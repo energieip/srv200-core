@@ -2,7 +2,7 @@ package database
 
 import (
 	"github.com/energieip/common-database-go/pkg/database"
-	"github.com/energieip/common-group-go/pkg/groupmodel"
+	group "github.com/energieip/common-group-go/pkg/groupmodel"
 	led "github.com/energieip/common-led-go/pkg/driverled"
 	sensor "github.com/energieip/common-sensor-go/pkg/driversensor"
 	"github.com/romana/rlog"
@@ -48,7 +48,7 @@ func ConnectDatabase(ip, port string) (*Database, error) {
 		rlog.Warn("Create table ", err.Error())
 	}
 
-	err = db.CreateTable("config", "groups", &groupmodel.GroupConfig{})
+	err = db.CreateTable("config", "groups", &group.GroupConfig{})
 	if err != nil {
 		rlog.Warn("Create table ", err.Error())
 	}
@@ -63,7 +63,7 @@ func ConnectDatabase(ip, port string) (*Database, error) {
 		rlog.Warn("Create table ", err.Error())
 	}
 
-	err = db.CreateTable("status", "groups", &groupmodel.GroupStatus{})
+	err = db.CreateTable("status", "groups", &group.GroupStatus{})
 	if err != nil {
 		rlog.Warn("Create table ", err.Error())
 	}
@@ -145,6 +145,30 @@ func SaveSensorStatus(db Database, sensorStatus sensor.Sensor) error {
 		_, err = db.InsertRecord(sensor.DbName, sensor.TableName, sensorStatus)
 	} else {
 		err = db.UpdateRecord(sensor.DbName, sensor.TableName, dbID, sensorStatus)
+	}
+	return err
+}
+
+//SaveGroupStatus dump group status in database
+func SaveGroupStatus(db Database, status group.GroupStatus) error {
+	var dbID string
+	criteria := make(map[string]interface{})
+	criteria["Group"] = status.Group
+	grStored, err := db.GetRecord(group.DbStatusName, group.TableStatusName, criteria)
+	if err == nil && grStored != nil {
+		m := grStored.(map[string]interface{})
+		id, ok := m["id"]
+		if !ok {
+			id, ok = m["ID"]
+		}
+		if ok {
+			dbID = id.(string)
+		}
+	}
+	if dbID == "" {
+		_, err = db.InsertRecord(group.DbStatusName, group.TableStatusName, status)
+	} else {
+		err = db.UpdateRecord(group.DbStatusName, group.TableStatusName, dbID, status)
 	}
 	return err
 }
