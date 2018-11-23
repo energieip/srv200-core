@@ -123,6 +123,7 @@ func (s *CoreService) registerSwitchStatus(switchStatus deviceswitch.SwitchStatu
 	for _, group := range switchStatus.Groups {
 		database.SaveGroupStatus(s.db, group)
 	}
+	database.SaveSwitchStatus(s.db, switchStatus)
 }
 
 //Run service mainloop

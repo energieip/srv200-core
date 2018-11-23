@@ -5,10 +5,20 @@ import (
 	group "github.com/energieip/common-group-go/pkg/groupmodel"
 	led "github.com/energieip/common-led-go/pkg/driverled"
 	sensor "github.com/energieip/common-sensor-go/pkg/driversensor"
+	sdevice "github.com/energieip/common-switch-go/pkg/deviceswitch"
 	"github.com/romana/rlog"
 )
 
 type Database = database.DatabaseInterface
+
+type switchDump struct {
+	sdevice.Switch
+	ErrorCode *int                             `json:"errorCode"`
+	Services  map[string]sdevice.ServiceStatus `json:"services"`
+	Leds      []string                         `json:"leds"`
+	Sensors   []string                         `json:"sensors"`
+	Groups    []int                            `json:"groups"`
+}
 
 //ConnectDatabase plug datbase
 func ConnectDatabase(ip, port string) (*Database, error) {
@@ -64,6 +74,11 @@ func ConnectDatabase(ip, port string) (*Database, error) {
 	}
 
 	err = db.CreateTable("status", "groups", &group.GroupStatus{})
+	if err != nil {
+		rlog.Warn("Create table ", err.Error())
+	}
+
+	err = db.CreateTable("status", "switchs", &switchDump{})
 	if err != nil {
 		rlog.Warn("Create table ", err.Error())
 	}
@@ -169,6 +184,54 @@ func SaveGroupStatus(db Database, status group.GroupStatus) error {
 		_, err = db.InsertRecord(group.DbStatusName, group.TableStatusName, status)
 	} else {
 		err = db.UpdateRecord(group.DbStatusName, group.TableStatusName, dbID, status)
+	}
+	return err
+}
+
+//SaveSwitchStatus dump switch status in database
+func SaveSwitchStatus(db Database, status sdevice.SwitchStatus) error {
+	swStatus := switchDump{}
+	swStatus.Mac = status.Mac
+	swStatus.IP = status.IP
+	swStatus.ErrorCode = status.ErrorCode
+	swStatus.IsConfigured = status.IsConfigured
+	swStatus.Topic = status.Topic
+	swStatus.Topic = status.Topic
+	swStatus.Services = status.Services
+
+	var leds []string
+	for mac := range status.Leds {
+		leds = append(leds, mac)
+	}
+	swStatus.Leds = leds
+
+	var sensors []string
+	for mac := range status.Sensors {
+		sensors = append(sensors, mac)
+	}
+	swStatus.Sensors = sensors
+
+	var groups []int
+	for grID := range status.Groups {
+		groups = append(groups, grID)
+	}
+	swStatus.Groups = groups
+
+	var dbID string
+	criteria := make(map[string]interface{})
+	criteria["Mac"] = status.Mac
+	swStored, err := db.GetRecord("status", "switchs", criteria)
+	if err == nil && swStored != nil {
+		m := swStored.(map[string]interface{})
+		id, ok := m["id"]
+		if ok {
+			dbID = id.(string)
+		}
+	}
+	if dbID == "" {
+		_, err = db.InsertRecord("status", "switchs", swStatus)
+	} else {
+		err = db.UpdateRecord("status", "switchs", dbID, swStatus)
 	}
 	return err
 }
