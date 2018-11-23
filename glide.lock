@@ -1,0 +1,76 @@
+hash: 7873f75061b03685fab1d37fa10ae2d9249507813e75d280fc0acfb9b629147f
+updated: 2018-11-23T14:37:42.940345707+01:00
+imports:
+- name: github.com/cenkalti/backoff
+  version: 62661b46c4093e2c1f38d943e663db1a29873e80
+- name: github.com/eclipse/paho.mqtt.golang
+  version: 103f6a1ef3ffa45671307ccb1c88ba2f4834993d
+  subpackages:
+  - packets
+- name: github.com/energieip/common-database-go
+  version: 077344c8306ad3e191555a01ec004d6be0e758cb
+  subpackages:
+  - pkg/database
+- name: github.com/energieip/common-group-go
+  version: 3beeec03c27bd98b45889e35119e5f241326e519
+  subpackages:
+  - pkg/groupmodel
+- name: github.com/energieip/common-led-go
+  version: 9c2087f86cf9faff94f3b13b44b9e08ed0352553
+  subpackages:
+  - pkg/driverled
+- name: github.com/energieip/common-network-go
+  version: 5ec5ff7972a8901fe3f83cee30a8552580000378
+  subpackages:
+  - pkg/network
+- name: github.com/energieip/common-sensor-go
+  version: 9b3277fdd3e6d6e787065895f97da935d6573946
+  subpackages:
+  - pkg/driversensor
+- name: github.com/energieip/common-switch-go
+  version: b21023fbd95768e545d90298fecbe707441528df
+  subpackages:
+  - pkg/deviceswitch
+- name: github.com/golang/protobuf
+  version: 882cf97a83ad205fd22af574246a3bc647d7a7d2
+  subpackages:
+  - proto
+- name: github.com/hailocab/go-hostpool
+  version: e80d13ce29ede4452c43dea11e79b9bc8a15b478
+- name: github.com/konsorten/go-windows-terminal-sequences
+  version: 5c8c8bd35d3832f5d134ae1e1e375b69a4d25242
+- name: github.com/opentracing/opentracing-go
+  version: be550b025b433cdfa2f11efb962afa2ea3c4d967
+  subpackages:
+  - ext
+  - log
+- name: github.com/romana/rlog
+  version: f018bc92e7d71f27c04e04cbf008860416c21d01
+- name: github.com/sirupsen/logrus
+  version: 29d7eb25e8ffa54207ff5a9a5c3d63e95be2cc39
+- name: golang.org/x/crypto
+  version: 3d3f9f413869b949e48070b5bc593aa22cc2b8f2
+  subpackages:
+  - pbkdf2
+  - ssh/terminal
+- name: golang.org/x/net
+  version: adae6a3d119ae4890b46832a2e88a95adc62b8e7
+  subpackages:
+  - context
+  - internal/socks
+  - proxy
+  - websocket
+- name: golang.org/x/sys
+  version: 62eef0e2fa9b2c385f7b2778e763486da6880d37
+  subpackages:
+  - unix
+  - windows
+- name: gopkg.in/fatih/pool.v2
+  version: 010e0b745d12eaf8426c95f9c3924d81dd0b668f
+- name: gopkg.in/rethinkdb/rethinkdb-go.v5
+  version: 442075482543497ce5f159d3dea451dc43bd1c0a
+  subpackages:
+  - encoding
+  - ql2
+  - types
+testImports: []

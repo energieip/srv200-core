@@ -1,0 +1,6 @@
+{
+    "server_ip": "127.0.0.1",
+    "server_port": "1883",
+    "database_ip": "127.0.0.1",
+    "database_port": "29015"
+}
