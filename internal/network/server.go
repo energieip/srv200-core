@@ -6,6 +6,7 @@ import (
 
 	genericNetwork "github.com/energieip/common-network-go/pkg/network"
 	"github.com/energieip/common-switch-go/pkg/deviceswitch"
+	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/energieip/srv200-coreservice-go/pkg/config"
 	"github.com/romana/rlog"
 )
@@ -13,12 +14,17 @@ import (
 const (
 	EventHello = "switchHello"
 	EventDump  = "switchDump"
+
+	EventRemoveCfg = "switchRemoveCfg"
+	EventWriteCfg  = "switchWriteCfg"
+	EventManualCfg = "switchManualCfg"
 )
 
 //ServerNetwork network object
 type ServerNetwork struct {
-	Iface  genericNetwork.NetworkInterface
-	Events chan map[string]deviceswitch.SwitchStatus
+	Iface     genericNetwork.NetworkInterface
+	Events    chan map[string]deviceswitch.SwitchStatus
+	EventsCfg chan map[string]core.ServerConfig
 }
 
 //CreateServerNetwork create network server object
@@ -28,8 +34,9 @@ func CreateServerNetwork() (*ServerNetwork, error) {
 		return nil, err
 	}
 	serverNet := ServerNetwork{
-		Iface:  serverBroker,
-		Events: make(chan map[string]deviceswitch.SwitchStatus),
+		Iface:     serverBroker,
+		Events:    make(chan map[string]deviceswitch.SwitchStatus),
+		EventsCfg: make(chan map[string]core.ServerConfig),
 	}
 	return &serverNet, nil
 
@@ -103,6 +110,16 @@ func (net ServerNetwork) onDump(client genericNetwork.Client, msg genericNetwork
 func (net ServerNetwork) registerConfigs(client genericNetwork.Client, msg genericNetwork.Message) {
 	payload := msg.Payload()
 	rlog.Debug("Received registerConfigs: Received topic: " + msg.Topic() + " payload: " + string(payload))
+	var servCfg core.ServerConfig
+	err := json.Unmarshal(payload, &servCfg)
+	if err != nil {
+		rlog.Error("Cannot parse config ", err.Error())
+		return
+	}
+
+	event := make(map[string]core.ServerConfig)
+	event[EventWriteCfg] = servCfg
+	net.EventsCfg <- event
 }
 
 func (net ServerNetwork) removeConfigs(client genericNetwork.Client, msg genericNetwork.Message) {

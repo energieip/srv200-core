@@ -6,6 +6,7 @@ import (
 	"github.com/energieip/common-led-go/pkg/driverled"
 	"github.com/energieip/common-sensor-go/pkg/driversensor"
 	"github.com/energieip/common-switch-go/pkg/deviceswitch"
+	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
 	"github.com/energieip/srv200-coreservice-go/internal/network"
 	"github.com/energieip/srv200-coreservice-go/pkg/config"
@@ -126,6 +127,10 @@ func (s *CoreService) registerSwitchStatus(switchStatus deviceswitch.SwitchStatu
 	database.SaveSwitchStatus(s.db, switchStatus)
 }
 
+func (s *CoreService) registerConfig(config core.ServerConfig) {
+	database.SaveServerConfig(s.db, config)
+}
+
 //Run service mainloop
 func (s *CoreService) Run() error {
 	for {
@@ -139,6 +144,13 @@ func (s *CoreService) Run() error {
 
 				case network.EventDump:
 					s.registerSwitchStatus(event)
+				}
+			}
+		case configEvents := <-s.server.EventsCfg:
+			for eventType, event := range configEvents {
+				switch eventType {
+				case network.EventWriteCfg:
+					s.registerConfig(event)
 				}
 			}
 		}

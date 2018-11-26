@@ -251,3 +251,105 @@ func SaveSwitchConfig(db Database, sw core.SwitchSetup) error {
 	}
 	return err
 }
+
+//SaveLedConfig dump led config in database
+func SaveLedConfig(db Database, ledStatus led.LedSetup) error {
+	var dbID string
+	criteria := make(map[string]interface{})
+	criteria["Mac"] = ledStatus.Mac
+	ledStored, err := db.GetRecord(StatusDB, LedsTable, criteria)
+	if err == nil && ledStored != nil {
+		m := ledStored.(map[string]interface{})
+		id, ok := m["id"]
+		if !ok {
+			id, ok = m["ID"]
+		}
+		if ok {
+			dbID = id.(string)
+		}
+	}
+	if dbID == "" {
+		_, err = db.InsertRecord(ConfigDB, LedsTable, ledStatus)
+	} else {
+		err = db.UpdateRecord(ConfigDB, LedsTable, dbID, ledStatus)
+	}
+	return err
+}
+
+//SaveSensorConfig dump sensor config in database
+func SaveSensorConfig(db Database, sensorStatus sensor.SensorSetup) error {
+	var dbID string
+	criteria := make(map[string]interface{})
+	criteria["Mac"] = sensorStatus.Mac
+	sensorStored, err := db.GetRecord(ConfigDB, SensorsTable, criteria)
+	if err == nil && sensorStored != nil {
+		m := sensorStored.(map[string]interface{})
+		id, ok := m["id"]
+		if !ok {
+			id, ok = m["ID"]
+		}
+		if ok {
+			dbID = id.(string)
+		}
+	}
+	if dbID == "" {
+		_, err = db.InsertRecord(ConfigDB, SensorsTable, sensorStatus)
+	} else {
+		err = db.UpdateRecord(ConfigDB, SensorsTable, dbID, sensorStatus)
+	}
+	return err
+}
+
+//SaveGroupConfig dump group config in database
+func SaveGroupConfig(db Database, status group.GroupConfig) error {
+	var dbID string
+	criteria := make(map[string]interface{})
+	criteria["Group"] = status.Group
+	grStored, err := db.GetRecord(ConfigDB, GroupsTable, criteria)
+	if err == nil && grStored != nil {
+		m := grStored.(map[string]interface{})
+		id, ok := m["id"]
+		if !ok {
+			id, ok = m["ID"]
+		}
+		if ok {
+			dbID = id.(string)
+		}
+	}
+	if dbID == "" {
+		_, err = db.InsertRecord(ConfigDB, GroupsTable, status)
+	} else {
+		err = db.UpdateRecord(ConfigDB, GroupsTable, dbID, status)
+	}
+	return err
+}
+
+//SaveServerConfig dump group status in database
+func SaveServerConfig(db Database, config core.ServerConfig) error {
+	var issue error
+	for _, grCfg := range config.Groups {
+		err := SaveGroupConfig(db, grCfg)
+		if err != nil {
+			issue = err
+		}
+	}
+	for _, ledCfg := range config.Leds {
+		err := SaveLedConfig(db, ledCfg)
+		if err != nil {
+			issue = err
+		}
+	}
+	for _, sensorCfg := range config.Sensors {
+		err := SaveSensorConfig(db, sensorCfg)
+		if err != nil {
+			issue = err
+		}
+	}
+	for _, switchCfg := range config.Switchs {
+		err := SaveSwitchConfig(db, switchCfg)
+		if err != nil {
+			issue = err
+		}
+	}
+	return issue
+}
