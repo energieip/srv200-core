@@ -40,6 +40,9 @@ func (net ServerNetwork) LocalConnection(conf config.Configuration, clientID str
 	cbkServer := make(map[string]func(genericNetwork.Client, genericNetwork.Message))
 	cbkServer["/read/switch/+/setup/hello"] = net.onHello
 	cbkServer["/read/switch/+/status/dump"] = net.onDump
+	cbkServer["/write/server/components/config"] = net.registerConfigs
+	cbkServer["/remove/server/components/config"] = net.removeConfigs
+	cbkServer["/write/server/manual/control"] = net.manualControl
 
 	confServer := genericNetwork.NetworkConfig{
 		IP:         conf.ServerIP,
@@ -95,6 +98,21 @@ func (net ServerNetwork) onDump(client genericNetwork.Client, msg genericNetwork
 	event := make(map[string]deviceswitch.SwitchStatus)
 	event[EventDump] = switchStatus
 	net.Events <- event
+}
+
+func (net ServerNetwork) registerConfigs(client genericNetwork.Client, msg genericNetwork.Message) {
+	payload := msg.Payload()
+	rlog.Debug("Received registerConfigs: Received topic: " + msg.Topic() + " payload: " + string(payload))
+}
+
+func (net ServerNetwork) removeConfigs(client genericNetwork.Client, msg genericNetwork.Message) {
+	payload := msg.Payload()
+	rlog.Debug("Received removeConfigs: Received topic: " + msg.Topic() + " payload: " + string(payload))
+}
+
+func (net ServerNetwork) manualControl(client genericNetwork.Client, msg genericNetwork.Message) {
+	payload := msg.Payload()
+	rlog.Debug("Received manualControl: Received topic: " + msg.Topic() + " payload: " + string(payload))
 }
 
 //Disconnect from server

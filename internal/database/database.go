@@ -6,7 +6,18 @@ import (
 	led "github.com/energieip/common-led-go/pkg/driverled"
 	sensor "github.com/energieip/common-sensor-go/pkg/driversensor"
 	sdevice "github.com/energieip/common-switch-go/pkg/deviceswitch"
+	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/romana/rlog"
+)
+
+const (
+	ConfigDB = "configs"
+	StatusDB = "status"
+
+	LedsTable    = "leds"
+	SensorsTable = "sensors"
+	GroupsTable  = "groups"
+	SwitchsTable = "switchs"
 )
 
 type Database = database.DatabaseInterface
@@ -38,49 +49,30 @@ func ConnectDatabase(ip, port string) (*Database, error) {
 		return nil, err
 	}
 
-	err = db.CreateDB("status")
-	if err != nil {
-		rlog.Warn("Create DB ", err.Error())
-	}
+	for _, dbName := range []string{ConfigDB, StatusDB} {
+		err = db.CreateDB(dbName)
+		if err != nil {
+			rlog.Warn("Create DB ", err.Error())
+		}
 
-	err = db.CreateDB("config")
-	if err != nil {
-		rlog.Warn("Create DB ", err.Error())
-	}
-
-	err = db.CreateTable("config", "leds", &led.LedSetup{})
-	if err != nil {
-		rlog.Warn("Create table ", err.Error())
-	}
-
-	err = db.CreateTable("config", "sensors", &sensor.SensorSetup{})
-	if err != nil {
-		rlog.Warn("Create table ", err.Error())
-	}
-
-	err = db.CreateTable("config", "groups", &group.GroupConfig{})
-	if err != nil {
-		rlog.Warn("Create table ", err.Error())
-	}
-
-	err = db.CreateTable("status", "leds", &led.Led{})
-	if err != nil {
-		rlog.Warn("Create table ", err.Error())
-	}
-
-	err = db.CreateTable("status", "sensors", &sensor.Sensor{})
-	if err != nil {
-		rlog.Warn("Create table ", err.Error())
-	}
-
-	err = db.CreateTable("status", "groups", &group.GroupStatus{})
-	if err != nil {
-		rlog.Warn("Create table ", err.Error())
-	}
-
-	err = db.CreateTable("status", "switchs", &switchDump{})
-	if err != nil {
-		rlog.Warn("Create table ", err.Error())
+		tableCfg := make(map[string]interface{})
+		if dbName == ConfigDB {
+			tableCfg[LedsTable] = led.LedSetup{}
+			tableCfg[SensorsTable] = sensor.SensorSetup{}
+			tableCfg[GroupsTable] = group.GroupConfig{}
+			tableCfg[SwitchsTable] = core.SwitchSetup{}
+		} else {
+			tableCfg[LedsTable] = led.Led{}
+			tableCfg[SensorsTable] = sensor.Sensor{}
+			tableCfg[GroupsTable] = group.GroupStatus{}
+			tableCfg[SwitchsTable] = switchDump{}
+		}
+		for tableName, objs := range tableCfg {
+			err = db.CreateTable(dbName, tableName, &objs)
+			if err != nil {
+				rlog.Warn("Create table ", err.Error())
+			}
+		}
 	}
 
 	return &db, nil
@@ -90,7 +82,7 @@ func ConnectDatabase(ip, port string) (*Database, error) {
 func GetLedConfig(db Database, mac string) *led.LedSetup {
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = mac
-	ledStored, err := db.GetRecord("config", led.TableName, criteria)
+	ledStored, err := db.GetRecord(ConfigDB, LedsTable, criteria)
 	if err != nil || ledStored == nil {
 		return nil
 	}
@@ -105,7 +97,7 @@ func GetLedConfig(db Database, mac string) *led.LedSetup {
 func GetSensorConfig(db Database, mac string) *sensor.SensorSetup {
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = mac
-	sensorStored, err := db.GetRecord("config", sensor.TableName, criteria)
+	sensorStored, err := db.GetRecord(ConfigDB, SensorsTable, criteria)
 	if err != nil || sensorStored == nil {
 		return nil
 	}
@@ -121,7 +113,7 @@ func SaveLedStatus(db Database, ledStatus led.Led) error {
 	var dbID string
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = ledStatus.Mac
-	ledStored, err := db.GetRecord(led.DbName, led.TableName, criteria)
+	ledStored, err := db.GetRecord(StatusDB, LedsTable, criteria)
 	if err == nil && ledStored != nil {
 		m := ledStored.(map[string]interface{})
 		id, ok := m["id"]
@@ -133,9 +125,9 @@ func SaveLedStatus(db Database, ledStatus led.Led) error {
 		}
 	}
 	if dbID == "" {
-		_, err = db.InsertRecord(led.DbName, led.TableName, ledStatus)
+		_, err = db.InsertRecord(StatusDB, LedsTable, ledStatus)
 	} else {
-		err = db.UpdateRecord(led.DbName, led.TableName, dbID, ledStatus)
+		err = db.UpdateRecord(StatusDB, LedsTable, dbID, ledStatus)
 	}
 	return err
 }
@@ -145,7 +137,7 @@ func SaveSensorStatus(db Database, sensorStatus sensor.Sensor) error {
 	var dbID string
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = sensorStatus.Mac
-	sensorStored, err := db.GetRecord(sensor.DbName, sensor.TableName, criteria)
+	sensorStored, err := db.GetRecord(StatusDB, SensorsTable, criteria)
 	if err == nil && sensorStored != nil {
 		m := sensorStored.(map[string]interface{})
 		id, ok := m["id"]
@@ -157,9 +149,9 @@ func SaveSensorStatus(db Database, sensorStatus sensor.Sensor) error {
 		}
 	}
 	if dbID == "" {
-		_, err = db.InsertRecord(sensor.DbName, sensor.TableName, sensorStatus)
+		_, err = db.InsertRecord(StatusDB, SensorsTable, sensorStatus)
 	} else {
-		err = db.UpdateRecord(sensor.DbName, sensor.TableName, dbID, sensorStatus)
+		err = db.UpdateRecord(StatusDB, SensorsTable, dbID, sensorStatus)
 	}
 	return err
 }
@@ -169,7 +161,7 @@ func SaveGroupStatus(db Database, status group.GroupStatus) error {
 	var dbID string
 	criteria := make(map[string]interface{})
 	criteria["Group"] = status.Group
-	grStored, err := db.GetRecord(group.DbStatusName, group.TableStatusName, criteria)
+	grStored, err := db.GetRecord(StatusDB, GroupsTable, criteria)
 	if err == nil && grStored != nil {
 		m := grStored.(map[string]interface{})
 		id, ok := m["id"]
@@ -181,9 +173,9 @@ func SaveGroupStatus(db Database, status group.GroupStatus) error {
 		}
 	}
 	if dbID == "" {
-		_, err = db.InsertRecord(group.DbStatusName, group.TableStatusName, status)
+		_, err = db.InsertRecord(StatusDB, GroupsTable, status)
 	} else {
-		err = db.UpdateRecord(group.DbStatusName, group.TableStatusName, dbID, status)
+		err = db.UpdateRecord(StatusDB, GroupsTable, dbID, status)
 	}
 	return err
 }
@@ -220,7 +212,7 @@ func SaveSwitchStatus(db Database, status sdevice.SwitchStatus) error {
 	var dbID string
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = status.Mac
-	swStored, err := db.GetRecord("status", "switchs", criteria)
+	swStored, err := db.GetRecord(StatusDB, SwitchsTable, criteria)
 	if err == nil && swStored != nil {
 		m := swStored.(map[string]interface{})
 		id, ok := m["id"]
@@ -229,9 +221,33 @@ func SaveSwitchStatus(db Database, status sdevice.SwitchStatus) error {
 		}
 	}
 	if dbID == "" {
-		_, err = db.InsertRecord("status", "switchs", swStatus)
+		_, err = db.InsertRecord(StatusDB, SwitchsTable, swStatus)
 	} else {
-		err = db.UpdateRecord("status", "switchs", dbID, swStatus)
+		err = db.UpdateRecord(StatusDB, SwitchsTable, dbID, swStatus)
+	}
+	return err
+}
+
+//SaveSwitchConfig register switch config in database
+func SaveSwitchConfig(db Database, sw core.SwitchSetup) error {
+	var dbID string
+	criteria := make(map[string]interface{})
+	criteria["Mac"] = sw.Mac
+	switchStored, err := db.GetRecord(ConfigDB, SwitchsTable, criteria)
+	if err == nil && switchStored != nil {
+		m := switchStored.(map[string]interface{})
+		id, ok := m["id"]
+		if !ok {
+			id, ok = m["ID"]
+		}
+		if ok {
+			dbID = id.(string)
+		}
+	}
+	if dbID == "" {
+		_, err = db.InsertRecord(ConfigDB, SwitchsTable, sw)
+	} else {
+		err = db.UpdateRecord(ConfigDB, SwitchsTable, dbID, sw)
 	}
 	return err
 }
