@@ -116,7 +116,7 @@ func (s *CoreService) prepareSwitchConfig(switchStatus deviceswitch.SwitchStatus
 					high := 100
 					dled := driverled.LedSetup{
 						Mac:          led.Mac,
-						IMax:         700,
+						IMax:         100,
 						Group:        &defaultGroup,
 						Watchdog:     &defaultWatchdog,
 						IsBleEnabled: &enableBle,
