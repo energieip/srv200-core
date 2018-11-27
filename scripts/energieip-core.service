@@ -1,0 +1,15 @@
+[Unit]
+Description=Server Core service management
+After=mosquitto.service rethinkdb.service network-online.target
+Wants=network-online.target
+PartOf=rethinkdb.service network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/energieip-core -c /etc/energieip-core/config.json
+KillMode=process
+PrivateTmp=true
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
