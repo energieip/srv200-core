@@ -26,19 +26,30 @@ func SaveGroupConfig(db Database, status group.GroupConfig) error {
 	return err
 }
 
-//GetGroupConfig get group Config
-func GetGroupConfig(db Database, grID int) *group.GroupConfig {
-	criteria := make(map[string]interface{})
-	criteria["Group"] = grID
-	stored, err := db.GetRecord(ConfigDB, GroupsTable, criteria)
+//GetGroupConfigs get group Config
+func GetGroupConfigs(db Database, driversMac map[string]bool) map[int]group.GroupConfig {
+	groups := make(map[int]group.GroupConfig)
+	stored, err := db.FetchAllRecords(ConfigDB, GroupsTable)
 	if err != nil || stored == nil {
-		return nil
+		return groups
 	}
-	gr, err := group.ToGroupConfig(stored)
-	if err != nil {
-		return nil
+	for _, val := range stored {
+		gr, err := group.ToGroupConfig(val)
+		if err != nil || gr == nil {
+			continue
+		}
+		addGroup := false
+		for _, mac := range gr.Leds {
+			if _, ok := driversMac[mac]; ok {
+				addGroup = true
+				break
+			}
+		}
+		if addGroup {
+			groups[gr.Group] = *gr
+		}
 	}
-	return gr
+	return groups
 }
 
 //SaveGroupStatus dump group status in database

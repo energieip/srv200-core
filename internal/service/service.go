@@ -96,6 +96,12 @@ func (s *CoreService) prepareSwitchConfig(switchStatus deviceswitch.SwitchStatus
 	setup.SensorsSetup = make(map[string]driversensor.SensorSetup)
 	setup.Services = database.GetServiceConfigs(s.db)
 
+	driversMac := make(map[string]bool)
+	for _, led := range switchStatus.Leds {
+		driversMac[led.Mac] = true
+	}
+	setup.Groups = database.GetGroupConfigs(s.db, driversMac)
+
 	for mac, led := range switchStatus.Leds {
 		if !led.IsConfigured {
 			lsetup := database.GetLedConfig(s.db, mac)

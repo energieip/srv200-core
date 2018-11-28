@@ -1,6 +1,8 @@
 package database
 
-import "github.com/energieip/srv200-coreservice-go/internal/core"
+import (
+	"github.com/energieip/srv200-coreservice-go/internal/core"
+)
 
 //SaveServerConfig dump group status in database
 func SaveServerConfig(db Database, config core.ServerConfig) error {
