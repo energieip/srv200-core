@@ -13,26 +13,9 @@ func SaveSwitchStatus(db Database, status sdevice.SwitchStatus) error {
 	swStatus.ErrorCode = status.ErrorCode
 	swStatus.IsConfigured = status.IsConfigured
 	swStatus.Topic = status.Topic
-	swStatus.Topic = status.Topic
-	swStatus.Services = status.Services
-
-	var leds []string
-	for mac := range status.Leds {
-		leds = append(leds, mac)
-	}
-	swStatus.Leds = leds
-
-	var sensors []string
-	for mac := range status.Sensors {
-		sensors = append(sensors, mac)
-	}
-	swStatus.Sensors = sensors
-
-	var groups []int
-	for grID := range status.Groups {
-		groups = append(groups, grID)
-	}
-	swStatus.Groups = groups
+	swStatus.Protocol = status.Protocol
+	swStatus.FriendlyName = status.FriendlyName
+	swStatus.LastSystemUpgradeDate = status.LastSystemUpgradeDate
 
 	var dbID string
 	criteria := make(map[string]interface{})

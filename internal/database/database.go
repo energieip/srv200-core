@@ -25,11 +25,7 @@ type Database = database.DatabaseInterface
 
 type switchDump struct {
 	sdevice.Switch
-	ErrorCode *int                             `json:"errorCode"`
-	Services  map[string]sdevice.ServiceStatus `json:"services"`
-	Leds      []string                         `json:"leds"`
-	Sensors   []string                         `json:"sensors"`
-	Groups    []int                            `json:"groups"`
+	ErrorCode *int `json:"errorCode"`
 }
 
 //ConnectDatabase plug datbase
