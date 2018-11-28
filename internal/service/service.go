@@ -81,88 +81,74 @@ func (s *CoreService) Stop() {
 }
 
 func (s *CoreService) prepareSwitchConfig(switchStatus deviceswitch.SwitchStatus) *deviceswitch.SwitchConfig {
-	var conf *deviceswitch.SwitchConfig
-	if s.installMode {
-		defaultGroup := 0
-		defaultWatchdog := 600
-
-		var setup deviceswitch.SwitchConfig
-		config := database.GetSwitchConfig(s.db, switchStatus.Mac)
-		if config != nil {
-			setup = *config
-		} else {
-			isConfigured := true
-			setup = deviceswitch.SwitchConfig{}
-			setup.Mac = switchStatus.Mac
-			setup.IsConfigured = &isConfigured
-
-			switchSetup := core.SwitchSetup{}
-			switchSetup.Mac = setup.Mac
-			switchSetup.IP = switchStatus.IP
-			switchSetup.Protocol = switchStatus.Protocol
-			switchSetup.Topic = switchStatus.Topic
-			database.SaveSwitchConfig(s.db, switchSetup)
-		}
-
-		var ledsSetup map[string]driverled.LedSetup
-		var sensorsSetup map[string]driversensor.SensorSetup
-
-		for mac, led := range switchStatus.Leds {
-			if !led.IsConfigured {
-				lsetup := database.GetLedConfig(s.db, mac)
-				if lsetup == nil {
-					enableBle := false
-					low := 0
-					high := 100
-					dled := driverled.LedSetup{
-						Mac:          led.Mac,
-						IMax:         100,
-						Group:        &defaultGroup,
-						Watchdog:     &defaultWatchdog,
-						IsBleEnabled: &enableBle,
-						ThresoldHigh: &high,
-						ThresoldLow:  &low,
-					}
-					lsetup = &dled
-					// saved default config
-					database.SaveLedConfig(s.db, dled)
-				}
-				ledsSetup[mac] = *lsetup
-			}
-		}
-		setup.LedsSetup = ledsSetup
-
-		for mac, sensor := range switchStatus.Sensors {
-			if !sensor.IsConfigured {
-				ssetup := database.GetSensorConfig(s.db, mac)
-				if ssetup == nil {
-					enableBle := true
-					brightnessCorrection := 1
-					thresoldPresence := 10
-					temperatureOffset := 0
-					dsensor := driversensor.SensorSetup{
-						Mac:                        sensor.Mac,
-						Group:                      &defaultGroup,
-						IsBleEnabled:               &enableBle,
-						BrigthnessCorrectionFactor: &brightnessCorrection,
-						ThresoldPresence:           &thresoldPresence,
-						TemperatureOffset:          &temperatureOffset,
-					}
-					ssetup = &dsensor
-					// saved default config
-					database.SaveSensorConfig(s.db, dsensor)
-				}
-				sensorsSetup[mac] = *ssetup
-			}
-		}
-		setup.SensorsSetup = sensorsSetup
-		conf = &setup
-
-	} else {
-		// standard mode
-		conf = database.GetSwitchConfig(s.db, switchStatus.Mac)
+	config := database.GetSwitchConfig(s.db, switchStatus.Mac)
+	if config == nil && !s.installMode {
+		return nil
 	}
-	return conf
+	defaultGroup := 0
+	defaultWatchdog := 600
+
+	isConfigured := true
+	setup := deviceswitch.SwitchConfig{}
+	setup.Mac = switchStatus.Mac
+	setup.IsConfigured = &isConfigured
+	setup.LedsSetup = make(map[string]driverled.LedSetup)
+	setup.SensorsSetup = make(map[string]driversensor.SensorSetup)
+
+	for mac, led := range switchStatus.Leds {
+		if !led.IsConfigured {
+			lsetup := database.GetLedConfig(s.db, mac)
+			if lsetup == nil && s.installMode {
+				enableBle := false
+				low := 0
+				high := 100
+				dled := driverled.LedSetup{
+					Mac:          led.Mac,
+					IMax:         100,
+					Group:        &defaultGroup,
+					Watchdog:     &defaultWatchdog,
+					IsBleEnabled: &enableBle,
+					ThresoldHigh: &high,
+					ThresoldLow:  &low,
+				}
+				lsetup = &dled
+				// saved default config
+				database.SaveLedConfig(s.db, dled)
+			}
+			setup.LedsSetup[mac] = *lsetup
+		}
+	}
+
+	for mac, sensor := range switchStatus.Sensors {
+		if !sensor.IsConfigured {
+			ssetup := database.GetSensorConfig(s.db, mac)
+			if ssetup == nil {
+				enableBle := true
+				brightnessCorrection := 1
+				thresoldPresence := 10
+				temperatureOffset := 0
+				dsensor := driversensor.SensorSetup{
+					Mac:                        sensor.Mac,
+					Group:                      &defaultGroup,
+					IsBleEnabled:               &enableBle,
+					BrigthnessCorrectionFactor: &brightnessCorrection,
+					ThresoldPresence:           &thresoldPresence,
+					TemperatureOffset:          &temperatureOffset,
+				}
+				ssetup = &dsensor
+				// saved default config
+				database.SaveSensorConfig(s.db, dsensor)
+			}
+			setup.SensorsSetup[mac] = *ssetup
+		}
+	}
+
+	if s.installMode {
+		switchSetup := core.SwitchSetup{}
+		switchSetup.Mac = setup.Mac
+		database.SaveSwitchConfig(s.db, switchSetup)
+	}
+	return &setup
 }
 
 func (s *CoreService) sendSwitchSetup(switchStatus deviceswitch.SwitchStatus) {
@@ -179,16 +165,16 @@ func (s *CoreService) sendSwitchSetup(switchStatus deviceswitch.SwitchStatus) {
 }
 
 func (s *CoreService) sendSwitchUpdateConfig(sw deviceswitch.SwitchStatus) {
-	conf := s.prepareSwitchConfig(sw)
-	if conf == nil {
-		rlog.Warn("This device " + sw.Mac + " is not authorized")
-		return
-	}
-	switchSetup := *conf
+	// conf := s.prepareSwitchConfig(sw)
+	// if conf == nil {
+	// 	rlog.Warn("This device " + sw.Mac + " is not authorized")
+	// 	return
+	// }
+	// switchSetup := *conf
 
-	url := "/write/" + sw.Topic + "/update/settings"
-	dump, _ := switchSetup.ToJSON()
-	s.server.SendCommand(url, dump)
+	// url := "/write/" + sw.Topic + "/update/settings"
+	// dump, _ := switchSetup.ToJSON()
+	// s.server.SendCommand(url, dump)
 }
 
 func (s *CoreService) sendSwitchCommand() {

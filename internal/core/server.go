@@ -6,16 +6,11 @@ import (
 	"github.com/energieip/common-group-go/pkg/groupmodel"
 	"github.com/energieip/common-led-go/pkg/driverled"
 	"github.com/energieip/common-sensor-go/pkg/driversensor"
-	"github.com/energieip/common-switch-go/pkg/deviceswitch"
 )
 
 //SwitchSetup content
 type SwitchSetup struct {
-	deviceswitch.Switch
-	Services map[string]deviceswitch.Service `json:"services"`
-	Groups   []int                           `json:"switchGroups"`
-	Leds     []string                        `json:"switchLeds"`
-	Sensors  []string                        `json:"switchSensors"`
+	Mac string `json:"mac"`
 }
 
 //ServerConfig server configuration
@@ -42,4 +37,15 @@ func (sw SwitchSetup) ToJSON() (string, error) {
 		return "", err
 	}
 	return string(inrec[:]), err
+}
+
+//ToSwitchSetup convert map interface to Led object
+func ToSwitchSetup(val interface{}) (*SwitchSetup, error) {
+	var sw SwitchSetup
+	inrec, err := json.Marshal(val)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(inrec, &sw)
+	return &sw, err
 }

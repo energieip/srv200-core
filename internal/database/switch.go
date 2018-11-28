@@ -78,7 +78,16 @@ func SaveSwitchConfig(db Database, sw core.SwitchSetup) error {
 }
 
 //GetSwitchConfig get switch Config
-func GetSwitchConfig(db Database, mac string) *sdevice.SwitchConfig {
-
-	return nil
+func GetSwitchConfig(db Database, mac string) *core.SwitchSetup {
+	criteria := make(map[string]interface{})
+	criteria["Mac"] = mac
+	swStored, err := db.GetRecord(ConfigDB, SwitchsTable, criteria)
+	if err != nil || swStored == nil {
+		return nil
+	}
+	sw, err := core.ToSwitchSetup(swStored)
+	if err != nil || sw == nil {
+		return nil
+	}
+	return sw
 }

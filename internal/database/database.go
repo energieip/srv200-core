@@ -14,10 +14,11 @@ const (
 	ConfigDB = "configs"
 	StatusDB = "status"
 
-	LedsTable    = "leds"
-	SensorsTable = "sensors"
-	GroupsTable  = "groups"
-	SwitchsTable = "switchs"
+	LedsTable     = "leds"
+	SensorsTable  = "sensors"
+	GroupsTable   = "groups"
+	SwitchsTable  = "switchs"
+	ServicesTable = "services"
 )
 
 type Database = database.DatabaseInterface
@@ -61,6 +62,7 @@ func ConnectDatabase(ip, port string) (*Database, error) {
 			tableCfg[SensorsTable] = sensor.SensorSetup{}
 			tableCfg[GroupsTable] = group.GroupConfig{}
 			tableCfg[SwitchsTable] = core.SwitchSetup{}
+			tableCfg[ServicesTable] = sdevice.Service{}
 		} else {
 			tableCfg[LedsTable] = led.Led{}
 			tableCfg[SensorsTable] = sensor.Sensor{}
