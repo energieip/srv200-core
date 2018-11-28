@@ -2,6 +2,7 @@ package database
 
 import (
 	sdevice "github.com/energieip/common-switch-go/pkg/deviceswitch"
+	"github.com/energieip/srv200-coreservice-go/internal/core"
 )
 
 //SaveServiceConfig dump sensor config in database
@@ -43,10 +44,11 @@ func GetServiceConfigs(db Database) map[string]sdevice.Service {
 }
 
 //SaveServiceStatus dump service status in database
-func SaveServiceStatus(db Database, status sdevice.ServiceStatus) error {
+func SaveServiceStatus(db Database, status core.ServiceDump) error {
 	var dbID string
 	criteria := make(map[string]interface{})
 	criteria["Name"] = status.Name
+	criteria["SwitchMac"] = status.SwitchMac
 	stored, err := db.GetRecord(StatusDB, ServicesTable, criteria)
 	if err == nil && stored != nil {
 		m := stored.(map[string]interface{})

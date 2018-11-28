@@ -14,6 +14,12 @@ type SwitchSetup struct {
 	Mac string `json:"mac"`
 }
 
+//ServiceDump content
+type ServiceDump struct {
+	deviceswitch.ServiceStatus
+	SwitchMac string `json:"switchMac"`
+}
+
 //ServerConfig server configuration
 type ServerConfig struct {
 	Switchs  map[string]SwitchSetup              `json:"switchs"`

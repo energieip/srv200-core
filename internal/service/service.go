@@ -194,7 +194,13 @@ func (s *CoreService) registerSwitchStatus(switchStatus deviceswitch.SwitchStatu
 	}
 
 	for _, service := range switchStatus.Services {
-		database.SaveServiceStatus(s.db, service)
+		serv := core.ServiceDump{}
+		serv.Name = service.Name
+		serv.PackageName = service.PackageName
+		serv.Version = service.Version
+		serv.Status = service.Status
+		serv.SwitchMac = switchStatus.Mac
+		database.SaveServiceStatus(s.db, serv)
 	}
 	database.SaveSwitchStatus(s.db, switchStatus)
 }
