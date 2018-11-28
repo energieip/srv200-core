@@ -68,6 +68,7 @@ func ConnectDatabase(ip, port string) (*Database, error) {
 			tableCfg[SensorsTable] = sensor.Sensor{}
 			tableCfg[GroupsTable] = group.GroupStatus{}
 			tableCfg[SwitchsTable] = switchDump{}
+			tableCfg[ServicesTable] = sdevice.ServiceStatus{}
 		}
 		for tableName, objs := range tableCfg {
 			err = db.CreateTable(dbName, tableName, &objs)

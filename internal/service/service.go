@@ -94,6 +94,7 @@ func (s *CoreService) prepareSwitchConfig(switchStatus deviceswitch.SwitchStatus
 	setup.IsConfigured = &isConfigured
 	setup.LedsSetup = make(map[string]driverled.LedSetup)
 	setup.SensorsSetup = make(map[string]driversensor.SensorSetup)
+	setup.Services = database.GetServiceConfigs(s.db)
 
 	for mac, led := range switchStatus.Leds {
 		if !led.IsConfigured {
@@ -190,6 +191,10 @@ func (s *CoreService) registerSwitchStatus(switchStatus deviceswitch.SwitchStatu
 	}
 	for _, group := range switchStatus.Groups {
 		database.SaveGroupStatus(s.db, group)
+	}
+
+	for _, service := range switchStatus.Services {
+		database.SaveServiceStatus(s.db, service)
 	}
 	database.SaveSwitchStatus(s.db, switchStatus)
 }

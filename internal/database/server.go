@@ -29,5 +29,11 @@ func SaveServerConfig(db Database, config core.ServerConfig) error {
 			issue = err
 		}
 	}
+	for _, serviceCfg := range config.Services {
+		err := SaveServiceConfig(db, serviceCfg)
+		if err != nil {
+			issue = err
+		}
+	}
 	return issue
 }
