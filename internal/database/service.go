@@ -1,12 +1,12 @@
 package database
 
 import (
-	sdevice "github.com/energieip/common-switch-go/pkg/deviceswitch"
+	pkg "github.com/energieip/common-service-go/pkg/service"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 )
 
 //SaveServiceConfig dump sensor config in database
-func SaveServiceConfig(db Database, service sdevice.Service) error {
+func SaveServiceConfig(db Database, service pkg.Service) error {
 	var dbID string
 	criteria := make(map[string]interface{})
 	criteria["Name"] = service.Name
@@ -27,14 +27,14 @@ func SaveServiceConfig(db Database, service sdevice.Service) error {
 }
 
 //GetServiceConfigs return the sensor configuration
-func GetServiceConfigs(db Database) map[string]sdevice.Service {
-	services := map[string]sdevice.Service{}
+func GetServiceConfigs(db Database) map[string]pkg.Service {
+	services := map[string]pkg.Service{}
 	stored, err := db.FetchAllRecords(ConfigDB, ServicesTable)
 	if err != nil || stored == nil {
 		return services
 	}
 	for _, s := range stored {
-		serv, err := sdevice.ToService(s)
+		serv, err := pkg.ToService(s)
 		if err != nil || serv == nil {
 			continue
 		}

@@ -5,6 +5,7 @@ import (
 	group "github.com/energieip/common-group-go/pkg/groupmodel"
 	led "github.com/energieip/common-led-go/pkg/driverled"
 	sensor "github.com/energieip/common-sensor-go/pkg/driversensor"
+	pkg "github.com/energieip/common-service-go/pkg/service"
 	sdevice "github.com/energieip/common-switch-go/pkg/deviceswitch"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/romana/rlog"
@@ -58,13 +59,13 @@ func ConnectDatabase(ip, port string) (*Database, error) {
 			tableCfg[SensorsTable] = sensor.SensorSetup{}
 			tableCfg[GroupsTable] = group.GroupConfig{}
 			tableCfg[SwitchsTable] = core.SwitchSetup{}
-			tableCfg[ServicesTable] = sdevice.Service{}
+			tableCfg[ServicesTable] = pkg.Service{}
 		} else {
 			tableCfg[LedsTable] = led.Led{}
 			tableCfg[SensorsTable] = sensor.Sensor{}
 			tableCfg[GroupsTable] = group.GroupStatus{}
 			tableCfg[SwitchsTable] = switchDump{}
-			tableCfg[ServicesTable] = sdevice.ServiceStatus{}
+			tableCfg[ServicesTable] = pkg.ServiceStatus{}
 		}
 		for tableName, objs := range tableCfg {
 			err = db.CreateTable(dbName, tableName, &objs)

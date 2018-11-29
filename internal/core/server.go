@@ -6,7 +6,7 @@ import (
 	"github.com/energieip/common-group-go/pkg/groupmodel"
 	"github.com/energieip/common-led-go/pkg/driverled"
 	"github.com/energieip/common-sensor-go/pkg/driversensor"
-	"github.com/energieip/common-switch-go/pkg/deviceswitch"
+	pkg "github.com/energieip/common-service-go/pkg/service"
 )
 
 //SwitchSetup content
@@ -16,7 +16,7 @@ type SwitchSetup struct {
 
 //ServiceDump content
 type ServiceDump struct {
-	deviceswitch.ServiceStatus
+	pkg.ServiceStatus
 	SwitchMac string `json:"switchMac"`
 }
 
@@ -26,7 +26,7 @@ type ServerConfig struct {
 	Leds     map[string]driverled.LedSetup       `json:"leds"`
 	Sensors  map[string]driversensor.SensorSetup `json:"sensors"`
 	Groups   map[int]groupmodel.GroupConfig      `json:"groups"`
-	Services map[string]deviceswitch.Service     `json:"services"`
+	Services map[string]pkg.Service              `json:"services"`
 }
 
 // ToJSON dump server config struct
