@@ -14,9 +14,9 @@ import (
 )
 
 const (
-	ActionReload = "ReloadConfig"
-	ActionSetup  = "Setup"
-	ActionDump   = "DumpStatus"
+	ActionReload = "reload"
+	ActionSetup  = "setup"
+	ActionDump   = "dump"
 	ActionRemove = "remove"
 
 	UrlStatus = "status/dump"
@@ -91,6 +91,7 @@ func (s *CoreService) prepareSwitchConfig(switchStatus deviceswitch.SwitchStatus
 	isConfigured := true
 	setup := deviceswitch.SwitchConfig{}
 	setup.Mac = switchStatus.Mac
+	setup.FriendlyName = config.FriendlyName
 	setup.IsConfigured = &isConfigured
 	setup.LedsSetup = make(map[string]driverled.LedSetup)
 	setup.SensorsSetup = make(map[string]driversensor.SensorSetup)
@@ -153,7 +154,14 @@ func (s *CoreService) prepareSwitchConfig(switchStatus deviceswitch.SwitchStatus
 	if s.installMode {
 		switchSetup := core.SwitchSetup{}
 		switchSetup.Mac = setup.Mac
+		switchSetup.IP = switchStatus.IP
+		switchSetup.Cluster = 0
+		switchSetup.FriendlyName = switchStatus.FriendlyName
 		database.SaveSwitchConfig(s.db, switchSetup)
+	}
+	if config.IP == "" {
+		config.IP = switchStatus.IP
+		database.SaveSwitchConfig(s.db, *config)
 	}
 	return &setup
 }

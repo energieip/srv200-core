@@ -11,7 +11,10 @@ import (
 
 //SwitchSetup content
 type SwitchSetup struct {
-	Mac string `json:"mac"`
+	Mac          string `json:"mac"`
+	FriendlyName string `json:"friendlyName"`
+	IP           string `json:"ip"`
+	Cluster      int    `json:"cluster"`
 }
 
 //ServiceDump content
