@@ -5,11 +5,11 @@ import (
 
 	"github.com/energieip/common-led-go/pkg/driverled"
 	"github.com/energieip/common-sensor-go/pkg/driversensor"
+	pkg "github.com/energieip/common-service-go/pkg/service"
 	"github.com/energieip/common-switch-go/pkg/deviceswitch"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
 	"github.com/energieip/srv200-coreservice-go/internal/network"
-	"github.com/energieip/srv200-coreservice-go/pkg/config"
 	"github.com/romana/rlog"
 )
 
@@ -38,17 +38,17 @@ func (s *CoreService) Initialize(confFile string) error {
 	s.installMode = false
 	s.events = make(chan string)
 
-	conf, err := config.ReadConfig(confFile)
+	conf, err := pkg.ReadServiceConfig(confFile)
 	if err != nil {
 		rlog.Error("Cannot parse configuration file " + err.Error())
 		return err
 	}
-	os.Setenv("RLOG_LOG_LEVEL", *conf.LogLevel)
+	os.Setenv("RLOG_LOG_LEVEL", conf.LogLevel)
 	os.Setenv("RLOG_LOG_NOTIME", "yes")
 	rlog.UpdateEnv()
 	rlog.Info("Starting ServerCore service")
 
-	db, err := database.ConnectDatabase(conf.DatabaseIP, conf.DatabasePort)
+	db, err := database.ConnectDatabase(conf.DB.ClientIP, conf.DB.ClientPort)
 	if err != nil {
 		rlog.Error("Cannot connect to database " + err.Error())
 		return err
@@ -57,14 +57,14 @@ func (s *CoreService) Initialize(confFile string) error {
 
 	serverNet, err := network.CreateServerNetwork()
 	if err != nil {
-		rlog.Error("Cannot connect to broker " + conf.ServerIP + " error: " + err.Error())
+		rlog.Error("Cannot connect to broker " + conf.NetworkBroker.IP + " error: " + err.Error())
 		return err
 	}
 	s.server = *serverNet
 
 	err = s.server.LocalConnection(*conf, clientID)
 	if err != nil {
-		rlog.Error("Cannot connect to drivers broker " + conf.ServerIP + " error: " + err.Error())
+		rlog.Error("Cannot connect to drivers broker " + conf.NetworkBroker.IP + " error: " + err.Error())
 		return err
 	}
 

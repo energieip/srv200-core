@@ -5,9 +5,9 @@ import (
 	"time"
 
 	genericNetwork "github.com/energieip/common-network-go/pkg/network"
+	pkg "github.com/energieip/common-service-go/pkg/service"
 	"github.com/energieip/common-switch-go/pkg/deviceswitch"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
-	"github.com/energieip/srv200-coreservice-go/pkg/config"
 	"github.com/romana/rlog"
 )
 
@@ -43,7 +43,7 @@ func CreateServerNetwork() (*ServerNetwork, error) {
 }
 
 //LocalConnection connect service to server broker
-func (net ServerNetwork) LocalConnection(conf config.Configuration, clientID string) error {
+func (net ServerNetwork) LocalConnection(conf pkg.ServiceConfig, clientID string) error {
 	cbkServer := make(map[string]func(genericNetwork.Client, genericNetwork.Message))
 	cbkServer["/read/switch/+/setup/hello"] = net.onHello
 	cbkServer["/read/switch/+/status/dump"] = net.onDump
@@ -52,23 +52,23 @@ func (net ServerNetwork) LocalConnection(conf config.Configuration, clientID str
 	cbkServer["/write/server/manual/control"] = net.manualControl
 
 	confServer := genericNetwork.NetworkConfig{
-		IP:         conf.ServerIP,
-		Port:       conf.ServerPort,
+		IP:         conf.NetworkBroker.IP,
+		Port:       conf.NetworkBroker.Port,
 		ClientName: clientID,
 		Callbacks:  cbkServer,
-		LogLevel:   *conf.LogLevel,
+		LogLevel:   conf.LogLevel,
 	}
 
 	for {
-		rlog.Info("Try to connect to " + conf.ServerIP)
+		rlog.Info("Try to connect to " + conf.NetworkBroker.IP)
 		err := net.Iface.Initialize(confServer)
 		if err == nil {
-			rlog.Info(clientID + " connected to server broker " + conf.ServerIP)
+			rlog.Info(clientID + " connected to server broker " + conf.NetworkBroker.IP)
 			return err
 		}
 		timer := time.NewTicker(time.Second)
-		rlog.Error("Cannot connect to broker " + conf.ServerIP + " error: " + err.Error())
-		rlog.Error("Try to reconnect " + conf.ServerIP + " in 1s")
+		rlog.Error("Cannot connect to broker " + conf.NetworkBroker.IP + " error: " + err.Error())
+		rlog.Error("Try to reconnect " + conf.NetworkBroker.IP + " in 1s")
 
 		select {
 		case <-timer.C:
