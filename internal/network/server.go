@@ -2,6 +2,7 @@ package network
 
 import (
 	"encoding/json"
+	"strconv"
 	"time"
 
 	genericNetwork "github.com/energieip/common-network-go/pkg/network"
@@ -22,9 +23,10 @@ const (
 
 //ServerNetwork network object
 type ServerNetwork struct {
-	Iface     genericNetwork.NetworkInterface
-	Events    chan map[string]deviceswitch.SwitchStatus
-	EventsCfg chan map[string]core.ServerConfig
+	Iface             genericNetwork.NetworkInterface
+	Events            chan map[string]deviceswitch.SwitchStatus
+	EventsCfg         chan map[string]core.ServerConfig
+	EventsInstallMode chan bool //installation mode
 }
 
 //CreateServerNetwork create network server object
@@ -34,9 +36,10 @@ func CreateServerNetwork() (*ServerNetwork, error) {
 		return nil, err
 	}
 	serverNet := ServerNetwork{
-		Iface:     serverBroker,
-		Events:    make(chan map[string]deviceswitch.SwitchStatus),
-		EventsCfg: make(chan map[string]core.ServerConfig),
+		Iface:             serverBroker,
+		Events:            make(chan map[string]deviceswitch.SwitchStatus),
+		EventsCfg:         make(chan map[string]core.ServerConfig),
+		EventsInstallMode: make(chan bool),
 	}
 	return &serverNet, nil
 
@@ -50,6 +53,7 @@ func (net ServerNetwork) LocalConnection(conf pkg.ServiceConfig, clientID string
 	cbkServer["/write/server/components/config"] = net.registerConfigs
 	cbkServer["/remove/server/components/config"] = net.removeConfigs
 	cbkServer["/write/server/manual/control"] = net.manualControl
+	cbkServer["/write/server/install/mode"] = net.installMode
 
 	confServer := genericNetwork.NetworkConfig{
 		IP:         conf.NetworkBroker.IP,
@@ -130,6 +134,17 @@ func (net ServerNetwork) removeConfigs(client genericNetwork.Client, msg generic
 func (net ServerNetwork) manualControl(client genericNetwork.Client, msg genericNetwork.Message) {
 	payload := msg.Payload()
 	rlog.Debug("Received manualControl: Received topic: " + msg.Topic() + " payload: " + string(payload))
+}
+
+func (net ServerNetwork) installMode(client genericNetwork.Client, msg genericNetwork.Message) {
+	payload := string(msg.Payload())
+	rlog.Debug("Received installMode: Received topic: " + msg.Topic() + " payload: " + payload)
+	mode, err := strconv.ParseBool(payload)
+	if err != nil {
+		rlog.Error("Cannot parse installation Mode ", err.Error())
+		return
+	}
+	net.EventsInstallMode <- mode
 }
 
 //Disconnect from server

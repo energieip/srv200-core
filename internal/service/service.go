@@ -180,16 +180,16 @@ func (s *CoreService) sendSwitchSetup(switchStatus deviceswitch.SwitchStatus) {
 }
 
 func (s *CoreService) sendSwitchUpdateConfig(sw deviceswitch.SwitchStatus) {
-	// conf := s.prepareSwitchConfig(sw)
-	// if conf == nil {
-	// 	rlog.Warn("This device " + sw.Mac + " is not authorized")
-	// 	return
-	// }
-	// switchSetup := *conf
+	conf := s.prepareSwitchConfig(sw)
+	if conf == nil {
+		rlog.Warn("This device " + sw.Mac + " is not authorized")
+		return
+	}
+	switchSetup := *conf
 
-	// url := "/write/" + sw.Topic + "/update/settings"
-	// dump, _ := switchSetup.ToJSON()
-	// s.server.SendCommand(url, dump)
+	url := "/write/" + sw.Topic + "/update/settings"
+	dump, _ := switchSetup.ToJSON()
+	s.server.SendCommand(url, dump)
 }
 
 func (s *CoreService) sendSwitchCommand() {
@@ -233,7 +233,6 @@ func (s *CoreService) Run() error {
 				case network.EventHello:
 					s.sendSwitchSetup(event)
 					s.registerSwitchStatus(event)
-
 				case network.EventDump:
 					s.registerSwitchStatus(event)
 					s.sendSwitchUpdateConfig(event)
@@ -246,6 +245,8 @@ func (s *CoreService) Run() error {
 					s.registerConfig(event)
 				}
 			}
+		case installModeEvent := <-s.server.EventsInstallMode:
+			s.installMode = installModeEvent
 		}
 	}
 }
