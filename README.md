@@ -1,6 +1,11 @@
 Server Core: Service Management for configuration and data
 ==========================================================
 
+Server core is responsible for:
+* managing configuration database for all switchs/servers/drivers configuration and authorization
+* setup-ing switchs 
+* sending command to switchs
+
 Build Requirement: 
 * golang-go > 1.9
 * glide
