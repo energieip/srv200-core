@@ -17,6 +17,14 @@ type SwitchSetup struct {
 	Cluster      int    `json:"cluster"`
 }
 
+//SwitchCmd content
+type SwitchCmd struct {
+	FriendlyName *string `json:"friendlyName"`
+	IP           *string `json:"ip"`
+	Cluster      *int    `json:"cluster"`
+	IsConfigured *bool   `json:"isConfigured"`
+}
+
 //ServiceDump content
 type ServiceDump struct {
 	pkg.ServiceStatus
@@ -30,6 +38,14 @@ type ServerConfig struct {
 	Sensors  map[string]driversensor.SensorSetup `json:"sensors"`
 	Groups   map[int]groupmodel.GroupConfig      `json:"groups"`
 	Services map[string]pkg.Service              `json:"services"`
+}
+
+//ServerCmd server configuration
+type ServerCmd struct {
+	Switchs map[string]SwitchCmd               `json:"switchs"`
+	Leds    map[string]driverled.LedConf       `json:"leds"`
+	Sensors map[string]driversensor.SensorConf `json:"sensors"`
+	Groups  map[int]groupmodel.GroupConfig     `json:"groups"`
 }
 
 // ToJSON dump server config struct

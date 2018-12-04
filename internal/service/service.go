@@ -80,22 +80,50 @@ func (s *CoreService) Stop() {
 	rlog.Info("ServerCore service stopped")
 }
 
-func (s *CoreService) prepareSwitchConfig(switchStatus deviceswitch.SwitchStatus) *deviceswitch.SwitchConfig {
+func (s *CoreService) prepareSetupSwitchConfig(switchStatus deviceswitch.SwitchStatus) *deviceswitch.SwitchConfig {
 	config := database.GetSwitchConfig(s.db, switchStatus.Mac)
 	if config == nil && !s.installMode {
 		return nil
 	}
-	defaultGroup := 0
-	defaultWatchdog := 600
 
 	isConfigured := true
 	setup := deviceswitch.SwitchConfig{}
 	setup.Mac = switchStatus.Mac
 	setup.FriendlyName = config.FriendlyName
 	setup.IsConfigured = &isConfigured
+	setup.Services = database.GetServiceConfigs(s.db)
+	if s.installMode {
+		switchSetup := core.SwitchSetup{}
+		switchSetup.Mac = setup.Mac
+		switchSetup.IP = switchStatus.IP
+		switchSetup.Cluster = 0
+		switchSetup.FriendlyName = switchStatus.FriendlyName
+		database.SaveSwitchConfig(s.db, switchSetup)
+	}
+	if config.IP == "" {
+		config.IP = switchStatus.IP
+		database.SaveSwitchConfig(s.db, *config)
+	}
+	return &setup
+}
+
+func (s *CoreService) prepareSwitchConfig(switchStatus deviceswitch.SwitchStatus) *deviceswitch.SwitchConfig {
+	config := database.GetSwitchConfig(s.db, switchStatus.Mac)
+	if config == nil && !s.installMode {
+		return nil
+	}
+
+	isConfigured := true
+	setup := deviceswitch.SwitchConfig{}
+	setup.Mac = switchStatus.Mac
+	setup.FriendlyName = config.FriendlyName
+	setup.IsConfigured = &isConfigured
+
+	defaultGroup := 0
+	defaultWatchdog := 600
+
 	setup.LedsSetup = make(map[string]driverled.LedSetup)
 	setup.SensorsSetup = make(map[string]driversensor.SensorSetup)
-	setup.Services = database.GetServiceConfigs(s.db)
 
 	driversMac := make(map[string]bool)
 	for _, led := range switchStatus.Leds {
@@ -123,7 +151,9 @@ func (s *CoreService) prepareSwitchConfig(switchStatus deviceswitch.SwitchStatus
 				// saved default config
 				database.SaveLedConfig(s.db, dled)
 			}
-			setup.LedsSetup[mac] = *lsetup
+			if lsetup != nil {
+				setup.LedsSetup[mac] = *lsetup
+			}
 		}
 	}
 
@@ -147,36 +177,30 @@ func (s *CoreService) prepareSwitchConfig(switchStatus deviceswitch.SwitchStatus
 				// saved default config
 				database.SaveSensorConfig(s.db, dsensor)
 			}
-			setup.SensorsSetup[mac] = *ssetup
+			if ssetup != nil {
+				setup.SensorsSetup[mac] = *ssetup
+			}
 		}
-	}
-
-	if s.installMode {
-		switchSetup := core.SwitchSetup{}
-		switchSetup.Mac = setup.Mac
-		switchSetup.IP = switchStatus.IP
-		switchSetup.Cluster = 0
-		switchSetup.FriendlyName = switchStatus.FriendlyName
-		database.SaveSwitchConfig(s.db, switchSetup)
-	}
-	if config.IP == "" {
-		config.IP = switchStatus.IP
-		database.SaveSwitchConfig(s.db, *config)
 	}
 	return &setup
 }
 
-func (s *CoreService) sendSwitchSetup(switchStatus deviceswitch.SwitchStatus) {
-	conf := s.prepareSwitchConfig(switchStatus)
+func (s *CoreService) sendSwitchSetup(sw deviceswitch.SwitchStatus) {
+	conf := s.prepareSetupSwitchConfig(sw)
 	if conf == nil {
-		rlog.Warn("This device " + switchStatus.Mac + " is not authorized")
+		rlog.Warn("This device " + sw.Mac + " is not authorized")
 		return
 	}
 	switchSetup := *conf
 
-	url := "/write/" + switchStatus.Topic + "/setup/config"
+	url := "/write/" + sw.Topic + "/setup/config"
 	dump, _ := switchSetup.ToJSON()
-	s.server.SendCommand(url, dump)
+	err := s.server.SendCommand(url, dump)
+	if err != nil {
+		rlog.Error("Cannot send setup config to " + sw.Mac + " on topic: " + url + " err:" + err.Error())
+	} else {
+		rlog.Info("Send update config to " + sw.Mac + " on topic: " + url)
+	}
 }
 
 func (s *CoreService) sendSwitchUpdateConfig(sw deviceswitch.SwitchStatus) {
@@ -189,11 +213,16 @@ func (s *CoreService) sendSwitchUpdateConfig(sw deviceswitch.SwitchStatus) {
 
 	url := "/write/" + sw.Topic + "/update/settings"
 	dump, _ := switchSetup.ToJSON()
-	s.server.SendCommand(url, dump)
+	err := s.server.SendCommand(url, dump)
+	if err != nil {
+		rlog.Error("Cannot send update config to " + sw.Mac + " on topic: " + url + " err:" + err.Error())
+	} else {
+		rlog.Info("Send update config to " + sw.Mac + " on topic: " + url)
+	}
 }
 
-func (s *CoreService) sendSwitchCommand() {
-
+func (s *CoreService) sendSwitchCommand(cmd core.ServerCmd) {
+	rlog.Info("Send switch cmd", cmd)
 }
 
 func (s *CoreService) registerSwitchStatus(switchStatus deviceswitch.SwitchStatus) {
@@ -234,8 +263,8 @@ func (s *CoreService) Run() error {
 					s.sendSwitchSetup(event)
 					s.registerSwitchStatus(event)
 				case network.EventDump:
-					s.registerSwitchStatus(event)
 					s.sendSwitchUpdateConfig(event)
+					s.registerSwitchStatus(event)
 				}
 			}
 		case configEvents := <-s.server.EventsCfg:
@@ -247,6 +276,9 @@ func (s *CoreService) Run() error {
 			}
 		case installModeEvent := <-s.server.EventsInstallMode:
 			s.installMode = installModeEvent
+			rlog.Info("Installation mode status is now:", s.installMode)
+		case cmd := <-s.server.EventsCmd:
+			s.sendSwitchCommand(cmd)
 		}
 	}
 }

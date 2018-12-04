@@ -27,6 +27,7 @@ type ServerNetwork struct {
 	Events            chan map[string]deviceswitch.SwitchStatus
 	EventsCfg         chan map[string]core.ServerConfig
 	EventsInstallMode chan bool //installation mode
+	EventsCmd         chan core.ServerCmd
 }
 
 //CreateServerNetwork create network server object
@@ -40,6 +41,7 @@ func CreateServerNetwork() (*ServerNetwork, error) {
 		Events:            make(chan map[string]deviceswitch.SwitchStatus),
 		EventsCfg:         make(chan map[string]core.ServerConfig),
 		EventsInstallMode: make(chan bool),
+		EventsCmd:         make(chan core.ServerCmd),
 	}
 	return &serverNet, nil
 
@@ -134,11 +136,18 @@ func (net ServerNetwork) removeConfigs(client genericNetwork.Client, msg generic
 func (net ServerNetwork) manualControl(client genericNetwork.Client, msg genericNetwork.Message) {
 	payload := msg.Payload()
 	rlog.Debug("Received manualControl: Received topic: " + msg.Topic() + " payload: " + string(payload))
+	var servCmd core.ServerCmd
+	err := json.Unmarshal(payload, &servCmd)
+	if err != nil {
+		rlog.Error("Cannot parse command ", err.Error())
+		return
+	}
+	net.EventsCmd <- servCmd
 }
 
 func (net ServerNetwork) installMode(client genericNetwork.Client, msg genericNetwork.Message) {
 	payload := string(msg.Payload())
-	rlog.Debug("Received installMode: Received topic: " + msg.Topic() + " payload: " + payload)
+	rlog.Info("Received installMode: Received topic: " + msg.Topic() + " payload: " + payload)
 	mode, err := strconv.ParseBool(payload)
 	if err != nil {
 		rlog.Error("Cannot parse installation Mode ", err.Error())

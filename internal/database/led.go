@@ -1,13 +1,15 @@
 package database
 
-import led "github.com/energieip/common-led-go/pkg/driverled"
+import (
+	led "github.com/energieip/common-led-go/pkg/driverled"
+)
 
 //SaveLedConfig dump led config in database
 func SaveLedConfig(db Database, ledStatus led.LedSetup) error {
 	var dbID string
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = ledStatus.Mac
-	ledStored, err := db.GetRecord(StatusDB, LedsTable, criteria)
+	ledStored, err := db.GetRecord(ConfigDB, LedsTable, criteria)
 	if err == nil && ledStored != nil {
 		m := ledStored.(map[string]interface{})
 		id, ok := m["id"]
