@@ -254,6 +254,7 @@ func (s *CoreService) registerConfig(config core.ServerConfig) {
 
 //Run service mainloop
 func (s *CoreService) Run() error {
+	go s.swagger()
 	for {
 		select {
 		case serverEvents := <-s.server.Events:

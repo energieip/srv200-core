@@ -1,6 +1,8 @@
 package database
 
-import sensor "github.com/energieip/common-sensor-go/pkg/driversensor"
+import (
+	sensor "github.com/energieip/common-sensor-go/pkg/driversensor"
+)
 
 //SaveSensorConfig dump sensor config in database
 func SaveSensorConfig(db Database, sensorStatus sensor.SensorSetup) error {
@@ -63,4 +65,36 @@ func SaveSensorStatus(db Database, sensorStatus sensor.Sensor) error {
 		err = db.UpdateRecord(StatusDB, SensorsTable, dbID, sensorStatus)
 	}
 	return err
+}
+
+//GetSensorsStatus return the led status list
+func GetSensorsStatus(db Database) map[string]sensor.Sensor {
+	sensors := map[string]sensor.Sensor{}
+	stored, err := db.FetchAllRecords(StatusDB, SensorsTable)
+	if err != nil || stored == nil {
+		return sensors
+	}
+	for _, l := range stored {
+		cell, err := sensor.ToSensor(l)
+		if err != nil || cell == nil {
+			continue
+		}
+		sensors[cell.Mac] = *cell
+	}
+	return sensors
+}
+
+//GetSensorStatus return the led status
+func GetSensorStatus(db Database, mac string) *sensor.Sensor {
+	criteria := make(map[string]interface{})
+	criteria["Mac"] = mac
+	stored, err := db.GetRecord(StatusDB, SensorsTable, criteria)
+	if err != nil || stored == nil {
+		return nil
+	}
+	cell, err := sensor.ToSensor(stored)
+	if err != nil {
+		return nil
+	}
+	return cell
 }

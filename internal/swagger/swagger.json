@@ -1,0 +1,542 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "GTB server API",
+        "version": "1.0",
+        "title": "GTB Swagger",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "email": "developer@energie-ip.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        }
+    },
+    "tags":[
+        {
+            "name": "config",
+            "description": "GTB configuration: setup config"
+        },
+        {
+            "name": "command",
+            "description": "Drivers and groups control"
+        },
+        {
+            "name": "status",
+            "description": "Drivers and groups status"
+        }
+    ],
+    "schemes":[
+        "http"
+    ],
+    "paths":{
+        "/sensors":{
+            "get":{
+                "tags":[
+                    "status"
+                ],
+                "summary": "Return Sensor Status",
+                "description": "Return the list of sensor status with filter",
+                "operationId": "getSensorsStatus",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Status values that need to be considered for filter",
+                        "required": false,
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "all",
+                                "isConfigured",
+                                "group"
+                            ],
+                            "default": "all"
+                        },
+                        "collectionFormat": "multi"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema":{
+                            "$ref": "#/definitions/SensorsStatus"
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                      }
+                }
+            }
+        },
+        "/sensor/{mac}": {
+            "get": {
+                "tags": [
+                    "status"
+                ],
+                "summary": "Return Sensor Status",
+                "description": "Return the given sensor status",
+                "operationId": "getSensorStatus",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[{
+                    "name": "mac",
+                    "in": "path",
+                    "description": "Sensor Mac address",
+                    "required": true,
+                    "type": "string"
+                }],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema":{
+                            "$ref": "#/definitions/SensorStatus"
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                      }
+                }
+            },
+            "post": {
+                "tags": [
+                    "config"
+                ],
+                "summary": "Set Sensor Config",
+                "description": "Return the given sensor status",
+                "operationId": "setSensor",
+                "produces":[
+                    "application/json"
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "mac",
+                        "in": "path",
+                        "description": "Sensor Mac address",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "sensor",
+                        "in": "body",
+                        "description": "Sensor config",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/SensorStatus"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema":{
+                            "$ref": "#/definitions/SensorStatus"
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/leds":{
+            "get":{
+                "tags":[
+                    "status"
+                ],
+                "summary": "Return LED Status",
+                "description": "Return the list of leds status with filter",
+                "operationId": "getLedsStatus",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Status values that need to be considered for filter",
+                        "required": false,
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "all",
+                                "isConfigured",
+                                "group"
+                            ],
+                            "default": "all"
+                        },
+                        "collectionFormat": "multi"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema":{
+                            "$ref": "#/definitions/LedsStatus"
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                      }
+                }
+            }
+        },
+        "/led/{mac}":{
+            "get":{
+                "tags":[
+                    "status"
+                ],
+                "summary": "Return Led Status",
+                "description": "Return the given LED status",
+                "operationId": "getLedStatus",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[{
+                    "name": "mac",
+                    "in": "path",
+                    "description": "LED Mac address",
+                    "required": true,
+                    "type": "string"
+                }],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema":{
+                            "$ref": "#/definitions/LedStatus"
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                      }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "SensorsStatus": {
+            "type": "object",
+            "required": [
+                "mac"
+            ],
+            "properties": {
+                "mac": {
+                    "type": "string",
+                    "description": "Sensor mac address"
+                },
+                "sensor": {
+                    "$ref": "#/definitions/SensorStatus"
+                }
+            }
+        },
+        "LedsStatus": {
+            "type": "object",
+            "required": [
+                "mac"
+            ],
+            "properties": {
+                "mac": {
+                    "type": "string",
+                    "description": "LED mac address"
+                },
+                "led": {
+                    "$ref": "#/definitions/LedStatus"
+                }
+            }
+        },
+        "SensorStatus": {
+            "type": "object",
+            "required": [
+                "mac"
+            ],
+            "properties": {
+                "mac": {
+                    "type": "string",
+                    "description": "Sensor mac address"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "ip": {
+                    "type": "string",
+                    "description": "Sensor IP address"
+                },
+                "group": {
+                    "type": "integer",
+                    "description": "Associate group"
+                },
+                "protocol": {
+                    "type": "string",
+                    "description": "Sensor communication protocol"
+                },
+                "topic": {
+                    "type": "string",
+                    "description": "Sensor communication topic"
+                },
+                "switchMac": {
+                    "type": "string",
+                    "description": "Associate switch mac address"
+                },
+                "isConfigured": {
+                    "type": "boolean",
+                    "description": "Is the sensor configured"
+                },
+                "softwareVersion": {
+                    "type": "number",
+                    "format": "float32",
+                    "description": "Sensor Software version"
+                },
+                "hardwareVersion": {
+                    "type": "string",
+                    "description": "Sensor Hardware version"
+                },
+                "isBleEnabled": {
+                    "type": "boolean",
+                    "description": "Is the bluetooth activate"
+                },
+                "temperature": {
+                    "type": "integer",
+                    "description": "Temperature"
+                },
+                "error": {
+                    "type": "integer",
+                    "description": "Error code value: 0 means no error"
+                },
+                "resetNumbers": {
+                    "type": "integer",
+                    "description": "Number of reset"
+                },
+                "initialSetupDate": {
+                    "type": "number",
+                    "format": "float64",
+                    "description": "First installation date"
+                },
+                "lastResetDate": {
+                    "type": "number",
+                    "format": "float64",
+                    "description": "Last reset date"
+                },
+                "brightness": {
+                    "type": "integer",
+                    "description": "Corrected Brightness in Lux"
+                },
+                "presence": {
+                    "type": "boolean",
+                    "description": "Presence"
+                },
+                "brigthnessCorrectionFactor": {
+                    "type": "integer",
+                    "description": "Brightness correction factor"
+                },
+                "thresoldPresence": {
+                    "type": "integer",
+                    "description": "Thresold presence"
+                },
+                "temperatureOffset": {
+                    "type": "integer",
+                    "description": "Temperature offset correcion"
+                },
+                "brigthnessRaw": {
+                    "type": "integer",
+                    "description": "Brigthness Raw value in Lux"
+                },
+                "lastMovement": {
+                    "type": "integer",
+                    "description": "Last Movement date"
+                },
+                "voltageInput": {
+                    "type": "integer",
+                    "description": "Input voltage"
+                },
+                "temperatureRaw": {
+                    "type": "integer",
+                    "description": "Temperature Raw value"
+                },
+                "friendlyName": {
+                    "type": "string",
+                    "description": "Sensor FriendlyName"
+                }
+            }
+        },
+        "LedStatus": {
+            "type": "object",
+            "required": [
+                "mac"
+            ],
+            "properties": {
+                "mac": {
+                    "type": "string",
+                    "description": "LED mac address"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "ip": {
+                    "type": "string",
+                    "description": "Led IP address"
+                },
+                "group": {
+                    "type": "integer",
+                    "description": "Associate group"
+                },
+                "protocol": {
+                    "type": "string",
+                    "description": "Sensor communication protocol"
+                },
+                "topic": {
+                    "type": "string",
+                    "description": "Sensor communication topic"
+                },
+                "switchMac": {
+                    "type": "string",
+                    "description": "Associate switch mac address"
+                },
+                "isConfigured": {
+                    "type": "boolean",
+                    "description": "Is the sensor configured"
+                },
+                "softwareVersion": {
+                    "type": "number",
+                    "format": "float32",
+                    "description": "Sensor Software version"
+                },
+                "hardwareVersion": {
+                    "type": "string",
+                    "description": "Sensor Hardware version"
+                },
+                "isBleEnabled": {
+                    "type": "boolean",
+                    "description": "Is the bluetooth activate"
+                },
+                "temperature": {
+                    "type": "integer",
+                    "description": "On board temperature"
+                },
+                "error": {
+                    "type": "integer",
+                    "description": "Error code value: 0 means no error"
+                },
+                "resetNumbers": {
+                    "type": "integer",
+                    "description": "Number of reset"
+                },
+                "initialSetupDate": {
+                    "type": "number",
+                    "format": "float64",
+                    "description": "First installation date"
+                },
+                "lastResetDate": {
+                    "type": "number",
+                    "format": "float64",
+                    "description": "Last reset date"
+                },
+                "friendlyName": {
+                    "type": "string",
+                    "description": "Sensor FriendlyName"
+                },
+                "iMax": {
+                    "type": "integer",
+                    "description": "iMax"
+                },
+                "duration": {
+                    "type": "number",
+                    "format": "float64",
+                    "description": "brightness duration"
+                },
+                "setpoint": {
+                    "type": "integer",
+                    "description": "Setpoint value in percentage"
+                },
+                "thresoldLow": {
+                    "type": "integer",
+                    "description": "Thresold low"
+                },
+                "thresoldHigh": {
+                    "type": "integer",
+                    "description": "Thresold high"
+                },
+                "daisyChainEnabled": {
+                    "type": "boolean",
+                    "description": "Daisy chained enabled"
+                },
+                "daisyChainPos": {
+                    "type": "integer",
+                    "description": "Daisy chained position"
+                },
+                "devicePower": {
+                    "type": "integer",
+                    "description": "Device power"
+                },
+                "energy": {
+                    "type": "number",
+                    "format": "float64",
+                    "description": "Energy"
+                },
+                "voltageLed": {
+                    "type": "integer",
+                    "description": "Voltage LED"
+                },
+                "voltageInput": {
+                    "type": "integer",
+                    "description": "Voltage input"
+                },
+                "linePower": {
+                    "type": "integer",
+                    "description": "input line power"
+                },
+                "timeToAuto": {
+                    "type": "integer",
+                    "description": "remaining time to automatic mode in second"
+                },
+                "watchdog": {
+                    "type": "integer",
+                    "description": "watchdog in second"
+                },
+                "auto": {
+                    "type": "boolean",
+                    "description": "Automatic mode"
+                }
+            }
+        },
+        "Error": {
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          }
+    }
+}

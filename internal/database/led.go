@@ -66,3 +66,35 @@ func SaveLedStatus(db Database, ledStatus led.Led) error {
 	}
 	return err
 }
+
+//GetLedsStatus return the led status list
+func GetLedsStatus(db Database) map[string]led.Led {
+	leds := map[string]led.Led{}
+	stored, err := db.FetchAllRecords(StatusDB, LedsTable)
+	if err != nil || stored == nil {
+		return leds
+	}
+	for _, l := range stored {
+		light, err := led.ToLed(l)
+		if err != nil || light == nil {
+			continue
+		}
+		leds[light.Mac] = *light
+	}
+	return leds
+}
+
+//GetLedStatus return the led status
+func GetLedStatus(db Database, mac string) *led.Led {
+	criteria := make(map[string]interface{})
+	criteria["Mac"] = mac
+	ledStored, err := db.GetRecord(StatusDB, LedsTable, criteria)
+	if err != nil || ledStored == nil {
+		return nil
+	}
+	light, err := led.ToLed(ledStored)
+	if err != nil {
+		return nil
+	}
+	return light
+}
