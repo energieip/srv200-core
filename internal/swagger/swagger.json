@@ -77,6 +77,34 @@
                 }
             }
         },
+        "/sensors/event":{
+            "get":{
+                "tags":[
+                    "status"
+                ],
+                "summary": "Websocket for Sensor event Status",
+                "description": "pop sensor event",
+                "operationId": "sensorEvents",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[],
+                "responses": {
+                    "101": {
+                        "description": "successful operation",
+                        "schema":{
+                            "$ref": "#/definitions/EventSensorStatus"
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                      }
+                }
+            }
+        },
         "/sensor/{mac}": {
             "get": {
                 "tags": [
@@ -248,6 +276,21 @@
                 "mac": {
                     "type": "string",
                     "description": "Sensor mac address"
+                },
+                "sensor": {
+                    "$ref": "#/definitions/SensorStatus"
+                }
+            }
+        },
+        "EventSensorStatus": {
+            "type": "object",
+            "required": [
+                "eventType"
+            ],
+            "properties": {
+                "eventType": {
+                    "type": "string",
+                    "description": "event category add|update|remove"
                 },
                 "sensor": {
                     "$ref": "#/definitions/SensorStatus"

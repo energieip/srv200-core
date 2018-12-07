@@ -21,6 +21,10 @@ const (
 
 	UrlStatus = "status/dump"
 	UrlHello  = "setup/hello"
+
+	EventRemove = "remove"
+	EventUpdate = "update"
+	EventAdd    = "add"
 )
 
 //CoreService content
@@ -30,6 +34,7 @@ type CoreService struct {
 	mac         string //Switch mac address
 	events      chan string
 	installMode bool
+	eventSensor chan map[string]driversensor.Sensor
 }
 
 //Initialize service
@@ -37,6 +42,7 @@ func (s *CoreService) Initialize(confFile string) error {
 	clientID := "Server"
 	s.installMode = false
 	s.events = make(chan string)
+	s.eventSensor = make(chan map[string]driversensor.Sensor)
 
 	conf, err := pkg.ReadServiceConfig(confFile)
 	if err != nil {
@@ -179,6 +185,9 @@ func (s *CoreService) prepareSwitchConfig(switchStatus deviceswitch.SwitchStatus
 			}
 			if ssetup != nil {
 				setup.SensorsSetup[mac] = *ssetup
+				event := make(map[string]driversensor.Sensor)
+				event[EventAdd] = sensor
+				s.eventSensor <- event
 			}
 		}
 	}
