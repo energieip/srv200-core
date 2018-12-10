@@ -110,7 +110,7 @@ func (s *CoreService) setSensor(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (s *CoreService) sensorEvents(w http.ResponseWriter, r *http.Request) {
+func (s *CoreService) webEvents(w http.ResponseWriter, r *http.Request) {
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		rlog.Error("Error when switchin in websocket " + err.Error())
@@ -124,8 +124,10 @@ func (s *CoreService) sensorEvents(w http.ResponseWriter, r *http.Request) {
 			case events := <-s.eventSensor:
 				for eventType, event := range events {
 					for client := range clients {
-						evt := make(map[string]driversensor.Sensor)
-						evt[eventType] = event
+						evt := make(map[string]interface{})
+						dev := make(map[string]driversensor.Sensor)
+						dev["Sensor"] = event
+						evt[eventType] = dev
 						if err := client.WriteJSON(evt); err != nil {
 							rlog.Error("Error writing in websocket" + err.Error())
 							client.Close()
@@ -147,6 +149,6 @@ func (s *CoreService) swagger() {
 	router.HandleFunc("/sensors", s.getSensors).Methods("GET")
 	router.HandleFunc("/sensor/{mac}", s.getSensor).Methods("GET")
 	router.HandleFunc("/sensor/{mac}", s.setSensor).Methods("POST")
-	router.HandleFunc("/sensors/events", s.sensorEvents)
+	router.HandleFunc("/events", s.webEvents)
 	log.Fatal(http.ListenAndServe(":8888", router))
 }

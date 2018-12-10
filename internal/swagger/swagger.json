@@ -77,14 +77,14 @@
                 }
             }
         },
-        "/sensors/event":{
+        "/events":{
             "get":{
                 "tags":[
                     "status"
                 ],
                 "summary": "Websocket for Sensor event Status",
                 "description": "pop sensor event",
-                "operationId": "sensorEvents",
+                "operationId": "events",
                 "produces":[
                     "application/json"
                 ],
@@ -93,7 +93,7 @@
                     "101": {
                         "description": "successful operation",
                         "schema":{
-                            "$ref": "#/definitions/EventSensorStatus"
+                            "$ref": "#/definitions/Event"
                         }
                     },
                     "default": {
@@ -282,7 +282,7 @@
                 }
             }
         },
-        "EventSensorStatus": {
+        "Event": {
             "type": "object",
             "required": [
                 "eventType"
@@ -292,8 +292,12 @@
                     "type": "string",
                     "description": "event category add|update|remove"
                 },
+                "driverType": {
+                    "type": "string",
+                    "description": "driver category sensor|LED"
+                },
                 "sensor": {
-                    "$ref": "#/definitions/SensorStatus"
+                    "$ref": "#/definitions/Status"
                 }
             }
         },
@@ -357,6 +361,120 @@
                 "hardwareVersion": {
                     "type": "string",
                     "description": "Sensor Hardware version"
+                },
+                "isBleEnabled": {
+                    "type": "boolean",
+                    "description": "Is the bluetooth activate"
+                },
+                "temperature": {
+                    "type": "integer",
+                    "description": "Temperature"
+                },
+                "error": {
+                    "type": "integer",
+                    "description": "Error code value: 0 means no error"
+                },
+                "resetNumbers": {
+                    "type": "integer",
+                    "description": "Number of reset"
+                },
+                "initialSetupDate": {
+                    "type": "number",
+                    "format": "float64",
+                    "description": "First installation date"
+                },
+                "lastResetDate": {
+                    "type": "number",
+                    "format": "float64",
+                    "description": "Last reset date"
+                },
+                "brightness": {
+                    "type": "integer",
+                    "description": "Corrected Brightness in Lux"
+                },
+                "presence": {
+                    "type": "boolean",
+                    "description": "Presence"
+                },
+                "brigthnessCorrectionFactor": {
+                    "type": "integer",
+                    "description": "Brightness correction factor"
+                },
+                "thresoldPresence": {
+                    "type": "integer",
+                    "description": "Thresold presence"
+                },
+                "temperatureOffset": {
+                    "type": "integer",
+                    "description": "Temperature offset correcion"
+                },
+                "brigthnessRaw": {
+                    "type": "integer",
+                    "description": "Brigthness Raw value in Lux"
+                },
+                "lastMovement": {
+                    "type": "integer",
+                    "description": "Last Movement date"
+                },
+                "voltageInput": {
+                    "type": "integer",
+                    "description": "Input voltage"
+                },
+                "temperatureRaw": {
+                    "type": "integer",
+                    "description": "Temperature Raw value"
+                },
+                "friendlyName": {
+                    "type": "string",
+                    "description": "Sensor FriendlyName"
+                }
+            }
+        },
+        "Status": {
+            "type": "object",
+            "required": [
+                "mac"
+            ],
+            "properties": {
+                "mac": {
+                    "type": "string",
+                    "description": "Mac address"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "ip": {
+                    "type": "string",
+                    "description": "IP address"
+                },
+                "group": {
+                    "type": "integer",
+                    "description": "Associate group"
+                },
+                "protocol": {
+                    "type": "string",
+                    "description": "communication protocol"
+                },
+                "topic": {
+                    "type": "string",
+                    "description": "communication topic"
+                },
+                "switchMac": {
+                    "type": "string",
+                    "description": "Associate switch mac address"
+                },
+                "isConfigured": {
+                    "type": "boolean",
+                    "description": "Is the device configured"
+                },
+                "softwareVersion": {
+                    "type": "number",
+                    "format": "float32",
+                    "description": "Software version"
+                },
+                "hardwareVersion": {
+                    "type": "string",
+                    "description": "Hardware version"
                 },
                 "isBleEnabled": {
                     "type": "boolean",
