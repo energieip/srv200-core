@@ -15,6 +15,7 @@ import (
 
 const (
 	APIErrorDeviceNotFound = 1
+	APIErrorBodyParsing    = 2
 )
 
 //APIError Message error code
@@ -28,6 +29,14 @@ type API struct {
 	upgrader  websocket.Upgrader
 	db        database.Database
 	eventsAPI chan map[string]interface{}
+}
+
+type ModelInfo struct {
+	Label     string `json:"label"` //cable label
+	ModelName string `json:"modelName"`
+	Mac       string `json:"mac"` //device Mac address
+	Vendor    string `json:"vendor"`
+	URL       string `json:"url"`
 }
 
 //InitAPI start API connection
@@ -46,12 +55,21 @@ func InitAPI(db database.Database, eventsAPI chan map[string]interface{}) *API {
 	return &api
 }
 
-type ModelInfo struct {
-	Label     string `json:"label"` //cable label
-	ModelName string `json:"modelName"`
-	Mac       string `json:"mac"` //device Mac address
-	Vendor    string `json:"vendor"`
-	URL       string `json:"url"`
+func (api *API) seDefaultHeader(w http.ResponseWriter) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+}
+
+func (api *API) sendError(w http.ResponseWriter, errorCode int, message string) {
+	errCode := APIError{
+		Code:    APIErrorDeviceNotFound,
+		Message: message,
+	}
+
+	inrec, _ := json.MarshalIndent(errCode, "", "  ")
+	rlog.Error(errCode.Message)
+	http.Error(w, string(inrec),
+		http.StatusInternalServerError)
 }
 
 func (api *API) getLeds(w http.ResponseWriter, req *http.Request) {
@@ -208,6 +226,7 @@ func (api *API) swagger() {
 	sh := http.StripPrefix("/swaggerui/", http.FileServer(http.Dir("/var/www/swaggerui/")))
 	router.PathPrefix("/swaggerui/").Handler(sh)
 	router.HandleFunc("/setup/sensor/{mac}", api.getSensorSetup).Methods("GET")
+	router.HandleFunc("/setup/sensor", api.setSensorSetup).Methods("POST")
 
 	router.HandleFunc("/leds", api.getLeds).Methods("GET")
 	router.HandleFunc("/led/{mac}", api.getLed).Methods("GET")

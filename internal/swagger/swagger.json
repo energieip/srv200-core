@@ -61,7 +61,45 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "successful operation",
+                        "description": "successfull operation",
+                        "schema":{
+                            "$ref": "#/definitions/SensorSetup"
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },        
+        "/setup/sensor":{
+            "post":{
+                "tags":[
+                    "setup"
+                ],
+                "summary": " Sensor Setup configuration",
+                "description": "Sensor Setup configuration",
+                "operationId": "setSensorSetup",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "sensor",
+                        "in": "body",
+                        "description": "Sensor config",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/SensorSetup"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successfull operation",
                         "schema":{
                             "$ref": "#/definitions/SensorSetup"
                         }
