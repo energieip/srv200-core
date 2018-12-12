@@ -13,6 +13,16 @@ import (
 	"github.com/romana/rlog"
 )
 
+const (
+	APIErrorDeviceNotFound = 1
+)
+
+//APIError Message error code
+type APIError struct {
+	Code    int    `json:"code"` //errorCode
+	Message string `json:"message"`
+}
+
 type API struct {
 	clients   map[*websocket.Conn]bool
 	upgrader  websocket.Upgrader
@@ -197,6 +207,8 @@ func (api *API) swagger() {
 	router := mux.NewRouter()
 	sh := http.StripPrefix("/swaggerui/", http.FileServer(http.Dir("/var/www/swaggerui/")))
 	router.PathPrefix("/swaggerui/").Handler(sh)
+	router.HandleFunc("/setup/sensor/{mac}", api.getSensorSetup).Methods("GET")
+
 	router.HandleFunc("/leds", api.getLeds).Methods("GET")
 	router.HandleFunc("/led/{mac}", api.getLed).Methods("GET")
 	router.HandleFunc("/sensors", api.getSensors).Methods("GET")

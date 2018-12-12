@@ -15,8 +15,16 @@
     },
     "tags":[
         {
-            "name": "config",
+            "name": "setup",
             "description": "GTB configuration: setup config"
+        },
+        {
+            "name": "project",
+            "description": "GTB configuration: project config"
+        },
+        {
+            "name": "event",
+            "description": "GTB configuration: project config"
         },
         {
             "name": "command",
@@ -31,41 +39,31 @@
         "http"
     ],
     "paths":{
-        "/sensors":{
+        "/setup/sensor/{mac}":{
             "get":{
                 "tags":[
-                    "status"
+                    "setup"
                 ],
-                "summary": "Return Sensor Status",
-                "description": "Return the list of sensor status with filter",
-                "operationId": "getSensorsStatus",
+                "summary": "Return Sensor Setup configuration",
+                "description": "Return Sensor Setup configuration",
+                "operationId": "getSensorSetup",
                 "produces":[
                     "application/json"
                 ],
                 "parameters":[
                     {
-                        "name": "status",
-                        "in": "query",
-                        "description": "Status values that need to be considered for filter",
-                        "required": false,
-                        "type": "array",
-                        "items": {
-                            "type": "string",
-                            "enum": [
-                                "all",
-                                "isConfigured",
-                                "group"
-                            ],
-                            "default": "all"
-                        },
-                        "collectionFormat": "multi"
+                        "name": "mac",
+                        "in": "path",
+                        "description": "Sensor Mac address",
+                        "required": true,
+                        "type": "string"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "successful operation",
                         "schema":{
-                            "$ref": "#/definitions/SensorsStatus"
+                            "$ref": "#/definitions/SensorSetup"
                         }
                     },
                     "default": {
@@ -73,7 +71,7 @@
                         "schema": {
                           "$ref": "#/definitions/Error"
                         }
-                      }
+                    }
                 }
             }
         },
@@ -267,6 +265,42 @@
         }
     },
     "definitions": {
+        "SensorSetup":{
+            "type": "object",
+            "required": [
+                "mac"
+            ],
+            "properties": {
+                "mac": {
+                    "type": "string",
+                    "description": "Sensor mac address"
+                },
+                "group": {
+                    "type": "integer",
+                    "description": "Associate group"
+                },
+                "isBleEnabled": {
+                    "type": "boolean",
+                    "description": "bluetooth activation"
+                },
+                "brigthnessCorrectionFactor": {
+                    "type": "integer",
+                    "description": "Brightness correction factor"
+                },
+                "friendlyName": {
+                    "type": "string",
+                    "description": "Sensor FriendlyName"
+                },
+                "thresoldPresence": {
+                    "type": "integer",
+                    "description": "Thresold presence"
+                },
+                "temperatureOffset": {
+                    "type": "integer",
+                    "description": "Temperature offset correction"
+                }
+            }
+        },
         "SensorsStatus": {
             "type": "object",
             "required": [
