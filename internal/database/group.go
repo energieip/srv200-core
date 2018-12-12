@@ -26,6 +26,21 @@ func SaveGroupConfig(db Database, status group.GroupConfig) error {
 	return err
 }
 
+//GetGroupConfig return the group configuration
+func GetGroupConfig(db Database, grID int) *group.GroupConfig {
+	criteria := make(map[string]interface{})
+	criteria["Group"] = grID
+	stored, err := db.GetRecord(ConfigDB, GroupsTable, criteria)
+	if err != nil || stored == nil {
+		return nil
+	}
+	gr, err := group.ToGroupConfig(stored)
+	if err != nil {
+		return nil
+	}
+	return gr
+}
+
 //GetGroupConfigs get group Config
 func GetGroupConfigs(db Database, driversMac map[string]bool) map[int]group.GroupConfig {
 	groups := make(map[int]group.GroupConfig)

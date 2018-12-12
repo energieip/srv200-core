@@ -187,6 +187,80 @@
                 }
             }
         },
+        "/setup/group/{groupID}":{
+            "get":{
+                "tags":[
+                    "setup"
+                ],
+                "summary": "Return Group Setup configuration",
+                "description": "Return Group Setup configuration",
+                "operationId": "getGroupSetup",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "groupID",
+                        "in": "path",
+                        "description": "Group Number",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successfull operation",
+                        "schema":{
+                            "$ref": "#/definitions/GroupSetup"
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/setup/group":{
+            "post":{
+                "tags":[
+                    "setup"
+                ],
+                "summary": "Group Setup configuration",
+                "description": "Group Setup configuration",
+                "operationId": "setGroupSetup",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "group",
+                        "in": "body",
+                        "description": "Group config",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/GroupSetup"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successfull operation",
+                        "schema":{
+                            "$ref": "#/definitions/GroupSetup"
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
         "/events":{
             "get":{
                 "tags":[
@@ -451,6 +525,82 @@
                 "thresoldHigh": {
                     "type": "integer",
                     "description": "Thresold high"
+                },
+                "friendlyName": {
+                    "type": "string",
+                    "description": "Sensor FriendlyName"
+                }
+            }
+        },
+        "GroupRule":{
+            "type": "object",
+            "properties": {
+                "brightness": {
+                    "type": "integer",
+                    "description": "Brigthness in Lux"
+                },
+                "Presence": {
+                    "type": "integer",
+                    "description": "Presence in Second"
+                }
+            }
+        },
+        "GroupSetup":{
+            "type": "object",
+            "required": [
+                "group"
+            ],
+            "properties": {
+                "group": {
+                    "type": "integer",
+                    "description": "Associate group"
+                },
+                "auto": {
+                    "type": "boolean",
+                    "description": "Automatic mode"
+                },
+                "watchdog": {
+                    "type": "integer",
+                    "description": "watchdog in second"
+                },
+                "slopeStart": {
+                    "type": "integer",
+                    "description": "slopeStart in second"
+                },
+                "slopeStop": {
+                    "type": "integer",
+                    "description": "slopeStop in second"
+                },
+                "sensorRule": {
+                    "type": "string",
+                    "enum": [
+                        "average",
+                        "min",
+                        "max"
+                    ],
+                    "default": "average",
+                    "description": "Rule when multiple sensors are presents in the same group"
+                },
+                "correctionInterval": {
+                    "type": "integer",
+                    "description": "correctionInterval in second"
+                },
+                "leds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Array of LED mac addresses"
+                },
+                "sensors": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Array of Sensor mac addresses"
+                },
+                "groupRules": {
+                    "$ref": "#/definitions/GroupRule"
                 },
                 "friendlyName": {
                     "type": "string",
