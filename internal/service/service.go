@@ -7,6 +7,7 @@ import (
 	"github.com/energieip/common-sensor-go/pkg/driversensor"
 	pkg "github.com/energieip/common-service-go/pkg/service"
 	"github.com/energieip/common-switch-go/pkg/deviceswitch"
+	"github.com/energieip/srv200-coreservice-go/internal/api"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
 	"github.com/energieip/srv200-coreservice-go/internal/network"
@@ -34,7 +35,7 @@ type CoreService struct {
 	mac         string //Switch mac address
 	events      chan string
 	installMode bool
-	eventSensor chan map[string]driversensor.Sensor
+	eventsAPI   chan map[string]interface{}
 }
 
 //Initialize service
@@ -42,7 +43,7 @@ func (s *CoreService) Initialize(confFile string) error {
 	clientID := "Server"
 	s.installMode = false
 	s.events = make(chan string)
-	s.eventSensor = make(chan map[string]driversensor.Sensor)
+	s.eventsAPI = make(chan map[string]interface{})
 
 	conf, err := pkg.ReadServiceConfig(confFile)
 	if err != nil {
@@ -73,7 +74,7 @@ func (s *CoreService) Initialize(confFile string) error {
 		rlog.Error("Cannot connect to drivers broker " + conf.NetworkBroker.IP + " error: " + err.Error())
 		return err
 	}
-
+	api.InitAPI(s.db, s.eventsAPI)
 	rlog.Info("ServerCore service started")
 	return nil
 }
@@ -185,9 +186,9 @@ func (s *CoreService) prepareSwitchConfig(switchStatus deviceswitch.SwitchStatus
 			}
 			if ssetup != nil {
 				setup.SensorsSetup[mac] = *ssetup
-				event := make(map[string]driversensor.Sensor)
+				event := make(map[string]interface{})
 				event[EventAdd] = sensor
-				s.eventSensor <- event
+				s.eventsAPI <- event
 			}
 		}
 	}
@@ -263,7 +264,6 @@ func (s *CoreService) registerConfig(config core.ServerConfig) {
 
 //Run service mainloop
 func (s *CoreService) Run() error {
-	go s.swagger()
 	for {
 		select {
 		case serverEvents := <-s.server.Events:
