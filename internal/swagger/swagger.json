@@ -338,7 +338,7 @@
         "/events":{
             "get":{
                 "tags":[
-                    "status"
+                    "event"
                 ],
                 "summary": "Websocket for Event Status",
                 "description": "pop event",
