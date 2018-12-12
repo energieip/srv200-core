@@ -113,6 +113,80 @@
                 }
             }
         },
+        "/setup/led/{mac}":{
+            "get":{
+                "tags":[
+                    "setup"
+                ],
+                "summary": "Return LED Setup configuration",
+                "description": "Return LED Setup configuration",
+                "operationId": "getLedSetup",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "mac",
+                        "in": "path",
+                        "description": "Led Mac address",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successfull operation",
+                        "schema":{
+                            "$ref": "#/definitions/LedSetup"
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },        
+        "/setup/led":{
+            "post":{
+                "tags":[
+                    "setup"
+                ],
+                "summary": "LED Setup configuration",
+                "description": "LED Setup configuration",
+                "operationId": "setLedSetup",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "led",
+                        "in": "body",
+                        "description": "led config",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/LedSetup"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successfull operation",
+                        "schema":{
+                            "$ref": "#/definitions/LedSetup"
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
         "/events":{
             "get":{
                 "tags":[
@@ -336,6 +410,51 @@
                 "temperatureOffset": {
                     "type": "integer",
                     "description": "Temperature offset correction"
+                }
+            }
+        },
+        "LedSetup":{
+            "type": "object",
+            "required": [
+                "mac",
+                "iMax"
+            ],
+            "properties": {
+                "mac": {
+                    "type": "string",
+                    "description": "Sensor mac address"
+                },
+                "group": {
+                    "type": "integer",
+                    "description": "Associate group"
+                },
+                "isBleEnabled": {
+                    "type": "boolean",
+                    "description": "bluetooth activation"
+                },
+                "iMax": {
+                    "type": "integer",
+                    "description": "iMax"
+                },
+                "auto": {
+                    "type": "boolean",
+                    "description": "Automatic mode"
+                },
+                "watchdog": {
+                    "type": "integer",
+                    "description": "watchdog in second"
+                },
+                "thresoldLow": {
+                    "type": "integer",
+                    "description": "Thresold low"
+                },
+                "thresoldHigh": {
+                    "type": "integer",
+                    "description": "Thresold high"
+                },
+                "friendlyName": {
+                    "type": "string",
+                    "description": "Sensor FriendlyName"
                 }
             }
         },

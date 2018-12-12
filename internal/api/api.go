@@ -225,8 +225,12 @@ func (api *API) swagger() {
 	router := mux.NewRouter()
 	sh := http.StripPrefix("/swaggerui/", http.FileServer(http.Dir("/var/www/swaggerui/")))
 	router.PathPrefix("/swaggerui/").Handler(sh)
+
+	//setup API
 	router.HandleFunc("/setup/sensor/{mac}", api.getSensorSetup).Methods("GET")
 	router.HandleFunc("/setup/sensor", api.setSensorSetup).Methods("POST")
+	router.HandleFunc("/setup/led/{mac}", api.getLedSetup).Methods("GET")
+	router.HandleFunc("/setup/led", api.setLedSetup).Methods("POST")
 
 	router.HandleFunc("/leds", api.getLeds).Methods("GET")
 	router.HandleFunc("/led/{mac}", api.getLed).Methods("GET")
