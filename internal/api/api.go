@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/energieip/common-led-go/pkg/driverled"
 	"github.com/energieip/common-sensor-go/pkg/driversensor"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
 	"github.com/gorilla/mux"
@@ -37,6 +38,12 @@ type ModelInfo struct {
 	Mac       string `json:"mac"` //device Mac address
 	Vendor    string `json:"vendor"`
 	URL       string `json:"url"`
+}
+
+//Status
+type Status struct {
+	Leds    []driverled.Led       `json:"leds"`
+	Sensors []driversensor.Sensor `json:"sensors"`
 }
 
 //InitAPI start API connection
@@ -174,11 +181,25 @@ func (api *API) webEvents(w http.ResponseWriter, r *http.Request) {
 			select {
 			case events := <-api.eventsAPI:
 				for eventType, event := range events {
+					var leds []driverled.Led
+					var sensors []driversensor.Sensor
+					// Convert Type
+					sensor, err := driversensor.ToSensor(event)
+					if err == nil && sensor != nil {
+						sensors = append(sensors, *sensor)
+					} else {
+						led, err := driverled.ToLed(event)
+						if err == nil && led != nil {
+							leds = append(leds, *led)
+						}
+					}
+					evt := make(map[string]Status)
+					evt[eventType] = Status{
+						Leds:    leds,
+						Sensors: sensors,
+					}
+
 					for client := range api.clients {
-						evt := make(map[string]interface{})
-						dev := make(map[string]interface{})
-						dev["Sensor"] = event
-						evt[eventType] = dev
 						if err := client.WriteJSON(evt); err != nil {
 							rlog.Error("Error writing in websocket" + err.Error())
 							client.Close()
@@ -209,11 +230,11 @@ func (api *API) swagger() {
 	//status API
 	router.HandleFunc("/status/sensor/{mac}", api.getSensorStatus).Methods("GET")
 	router.HandleFunc("/status/led/{mac}", api.getLedStatus).Methods("GET")
+	router.HandleFunc("/events", api.webEvents)
 
 	router.HandleFunc("/leds", api.getLeds).Methods("GET")
 	router.HandleFunc("/sensors", api.getSensors).Methods("GET")
 	router.HandleFunc("/sensor/{mac}", api.setSensor).Methods("POST")
 	router.HandleFunc("/modelInfo/{label}", api.getModelInfo).Methods("GET")
-	router.HandleFunc("/events", api.webEvents)
 	log.Fatal(http.ListenAndServe(":8888", router))
 }

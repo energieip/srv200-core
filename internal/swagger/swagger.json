@@ -340,8 +340,8 @@
                 "tags":[
                     "status"
                 ],
-                "summary": "Websocket for Sensor event Status",
-                "description": "pop sensor event",
+                "summary": "Websocket for Event Status",
+                "description": "pop event",
                 "operationId": "events",
                 "produces":[
                     "application/json"
@@ -349,7 +349,7 @@
                 "parameters":[],
                 "responses": {
                     "101": {
-                        "description": "successful operation",
+                        "description": "successfull operation",
                         "schema":{
                             "$ref": "#/definitions/Event"
                         }
@@ -383,7 +383,7 @@
                 }],
                 "responses": {
                     "200": {
-                        "description": "successful operation",
+                        "description": "successfull operation",
                         "schema":{
                             "$ref": "#/definitions/SensorStatus"
                         }
@@ -479,14 +479,14 @@
                 }
             }
         },
-        "/leds":{
+        "/status":{
             "get":{
                 "tags":[
                     "status"
                 ],
-                "summary": "Return LED Status",
-                "description": "Return the list of leds status with filter",
-                "operationId": "getLedsStatus",
+                "summary": "Return Complete Status",
+                "description": "Dump the Complete status with filter",
+                "operationId": "getStatus",
                 "produces":[
                     "application/json"
                 ],
@@ -502,7 +502,8 @@
                             "enum": [
                                 "all",
                                 "isConfigured",
-                                "group"
+                                "group",
+                                "type"
                             ],
                             "default": "all"
                         },
@@ -513,7 +514,7 @@
                     "200": {
                         "description": "successful operation",
                         "schema":{
-                            "$ref": "#/definitions/LedsStatus"
+                            "$ref": "#/definitions/Status"
                         }
                     },
                     "default": {
@@ -708,52 +709,19 @@
                 }
             }
         },
-        "SensorsStatus": {
-            "type": "object",
-            "required": [
-                "mac"
-            ],
-            "properties": {
-                "mac": {
-                    "type": "string",
-                    "description": "Sensor mac address"
-                },
-                "sensor": {
-                    "$ref": "#/definitions/SensorStatus"
-                }
-            }
-        },
         "Event": {
             "type": "object",
             "required": [
-                "eventType"
+                "eventType",
+                "status"
             ],
             "properties": {
                 "eventType": {
                     "type": "string",
                     "description": "event category add|update|remove"
                 },
-                "driverType": {
-                    "type": "string",
-                    "description": "driver category sensor|LED"
-                },
-                "sensor": {
+                "status": {
                     "$ref": "#/definitions/Status"
-                }
-            }
-        },
-        "LedsStatus": {
-            "type": "object",
-            "required": [
-                "mac"
-            ],
-            "properties": {
-                "mac": {
-                    "type": "string",
-                    "description": "LED mac address"
-                },
-                "led": {
-                    "$ref": "#/definitions/LedStatus"
                 }
             }
         },
@@ -870,115 +838,20 @@
         },
         "Status": {
             "type": "object",
-            "required": [
-                "mac"
-            ],
             "properties": {
-                "mac": {
-                    "type": "string",
-                    "description": "Mac address"
+                "leds": {
+                    "type": "array",
+                    "items":{
+                        "$ref": "#/definitions/LedStatus"
+                    },
+                    "description": "List of leds status"
                 },
-                "id": {
-                    "type": "string"
-                },
-                "ip": {
-                    "type": "string",
-                    "description": "IP address"
-                },
-                "group": {
-                    "type": "integer",
-                    "description": "Associate group"
-                },
-                "protocol": {
-                    "type": "string",
-                    "description": "communication protocol"
-                },
-                "topic": {
-                    "type": "string",
-                    "description": "communication topic"
-                },
-                "switchMac": {
-                    "type": "string",
-                    "description": "Associate switch mac address"
-                },
-                "isConfigured": {
-                    "type": "boolean",
-                    "description": "Is the device configured"
-                },
-                "softwareVersion": {
-                    "type": "number",
-                    "format": "float32",
-                    "description": "Software version"
-                },
-                "hardwareVersion": {
-                    "type": "string",
-                    "description": "Hardware version"
-                },
-                "isBleEnabled": {
-                    "type": "boolean",
-                    "description": "Is the bluetooth activate"
-                },
-                "temperature": {
-                    "type": "integer",
-                    "description": "Temperature"
-                },
-                "error": {
-                    "type": "integer",
-                    "description": "Error code value: 0 means no error"
-                },
-                "resetNumbers": {
-                    "type": "integer",
-                    "description": "Number of reset"
-                },
-                "initialSetupDate": {
-                    "type": "number",
-                    "format": "float64",
-                    "description": "First installation date"
-                },
-                "lastResetDate": {
-                    "type": "number",
-                    "format": "float64",
-                    "description": "Last reset date"
-                },
-                "brightness": {
-                    "type": "integer",
-                    "description": "Corrected Brightness in Lux"
-                },
-                "presence": {
-                    "type": "boolean",
-                    "description": "Presence"
-                },
-                "brigthnessCorrectionFactor": {
-                    "type": "integer",
-                    "description": "Brightness correction factor"
-                },
-                "thresoldPresence": {
-                    "type": "integer",
-                    "description": "Thresold presence"
-                },
-                "temperatureOffset": {
-                    "type": "integer",
-                    "description": "Temperature offset correcion"
-                },
-                "brigthnessRaw": {
-                    "type": "integer",
-                    "description": "Brigthness Raw value in Lux"
-                },
-                "lastMovement": {
-                    "type": "integer",
-                    "description": "Last Movement date"
-                },
-                "voltageInput": {
-                    "type": "integer",
-                    "description": "Input voltage"
-                },
-                "temperatureRaw": {
-                    "type": "integer",
-                    "description": "Temperature Raw value"
-                },
-                "friendlyName": {
-                    "type": "string",
-                    "description": "Sensor FriendlyName"
+                "sensors": {
+                    "type": "array",
+                    "items":{
+                        "$ref": "#/definitions/SensorStatus"
+                    },
+                    "description": "List of sensors status"
                 }
             }
         },
