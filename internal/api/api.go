@@ -233,6 +233,8 @@ func (api *API) swagger() {
 	router.HandleFunc("/setup/led", api.setLedSetup).Methods("POST")
 	router.HandleFunc("/setup/group/{groupID}", api.getGroupSetup).Methods("GET")
 	router.HandleFunc("/setup/group", api.setGroupSetup).Methods("POST")
+	router.HandleFunc("/setup/switch/{mac}", api.getSwitchSetup).Methods("GET")
+	router.HandleFunc("/setup/switch", api.setSwitchSetup).Methods("POST")
 
 	router.HandleFunc("/leds", api.getLeds).Methods("GET")
 	router.HandleFunc("/led/{mac}", api.getLed).Methods("GET")

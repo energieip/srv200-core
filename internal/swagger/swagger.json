@@ -261,6 +261,80 @@
                 }
             }
         },
+        "/setup/switch/{mac}":{
+            "get":{
+                "tags":[
+                    "setup"
+                ],
+                "summary": "Return Switch Setup configuration",
+                "description": "Return Switch Setup configuration",
+                "operationId": "getSwitchSetup",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "mac",
+                        "in": "path",
+                        "description": "Switch Mac address",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successfull operation",
+                        "schema":{
+                            "$ref": "#/definitions/SwitchSetup"
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/setup/switch":{
+            "post":{
+                "tags":[
+                    "setup"
+                ],
+                "summary": "Switch Setup configuration",
+                "description": "Switch Setup configuration",
+                "operationId": "setSwitchSetup",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "switch",
+                        "in": "body",
+                        "description": "Switch config",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/SwitchSetup"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successfull operation",
+                        "schema":{
+                            "$ref": "#/definitions/SwitchSetup"
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
         "/events":{
             "get":{
                 "tags":[
@@ -525,6 +599,30 @@
                 "thresoldHigh": {
                     "type": "integer",
                     "description": "Thresold high"
+                },
+                "friendlyName": {
+                    "type": "string",
+                    "description": "Sensor FriendlyName"
+                }
+            }
+        },
+        "SwitchSetup":{
+            "type": "object",
+            "required": [
+                "mac"
+            ],
+            "properties": {
+                "mac": {
+                    "type": "string",
+                    "description": "Sensor mac address"
+                },
+                "cluster": {
+                    "type": "integer",
+                    "description": "Associate Cluster number"
+                },
+                "ip": {
+                    "type": "string",
+                    "description": "Switch IP address"
                 },
                 "friendlyName": {
                     "type": "string",
