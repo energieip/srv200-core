@@ -166,7 +166,7 @@ func (api *API) setSensor(w http.ResponseWriter, req *http.Request) {
 func (api *API) webEvents(w http.ResponseWriter, r *http.Request) {
 	ws, err := api.upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		rlog.Error("Error when switchin in websocket " + err.Error())
+		rlog.Error("Error when switching in websocket " + err.Error())
 		return
 	}
 	api.clients[ws] = true
