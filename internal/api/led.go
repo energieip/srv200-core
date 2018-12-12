@@ -49,3 +49,16 @@ func (api *API) setLedSetup(w http.ResponseWriter, req *http.Request) {
 
 	api.readLedConfig(w, led.Mac)
 }
+
+func (api *API) getLedStatus(w http.ResponseWriter, req *http.Request) {
+	api.seDefaultHeader(w)
+	params := mux.Vars(req)
+	mac := params["mac"]
+	led := database.GetLedStatus(api.db, mac)
+	if led == nil {
+		api.sendError(w, APIErrorDeviceNotFound, "Device "+mac+" not found")
+		return
+	}
+	inrec, _ := json.MarshalIndent(led, "", "  ")
+	w.Write(inrec)
+}

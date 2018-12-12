@@ -30,7 +30,6 @@ func (api *API) getSensorSetup(w http.ResponseWriter, req *http.Request) {
 
 func (api *API) setSensorSetup(w http.ResponseWriter, req *http.Request) {
 	api.seDefaultHeader(w)
-
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Error reading request body")
@@ -48,4 +47,17 @@ func (api *API) setSensorSetup(w http.ResponseWriter, req *http.Request) {
 	database.SaveSensorConfig(api.db, sensor)
 
 	api.readSensorConfig(w, sensor.Mac)
+}
+
+func (api *API) getSensorStatus(w http.ResponseWriter, req *http.Request) {
+	api.seDefaultHeader(w)
+	params := mux.Vars(req)
+	mac := params["mac"]
+	sensor := database.GetSensorStatus(api.db, mac)
+	if sensor == nil {
+		api.sendError(w, APIErrorDeviceNotFound, "Device "+mac+" not found")
+		return
+	}
+	inrec, _ := json.MarshalIndent(sensor, "", "  ")
+	w.Write(inrec)
 }

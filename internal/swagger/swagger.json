@@ -363,7 +363,7 @@
                 }
             }
         },
-        "/sensor/{mac}": {
+        "/status/sensor/{mac}": {
             "get": {
                 "tags": [
                     "status"
@@ -395,7 +395,43 @@
                         }
                       }
                 }
-            },
+            }
+        },
+        "/status/led/{mac}":{
+            "get":{
+                "tags":[
+                    "status"
+                ],
+                "summary": "Return Led Status",
+                "description": "Return the given LED status",
+                "operationId": "getLedStatus",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[{
+                    "name": "mac",
+                    "in": "path",
+                    "description": "LED Mac address",
+                    "required": true,
+                    "type": "string"
+                }],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema":{
+                            "$ref": "#/definitions/LedStatus"
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                      }
+                }
+            }
+        },
+        "/sensor/{mac}": {
             "post": {
                 "tags": [
                     "config"
@@ -478,40 +514,6 @@
                         "description": "successful operation",
                         "schema":{
                             "$ref": "#/definitions/LedsStatus"
-                        }
-                    },
-                    "default": {
-                        "description": "unexpected error",
-                        "schema": {
-                          "$ref": "#/definitions/Error"
-                        }
-                      }
-                }
-            }
-        },
-        "/led/{mac}":{
-            "get":{
-                "tags":[
-                    "status"
-                ],
-                "summary": "Return Led Status",
-                "description": "Return the given LED status",
-                "operationId": "getLedStatus",
-                "produces":[
-                    "application/json"
-                ],
-                "parameters":[{
-                    "name": "mac",
-                    "in": "path",
-                    "description": "LED Mac address",
-                    "required": true,
-                    "type": "string"
-                }],
-                "responses": {
-                    "200": {
-                        "description": "successful operation",
-                        "schema":{
-                            "$ref": "#/definitions/LedStatus"
                         }
                     },
                     "default": {
@@ -765,9 +767,6 @@
                     "type": "string",
                     "description": "Sensor mac address"
                 },
-                "id": {
-                    "type": "string"
-                },
                 "ip": {
                     "type": "string",
                     "description": "Sensor IP address"
@@ -992,9 +991,6 @@
                 "mac": {
                     "type": "string",
                     "description": "LED mac address"
-                },
-                "id": {
-                    "type": "string"
                 },
                 "ip": {
                     "type": "string",

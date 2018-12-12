@@ -116,41 +116,11 @@ func (api *API) getModelInfo(w http.ResponseWriter, req *http.Request) {
 	w.Write(inrec)
 }
 
-func (api *API) getLed(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Type", "application/json")
-	params := mux.Vars(req)
-	led := database.GetLedStatus(api.db, params["mac"])
-	inrec, err := json.MarshalIndent(led, "", "  ")
-	if err != nil {
-		rlog.Error("Could not parse input format " + err.Error())
-		http.Error(w, "Error Parsing json",
-			http.StatusInternalServerError)
-		return
-	}
-	w.Write(inrec)
-}
-
 func (api *API) getSensors(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
 	sensors := database.GetSensorsStatus(api.db)
 	inrec, err := json.MarshalIndent(sensors, "", "  ")
-	if err != nil {
-		rlog.Error("Could not parse input format " + err.Error())
-		http.Error(w, "Error Parsing json",
-			http.StatusInternalServerError)
-		return
-	}
-	w.Write(inrec)
-}
-
-func (api *API) getSensor(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Type", "application/json")
-	params := mux.Vars(req)
-	sensor := database.GetSensorStatus(api.db, params["mac"])
-	inrec, err := json.MarshalIndent(sensor, "", "  ")
 	if err != nil {
 		rlog.Error("Could not parse input format " + err.Error())
 		http.Error(w, "Error Parsing json",
@@ -236,10 +206,12 @@ func (api *API) swagger() {
 	router.HandleFunc("/setup/switch/{mac}", api.getSwitchSetup).Methods("GET")
 	router.HandleFunc("/setup/switch", api.setSwitchSetup).Methods("POST")
 
+	//status API
+	router.HandleFunc("/status/sensor/{mac}", api.getSensorStatus).Methods("GET")
+	router.HandleFunc("/status/led/{mac}", api.getLedStatus).Methods("GET")
+
 	router.HandleFunc("/leds", api.getLeds).Methods("GET")
-	router.HandleFunc("/led/{mac}", api.getLed).Methods("GET")
 	router.HandleFunc("/sensors", api.getSensors).Methods("GET")
-	router.HandleFunc("/sensor/{mac}", api.getSensor).Methods("GET")
 	router.HandleFunc("/sensor/{mac}", api.setSensor).Methods("POST")
 	router.HandleFunc("/modelInfo/{label}", api.getModelInfo).Methods("GET")
 	router.HandleFunc("/events", api.webEvents)
