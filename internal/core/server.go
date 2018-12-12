@@ -38,6 +38,8 @@ type ServerConfig struct {
 	Sensors  map[string]driversensor.SensorSetup `json:"sensors"`
 	Groups   map[int]groupmodel.GroupConfig      `json:"groups"`
 	Services map[string]pkg.Service              `json:"services"`
+	Models   map[string]Model                    `json:"models"`
+	Projects map[string]Project                  `json:"projects"`
 }
 
 //ServerCmd server configuration

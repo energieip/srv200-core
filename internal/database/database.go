@@ -20,6 +20,8 @@ const (
 	GroupsTable   = "groups"
 	SwitchsTable  = "switchs"
 	ServicesTable = "services"
+	ModelsTable   = "models"
+	ProjectsTable = "projects"
 )
 
 type Database = database.DatabaseInterface
@@ -60,6 +62,8 @@ func ConnectDatabase(ip, port string) (*Database, error) {
 			tableCfg[GroupsTable] = group.GroupConfig{}
 			tableCfg[SwitchsTable] = core.SwitchSetup{}
 			tableCfg[ServicesTable] = pkg.Service{}
+			tableCfg[ModelsTable] = core.Model{}
+			tableCfg[ProjectsTable] = core.Project{}
 		} else {
 			tableCfg[LedsTable] = led.Led{}
 			tableCfg[SensorsTable] = sensor.Sensor{}

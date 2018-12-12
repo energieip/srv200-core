@@ -37,5 +37,17 @@ func SaveServerConfig(db Database, config core.ServerConfig) error {
 			issue = err
 		}
 	}
+	for _, model := range config.Models {
+		err := SaveModel(db, model)
+		if err != nil {
+			issue = err
+		}
+	}
+	for _, project := range config.Projects {
+		err := SaveProject(db, project)
+		if err != nil {
+			issue = err
+		}
+	}
 	return issue
 }

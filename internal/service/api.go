@@ -20,11 +20,49 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
+type ModelInfo struct {
+	Label     string `json:"label"` //cable label
+	ModelName string `json:"modelName"`
+	Mac       string `json:"mac"` //device Mac address
+	Vendor    string `json:"vendor"`
+	URL       string `json:"url"`
+}
+
 func (s *CoreService) getLeds(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
 	leds := database.GetLedsStatus(s.db)
 	inrec, err := json.MarshalIndent(leds, "", "  ")
+	if err != nil {
+		rlog.Error("Could not parse input format " + err.Error())
+		http.Error(w, "Error Parsing json",
+			http.StatusInternalServerError)
+		return
+	}
+	w.Write(inrec)
+}
+
+func (s *CoreService) getModelInfo(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(req)
+	label := params["label"]
+	project := database.GetProject(s.db, label)
+	if project == nil {
+		rlog.Error("Could not parse input format")
+		http.Error(w, "Error Parsing json",
+			http.StatusInternalServerError)
+		return
+	}
+	model := database.GetModel(s.db, project.ModelName)
+	info := ModelInfo{
+		Label:     label,
+		ModelName: model.Name,
+		Mac:       project.Mac,
+		Vendor:    model.Vendor,
+		URL:       model.URL,
+	}
+	inrec, err := json.MarshalIndent(info, "", "  ")
 	if err != nil {
 		rlog.Error("Could not parse input format " + err.Error())
 		http.Error(w, "Error Parsing json",
@@ -149,6 +187,7 @@ func (s *CoreService) swagger() {
 	router.HandleFunc("/sensors", s.getSensors).Methods("GET")
 	router.HandleFunc("/sensor/{mac}", s.getSensor).Methods("GET")
 	router.HandleFunc("/sensor/{mac}", s.setSensor).Methods("POST")
+	router.HandleFunc("/modelInfo/{label}", s.getModelInfo).Methods("GET")
 	router.HandleFunc("/events", s.webEvents)
 	log.Fatal(http.ListenAndServe(":8888", router))
 }
