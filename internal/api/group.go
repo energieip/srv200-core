@@ -55,3 +55,20 @@ func (api *API) setGroupSetup(w http.ResponseWriter, req *http.Request) {
 
 	api.readGroupConfig(w, gr.Group)
 }
+
+func (api *API) removeGroupSetup(w http.ResponseWriter, req *http.Request) {
+	api.seDefaultHeader(w)
+	params := mux.Vars(req)
+	grID := params["groupID"]
+	i, err := strconv.Atoi(grID)
+	if err != nil {
+		api.sendError(w, APIErrorDeviceNotFound, "Group "+grID+" not found")
+		return
+	}
+	res := database.RemoveGroupConfig(api.db, i)
+	if res != nil {
+		api.sendError(w, APIErrorDeviceNotFound, "Group "+grID+" not found")
+		return
+	}
+	w.Write([]byte(""))
+}

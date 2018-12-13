@@ -283,6 +283,37 @@
                         }
                     }
                 }
+            },
+            "delete":{
+                "tags":[
+                    "setup"
+                ],
+                "summary": "Remove Group Setup configuration",
+                "description": "Remove Group Setup configuration",
+                "operationId": "removeGroupSetup",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "groupID",
+                        "in": "path",
+                        "description": "Group Number",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successfull operation",
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
             }
         },
         "/setup/group":{

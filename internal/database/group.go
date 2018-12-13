@@ -26,6 +26,13 @@ func SaveGroupConfig(db Database, status group.GroupConfig) error {
 	return err
 }
 
+//RemoveGroupConfig remove group config in database
+func RemoveGroupConfig(db Database, grID int) error {
+	criteria := make(map[string]interface{})
+	criteria["Group"] = grID
+	return db.DeleteRecord(ConfigDB, GroupsTable, criteria)
+}
+
 //GetGroupConfig return the group configuration
 func GetGroupConfig(db Database, grID int) *group.GroupConfig {
 	criteria := make(map[string]interface{})
