@@ -2,9 +2,9 @@ package api
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/energieip/common-led-go/pkg/driverled"
 	"github.com/energieip/common-sensor-go/pkg/driversensor"
@@ -17,6 +17,10 @@ import (
 const (
 	APIErrorDeviceNotFound = 1
 	APIErrorBodyParsing    = 2
+
+	FilterTypeAll    = "all"
+	FilterTypeSensor = "sensor"
+	FilterTypeLed    = "led"
 )
 
 //APIError Message error code
@@ -79,23 +83,66 @@ func (api *API) sendError(w http.ResponseWriter, errorCode int, message string) 
 		http.StatusInternalServerError)
 }
 
-func (api *API) getLeds(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Type", "application/json")
-	leds := database.GetLedsStatus(api.db)
-	inrec, err := json.MarshalIndent(leds, "", "  ")
-	if err != nil {
-		rlog.Error("Could not parse input format " + err.Error())
-		http.Error(w, "Error Parsing json",
-			http.StatusInternalServerError)
-		return
+func (api *API) getStatus(w http.ResponseWriter, req *http.Request) {
+	api.seDefaultHeader(w)
+	var leds []driverled.Led
+	var sensors []driversensor.Sensor
+	var grID *int
+	var isConfig *bool
+	driverType := req.FormValue("type")
+	if driverType == "" {
+		driverType = FilterTypeAll
 	}
+
+	groupID := req.FormValue("groupID")
+	if groupID != "" {
+		i, err := strconv.Atoi(groupID)
+		if err == nil {
+			grID = &i
+		}
+	}
+
+	isConfigured := req.FormValue("isConfigured")
+	if isConfigured != "" {
+		b, err := strconv.ParseBool(isConfigured)
+		if err == nil {
+			isConfig = &b
+		}
+	}
+
+	if driverType == FilterTypeAll || driverType == FilterTypeLed {
+		lights := database.GetLedsStatus(api.db)
+		for _, led := range lights {
+			if grID == nil || *grID == led.Group {
+				if isConfig == nil || *isConfig == led.IsConfigured {
+					leds = append(leds, led)
+				}
+			}
+		}
+	}
+
+	if driverType == FilterTypeAll || driverType == FilterTypeSensor {
+		cells := database.GetSensorsStatus(api.db)
+		for _, sensor := range cells {
+			if grID == nil || *grID == sensor.Group {
+				if isConfig == nil || *isConfig == sensor.IsConfigured {
+					sensors = append(sensors, sensor)
+				}
+			}
+		}
+	}
+
+	status := Status{
+		Leds:    leds,
+		Sensors: sensors,
+	}
+
+	inrec, _ := json.MarshalIndent(status, "", "  ")
 	w.Write(inrec)
 }
 
 func (api *API) getModelInfo(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Type", "application/json")
+	api.seDefaultHeader(w)
 	params := mux.Vars(req)
 	label := params["label"]
 	project := database.GetProject(api.db, label)
@@ -121,51 +168,6 @@ func (api *API) getModelInfo(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	w.Write(inrec)
-}
-
-func (api *API) getSensors(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Type", "application/json")
-	sensors := database.GetSensorsStatus(api.db)
-	inrec, err := json.MarshalIndent(sensors, "", "  ")
-	if err != nil {
-		rlog.Error("Could not parse input format " + err.Error())
-		http.Error(w, "Error Parsing json",
-			http.StatusInternalServerError)
-		return
-	}
-	w.Write(inrec)
-}
-
-func (api *API) setSensor(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Type", "application/json")
-	if req.Method == "POST" {
-		body, err := ioutil.ReadAll(req.Body)
-		if err != nil {
-			http.Error(w, "Error reading request body",
-				http.StatusInternalServerError)
-			return
-		}
-		sensor := driversensor.Sensor{}
-		err = json.Unmarshal([]byte(body), &sensor)
-		if err != nil {
-			rlog.Error("Could not parse input format " + err.Error())
-			http.Error(w, "Error reading request body",
-				http.StatusInternalServerError)
-			return
-		}
-		config := driversensor.SensorSetup{
-			Mac:          sensor.Mac,
-			Group:        &sensor.Group,
-			FriendlyName: &sensor.FriendlyName,
-		}
-		rlog.Info("Try to save ", config)
-		database.SaveSensorConfig(api.db, config)
-		json.NewEncoder(w).Encode(nil)
-	} else {
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
-	}
 }
 
 func (api *API) webEvents(w http.ResponseWriter, r *http.Request) {
@@ -230,11 +232,11 @@ func (api *API) swagger() {
 	//status API
 	router.HandleFunc("/status/sensor/{mac}", api.getSensorStatus).Methods("GET")
 	router.HandleFunc("/status/led/{mac}", api.getLedStatus).Methods("GET")
+	router.HandleFunc("/status", api.getStatus).Methods("GET")
+
+	//event API
 	router.HandleFunc("/events", api.webEvents)
 
-	router.HandleFunc("/leds", api.getLeds).Methods("GET")
-	router.HandleFunc("/sensors", api.getSensors).Methods("GET")
-	router.HandleFunc("/sensor/{mac}", api.setSensor).Methods("POST")
 	router.HandleFunc("/modelInfo/{label}", api.getModelInfo).Methods("GET")
 	log.Fatal(http.ListenAndServe(":8888", router))
 }

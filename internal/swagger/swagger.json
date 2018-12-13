@@ -431,54 +431,6 @@
                 }
             }
         },
-        "/sensor/{mac}": {
-            "post": {
-                "tags": [
-                    "config"
-                ],
-                "summary": "Set Sensor Config",
-                "description": "Return the given sensor status",
-                "operationId": "setSensor",
-                "produces":[
-                    "application/json"
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "parameters": [
-                    {
-                        "name": "mac",
-                        "in": "path",
-                        "description": "Sensor Mac address",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "name": "sensor",
-                        "in": "body",
-                        "description": "Sensor config",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/SensorStatus"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "successful operation",
-                        "schema":{
-                            "$ref": "#/definitions/SensorStatus"
-                        }
-                    },
-                    "default": {
-                        "description": "unexpected error",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            }
-        },
         "/status":{
             "get":{
                 "tags":[
@@ -492,22 +444,25 @@
                 ],
                 "parameters":[
                     {
-                        "name": "status",
+                        "name": "isConfigured",
                         "in": "query",
-                        "description": "Status values that need to be considered for filter",
+                        "description": "Filter by isConfigured device",
                         "required": false,
-                        "type": "array",
-                        "items": {
-                            "type": "string",
-                            "enum": [
-                                "all",
-                                "isConfigured",
-                                "group",
-                                "type"
-                            ],
-                            "default": "all"
-                        },
-                        "collectionFormat": "multi"
+                        "type": "string"
+                    },
+                    {
+                        "name": "groupID",
+                        "in": "query",
+                        "description": "Filter by groupID",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "description": "Filter by driver type",
+                        "required": false,
+                        "type": "string"
                     }
                 ],
                 "responses": {
@@ -1006,6 +961,6 @@
                 "type": "string"
               }
             }
-          }
+        }
     }
 }
