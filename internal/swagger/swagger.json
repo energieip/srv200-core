@@ -564,6 +564,111 @@
                 }
             }
         },
+        "/project/model/{modelName}":{
+            "get":{
+                "tags":[
+                    "project"
+                ],
+                "summary": "Return model information",
+                "description": "Describe the model information",
+                "operationId": "getModelInfo",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "modelName",
+                        "in": "path",
+                        "description": "Ifc modelName value",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successfull operation",
+                        "schema":{
+                            "$ref": "#/definitions/ModelInfo"
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "delete":{
+                "tags":[
+                    "project"
+                ],
+                "summary": "Remove Model information",
+                "description": "Remove Model information",
+                "operationId": "removeModelInfo",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "modelName",
+                        "in": "path",
+                        "description": "Model name",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successfull operation"
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/project/model":{
+            "post":{
+                "tags":[
+                    "project"
+                ],
+                "summary": "Add/update model information",
+                "description": "Add/update model information",
+                "operationId": "setModelInfo",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "modelInfo",
+                        "in": "body",
+                        "description": "Model detail description",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ModelInfo"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successfull operation",
+                        "schema":{
+                            "$ref": "#/definitions/ModelInfo"
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
         "/events":{
             "get":{
                 "tags":[
@@ -814,6 +919,35 @@
                 "friendlyName": {
                     "type": "string",
                     "description": "Sensor FriendlyName"
+                }
+            }
+        },
+        "ModelInfo":{
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "Driver Model name"
+                },
+                "vendor": {
+                    "type": "string",
+                    "description": "vendor name"
+                },
+                "deviceType": {
+                    "type": "string",
+                    "enum": [
+                        "led",
+                        "sensor"
+                    ],
+                    "default": "led",
+                    "description": "device category LED|Sensor|etc."
+                },
+                "URL": {
+                    "type": "string",
+                    "description": "weblink to the technical description"
                 }
             }
         },
