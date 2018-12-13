@@ -230,6 +230,7 @@ func (api *API) swagger() {
 	router.HandleFunc("/setup/group/{groupID}", api.removeGroupSetup).Methods("DELETE")
 	router.HandleFunc("/setup/group", api.setGroupSetup).Methods("POST")
 	router.HandleFunc("/setup/switch/{mac}", api.getSwitchSetup).Methods("GET")
+	router.HandleFunc("/setup/switch/{mac}", api.removeSwitchSetup).Methods("DELETE")
 	router.HandleFunc("/setup/switch", api.setSwitchSetup).Methods("POST")
 
 	//status API

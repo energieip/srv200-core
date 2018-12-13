@@ -48,3 +48,15 @@ func (api *API) setSwitchSetup(w http.ResponseWriter, req *http.Request) {
 
 	api.readSwitchConfig(w, device.Mac)
 }
+
+func (api *API) removeSwitchSetup(w http.ResponseWriter, req *http.Request) {
+	api.seDefaultHeader(w)
+	params := mux.Vars(req)
+	mac := params["mac"]
+	res := database.RemoveSwitchConfig(api.db, mac)
+	if res != nil {
+		api.sendError(w, APIErrorDeviceNotFound, "Switch "+mac+" not found")
+		return
+	}
+	w.Write([]byte(""))
+}

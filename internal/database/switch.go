@@ -36,6 +36,13 @@ func SaveSwitchStatus(db Database, status sdevice.SwitchStatus) error {
 	return err
 }
 
+//RemoveSwitchConfig remove led config in database
+func RemoveSwitchConfig(db Database, mac string) error {
+	criteria := make(map[string]interface{})
+	criteria["Mac"] = mac
+	return db.DeleteRecord(ConfigDB, SwitchsTable, criteria)
+}
+
 //SaveSwitchConfig register switch config in database
 func SaveSwitchConfig(db Database, sw core.SwitchSetup) error {
 	var dbID string
