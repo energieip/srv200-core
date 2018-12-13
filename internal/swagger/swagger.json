@@ -16,7 +16,7 @@
     "tags":[
         {
             "name": "setup",
-            "description": "GTB configuration: setup config"
+            "description": "GTB configuration: drivers, switch, group setup config"
         },
         {
             "name": "project",
@@ -24,7 +24,7 @@
         },
         {
             "name": "event",
-            "description": "GTB configuration: project config"
+            "description": "GTB event"
         },
         {
             "name": "command",
