@@ -28,6 +28,13 @@ func SaveLedConfig(db Database, ledStatus led.LedSetup) error {
 	return err
 }
 
+//RemoveLedConfig remove led config in database
+func RemoveLedConfig(db Database, mac string) error {
+	criteria := make(map[string]interface{})
+	criteria["Mac"] = mac
+	return db.DeleteRecord(ConfigDB, LedsTable, criteria)
+}
+
 //GetLedConfig return the led configuration
 func GetLedConfig(db Database, mac string) *led.LedSetup {
 	criteria := make(map[string]interface{})

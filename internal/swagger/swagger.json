@@ -24,7 +24,7 @@
         },
         {
             "name": "event",
-            "description": "GTB event"
+            "description": "GTB events"
         },
         {
             "name": "command",
@@ -139,6 +139,37 @@
                         "schema":{
                             "$ref": "#/definitions/LedSetup"
                         }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "delete":{
+                "tags":[
+                    "setup"
+                ],
+                "summary": "Remove LED Setup configuration",
+                "description": "Remove LED Setup configuration. It means the driver LED will be blacklisted",
+                "operationId": "removeLedSetup",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "mac",
+                        "in": "path",
+                        "description": "Led Mac address",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successfull operation",
                     },
                     "default": {
                         "description": "unexpected error",
