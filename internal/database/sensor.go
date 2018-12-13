@@ -28,6 +28,13 @@ func SaveSensorConfig(db Database, sensorStatus sensor.SensorSetup) error {
 	return err
 }
 
+//RemoveSensorConfig remove sensor config in database
+func RemoveSensorConfig(db Database, mac string) error {
+	criteria := make(map[string]interface{})
+	criteria["Mac"] = mac
+	return db.DeleteRecord(ConfigDB, SensorsTable, criteria)
+}
+
 //GetSensorConfig return the sensor configuration
 func GetSensorConfig(db Database, mac string) *sensor.SensorSetup {
 	criteria := make(map[string]interface{})

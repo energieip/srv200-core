@@ -67,7 +67,6 @@ func (api *API) removeLedSetup(w http.ResponseWriter, req *http.Request) {
 	api.seDefaultHeader(w)
 	params := mux.Vars(req)
 	mac := params["mac"]
-	rlog.Info("=== todo try to remove ", mac)
 	res := database.RemoveLedConfig(api.db, mac)
 	if res != nil {
 		api.sendError(w, APIErrorDeviceNotFound, "Device "+mac+" not found")

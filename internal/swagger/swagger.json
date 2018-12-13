@@ -73,6 +73,37 @@
                         }
                     }
                 }
+            },
+            "delete":{
+                "tags":[
+                    "setup"
+                ],
+                "summary": "Remove Sensor Setup configuration",
+                "description": "Remove Sensor Setup configuration. It means the driver Sensor will be blacklisted",
+                "operationId": "removeSensorSetup",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "mac",
+                        "in": "path",
+                        "description": "Sensor Mac address",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successfull operation",
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
             }
         },        
         "/setup/sensor":{

@@ -61,3 +61,15 @@ func (api *API) getSensorStatus(w http.ResponseWriter, req *http.Request) {
 	inrec, _ := json.MarshalIndent(sensor, "", "  ")
 	w.Write(inrec)
 }
+
+func (api *API) removeSensorSetup(w http.ResponseWriter, req *http.Request) {
+	api.seDefaultHeader(w)
+	params := mux.Vars(req)
+	mac := params["mac"]
+	res := database.RemoveSensorConfig(api.db, mac)
+	if res != nil {
+		api.sendError(w, APIErrorDeviceNotFound, "Device "+mac+" not found")
+		return
+	}
+	w.Write([]byte(""))
+}
