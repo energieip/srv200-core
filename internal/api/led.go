@@ -23,14 +23,13 @@ func (api *API) readLedConfig(w http.ResponseWriter, mac string) {
 }
 
 func (api *API) getLedSetup(w http.ResponseWriter, req *http.Request) {
-	api.seDefaultHeader(w)
+	api.setDefaultHeader(w)
 	params := mux.Vars(req)
 	api.readLedConfig(w, params["mac"])
 }
 
 func (api *API) setLedSetup(w http.ResponseWriter, req *http.Request) {
-	api.seDefaultHeader(w)
-
+	api.setDefaultHeader(w)
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Error reading request body")
@@ -51,7 +50,7 @@ func (api *API) setLedSetup(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) getLedStatus(w http.ResponseWriter, req *http.Request) {
-	api.seDefaultHeader(w)
+	api.setDefaultHeader(w)
 	params := mux.Vars(req)
 	mac := params["mac"]
 	led := database.GetLedStatus(api.db, mac)
@@ -64,7 +63,7 @@ func (api *API) getLedStatus(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) removeLedSetup(w http.ResponseWriter, req *http.Request) {
-	api.seDefaultHeader(w)
+	api.setDefaultHeader(w)
 	params := mux.Vars(req)
 	mac := params["mac"]
 	res := database.RemoveLedConfig(api.db, mac)

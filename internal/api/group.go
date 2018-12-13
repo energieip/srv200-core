@@ -24,7 +24,7 @@ func (api *API) readGroupConfig(w http.ResponseWriter, grID int) {
 }
 
 func (api *API) getGroupSetup(w http.ResponseWriter, req *http.Request) {
-	api.seDefaultHeader(w)
+	api.setDefaultHeader(w)
 	params := mux.Vars(req)
 	grID, err := strconv.Atoi(params["groupID"])
 	if err != nil {
@@ -35,7 +35,7 @@ func (api *API) getGroupSetup(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) setGroupSetup(w http.ResponseWriter, req *http.Request) {
-	api.seDefaultHeader(w)
+	api.setDefaultHeader(w)
 
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
@@ -57,7 +57,7 @@ func (api *API) setGroupSetup(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) removeGroupSetup(w http.ResponseWriter, req *http.Request) {
-	api.seDefaultHeader(w)
+	api.setDefaultHeader(w)
 	params := mux.Vars(req)
 	grID := params["groupID"]
 	i, err := strconv.Atoi(grID)

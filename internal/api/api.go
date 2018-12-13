@@ -59,7 +59,7 @@ func InitAPI(db database.Database, eventsAPI chan map[string]interface{}) *API {
 	return &api
 }
 
-func (api *API) seDefaultHeader(w http.ResponseWriter) {
+func (api *API) setDefaultHeader(w http.ResponseWriter) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
 }
@@ -77,7 +77,7 @@ func (api *API) sendError(w http.ResponseWriter, errorCode int, message string) 
 }
 
 func (api *API) getStatus(w http.ResponseWriter, req *http.Request) {
-	api.seDefaultHeader(w)
+	api.setDefaultHeader(w)
 	var leds []driverled.Led
 	var sensors []driversensor.Sensor
 	var grID *int

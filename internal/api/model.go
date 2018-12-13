@@ -22,14 +22,14 @@ func (api *API) readModelInfo(w http.ResponseWriter, modelName string) {
 }
 
 func (api *API) getModelInfo(w http.ResponseWriter, req *http.Request) {
-	api.seDefaultHeader(w)
+	api.setDefaultHeader(w)
 	params := mux.Vars(req)
 	label := params["modelName"]
 	api.readModelInfo(w, label)
 }
 
 func (api *API) removeModelInfo(w http.ResponseWriter, req *http.Request) {
-	api.seDefaultHeader(w)
+	api.setDefaultHeader(w)
 	params := mux.Vars(req)
 	modelName := params["modelName"]
 	res := database.RemoveModel(api.db, modelName)
@@ -41,7 +41,7 @@ func (api *API) removeModelInfo(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) setModelInfo(w http.ResponseWriter, req *http.Request) {
-	api.seDefaultHeader(w)
+	api.setDefaultHeader(w)
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Error reading request body")

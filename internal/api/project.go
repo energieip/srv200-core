@@ -41,14 +41,14 @@ func (api *API) readIfcInfo(w http.ResponseWriter, label string) {
 }
 
 func (api *API) getIfcInfo(w http.ResponseWriter, req *http.Request) {
-	api.seDefaultHeader(w)
+	api.setDefaultHeader(w)
 	params := mux.Vars(req)
 	label := params["label"]
 	api.readIfcInfo(w, label)
 }
 
 func (api *API) removeIfcInfo(w http.ResponseWriter, req *http.Request) {
-	api.seDefaultHeader(w)
+	api.setDefaultHeader(w)
 	params := mux.Vars(req)
 	label := params["label"]
 	res := database.RemoveProject(api.db, label)
@@ -60,7 +60,7 @@ func (api *API) removeIfcInfo(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) setIfcInfo(w http.ResponseWriter, req *http.Request) {
-	api.seDefaultHeader(w)
+	api.setDefaultHeader(w)
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Error reading request body")
@@ -101,6 +101,7 @@ func (api *API) setIfcInfo(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) getIfc(w http.ResponseWriter, req *http.Request) {
+	api.setDefaultHeader(w)
 	var infos []IfcInfo
 	projects := database.GetProjects(api.db)
 	for _, project := range projects {

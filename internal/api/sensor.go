@@ -23,13 +23,13 @@ func (api *API) readSensorConfig(w http.ResponseWriter, mac string) {
 }
 
 func (api *API) getSensorSetup(w http.ResponseWriter, req *http.Request) {
-	api.seDefaultHeader(w)
+	api.setDefaultHeader(w)
 	params := mux.Vars(req)
 	api.readSensorConfig(w, params["mac"])
 }
 
 func (api *API) setSensorSetup(w http.ResponseWriter, req *http.Request) {
-	api.seDefaultHeader(w)
+	api.setDefaultHeader(w)
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Error reading request body")
@@ -50,7 +50,7 @@ func (api *API) setSensorSetup(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) getSensorStatus(w http.ResponseWriter, req *http.Request) {
-	api.seDefaultHeader(w)
+	api.setDefaultHeader(w)
 	params := mux.Vars(req)
 	mac := params["mac"]
 	sensor := database.GetSensorStatus(api.db, mac)
@@ -63,7 +63,7 @@ func (api *API) getSensorStatus(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) removeSensorSetup(w http.ResponseWriter, req *http.Request) {
-	api.seDefaultHeader(w)
+	api.setDefaultHeader(w)
 	params := mux.Vars(req)
 	mac := params["mac"]
 	res := database.RemoveSensorConfig(api.db, mac)
