@@ -669,6 +669,37 @@
                 }
             }
         },
+        "/project":{
+            "get":{
+                "tags":[
+                    "project"
+                ],
+                "summary": "Dump all ifc information",
+                "description": "Dump all the ifc information",
+                "operationId": "getIfc",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[],
+                "responses": {
+                    "200": {
+                        "description": "successfull operation",
+                        "schema":{
+                            "type": "array",
+                            "items":{
+                                "$ref": "#/definitions/IfcInfo"
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
         "/events":{
             "get":{
                 "tags":[

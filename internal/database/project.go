@@ -46,3 +46,20 @@ func GetProject(db Database, label string) *core.Project {
 	}
 	return project
 }
+
+//GetProjects return the project configuration
+func GetProjects(db Database) []core.Project {
+	var projects []core.Project
+	stored, err := db.FetchAllRecords(ConfigDB, ProjectsTable)
+	if err != nil || stored == nil {
+		return nil
+	}
+	for _, st := range stored {
+		project, err := core.ToProject(st)
+		if err != nil || project == nil {
+			continue
+		}
+		projects = append(projects, *project)
+	}
+	return projects
+}

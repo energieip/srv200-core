@@ -212,6 +212,7 @@ func (api *API) swagger() {
 	router.HandleFunc("/project/model/{modelName}", api.getModelInfo).Methods("GET")
 	router.HandleFunc("/project/model/{modelName}", api.removeModelInfo).Methods("DELETE")
 	router.HandleFunc("/project/model", api.setModelInfo).Methods("POST")
+	router.HandleFunc("/project", api.getIfc).Methods("GET")
 
 	log.Fatal(http.ListenAndServe(":8888", router))
 }

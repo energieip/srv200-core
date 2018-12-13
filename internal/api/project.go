@@ -99,3 +99,22 @@ func (api *API) setIfcInfo(w http.ResponseWriter, req *http.Request) {
 	}
 	api.readIfcInfo(w, ifcInfo.Label)
 }
+
+func (api *API) getIfc(w http.ResponseWriter, req *http.Request) {
+	var infos []IfcInfo
+	projects := database.GetProjects(api.db)
+	for _, project := range projects {
+		model := database.GetModel(api.db, project.ModelName)
+		info := IfcInfo{
+			Label:      project.Label,
+			ModelName:  model.Name,
+			Mac:        project.Mac,
+			Vendor:     model.Vendor,
+			URL:        model.URL,
+			DeviceType: model.DeviceType,
+		}
+		infos = append(infos, info)
+	}
+	inrec, _ := json.MarshalIndent(infos, "", "  ")
+	w.Write(inrec)
+}
