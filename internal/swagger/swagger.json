@@ -839,6 +839,15 @@
                     "type": "string",
                     "description": "vendor name"
                 },
+                "deviceType": {
+                    "type": "string",
+                    "enum": [
+                        "led",
+                        "sensor"
+                    ],
+                    "default": "led",
+                    "description": "device category LED|Sensor|etc."
+                },
                 "URL": {
                     "type": "string",
                     "description": "weblink to the technical description"

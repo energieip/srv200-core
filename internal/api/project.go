@@ -13,11 +13,12 @@ import (
 
 //IfcInfo ifc component description
 type IfcInfo struct {
-	Label     string `json:"label"` //cable label
-	ModelName string `json:"modelName"`
-	Mac       string `json:"mac"` //device Mac address
-	Vendor    string `json:"vendor"`
-	URL       string `json:"url"`
+	Label      string `json:"label"` //cable label
+	ModelName  string `json:"modelName"`
+	Mac        string `json:"mac"` //device Mac address
+	Vendor     string `json:"vendor"`
+	URL        string `json:"url"`
+	DeviceType string `json:"deviceType"`
 }
 
 func (api *API) readIfcInfo(w http.ResponseWriter, label string) {
@@ -28,11 +29,12 @@ func (api *API) readIfcInfo(w http.ResponseWriter, label string) {
 	}
 	model := database.GetModel(api.db, project.ModelName)
 	info := IfcInfo{
-		Label:     label,
-		ModelName: model.Name,
-		Mac:       project.Mac,
-		Vendor:    model.Vendor,
-		URL:       model.URL,
+		Label:      label,
+		ModelName:  model.Name,
+		Mac:        project.Mac,
+		Vendor:     model.Vendor,
+		URL:        model.URL,
+		DeviceType: model.DeviceType,
 	}
 	inrec, _ := json.MarshalIndent(info, "", "  ")
 	w.Write(inrec)
@@ -49,12 +51,7 @@ func (api *API) removeIfcInfo(w http.ResponseWriter, req *http.Request) {
 	api.seDefaultHeader(w)
 	params := mux.Vars(req)
 	label := params["label"]
-	res := database.RemoveModel(api.db, label)
-	if res != nil {
-		api.sendError(w, APIErrorDeviceNotFound, "Device "+label+" not found")
-		return
-	}
-	res = database.RemoveProject(api.db, label)
+	res := database.RemoveProject(api.db, label)
 	if res != nil {
 		api.sendError(w, APIErrorDeviceNotFound, "Device "+label+" not found")
 		return
@@ -79,9 +76,10 @@ func (api *API) setIfcInfo(w http.ResponseWriter, req *http.Request) {
 
 	rlog.Info("Try to save ", ifcInfo)
 	model := core.Model{
-		Name:   ifcInfo.ModelName,
-		Vendor: ifcInfo.Vendor,
-		URL:    ifcInfo.URL,
+		Name:       ifcInfo.ModelName,
+		Vendor:     ifcInfo.Vendor,
+		URL:        ifcInfo.URL,
+		DeviceType: ifcInfo.DeviceType,
 	}
 	err = database.SaveModel(api.db, model)
 	if err != nil {
