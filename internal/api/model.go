@@ -56,5 +56,6 @@ func (api *API) setModelInfo(w http.ResponseWriter, req *http.Request) {
 	}
 
 	rlog.Info("Try to save ", model)
-	api.readIfcInfo(w, model.Name)
+	database.SaveModel(api.db, model)
+	api.readModelInfo(w, model.Name)
 }

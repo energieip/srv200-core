@@ -26,9 +26,9 @@ func SaveModel(db Database, m core.Model) error {
 }
 
 //RemoveModel remove ifc config in database
-func RemoveModel(db Database, label string) error {
+func RemoveModel(db Database, name string) error {
 	criteria := make(map[string]interface{})
-	criteria["Label"] = label
+	criteria["Name"] = name
 	return db.DeleteRecord(ConfigDB, ModelsTable, criteria)
 }
 
