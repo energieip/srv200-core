@@ -17,6 +17,7 @@ import (
 const (
 	APIErrorDeviceNotFound = 1
 	APIErrorBodyParsing    = 2
+	APIErrorDatabase       = 3
 
 	FilterTypeAll    = "all"
 	FilterTypeSensor = "sensor"
@@ -34,14 +35,6 @@ type API struct {
 	upgrader  websocket.Upgrader
 	db        database.Database
 	eventsAPI chan map[string]interface{}
-}
-
-type ModelInfo struct {
-	Label     string `json:"label"` //cable label
-	ModelName string `json:"modelName"`
-	Mac       string `json:"mac"` //device Mac address
-	Vendor    string `json:"vendor"`
-	URL       string `json:"url"`
 }
 
 //Status
@@ -141,35 +134,6 @@ func (api *API) getStatus(w http.ResponseWriter, req *http.Request) {
 	w.Write(inrec)
 }
 
-func (api *API) getModelInfo(w http.ResponseWriter, req *http.Request) {
-	api.seDefaultHeader(w)
-	params := mux.Vars(req)
-	label := params["label"]
-	project := database.GetProject(api.db, label)
-	if project == nil {
-		rlog.Error("Could not parse input format")
-		http.Error(w, "Error Parsing json",
-			http.StatusInternalServerError)
-		return
-	}
-	model := database.GetModel(api.db, project.ModelName)
-	info := ModelInfo{
-		Label:     label,
-		ModelName: model.Name,
-		Mac:       project.Mac,
-		Vendor:    model.Vendor,
-		URL:       model.URL,
-	}
-	inrec, err := json.MarshalIndent(info, "", "  ")
-	if err != nil {
-		rlog.Error("Could not parse input format " + err.Error())
-		http.Error(w, "Error Parsing json",
-			http.StatusInternalServerError)
-		return
-	}
-	w.Write(inrec)
-}
-
 func (api *API) webEvents(w http.ResponseWriter, r *http.Request) {
 	ws, err := api.upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -241,6 +205,10 @@ func (api *API) swagger() {
 	//events API
 	router.HandleFunc("/events", api.webEvents)
 
-	router.HandleFunc("/modelInfo/{label}", api.getModelInfo).Methods("GET")
+	//project API
+	router.HandleFunc("/project/ifcInfo/{label}", api.getIfcInfo).Methods("GET")
+	router.HandleFunc("/project/ifcInfo/{label}", api.removeIfcInfo).Methods("DELETE")
+	router.HandleFunc("/project/ifcInfo", api.setIfcInfo).Methods("POST")
+
 	log.Fatal(http.ListenAndServe(":8888", router))
 }

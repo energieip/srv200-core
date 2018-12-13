@@ -459,6 +459,111 @@
                 }
             }
         },
+        "/project/ifcInfo/{label}":{
+            "get":{
+                "tags":[
+                    "project"
+                ],
+                "summary": "Return ifc information",
+                "description": "Describe the ifc information",
+                "operationId": "getIfcInfo",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "label",
+                        "in": "path",
+                        "description": "Ifc label value",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successfull operation",
+                        "schema":{
+                            "$ref": "#/definitions/IfcInfo"
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "delete":{
+                "tags":[
+                    "project"
+                ],
+                "summary": "Remove Ifc Info description",
+                "description": "Remove Ifc information",
+                "operationId": "removeIfcInfo",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "label",
+                        "in": "path",
+                        "description": "Ifc label value",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successfull operation"
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/project/ifcInfo":{
+            "post":{
+                "tags":[
+                    "project"
+                ],
+                "summary": "Add/update Ifc information",
+                "description": "Add/update Ifc information",
+                "operationId": "setIfcInfo",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "ifcInfo",
+                        "in": "body",
+                        "description": "ifc detail description",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/IfcInfo"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successfull operation",
+                        "schema":{
+                            "$ref": "#/definitions/IfcInfo"
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
         "/events":{
             "get":{
                 "tags":[
@@ -712,6 +817,34 @@
                 }
             }
         },
+        "IfcInfo":{
+            "type": "object",
+            "required": [
+                "label"
+            ],
+            "properties": {
+                "label": {
+                    "type": "string",
+                    "description": "label name available in the IFC for identifying the element"
+                },
+                "modelName": {
+                    "type": "string",
+                    "description": "Model name"
+                },
+                "mac": {
+                    "type": "string",
+                    "description": "device mac address"
+                },
+                "vendor": {
+                    "type": "string",
+                    "description": "vendor name"
+                },
+                "URL": {
+                    "type": "string",
+                    "description": "weblink to the technical description"
+                }
+            }
+        },
         "GroupRule":{
             "type": "object",
             "properties": {
@@ -719,7 +852,7 @@
                     "type": "integer",
                     "description": "Brigthness in Lux"
                 },
-                "Presence": {
+                "presence": {
                     "type": "integer",
                     "description": "Presence in Second"
                 }

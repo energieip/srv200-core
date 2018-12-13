@@ -25,6 +25,13 @@ func SaveProject(db Database, m core.Project) error {
 	return err
 }
 
+//RemoveProject remove project entry in database
+func RemoveProject(db Database, label string) error {
+	criteria := make(map[string]interface{})
+	criteria["Label"] = label
+	return db.DeleteRecord(ConfigDB, ProjectsTable, criteria)
+}
+
 //GetProject return the project configuration
 func GetProject(db Database, label string) *core.Project {
 	criteria := make(map[string]interface{})

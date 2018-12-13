@@ -25,6 +25,13 @@ func SaveModel(db Database, m core.Model) error {
 	return err
 }
 
+//RemoveModel remove ifc config in database
+func RemoveModel(db Database, label string) error {
+	criteria := make(map[string]interface{})
+	criteria["Label"] = label
+	return db.DeleteRecord(ConfigDB, ModelsTable, criteria)
+}
+
 //GetModel return the led configuration
 func GetModel(db Database, name string) *core.Model {
 	criteria := make(map[string]interface{})
