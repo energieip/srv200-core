@@ -1176,6 +1176,16 @@
                         "items":{
                             "type": "string"
                         }
+                    },
+                    {
+                        "name": "labels",
+                        "in": "query",
+                        "description": "Filter by IFC label. By default: all",
+                        "required": false,
+                        "type": "array",
+                        "items":{
+                            "type": "string"
+                        }
                     }
                 ],
                 "responses": {

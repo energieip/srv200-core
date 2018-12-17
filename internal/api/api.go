@@ -173,6 +173,7 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 	withIfc := false
 	withStatus := false
 	macs := make(map[string]bool)
+	labels := make(map[string]bool)
 	filterByMac := false
 	MacsParam := req.FormValue("macs")
 	if MacsParam != "" {
@@ -181,6 +182,15 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 		for _, v := range tempMac {
 			macs[v] = true
 			filterByMac = true
+		}
+	}
+
+	filterByLabel := false
+	LabelsParam := req.FormValue("labels")
+	if LabelsParam != "" {
+		for _, v := range strings.Split(LabelsParam, ",") {
+			labels[v] = true
+			filterByLabel = true
 		}
 	}
 
@@ -225,8 +235,8 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 			light.Config = &config
 
 		}
+		project := database.GetProjectByMac(api.db, led.Mac)
 		if withIfc {
-			project := database.GetProjectByMac(api.db, led.Mac)
 			if project != nil {
 				model := database.GetModel(api.db, project.ModelName)
 				info := IfcInfo{
@@ -238,6 +248,14 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 					DeviceType: model.DeviceType,
 				}
 				light.Ifc = &info
+			}
+		}
+		if filterByLabel {
+			if project == nil {
+				continue
+			}
+			if _, ok := labels[project.Label]; !ok {
+				continue
 			}
 		}
 		if light.Config == nil && light.Ifc == nil && light.Status == nil {
@@ -262,8 +280,8 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 			config, _ := cellsConfig[sensor.Mac]
 			cell.Config = &config
 		}
+		project := database.GetProjectByMac(api.db, sensor.Mac)
 		if withIfc {
-			project := database.GetProjectByMac(api.db, sensor.Mac)
 			if project != nil {
 				model := database.GetModel(api.db, project.ModelName)
 				info := IfcInfo{
@@ -275,6 +293,14 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 					DeviceType: model.DeviceType,
 				}
 				cell.Ifc = &info
+			}
+		}
+		if filterByLabel {
+			if project == nil {
+				continue
+			}
+			if _, ok := labels[project.Label]; !ok {
+				continue
 			}
 		}
 		if cell.Config == nil && cell.Ifc == nil && cell.Status == nil {
