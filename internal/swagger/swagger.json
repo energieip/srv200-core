@@ -1431,9 +1431,9 @@
                     "type": "boolean",
                     "description": "Automatic mode"
                 },
-                "setPoint": {
-                    "type": "string",
-                    "description": "Set point value in percentage"
+                "setpoint": {
+                    "type": "integer",
+                    "description": "Setpoint value in percentage"
                 }
             }
         },
