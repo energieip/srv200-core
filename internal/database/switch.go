@@ -36,6 +36,33 @@ func SaveSwitchStatus(db Database, status sdevice.SwitchStatus) error {
 	return err
 }
 
+//UpdateSwitchConfig update server config to database
+func UpdateSwitchConfig(db Database, config core.SwitchConfig) error {
+	criteria := make(map[string]interface{})
+	criteria["Mac"] = config.Mac
+	stored, err := db.GetRecord(ConfigDB, SwitchsTable, criteria)
+	if err != nil || stored == nil {
+		return NewError("Switch " + config.Mac + "not found")
+	}
+	m := stored.(map[string]interface{})
+	id, ok := m["id"]
+	if !ok {
+		id, ok = m["ID"]
+	}
+	if !ok {
+		return NewError("Switch " + config.Mac + "not found")
+	}
+	dbID := id.(string)
+
+	setup, err := core.ToSwitchConfig(stored)
+	if err != nil || stored == nil {
+		return NewError("Switch " + config.Mac + "not found")
+	}
+
+	setup.FriendlyName = config.FriendlyName
+	return db.UpdateRecord(ConfigDB, SwitchsTable, dbID, setup)
+}
+
 //RemoveSwitchConfig remove led config in database
 func RemoveSwitchConfig(db Database, mac string) error {
 	criteria := make(map[string]interface{})

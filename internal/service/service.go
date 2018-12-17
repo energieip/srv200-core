@@ -3,6 +3,7 @@ package service
 import (
 	"os"
 
+	"github.com/energieip/common-group-go/pkg/groupmodel"
 	"github.com/energieip/common-led-go/pkg/driverled"
 	"github.com/energieip/common-sensor-go/pkg/driversensor"
 	pkg "github.com/energieip/common-service-go/pkg/service"
@@ -272,6 +273,18 @@ func (s *CoreService) updateLedCfg(config interface{}) {
 	//TODO send order to switch
 }
 
+func (s *CoreService) updateGroupCfg(config interface{}) {
+	cfg, _ := groupmodel.ToGroupConfig(config)
+	database.UpdateGroupConfig(s.db, *cfg)
+	//TODO send order to switch
+}
+
+func (s *CoreService) updateSwitchCfg(config interface{}) {
+	cfg, _ := core.ToSwitchConfig(config)
+	database.UpdateSwitchConfig(s.db, *cfg)
+	//TODO send order to switch
+}
+
 func (s *CoreService) updateSensorCfg(config interface{}) {
 	cfg, _ := driversensor.ToSensorConf(config)
 	database.UpdateSensorConfig(s.db, *cfg)
@@ -288,6 +301,10 @@ func (s *CoreService) readAPIEvents() {
 					s.updateLedCfg(event)
 				case "sensor":
 					s.updateSensorCfg(event)
+				case "group":
+					s.updateGroupCfg(event)
+				case "switch":
+					s.updateSwitchCfg(event)
 				}
 			}
 		}

@@ -533,6 +533,76 @@
                 }
             }
         },
+        "/config/group":{
+            "post":{
+                "tags":[
+                    "config"
+                ],
+                "summary": "Group runtime configuration",
+                "description": "Group runtime configuration",
+                "operationId": "setGroupConfig",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "group",
+                        "in": "body",
+                        "description": "Group config",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/GroupConfig"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "sucessful operation"
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/config/switch":{
+            "post":{
+                "tags":[
+                    "config"
+                ],
+                "summary": "Switch runtime configuration",
+                "description": "Switch runtime configuration",
+                "operationId": "setSwitchConfig",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "switch",
+                        "in": "body",
+                        "description": "Switch config",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/SwitchConfig"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "sucessful operation"
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
         "/project/ifcInfo/{label}":{
             "get":{
                 "tags":[

@@ -49,6 +49,26 @@ func (api *API) setSwitchSetup(w http.ResponseWriter, req *http.Request) {
 	api.readSwitchConfig(w, device.Mac)
 }
 
+func (api *API) setSwitchConfig(w http.ResponseWriter, req *http.Request) {
+	api.setDefaultHeader(w)
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		api.sendError(w, APIErrorBodyParsing, "Error reading request body")
+		return
+	}
+
+	device := core.SwitchConfig{}
+	err = json.Unmarshal([]byte(body), &device)
+	if err != nil {
+		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error())
+		return
+	}
+	event := make(map[string]interface{})
+	event["switch"] = device
+	api.EventsToBackend <- event
+	w.Write([]byte(""))
+}
+
 func (api *API) removeSwitchSetup(w http.ResponseWriter, req *http.Request) {
 	api.setDefaultHeader(w)
 	params := mux.Vars(req)

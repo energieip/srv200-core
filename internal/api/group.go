@@ -56,6 +56,26 @@ func (api *API) setGroupSetup(w http.ResponseWriter, req *http.Request) {
 	api.readGroupConfig(w, gr.Group)
 }
 
+func (api *API) setGroupConfig(w http.ResponseWriter, req *http.Request) {
+	api.setDefaultHeader(w)
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		api.sendError(w, APIErrorBodyParsing, "Error reading request body")
+		return
+	}
+
+	gr := groupmodel.GroupConfig{}
+	err = json.Unmarshal([]byte(body), &gr)
+	if err != nil {
+		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error())
+		return
+	}
+	event := make(map[string]interface{})
+	event["group"] = gr
+	api.EventsToBackend <- event
+	w.Write([]byte(""))
+}
+
 func (api *API) removeGroupSetup(w http.ResponseWriter, req *http.Request) {
 	api.setDefaultHeader(w)
 	params := mux.Vars(req)

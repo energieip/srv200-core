@@ -17,6 +17,15 @@ type SwitchSetup struct {
 	Cluster      int    `json:"cluster"`
 }
 
+//SwitchConfig content
+type SwitchConfig struct {
+	Mac          string `json:"mac"`
+	FriendlyName string `json:"friendlyName"`
+	IP           string `json:"ip"`
+	Cluster      int    `json:"cluster"`
+	IsConfigured bool   `json:"isConfigured"`
+}
+
 //SwitchCmd content
 type SwitchCmd struct {
 	FriendlyName *string `json:"friendlyName"`
@@ -68,9 +77,20 @@ func (sw SwitchSetup) ToJSON() (string, error) {
 	return string(inrec[:]), err
 }
 
-//ToSwitchSetup convert map interface to Led object
+//ToSwitchSetup convert map interface to SwitchSetup object
 func ToSwitchSetup(val interface{}) (*SwitchSetup, error) {
 	var sw SwitchSetup
+	inrec, err := json.Marshal(val)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(inrec, &sw)
+	return &sw, err
+}
+
+//ToSwitchConfig convert map interface to SwitchConfig object
+func ToSwitchConfig(val interface{}) (*SwitchConfig, error) {
+	var sw SwitchConfig
 	inrec, err := json.Marshal(val)
 	if err != nil {
 		return nil, err

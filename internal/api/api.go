@@ -202,6 +202,8 @@ func (api *API) swagger() {
 	//config API
 	router.HandleFunc("/config/led", api.setLedConfig).Methods("POST")
 	router.HandleFunc("/config/sensor", api.setSensorConfig).Methods("POST")
+	router.HandleFunc("/config/group", api.setGroupConfig).Methods("POST")
+	router.HandleFunc("/config/switch", api.setSwitchConfig).Methods("POST")
 
 	//status API
 	router.HandleFunc("/status/sensor/{mac}", api.getSensorStatus).Methods("GET")

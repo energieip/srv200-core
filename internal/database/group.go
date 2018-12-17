@@ -1,6 +1,8 @@
 package database
 
-import group "github.com/energieip/common-group-go/pkg/groupmodel"
+import (
+	group "github.com/energieip/common-group-go/pkg/groupmodel"
+)
 
 //SaveGroupConfig dump group config in database
 func SaveGroupConfig(db Database, status group.GroupConfig) error {
@@ -46,6 +48,43 @@ func GetGroupConfig(db Database, grID int) *group.GroupConfig {
 		return nil
 	}
 	return gr
+}
+
+//UpdateGroupConfig update led config in database
+func UpdateGroupConfig(db Database, config group.GroupConfig) error {
+	criteria := make(map[string]interface{})
+	criteria["Group"] = config.Group
+	stored, err := db.GetRecord(ConfigDB, GroupsTable, criteria)
+	if err != nil || stored == nil {
+		return NewError("Group " + string(config.Group) + "not found")
+	}
+	m := stored.(map[string]interface{})
+	id, ok := m["id"]
+	if !ok {
+		id, ok = m["ID"]
+	}
+	if !ok {
+		return NewError("Group " + string(config.Group) + "not found")
+	}
+	dbID := id.(string)
+
+	setup, err := group.ToGroupConfig(stored)
+	if err != nil || stored == nil {
+		return NewError("Group " + string(config.Group) + "not found")
+	}
+
+	if config.Leds != nil {
+		setup.Leds = config.Leds
+	}
+
+	if config.Sensors != nil {
+		setup.Sensors = config.Sensors
+	}
+
+	if config.FriendlyName != nil {
+		setup.FriendlyName = config.FriendlyName
+	}
+	return db.UpdateRecord(ConfigDB, GroupsTable, dbID, setup)
 }
 
 //GetGroupConfigs get group Config
