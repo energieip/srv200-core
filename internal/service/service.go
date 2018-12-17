@@ -30,12 +30,14 @@ const (
 
 //CoreService content
 type CoreService struct {
-	server      network.ServerNetwork //Remote server
-	db          database.Database
-	mac         string //Switch mac address
-	events      chan string
-	installMode bool
-	eventsAPI   chan map[string]interface{}
+	server          network.ServerNetwork //Remote server
+	db              database.Database
+	mac             string //Switch mac address
+	events          chan string
+	installMode     bool
+	eventsAPI       chan map[string]interface{}
+	eventsToBackend chan map[string]interface{}
+	api             *api.API
 }
 
 //Initialize service
@@ -74,7 +76,9 @@ func (s *CoreService) Initialize(confFile string) error {
 		rlog.Error("Cannot connect to drivers broker " + conf.NetworkBroker.IP + " error: " + err.Error())
 		return err
 	}
-	api.InitAPI(s.db, s.eventsAPI)
+	web := api.InitAPI(s.db, s.eventsAPI)
+	s.api = web
+
 	rlog.Info("ServerCore service started")
 	return nil
 }
@@ -262,8 +266,37 @@ func (s *CoreService) registerConfig(config core.ServerConfig) {
 	database.SaveServerConfig(s.db, config)
 }
 
+func (s *CoreService) updateLedCfg(config interface{}) {
+	cfg, _ := driverled.ToLedConf(config)
+	database.UpdateLedConfig(s.db, *cfg)
+	//TODO send order to switch
+}
+
+func (s *CoreService) updateSensorCfg(config interface{}) {
+	cfg, _ := driversensor.ToSensorConf(config)
+	database.UpdateSensorConfig(s.db, *cfg)
+	//TODO send order to switch
+}
+
+func (s *CoreService) readAPIEvents() {
+	for {
+		select {
+		case apiEvents := <-s.api.EventsToBackend:
+			for eventType, event := range apiEvents {
+				switch eventType {
+				case "led":
+					s.updateLedCfg(event)
+				case "sensor":
+					s.updateSensorCfg(event)
+				}
+			}
+		}
+	}
+}
+
 //Run service mainloop
 func (s *CoreService) Run() error {
+	go s.readAPIEvents()
 	for {
 		select {
 		case serverEvents := <-s.server.Events:

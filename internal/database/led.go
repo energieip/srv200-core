@@ -50,6 +50,48 @@ func GetLedConfig(db Database, mac string) *led.LedSetup {
 	return light
 }
 
+//UpdateLedConfig update led config in database
+func UpdateLedConfig(db Database, config led.LedConf) error {
+	criteria := make(map[string]interface{})
+	criteria["Mac"] = config.Mac
+	stored, err := db.GetRecord(ConfigDB, LedsTable, criteria)
+	if err != nil || stored == nil {
+		return NewError("Device " + config.Mac + "not found")
+	}
+	m := stored.(map[string]interface{})
+	id, ok := m["id"]
+	if !ok {
+		id, ok = m["ID"]
+	}
+	if !ok {
+		return NewError("Device " + config.Mac + "not found")
+	}
+	dbID := id.(string)
+
+	setup, err := led.ToLedSetup(stored)
+	if err != nil || stored == nil {
+		return NewError("Device " + config.Mac + "not found")
+	}
+
+	if config.ThresoldHigh != nil {
+		setup.ThresoldHigh = config.ThresoldHigh
+	}
+
+	if config.FriendlyName != nil {
+		setup.FriendlyName = config.FriendlyName
+	}
+
+	if config.Group != nil {
+		setup.Group = config.Group
+	}
+
+	if config.IsBleEnabled != nil {
+		setup.IsBleEnabled = config.IsBleEnabled
+	}
+
+	return db.UpdateRecord(ConfigDB, LedsTable, dbID, setup)
+}
+
 //SaveLedStatus dump led status in database
 func SaveLedStatus(db Database, ledStatus led.Led) error {
 	var dbID string

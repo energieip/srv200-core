@@ -16,7 +16,11 @@
     "tags":[
         {
             "name": "setup",
-            "description": "GTB configuration: drivers, switch, group setup config"
+            "description": "GTB configuration: drivers, switch, group initial setup config"
+        },
+        {
+            "name": "config",
+            "description": "GTB configuration: drivers, switch, group runtime config"
         },
         {
             "name": "project",
@@ -61,7 +65,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "successfull operation",
+                        "description": "sucessful operation",
                         "schema":{
                             "$ref": "#/definitions/SensorSetup"
                         }
@@ -95,7 +99,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "successfull operation",
+                        "description": "sucessful operation"
                     },
                     "default": {
                         "description": "unexpected error",
@@ -130,7 +134,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "successfull operation",
+                        "description": "sucessful operation",
                         "schema":{
                             "$ref": "#/definitions/SensorSetup"
                         }
@@ -166,7 +170,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "successfull operation",
+                        "description": "sucessful operation",
                         "schema":{
                             "$ref": "#/definitions/LedSetup"
                         }
@@ -200,7 +204,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "successfull operation",
+                        "description": "sucessful operation"
                     },
                     "default": {
                         "description": "unexpected error",
@@ -235,7 +239,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "successfull operation",
+                        "description": "sucessful operation",
                         "schema":{
                             "$ref": "#/definitions/LedSetup"
                         }
@@ -271,7 +275,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "successfull operation",
+                        "description": "sucessful operation",
                         "schema":{
                             "$ref": "#/definitions/GroupSetup"
                         }
@@ -305,7 +309,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "successfull operation",
+                        "description": "sucessful operation"
                     },
                     "default": {
                         "description": "unexpected error",
@@ -340,7 +344,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "successfull operation",
+                        "description": "sucessful operation",
                         "schema":{
                             "$ref": "#/definitions/GroupSetup"
                         }
@@ -376,7 +380,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "successfull operation",
+                        "description": "sucessful operation",
                         "schema":{
                             "$ref": "#/definitions/SwitchSetup"
                         }
@@ -410,7 +414,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "successfull operation"
+                        "description": "sucessful operation"
                     },
                     "default": {
                         "description": "unexpected error",
@@ -445,10 +449,80 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "successfull operation",
+                        "description": "sucessful operation",
                         "schema":{
                             "$ref": "#/definitions/SwitchSetup"
                         }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },       
+        "/config/sensor":{
+            "post":{
+                "tags":[
+                    "config"
+                ],
+                "summary": "Change Sensor runtime configuration",
+                "description": "Change Sensor runtime configuration",
+                "operationId": "setSensorConfig",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "sensor",
+                        "in": "body",
+                        "description": "Sensor runtime config",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/SensorConfig"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "sucessful operation, Configuration read from database"
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/config/led":{
+            "post":{
+                "tags":[
+                    "config"
+                ],
+                "summary": "Change LED runtime configuration",
+                "description": "Change LED runtime configuration",
+                "operationId": "setLedConfig",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "led",
+                        "in": "body",
+                        "description": "LED runtime config",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/LedConfig"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "sucessful operation, Configuration read from database"
                     },
                     "default": {
                         "description": "unexpected error",
@@ -481,7 +555,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "successfull operation",
+                        "description": "sucessful operation",
                         "schema":{
                             "$ref": "#/definitions/IfcInfo"
                         }
@@ -515,7 +589,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "successfull operation"
+                        "description": "sucessful operation"
                     },
                     "default": {
                         "description": "unexpected error",
@@ -550,7 +624,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "successfull operation",
+                        "description": "sucessful operation",
                         "schema":{
                             "$ref": "#/definitions/IfcInfo"
                         }
@@ -586,7 +660,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "successfull operation",
+                        "description": "sucessful operation",
                         "schema":{
                             "$ref": "#/definitions/ModelInfo"
                         }
@@ -620,7 +694,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "successfull operation"
+                        "description": "sucessful operation"
                     },
                     "default": {
                         "description": "unexpected error",
@@ -655,7 +729,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "successfull operation",
+                        "description": "sucessful operation",
                         "schema":{
                             "$ref": "#/definitions/ModelInfo"
                         }
@@ -683,7 +757,7 @@
                 "parameters":[],
                 "responses": {
                     "200": {
-                        "description": "successfull operation",
+                        "description": "sucessful operation",
                         "schema":{
                             "type": "array",
                             "items":{
@@ -714,7 +788,7 @@
                 "parameters":[],
                 "responses": {
                     "101": {
-                        "description": "successfull operation",
+                        "description": "sucessful operation",
                         "schema":{
                             "$ref": "#/definitions/Event"
                         }
@@ -748,7 +822,7 @@
                 }],
                 "responses": {
                     "200": {
-                        "description": "successfull operation",
+                        "description": "sucessful operation",
                         "schema":{
                             "$ref": "#/definitions/SensorStatus"
                         }
@@ -884,6 +958,46 @@
                 }
             }
         },
+        "SensorConfig": {
+            "type": "object",
+            "required": [
+                "mac"
+            ],
+            "properties": {
+                "mac": {
+                    "type": "string",
+                    "description": "Sensor mac address"
+                },
+                "isConfigured": {
+                    "type": "boolean",
+                    "description": "Is the sensor configured"
+                },
+                "group": {
+                    "type": "integer",
+                    "description": "Associate group"
+                },
+                "isBleEnabled": {
+                    "type": "boolean",
+                    "description": "bluetooth activation"
+                },
+                "brigthnessCorrectionFactor": {
+                    "type": "integer",
+                    "description": "Brightness correction factor"
+                },
+                "friendlyName": {
+                    "type": "string",
+                    "description": "Sensor FriendlyName"
+                },
+                "thresoldPresence": {
+                    "type": "integer",
+                    "description": "Thresold presence"
+                },
+                "temperatureOffset": {
+                    "type": "integer",
+                    "description": "Temperature offset correction"
+                }
+            }
+        },
         "LedSetup":{
             "type": "object",
             "required": [
@@ -928,6 +1042,70 @@
                     "description": "Sensor FriendlyName"
                 }
             }
+        },        
+        "LedConfig":{
+            "type": "object",
+            "required": [
+                "mac"
+            ],
+            "properties": {
+                "mac": {
+                    "type": "string",
+                    "description": "Sensor mac address"
+                },
+                "group": {
+                    "type": "integer",
+                    "description": "Associate group"
+                },
+                "isBleEnabled": {
+                    "type": "boolean",
+                    "description": "bluetooth activation"
+                },
+                "isConfigured": {
+                    "type": "boolean",
+                    "description": "Reset the led configuration"
+                },
+                "auto": {
+                    "type": "boolean",
+                    "description": "Automatic mode"
+                },
+                "watchdog": {
+                    "type": "integer",
+                    "description": "watchdog in second"
+                },
+                "thresoldLow": {
+                    "type": "integer",
+                    "description": "Thresold low"
+                },
+                "thresoldHigh": {
+                    "type": "integer",
+                    "description": "Thresold high"
+                },
+                "friendlyName": {
+                    "type": "string",
+                    "description": "Sensor FriendlyName"
+                }
+            }
+        },
+        "LedCommand":{
+            "type": "object",
+            "required": [
+                "mac"
+            ],
+            "properties": {
+                "mac": {
+                    "type": "string",
+                    "description": "Sensor mac address"
+                },
+                "auto": {
+                    "type": "boolean",
+                    "description": "Automatic mode"
+                },
+                "setPoint": {
+                    "type": "string",
+                    "description": "Set point value in percentage"
+                }
+            }
         },
         "SwitchSetup":{
             "type": "object",
@@ -946,6 +1124,34 @@
                 "ip": {
                     "type": "string",
                     "description": "Switch IP address"
+                },
+                "friendlyName": {
+                    "type": "string",
+                    "description": "Sensor FriendlyName"
+                }
+            }
+        },
+        "SwitchConfig":{
+            "type": "object",
+            "required": [
+                "mac"
+            ],
+            "properties": {
+                "mac": {
+                    "type": "string",
+                    "description": "Sensor mac address"
+                },
+                "cluster": {
+                    "type": "integer",
+                    "description": "Associate Cluster number"
+                },
+                "ip": {
+                    "type": "string",
+                    "description": "Switch IP address"
+                },
+                "isConfigured": {
+                    "type": "boolean",
+                    "description": "Reset the led configuration"
                 },
                 "friendlyName": {
                     "type": "string",
@@ -1092,6 +1298,89 @@
                 "friendlyName": {
                     "type": "string",
                     "description": "Sensor FriendlyName"
+                }
+            }
+        },
+        "GroupConfig":{
+            "type": "object",
+            "required": [
+                "group"
+            ],
+            "properties": {
+                "group": {
+                    "type": "integer",
+                    "description": "Associate group"
+                },
+                "auto": {
+                    "type": "boolean",
+                    "description": "Automatic mode"
+                },
+                "watchdog": {
+                    "type": "integer",
+                    "description": "watchdog in second"
+                },
+                "slopeStart": {
+                    "type": "integer",
+                    "description": "slopeStart in second"
+                },
+                "slopeStop": {
+                    "type": "integer",
+                    "description": "slopeStop in second"
+                },
+                "sensorRule": {
+                    "type": "string",
+                    "enum": [
+                        "average",
+                        "min",
+                        "max"
+                    ],
+                    "default": "average",
+                    "description": "Rule when multiple sensors are presents in the same group"
+                },
+                "correctionInterval": {
+                    "type": "integer",
+                    "description": "correctionInterval in second"
+                },
+                "leds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Array of LED mac addresses"
+                },
+                "sensors": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Array of Sensor mac addresses"
+                },
+                "groupRules": {
+                    "$ref": "#/definitions/GroupRule"
+                },
+                "friendlyName": {
+                    "type": "string",
+                    "description": "Sensor FriendlyName"
+                }
+            }
+        },
+        "GroupCommand":{
+            "type": "object",
+            "required": [
+                "group"
+            ],
+            "properties": {
+                "group": {
+                    "type": "integer",
+                    "description": "Associate group"
+                },
+                "auto": {
+                    "type": "boolean",
+                    "description": "Automatic mode"
+                },
+                "ledSetPoint": {
+                    "type": "integer",
+                    "description": "Led SetPoint value"
                 }
             }
         },

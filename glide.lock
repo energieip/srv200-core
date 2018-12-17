@@ -1,5 +1,5 @@
 hash: 7873f75061b03685fab1d37fa10ae2d9249507813e75d280fc0acfb9b629147f
-updated: 2018-12-13T11:13:44.075491763+01:00
+updated: 2018-12-17T09:08:29.706208384+01:00
 imports:
 - name: github.com/cenkalti/backoff
   version: 62661b46c4093e2c1f38d943e663db1a29873e80
@@ -16,7 +16,7 @@ imports:
   subpackages:
   - pkg/groupmodel
 - name: github.com/energieip/common-led-go
-  version: 3cd72a257d090571e086109c6a4bcf32410b81a2
+  version: c809bd014a99927b7e59f286e4d827afa4def152
   subpackages:
   - pkg/driverled
 - name: github.com/energieip/common-network-go
@@ -24,7 +24,7 @@ imports:
   subpackages:
   - pkg/network
 - name: github.com/energieip/common-sensor-go
-  version: 22f5097a11881daad93c1880dda1db59ba345db7
+  version: 655f939f528e9afec62624f72711e2b9024c77fb
   subpackages:
   - pkg/driversensor
 - name: github.com/energieip/common-service-go
@@ -55,21 +55,21 @@ imports:
 - name: github.com/romana/rlog
   version: f018bc92e7d71f27c04e04cbf008860416c21d01
 - name: github.com/sirupsen/logrus
-  version: 9f049671f18633e0991c2cbc2bebc81e0b3c402c
+  version: 2067ea4241cec716fbd0ac90f42f339f963bff92
 - name: golang.org/x/crypto
   version: 505ab145d0a99da450461ae2c1a9f6cd10d1f447
   subpackages:
   - pbkdf2
   - ssh/terminal
 - name: golang.org/x/net
-  version: 610586996380ceef02dd726cc09df7e00a3f8e56
+  version: e147a9138326bc0e9d4e179541ffd8af41cff8a9
   subpackages:
   - context
   - internal/socks
   - proxy
   - websocket
 - name: golang.org/x/sys
-  version: 73d4af5aa059c8c2dfcf25aad4efd6ce7bc9adc1
+  version: 4d1cda033e0619309c606fc686de3adcf599539e
   subpackages:
   - unix
   - windows

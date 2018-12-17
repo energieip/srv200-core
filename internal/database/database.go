@@ -24,6 +24,19 @@ const (
 	ProjectsTable = "projects"
 )
 
+type databaseError struct {
+	s string
+}
+
+func (e *databaseError) Error() string {
+	return e.s
+}
+
+// NewError raise an error
+func NewError(text string) error {
+	return &databaseError{text}
+}
+
 type Database = database.DatabaseInterface
 
 type switchDump struct {

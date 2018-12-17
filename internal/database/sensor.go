@@ -28,6 +28,56 @@ func SaveSensorConfig(db Database, sensorStatus sensor.SensorSetup) error {
 	return err
 }
 
+//UpdateSensorConfig update sensor config in database
+func UpdateSensorConfig(db Database, sensorConfig sensor.SensorConf) error {
+	criteria := make(map[string]interface{})
+	criteria["Mac"] = sensorConfig.Mac
+	sensorStored, err := db.GetRecord(ConfigDB, SensorsTable, criteria)
+	if err != nil || sensorStored == nil {
+		return NewError("Device " + sensorConfig.Mac + "not found")
+	}
+	m := sensorStored.(map[string]interface{})
+	id, ok := m["id"]
+	if !ok {
+		id, ok = m["ID"]
+	}
+	if !ok {
+		return NewError("Device " + sensorConfig.Mac + "not found")
+	}
+	dbID := id.(string)
+
+	sensorSetup, err := sensor.ToSensorSetup(sensorStored)
+	if err != nil || sensorSetup == nil {
+		return NewError("Device " + sensorConfig.Mac + "not found")
+	}
+
+	if sensorConfig.BrigthnessCorrectionFactor != nil {
+		sensorSetup.BrigthnessCorrectionFactor = sensorConfig.BrigthnessCorrectionFactor
+	}
+
+	if sensorConfig.FriendlyName != nil {
+		sensorSetup.FriendlyName = sensorConfig.FriendlyName
+	}
+
+	if sensorConfig.Group != nil {
+		sensorSetup.Group = sensorConfig.Group
+	}
+
+	if sensorConfig.IsBleEnabled != nil {
+		sensorSetup.IsBleEnabled = sensorConfig.IsBleEnabled
+	}
+
+	if sensorConfig.TemperatureOffset != nil {
+		sensorSetup.TemperatureOffset = sensorConfig.TemperatureOffset
+	}
+
+	if sensorConfig.ThresoldPresence != nil {
+		sensorSetup.ThresoldPresence = sensorConfig.ThresoldPresence
+	}
+
+	return db.UpdateRecord(ConfigDB, SensorsTable, dbID, sensorSetup)
+}
+
 //RemoveSensorConfig remove sensor config in database
 func RemoveSensorConfig(db Database, mac string) error {
 	criteria := make(map[string]interface{})

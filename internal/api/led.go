@@ -49,6 +49,26 @@ func (api *API) setLedSetup(w http.ResponseWriter, req *http.Request) {
 	api.readLedConfig(w, led.Mac)
 }
 
+func (api *API) setLedConfig(w http.ResponseWriter, req *http.Request) {
+	api.setDefaultHeader(w)
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		api.sendError(w, APIErrorBodyParsing, "Error reading request body")
+		return
+	}
+
+	led := driverled.LedConf{}
+	err = json.Unmarshal([]byte(body), &led)
+	if err != nil {
+		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error())
+		return
+	}
+	event := make(map[string]interface{})
+	event["led"] = led
+	api.EventsToBackend <- event
+	w.Write([]byte(""))
+}
+
 func (api *API) getLedStatus(w http.ResponseWriter, req *http.Request) {
 	api.setDefaultHeader(w)
 	params := mux.Vars(req)

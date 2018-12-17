@@ -49,6 +49,26 @@ func (api *API) setSensorSetup(w http.ResponseWriter, req *http.Request) {
 	api.readSensorConfig(w, sensor.Mac)
 }
 
+func (api *API) setSensorConfig(w http.ResponseWriter, req *http.Request) {
+	api.setDefaultHeader(w)
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		api.sendError(w, APIErrorBodyParsing, "Error reading request body")
+		return
+	}
+
+	sensor := driversensor.SensorConf{}
+	err = json.Unmarshal([]byte(body), &sensor)
+	if err != nil {
+		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error())
+		return
+	}
+	event := make(map[string]interface{})
+	event["sensor"] = sensor
+	api.EventsToBackend <- event
+	w.Write([]byte(""))
+}
+
 func (api *API) getSensorStatus(w http.ResponseWriter, req *http.Request) {
 	api.setDefaultHeader(w)
 	params := mux.Vars(req)

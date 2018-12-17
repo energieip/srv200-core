@@ -31,10 +31,11 @@ type APIError struct {
 }
 
 type API struct {
-	clients   map[*websocket.Conn]bool
-	upgrader  websocket.Upgrader
-	db        database.Database
-	eventsAPI chan map[string]interface{}
+	clients         map[*websocket.Conn]bool
+	upgrader        websocket.Upgrader
+	db              database.Database
+	eventsAPI       chan map[string]interface{}
+	EventsToBackend chan map[string]interface{}
 }
 
 //Status
@@ -46,9 +47,10 @@ type Status struct {
 //InitAPI start API connection
 func InitAPI(db database.Database, eventsAPI chan map[string]interface{}) *API {
 	api := API{
-		db:        db,
-		eventsAPI: eventsAPI,
-		clients:   make(map[*websocket.Conn]bool),
+		db:              db,
+		eventsAPI:       eventsAPI,
+		EventsToBackend: make(chan map[string]interface{}),
+		clients:         make(map[*websocket.Conn]bool),
 		upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
 				return true
@@ -196,6 +198,10 @@ func (api *API) swagger() {
 	router.HandleFunc("/setup/switch/{mac}", api.getSwitchSetup).Methods("GET")
 	router.HandleFunc("/setup/switch/{mac}", api.removeSwitchSetup).Methods("DELETE")
 	router.HandleFunc("/setup/switch", api.setSwitchSetup).Methods("POST")
+
+	//config API
+	router.HandleFunc("/config/led", api.setLedConfig).Methods("POST")
+	router.HandleFunc("/config/sensor", api.setSensorConfig).Methods("POST")
 
 	//status API
 	router.HandleFunc("/status/sensor/{mac}", api.getSensorStatus).Methods("GET")
