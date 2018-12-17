@@ -76,6 +76,11 @@ func (api *API) setGroupConfig(w http.ResponseWriter, req *http.Request) {
 	w.Write([]byte(""))
 }
 
+func (api *API) sendGroupCommand(w http.ResponseWriter, req *http.Request) {
+	//TODO
+	api.sendError(w, APIErrorBodyParsing, "Not yet Implemented")
+}
+
 func (api *API) removeGroupSetup(w http.ResponseWriter, req *http.Request) {
 	api.setDefaultHeader(w)
 	params := mux.Vars(req)

@@ -69,6 +69,11 @@ func (api *API) setLedConfig(w http.ResponseWriter, req *http.Request) {
 	w.Write([]byte(""))
 }
 
+func (api *API) sendLedCommand(w http.ResponseWriter, req *http.Request) {
+	//TODO
+	api.sendError(w, APIErrorBodyParsing, "Not yet Implemented")
+}
+
 func (api *API) getLedStatus(w http.ResponseWriter, req *http.Request) {
 	api.setDefaultHeader(w)
 	params := mux.Vars(req)

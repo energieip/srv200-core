@@ -81,6 +81,11 @@ func (api *API) sendError(w http.ResponseWriter, errorCode int, message string) 
 		http.StatusInternalServerError)
 }
 
+func (api *API) sendCommand(w http.ResponseWriter, req *http.Request) {
+	//TODO
+	api.sendError(w, APIErrorBodyParsing, "Not yet Implemented")
+}
+
 func (api *API) getStatus(w http.ResponseWriter, req *http.Request) {
 	api.setDefaultHeader(w)
 	var leds []driverled.Led
@@ -254,6 +259,11 @@ func (api *API) swagger() {
 
 	//events API
 	router.HandleFunc("/events", api.webEvents)
+
+	//command API
+	router.HandleFunc("/command/led", api.sendLedCommand).Methods("POST")
+	router.HandleFunc("/command/group", api.sendGroupCommand).Methods("POST")
+	router.HandleFunc("/commands", api.sendCommand).Methods("POST")
 
 	//project API
 	router.HandleFunc("/project/ifcInfo/{label}", api.getIfcInfo).Methods("GET")

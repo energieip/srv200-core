@@ -638,6 +638,111 @@
                 }
             }
         },
+        "/command/led":{
+            "post":{
+                "tags":[
+                    "command"
+                ],
+                "summary": "Send LED command",
+                "description": "Send LED command",
+                "operationId": "sendLedCommand",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "led",
+                        "in": "body",
+                        "description": "LED Command",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/LedCommand"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "sucessful operation"
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/command/group":{
+            "post":{
+                "tags":[
+                    "command"
+                ],
+                "summary": "Send Group command",
+                "description": "Send Group command",
+                "operationId": "sendGroupCommand",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "group",
+                        "in": "body",
+                        "description": "Group command",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/GroupCommand"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "sucessful operation"
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/commands":{
+            "post":{
+                "tags":[
+                    "command"
+                ],
+                "summary": "Send command",
+                "description": "Send command",
+                "operationId": "setConfig",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "config",
+                        "in": "body",
+                        "description": "Command",
+                        "required": false,
+                        "schema": {
+                            "$ref": "#/definitions/Command"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "sucessful operation"
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
         "/project/ifcInfo/{label}":{
             "get":{
                 "tags":[
@@ -1052,6 +1157,23 @@
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/SensorConfig"
+                    }
+                }
+            }
+        },
+        "Command":{
+            "type": "object",
+            "properties": {
+                "groups": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/GroupCommand"
+                    }
+                },
+                "leds": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/LedCommand"
                     }
                 }
             }
