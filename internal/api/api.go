@@ -2,12 +2,15 @@ package api
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
 
+	"github.com/energieip/common-group-go/pkg/groupmodel"
 	"github.com/energieip/common-led-go/pkg/driverled"
 	"github.com/energieip/common-sensor-go/pkg/driversensor"
+	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
@@ -136,6 +139,44 @@ func (api *API) getStatus(w http.ResponseWriter, req *http.Request) {
 	w.Write(inrec)
 }
 
+type Conf struct {
+	Leds    []driverled.LedConf       `json:"leds"`
+	Sensors []driversensor.SensorConf `json:"sensors"`
+	Groups  []groupmodel.GroupConfig  `json:"groups"`
+	Switchs []core.SwitchConfig       `json:"switchs"`
+}
+
+func (api *API) setConfig(w http.ResponseWriter, req *http.Request) {
+	api.setDefaultHeader(w)
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		api.sendError(w, APIErrorBodyParsing, "Error reading request body")
+		return
+	}
+
+	config := Conf{}
+	err = json.Unmarshal([]byte(body), &config)
+	if err != nil {
+		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error())
+		return
+	}
+	event := make(map[string]interface{})
+	for _, led := range config.Leds {
+		event["led"] = led
+	}
+	for _, sensor := range config.Sensors {
+		event["sensor"] = sensor
+	}
+	for _, group := range config.Groups {
+		event["group"] = group
+	}
+	for _, sw := range config.Switchs {
+		event["switch"] = sw
+	}
+	api.EventsToBackend <- event
+	w.Write([]byte(""))
+}
+
 func (api *API) webEvents(w http.ResponseWriter, r *http.Request) {
 	ws, err := api.upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -204,6 +245,7 @@ func (api *API) swagger() {
 	router.HandleFunc("/config/sensor", api.setSensorConfig).Methods("POST")
 	router.HandleFunc("/config/group", api.setGroupConfig).Methods("POST")
 	router.HandleFunc("/config/switch", api.setSwitchConfig).Methods("POST")
+	router.HandleFunc("/configs", api.setConfig).Methods("POST")
 
 	//status API
 	router.HandleFunc("/status/sensor/{mac}", api.getSensorStatus).Methods("GET")
