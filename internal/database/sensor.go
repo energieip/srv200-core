@@ -100,6 +100,23 @@ func GetSensorConfig(db Database, mac string) *sensor.SensorSetup {
 	return cell
 }
 
+//GetSensorsConfig return the sensor config list
+func GetSensorsConfig(db Database) map[string]sensor.SensorSetup {
+	sensors := map[string]sensor.SensorSetup{}
+	stored, err := db.FetchAllRecords(ConfigDB, SensorsTable)
+	if err != nil || stored == nil {
+		return sensors
+	}
+	for _, l := range stored {
+		cell, err := sensor.ToSensorSetup(l)
+		if err != nil || cell == nil {
+			continue
+		}
+		sensors[cell.Mac] = *cell
+	}
+	return sensors
+}
+
 //SaveSensorStatus dump sensor status in database
 func SaveSensorStatus(db Database, sensorStatus sensor.Sensor) error {
 	var dbID string

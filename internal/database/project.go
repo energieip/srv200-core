@@ -47,6 +47,21 @@ func GetProject(db Database, label string) *core.Project {
 	return project
 }
 
+//GetProjectByMac return the project configuration
+func GetProjectByMac(db Database, mac string) *core.Project {
+	criteria := make(map[string]interface{})
+	criteria["Mac"] = mac
+	stored, err := db.GetRecord(ConfigDB, ProjectsTable, criteria)
+	if err != nil || stored == nil {
+		return nil
+	}
+	project, err := core.ToProject(stored)
+	if err != nil {
+		return nil
+	}
+	return project
+}
+
 //GetProjects return the project configuration
 func GetProjects(db Database) []core.Project {
 	var projects []core.Project

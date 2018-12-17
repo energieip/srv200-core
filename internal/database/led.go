@@ -92,6 +92,23 @@ func UpdateLedConfig(db Database, config led.LedConf) error {
 	return db.UpdateRecord(ConfigDB, LedsTable, dbID, setup)
 }
 
+//GetLedsConfig return the led config list
+func GetLedsConfig(db Database) map[string]led.LedSetup {
+	leds := map[string]led.LedSetup{}
+	stored, err := db.FetchAllRecords(ConfigDB, LedsTable)
+	if err != nil || stored == nil {
+		return leds
+	}
+	for _, l := range stored {
+		light, err := led.ToLedSetup(l)
+		if err != nil || light == nil {
+			continue
+		}
+		leds[light.Mac] = *light
+	}
+	return leds
+}
+
 //SaveLedStatus dump led status in database
 func SaveLedStatus(db Database, ledStatus led.Led) error {
 	var dbID string

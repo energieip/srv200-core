@@ -37,6 +37,10 @@
         {
             "name": "status",
             "description": "Drivers and groups status"
+        },
+        {
+            "name": "dump",
+            "description": "Drivers and groups dump"
         }
     ],
     "schemes":[
@@ -1129,6 +1133,66 @@
                       }
                 }
             }
+        },
+        "/dump":{
+            "get":{
+                "tags":[
+                    "dump"
+                ],
+                "summary": "Return Complete Dump",
+                "description": "Dump the Complete dump with filter",
+                "operationId": "getDump",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "withConfig",
+                        "in": "query",
+                        "description": "withConfig output. By default: false",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "withIfc",
+                        "in": "query",
+                        "description": "withConfig output. By default: false",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "withStatus",
+                        "in": "query",
+                        "description": "withStatus output. By default: false",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "macs",
+                        "in": "query",
+                        "description": "Filter by mac address. By default: all",
+                        "required": false,
+                        "type": "array",
+                        "items":{
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema":{
+                            "$ref": "#/definitions/Dump"
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                      }
+                }
+            }
         }
     },
     "definitions": {
@@ -1784,6 +1848,55 @@
                     },
                     "description": "List of sensors status"
                 }
+            }
+        },
+        "Dump": {
+            "type": "object",
+            "properties": {
+                "leds": {
+                    "type": "array",
+                    "items":{
+                        "$ref": "#/definitions/LedDump"
+                    },
+                    "description": "List of leds dump"
+                },
+                "sensors": {
+                    "type": "array",
+                    "items":{
+                        "$ref": "#/definitions/SensorDump"
+                    },
+                    "description": "List of sensors dump"
+                }
+            }
+        },
+        "LedDump": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "$ref": "#/definitions/LedStatus"
+                },
+                "ifc": {
+                    "$ref": "#/definitions/IfcInfo"
+                },
+                "config": {
+                    "$ref": "#/definitions/LedSetup"
+                }
+
+            }
+        },
+        "SensorDump": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "$ref": "#/definitions/SensorStatus"
+                },
+                "ifc": {
+                    "$ref": "#/definitions/IfcInfo"
+                },
+                "config": {
+                    "$ref": "#/definitions/SensorSetup"
+                }
+
             }
         },
         "LedStatus": {

@@ -47,6 +47,26 @@ type Status struct {
 	Sensors []driversensor.Sensor `json:"sensors"`
 }
 
+//DumpLed
+type DumpLed struct {
+	Ifc    IfcInfo            `json:"ifc"`
+	Status driverled.Led      `json:"status"`
+	Config driverled.LedSetup `json:"config"`
+}
+
+//DumpSensor
+type DumpSensor struct {
+	Ifc    IfcInfo                  `json:"ifc"`
+	Status driversensor.Sensor      `json:"status"`
+	Config driversensor.SensorSetup `json:"config"`
+}
+
+//Dump
+type Dump struct {
+	Leds    []DumpLed    `json:"leds"`
+	Sensors []DumpSensor `json:"sensors"`
+}
+
 //InitAPI start API connection
 func InitAPI(db database.Database, eventsAPI chan map[string]interface{}) *API {
 	api := API{
@@ -141,6 +161,67 @@ func (api *API) getStatus(w http.ResponseWriter, req *http.Request) {
 	}
 
 	inrec, _ := json.MarshalIndent(status, "", "  ")
+	w.Write(inrec)
+}
+
+func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
+	api.setDefaultHeader(w)
+	var leds []DumpLed
+	var sensors []DumpSensor
+
+	lights := database.GetLedsStatus(api.db)
+	lightsConfig := database.GetLedsConfig(api.db)
+	for _, led := range lights {
+		light := DumpLed{}
+		light.Status = led
+		light.Config, _ = lightsConfig[led.Mac]
+
+		project := database.GetProjectByMac(api.db, led.Mac)
+		if project != nil {
+			model := database.GetModel(api.db, project.ModelName)
+			info := IfcInfo{
+				Label:      project.Label,
+				ModelName:  model.Name,
+				Mac:        project.Mac,
+				Vendor:     model.Vendor,
+				URL:        model.URL,
+				DeviceType: model.DeviceType,
+			}
+			light.Ifc = info
+		}
+		leds = append(leds, light)
+	}
+
+	cells := database.GetSensorsStatus(api.db)
+	cellsConfig := database.GetSensorsConfig(api.db)
+	for _, sensor := range cells {
+		cell := DumpSensor{}
+		cell.Status = sensor
+		cell.Config, _ = cellsConfig[sensor.Mac]
+
+		project := database.GetProjectByMac(api.db, sensor.Mac)
+		if project != nil {
+			model := database.GetModel(api.db, project.ModelName)
+			info := IfcInfo{
+				Label:      project.Label,
+				ModelName:  model.Name,
+				Mac:        project.Mac,
+				Vendor:     model.Vendor,
+				URL:        model.URL,
+				DeviceType: model.DeviceType,
+			}
+			cell.Ifc = info
+		}
+
+		sensors = append(sensors, cell)
+	}
+
+	dump := Dump{
+		Leds:    leds,
+		Sensors: sensors,
+	}
+
+	inrec, _ := json.MarshalIndent(dump, "", "  ")
 	w.Write(inrec)
 }
 
@@ -273,6 +354,9 @@ func (api *API) swagger() {
 	router.HandleFunc("/project/model/{modelName}", api.removeModelInfo).Methods("DELETE")
 	router.HandleFunc("/project/model", api.setModelInfo).Methods("POST")
 	router.HandleFunc("/project", api.getIfc).Methods("GET")
+
+	//dump API
+	router.HandleFunc("/dump", api.getDump).Methods("GET")
 
 	log.Fatal(http.ListenAndServe(":8888", router))
 }

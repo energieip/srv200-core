@@ -32,7 +32,7 @@ func RemoveModel(db Database, name string) error {
 	return db.DeleteRecord(ConfigDB, ModelsTable, criteria)
 }
 
-//GetModel return the led configuration
+//GetModel return the model configuration
 func GetModel(db Database, name string) *core.Model {
 	criteria := make(map[string]interface{})
 	criteria["Name"] = name
@@ -45,4 +45,21 @@ func GetModel(db Database, name string) *core.Model {
 		return nil
 	}
 	return model
+}
+
+//GetModels return the models configuration
+func GetModels(db Database, name string) map[string]core.Model {
+	models := map[string]core.Model{}
+	stored, err := db.FetchAllRecords(ConfigDB, ModelsTable)
+	if err != nil || stored == nil {
+		return models
+	}
+	for _, m := range stored {
+		model, err := core.ToModel(m)
+		if err != nil || model == nil {
+			continue
+		}
+		models[model.Name] = *model
+	}
+	return models
 }
