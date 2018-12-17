@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/energieip/common-group-go/pkg/groupmodel"
 	"github.com/energieip/common-led-go/pkg/driverled"
@@ -49,16 +50,16 @@ type Status struct {
 
 //DumpLed
 type DumpLed struct {
-	Ifc    IfcInfo            `json:"ifc"`
-	Status driverled.Led      `json:"status"`
-	Config driverled.LedSetup `json:"config"`
+	Ifc    *IfcInfo            `json:"ifc"`
+	Status *driverled.Led      `json:"status"`
+	Config *driverled.LedSetup `json:"config"`
 }
 
 //DumpSensor
 type DumpSensor struct {
-	Ifc    IfcInfo                  `json:"ifc"`
-	Status driversensor.Sensor      `json:"status"`
-	Config driversensor.SensorSetup `json:"config"`
+	Ifc    *IfcInfo                  `json:"ifc"`
+	Status *driversensor.Sensor      `json:"status"`
+	Config *driversensor.SensorSetup `json:"config"`
 }
 
 //Dump
@@ -168,26 +169,79 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 	api.setDefaultHeader(w)
 	var leds []DumpLed
 	var sensors []DumpSensor
+	withConfig := false
+	withIfc := false
+	withStatus := false
+	macs := make(map[string]bool)
+	filterByMac := false
+	MacsParam := req.FormValue("macs")
+	if MacsParam != "" {
+		tempMac := strings.Split(MacsParam, ",")
+
+		for _, v := range tempMac {
+			macs[v] = true
+			filterByMac = true
+		}
+	}
+
+	withConfigParam := req.FormValue("withConfig")
+	if withConfigParam != "" {
+		b, err := strconv.ParseBool(withConfigParam)
+		if err == nil {
+			withConfig = b
+		}
+	}
+
+	withStatusParam := req.FormValue("withStatus")
+	if withStatusParam != "" {
+		b, err := strconv.ParseBool(withStatusParam)
+		if err == nil {
+			withStatus = b
+		}
+	}
+
+	withIfcParam := req.FormValue("withIfc")
+	if withIfcParam != "" {
+		b, err := strconv.ParseBool(withIfcParam)
+		if err == nil {
+			withIfc = b
+		}
+	}
 
 	lights := database.GetLedsStatus(api.db)
 	lightsConfig := database.GetLedsConfig(api.db)
 	for _, led := range lights {
-		light := DumpLed{}
-		light.Status = led
-		light.Config, _ = lightsConfig[led.Mac]
-
-		project := database.GetProjectByMac(api.db, led.Mac)
-		if project != nil {
-			model := database.GetModel(api.db, project.ModelName)
-			info := IfcInfo{
-				Label:      project.Label,
-				ModelName:  model.Name,
-				Mac:        project.Mac,
-				Vendor:     model.Vendor,
-				URL:        model.URL,
-				DeviceType: model.DeviceType,
+		if filterByMac {
+			if _, ok := macs[led.Mac]; !ok {
+				continue
 			}
-			light.Ifc = info
+		}
+		light := DumpLed{}
+		if withStatus {
+			light.Status = &led
+		}
+		if withConfig {
+			config, _ := lightsConfig[led.Mac]
+			light.Config = &config
+
+		}
+		if withIfc {
+			project := database.GetProjectByMac(api.db, led.Mac)
+			if project != nil {
+				model := database.GetModel(api.db, project.ModelName)
+				info := IfcInfo{
+					Label:      project.Label,
+					ModelName:  model.Name,
+					Mac:        project.Mac,
+					Vendor:     model.Vendor,
+					URL:        model.URL,
+					DeviceType: model.DeviceType,
+				}
+				light.Ifc = &info
+			}
+		}
+		if light.Config == nil && light.Ifc == nil && light.Status == nil {
+			continue
 		}
 		leds = append(leds, light)
 	}
@@ -195,24 +249,37 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 	cells := database.GetSensorsStatus(api.db)
 	cellsConfig := database.GetSensorsConfig(api.db)
 	for _, sensor := range cells {
-		cell := DumpSensor{}
-		cell.Status = sensor
-		cell.Config, _ = cellsConfig[sensor.Mac]
-
-		project := database.GetProjectByMac(api.db, sensor.Mac)
-		if project != nil {
-			model := database.GetModel(api.db, project.ModelName)
-			info := IfcInfo{
-				Label:      project.Label,
-				ModelName:  model.Name,
-				Mac:        project.Mac,
-				Vendor:     model.Vendor,
-				URL:        model.URL,
-				DeviceType: model.DeviceType,
+		if filterByMac {
+			if _, ok := macs[sensor.Mac]; !ok {
+				continue
 			}
-			cell.Ifc = info
 		}
-
+		cell := DumpSensor{}
+		if withStatus {
+			cell.Status = &sensor
+		}
+		if withConfig {
+			config, _ := cellsConfig[sensor.Mac]
+			cell.Config = &config
+		}
+		if withIfc {
+			project := database.GetProjectByMac(api.db, sensor.Mac)
+			if project != nil {
+				model := database.GetModel(api.db, project.ModelName)
+				info := IfcInfo{
+					Label:      project.Label,
+					ModelName:  model.Name,
+					Mac:        project.Mac,
+					Vendor:     model.Vendor,
+					URL:        model.URL,
+					DeviceType: model.DeviceType,
+				}
+				cell.Ifc = &info
+			}
+		}
+		if cell.Config == nil && cell.Ifc == nil && cell.Status == nil {
+			continue
+		}
 		sensors = append(sensors, cell)
 	}
 
