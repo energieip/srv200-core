@@ -291,6 +291,14 @@ func (s *CoreService) updateSensorCfg(config interface{}) {
 	//TODO send order to switch
 }
 
+func (s *CoreService) sendGroupCmd(cmd interface{}) {
+	rlog.Info("TODO send command to group", cmd)
+}
+
+func (s *CoreService) sendLedCmd(cmd interface{}) {
+	rlog.Info("TODO send command to LED", cmd)
+}
+
 func (s *CoreService) readAPIEvents() {
 	for {
 		select {
@@ -305,6 +313,10 @@ func (s *CoreService) readAPIEvents() {
 					s.updateGroupCfg(event)
 				case "switch":
 					s.updateSwitchCfg(event)
+				case "groupCmd":
+					s.sendGroupCmd(event)
+				case "ledCmd":
+					s.sendLedCmd(event)
 				}
 			}
 		}

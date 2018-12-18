@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/energieip/common-group-go/pkg/groupmodel"
+	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
 	"github.com/gorilla/mux"
 	"github.com/romana/rlog"
@@ -77,8 +78,23 @@ func (api *API) setGroupConfig(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) sendGroupCommand(w http.ResponseWriter, req *http.Request) {
-	//TODO
-	api.sendError(w, APIErrorBodyParsing, "Not yet Implemented")
+	api.setDefaultHeader(w)
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		api.sendError(w, APIErrorBodyParsing, "Error reading request body")
+		return
+	}
+
+	gr := core.GroupCmd{}
+	err = json.Unmarshal([]byte(body), &gr)
+	if err != nil {
+		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error())
+		return
+	}
+	event := make(map[string]interface{})
+	event["groupCmd"] = gr
+	api.EventsToBackend <- event
+	w.Write([]byte(""))
 }
 
 func (api *API) removeGroupSetup(w http.ResponseWriter, req *http.Request) {
