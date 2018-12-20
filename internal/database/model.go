@@ -48,7 +48,7 @@ func GetModel(db Database, name string) *core.Model {
 }
 
 //GetModels return the models configuration
-func GetModels(db Database, name string) map[string]core.Model {
+func GetModels(db Database) map[string]core.Model {
 	models := map[string]core.Model{}
 	stored, err := db.FetchAllRecords(ConfigDB, ModelsTable)
 	if err != nil || stored == nil {

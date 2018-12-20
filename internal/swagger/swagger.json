@@ -1147,27 +1147,6 @@
                 ],
                 "parameters":[
                     {
-                        "name": "withConfig",
-                        "in": "query",
-                        "description": "withConfig output. By default: false",
-                        "required": false,
-                        "type": "string"
-                    },
-                    {
-                        "name": "withIfc",
-                        "in": "query",
-                        "description": "withConfig output. By default: false",
-                        "required": false,
-                        "type": "string"
-                    },
-                    {
-                        "name": "withStatus",
-                        "in": "query",
-                        "description": "withStatus output. By default: false",
-                        "required": false,
-                        "type": "string"
-                    },
-                    {
                         "name": "macs",
                         "in": "query",
                         "description": "Filter by mac address. By default: all",

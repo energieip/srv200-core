@@ -50,16 +50,16 @@ type Status struct {
 
 //DumpLed
 type DumpLed struct {
-	Ifc    *IfcInfo            `json:"ifc"`
-	Status *driverled.Led      `json:"status"`
-	Config *driverled.LedSetup `json:"config"`
+	Ifc    core.IfcInfo       `json:"ifc"`
+	Status driverled.Led      `json:"status"`
+	Config driverled.LedSetup `json:"config"`
 }
 
 //DumpSensor
 type DumpSensor struct {
-	Ifc    *IfcInfo                  `json:"ifc"`
-	Status *driversensor.Sensor      `json:"status"`
-	Config *driversensor.SensorSetup `json:"config"`
+	Ifc    core.IfcInfo             `json:"ifc"`
+	Status driversensor.Sensor      `json:"status"`
+	Config driversensor.SensorSetup `json:"config"`
 }
 
 //Dump
@@ -169,9 +169,6 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 	api.setDefaultHeader(w)
 	var leds []DumpLed
 	var sensors []DumpSensor
-	withConfig := false
-	withIfc := false
-	withStatus := false
 	macs := make(map[string]bool)
 	labels := make(map[string]bool)
 	filterByMac := false
@@ -194,74 +191,34 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	withConfigParam := req.FormValue("withConfig")
-	if withConfigParam != "" {
-		b, err := strconv.ParseBool(withConfigParam)
-		if err == nil {
-			withConfig = b
-		}
-	}
-
-	withStatusParam := req.FormValue("withStatus")
-	if withStatusParam != "" {
-		b, err := strconv.ParseBool(withStatusParam)
-		if err == nil {
-			withStatus = b
-		}
-	}
-
-	withIfcParam := req.FormValue("withIfc")
-	if withIfcParam != "" {
-		b, err := strconv.ParseBool(withIfcParam)
-		if err == nil {
-			withIfc = b
-		}
-	}
-
 	lights := database.GetLedsStatus(api.db)
 	lightsConfig := database.GetLedsConfig(api.db)
+	ifcs := database.GetIfcs(api.db)
 	for _, led := range lights {
 		if filterByMac {
 			if _, ok := macs[led.Mac]; !ok {
 				continue
 			}
 		}
-		light := DumpLed{}
-		if withStatus {
-			light.Status = &led
-		}
-		if withConfig {
-			config, _ := lightsConfig[led.Mac]
-			light.Config = &config
+		dump := DumpLed{}
 
+		dump.Status = led
+		config, ok := lightsConfig[led.Mac]
+		if ok {
+			dump.Config = config
 		}
-		project := database.GetProjectByMac(api.db, led.Mac)
-		if withIfc {
-			if project != nil {
-				model := database.GetModel(api.db, project.ModelName)
-				info := IfcInfo{
-					Label:      project.Label,
-					ModelName:  model.Name,
-					Mac:        project.Mac,
-					Vendor:     model.Vendor,
-					URL:        model.URL,
-					DeviceType: model.DeviceType,
-				}
-				light.Ifc = &info
-			}
+
+		ifc, ok := ifcs[led.Mac]
+		if ok {
+			dump.Ifc = ifc
 		}
+
 		if filterByLabel {
-			if project == nil {
-				continue
-			}
-			if _, ok := labels[project.Label]; !ok {
+			if _, ok := labels[dump.Ifc.Label]; !ok {
 				continue
 			}
 		}
-		if light.Config == nil && light.Ifc == nil && light.Status == nil {
-			continue
-		}
-		leds = append(leds, light)
+		leds = append(leds, dump)
 	}
 
 	cells := database.GetSensorsStatus(api.db)
@@ -273,38 +230,20 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 			}
 		}
 		cell := DumpSensor{}
-		if withStatus {
-			cell.Status = &sensor
+		cell.Status = sensor
+		config, ok := cellsConfig[sensor.Mac]
+		if ok {
+			cell.Config = config
 		}
-		if withConfig {
-			config, _ := cellsConfig[sensor.Mac]
-			cell.Config = &config
+		ifc, ok := ifcs[sensor.Mac]
+		if ok {
+			cell.Ifc = ifc
 		}
-		project := database.GetProjectByMac(api.db, sensor.Mac)
-		if withIfc {
-			if project != nil {
-				model := database.GetModel(api.db, project.ModelName)
-				info := IfcInfo{
-					Label:      project.Label,
-					ModelName:  model.Name,
-					Mac:        project.Mac,
-					Vendor:     model.Vendor,
-					URL:        model.URL,
-					DeviceType: model.DeviceType,
-				}
-				cell.Ifc = &info
-			}
-		}
+
 		if filterByLabel {
-			if project == nil {
+			if _, ok := labels[cell.Ifc.Label]; !ok {
 				continue
 			}
-			if _, ok := labels[project.Label]; !ok {
-				continue
-			}
-		}
-		if cell.Config == nil && cell.Ifc == nil && cell.Status == nil {
-			continue
 		}
 		sensors = append(sensors, cell)
 	}

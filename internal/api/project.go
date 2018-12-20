@@ -11,16 +11,6 @@ import (
 	"github.com/romana/rlog"
 )
 
-//IfcInfo ifc component description
-type IfcInfo struct {
-	Label      string `json:"label"` //cable label
-	ModelName  string `json:"modelName"`
-	Mac        string `json:"mac"` //device Mac address
-	Vendor     string `json:"vendor"`
-	URL        string `json:"url"`
-	DeviceType string `json:"deviceType"`
-}
-
 func (api *API) readIfcInfo(w http.ResponseWriter, label string) {
 	project := database.GetProject(api.db, label)
 	if project == nil {
@@ -28,7 +18,7 @@ func (api *API) readIfcInfo(w http.ResponseWriter, label string) {
 		return
 	}
 	model := database.GetModel(api.db, project.ModelName)
-	info := IfcInfo{
+	info := core.IfcInfo{
 		Label:      label,
 		ModelName:  model.Name,
 		Mac:        project.Mac,
@@ -67,7 +57,7 @@ func (api *API) setIfcInfo(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	ifcInfo := IfcInfo{}
+	ifcInfo := core.IfcInfo{}
 	err = json.Unmarshal([]byte(body), &ifcInfo)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error())
@@ -102,18 +92,10 @@ func (api *API) setIfcInfo(w http.ResponseWriter, req *http.Request) {
 
 func (api *API) getIfc(w http.ResponseWriter, req *http.Request) {
 	api.setDefaultHeader(w)
-	var infos []IfcInfo
-	projects := database.GetProjects(api.db)
-	for _, project := range projects {
-		model := database.GetModel(api.db, project.ModelName)
-		info := IfcInfo{
-			Label:      project.Label,
-			ModelName:  model.Name,
-			Mac:        project.Mac,
-			Vendor:     model.Vendor,
-			URL:        model.URL,
-			DeviceType: model.DeviceType,
-		}
+	var infos []core.IfcInfo
+
+	ifcs := database.GetIfcs(api.db)
+	for _, info := range ifcs {
 		infos = append(infos, info)
 	}
 	inrec, _ := json.MarshalIndent(infos, "", "  ")
