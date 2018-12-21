@@ -310,18 +310,24 @@ func (api *API) webEvents(w http.ResponseWriter, r *http.Request) {
 				for eventType, event := range events {
 					var leds []driverled.Led
 					var sensors []driversensor.Sensor
+					res := strings.Split(eventType, ".")
+					driver := res[0]
+					action := res[1]
 					// Convert Type
-					sensor, err := driversensor.ToSensor(event)
-					if err == nil && sensor != nil {
-						sensors = append(sensors, *sensor)
-					} else {
+					switch driver {
+					case "sensor":
+						sensor, err := driversensor.ToSensor(event)
+						if err == nil && sensor != nil {
+							sensors = append(sensors, *sensor)
+						}
+					case "led":
 						led, err := driverled.ToLed(event)
 						if err == nil && led != nil {
 							leds = append(leds, *led)
 						}
 					}
 					evt := make(map[string]Status)
-					evt[eventType] = Status{
+					evt[action] = Status{
 						Leds:    leds,
 						Sensors: sensors,
 					}

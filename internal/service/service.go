@@ -165,7 +165,16 @@ func (s *CoreService) prepareSwitchConfig(switchStatus deviceswitch.SwitchStatus
 			}
 			if lsetup != nil {
 				setup.LedsSetup[mac] = *lsetup
+				event := make(map[string]interface{})
+				evtType := "led." + EventAdd
+				event[evtType] = led
+				s.eventsAPI <- event
 			}
+		} else {
+			event := make(map[string]interface{})
+			evtType := "led." + EventUpdate
+			event[evtType] = led
+			s.eventsAPI <- event
 		}
 	}
 
@@ -192,9 +201,15 @@ func (s *CoreService) prepareSwitchConfig(switchStatus deviceswitch.SwitchStatus
 			if ssetup != nil {
 				setup.SensorsSetup[mac] = *ssetup
 				event := make(map[string]interface{})
-				event[EventAdd] = sensor
+				evtType := "sensor." + EventAdd
+				event[evtType] = sensor
 				s.eventsAPI <- event
 			}
+		} else {
+			event := make(map[string]interface{})
+			evtType := "sensor." + EventUpdate
+			event[evtType] = sensor
+			s.eventsAPI <- event
 		}
 	}
 	return &setup
