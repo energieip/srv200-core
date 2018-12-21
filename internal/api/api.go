@@ -48,6 +48,22 @@ type Status struct {
 	Sensors []driversensor.Sensor `json:"sensors"`
 }
 
+type EventLed struct {
+	Led   driverled.Led `json:"led"`
+	Label string        `json:"label"`
+}
+
+type EventSensor struct {
+	Sensor driversensor.Sensor `json:"sensor"`
+	Label  string              `json:"label"`
+}
+
+//EventStatus
+type EventStatus struct {
+	Leds    []EventLed    `json:"leds"`
+	Sensors []EventSensor `json:"sensors"`
+}
+
 //DumpLed
 type DumpLed struct {
 	Ifc    core.IfcInfo       `json:"ifc"`
@@ -308,8 +324,8 @@ func (api *API) webEvents(w http.ResponseWriter, r *http.Request) {
 			select {
 			case events := <-api.eventsAPI:
 				for eventType, event := range events {
-					var leds []driverled.Led
-					var sensors []driversensor.Sensor
+					var leds []EventLed
+					var sensors []EventSensor
 					res := strings.Split(eventType, ".")
 					driver := res[0]
 					action := res[1]
@@ -317,17 +333,36 @@ func (api *API) webEvents(w http.ResponseWriter, r *http.Request) {
 					switch driver {
 					case "sensor":
 						sensor, err := driversensor.ToSensor(event)
+
 						if err == nil && sensor != nil {
-							sensors = append(sensors, *sensor)
+							label := ""
+							project := database.GetProjectByMac(api.db, sensor.Mac)
+							if project != nil {
+								label = project.Label
+							}
+							evt := EventSensor{
+								Sensor: *sensor,
+								Label:  label,
+							}
+							sensors = append(sensors, evt)
 						}
 					case "led":
 						led, err := driverled.ToLed(event)
 						if err == nil && led != nil {
-							leds = append(leds, *led)
+							label := ""
+							project := database.GetProjectByMac(api.db, led.Mac)
+							if project != nil {
+								label = project.Label
+							}
+							evt := EventLed{
+								Led:   *led,
+								Label: label,
+							}
+							leds = append(leds, evt)
 						}
 					}
-					evt := make(map[string]Status)
-					evt[action] = Status{
+					evt := make(map[string]EventStatus)
+					evt[action] = EventStatus{
 						Leds:    leds,
 						Sensors: sensors,
 					}
