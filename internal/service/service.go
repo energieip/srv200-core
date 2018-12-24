@@ -316,21 +316,26 @@ func (s *CoreService) sendLedCmd(cmd interface{}) {
 	cmdLed, _ := core.ToLedCmd(cmd)
 	if cmdLed == nil {
 		rlog.Error("Cannot parse cmd")
+		return
 	}
 	//Get correspnding switchMac
 	led := database.GetLedConfig(s.db, cmdLed.Mac)
 	if led == nil {
 		rlog.Error("Cannot find config for " + cmdLed.Mac)
+		return
 	}
 	url := "/write/switch/" + led.SwitchMac + "/update/settings"
 	switchSetup := deviceswitch.SwitchConfig{}
 	switchSetup.Mac = led.SwitchMac
 	switchSetup.LedsConfig = make(map[string]driverled.LedConf)
 
+	auto := cmdLed.Auto
+	setpoint := cmdLed.Setpoint
+
 	ledCfg := driverled.LedConf{
 		Mac:      led.Mac,
-		Auto:     &cmdLed.Auto,
-		Setpoint: &cmdLed.Setpoint,
+		Auto:     &auto,
+		Setpoint: &setpoint,
 	}
 	switchSetup.LedsConfig[led.Mac] = ledCfg
 
