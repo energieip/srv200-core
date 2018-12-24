@@ -210,27 +210,33 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 	lights := database.GetLedsStatus(api.db)
 	lightsConfig := database.GetLedsConfig(api.db)
 	ifcs := database.GetIfcs(api.db)
-	for _, led := range lights {
+	for _, ifc := range ifcs {
+		if filterByLabel {
+			if _, ok := labels[ifc.Label]; !ok {
+				continue
+			}
+		}
 		if filterByMac {
-			if _, ok := macs[led.Mac]; !ok {
+			if _, ok := macs[ifc.Mac]; !ok {
 				continue
 			}
 		}
 		dump := DumpLed{}
 
-		dump.Status = led
-		config, ok := lightsConfig[led.Mac]
+		led, ok := lights[ifc.Mac]
+		if ok {
+			dump.Status = led
+		}
+
+		config, ok := lightsConfig[ifc.Mac]
 		if ok {
 			dump.Config = config
 		}
 
-		ifc, ok := ifcs[led.Mac]
-		if ok {
-			dump.Ifc = ifc
-		}
+		dump.Ifc = ifc
 
 		if filterByLabel {
-			if _, ok := labels[dump.Ifc.Label]; !ok {
+			if _, ok := labels[ifc.Label]; !ok {
 				continue
 			}
 		}
