@@ -11,19 +11,22 @@ import (
 
 //SwitchSetup content
 type SwitchSetup struct {
-	Mac          string `json:"mac"`
-	FriendlyName string `json:"friendlyName"`
-	IP           string `json:"ip"`
-	Cluster      int    `json:"cluster"`
+	Mac           string `json:"mac"`
+	FriendlyName  string `json:"friendlyName"`
+	IP            string `json:"ip"`
+	Cluster       int    `json:"cluster"`
+	DumpFrequency int    `json:"dumpFrequency"`
+	IsConfigured  *bool  `json:"isConfigured"`
 }
 
 //SwitchConfig content
 type SwitchConfig struct {
-	Mac          string `json:"mac"`
-	FriendlyName string `json:"friendlyName"`
-	IP           string `json:"ip"`
-	Cluster      int    `json:"cluster"`
-	IsConfigured bool   `json:"isConfigured"`
+	Mac           string `json:"mac"`
+	FriendlyName  string `json:"friendlyName"`
+	IP            string `json:"ip"`
+	Cluster       int    `json:"cluster"`
+	IsConfigured  *bool  `json:"isConfigured"`
+	DumpFrequency *int   `json:"dumpFrequency"`
 }
 
 //SwitchCmd content

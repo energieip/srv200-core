@@ -1264,6 +1264,10 @@
                 "temperatureOffset": {
                     "type": "integer",
                     "description": "Temperature offset correction"
+                },
+                "dumpFrequency": {
+                    "type": "integer",
+                    "description": "Dump frequency by default: 1s"
                 }
             }
         },
@@ -1304,6 +1308,10 @@
                 "temperatureOffset": {
                     "type": "integer",
                     "description": "Temperature offset correction"
+                },
+                "dumpFrequency": {
+                    "type": "integer",
+                    "description": "Dump frequency by default: 1s"
                 }
             }
         },
@@ -1349,6 +1357,10 @@
                 "friendlyName": {
                     "type": "string",
                     "description": "Sensor FriendlyName"
+                },
+                "dumpFrequency": {
+                    "type": "integer",
+                    "description": "Dump frequency by default: 1s"
                 }
             }
         },        
@@ -1393,6 +1405,10 @@
                 "friendlyName": {
                     "type": "string",
                     "description": "Sensor FriendlyName"
+                },
+                "dumpFrequency": {
+                    "type": "integer",
+                    "description": "Dump frequency by default: 1s"
                 }
             }
         },
@@ -1437,6 +1453,10 @@
                 "friendlyName": {
                     "type": "string",
                     "description": "Sensor FriendlyName"
+                },
+                "dumpFrequency": {
+                    "type": "integer",
+                    "description": "Dump frequency by default: 1s"
                 }
             }
         },
@@ -1465,6 +1485,10 @@
                 "friendlyName": {
                     "type": "string",
                     "description": "Sensor FriendlyName"
+                },
+                "dumpFrequency": {
+                    "type": "integer",
+                    "description": "Dump frequency by default: 1s"
                 }
             }
         },
@@ -1760,6 +1784,10 @@
                     "type": "integer",
                     "description": "Temperature"
                 },
+                "humidity": {
+                    "type": "integer",
+                    "description": "Humidity in percentage"
+                },
                 "error": {
                     "type": "integer",
                     "description": "Error code value: 0 means no error"
@@ -1817,6 +1845,10 @@
                 "friendlyName": {
                     "type": "string",
                     "description": "Sensor FriendlyName"
+                },
+                "dumpFrequency": {
+                    "type": "integer",
+                    "description": "Dump frequency by default: 1s"
                 }
             }
         },
@@ -2022,6 +2054,10 @@
                 "auto": {
                     "type": "boolean",
                     "description": "Automatic mode"
+                },
+                "dumpFrequency": {
+                    "type": "integer",
+                    "description": "Dump frequency by default: 1s"
                 }
             }
         },
