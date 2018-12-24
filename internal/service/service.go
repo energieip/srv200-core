@@ -158,6 +158,7 @@ func (s *CoreService) prepareSwitchConfig(switchStatus deviceswitch.SwitchStatus
 					IsBleEnabled: &enableBle,
 					ThresoldHigh: &high,
 					ThresoldLow:  &low,
+					SwitchMac:    switchStatus.Mac,
 				}
 				lsetup = &dled
 				// saved default config
@@ -193,6 +194,7 @@ func (s *CoreService) prepareSwitchConfig(switchStatus deviceswitch.SwitchStatus
 					BrigthnessCorrectionFactor: &brightnessCorrection,
 					ThresoldPresence:           &thresoldPresence,
 					TemperatureOffset:          &temperatureOffset,
+					SwitchMac:                  switchStatus.Mac,
 				}
 				ssetup = &dsensor
 				// saved default config
@@ -311,7 +313,35 @@ func (s *CoreService) sendGroupCmd(cmd interface{}) {
 }
 
 func (s *CoreService) sendLedCmd(cmd interface{}) {
-	rlog.Info("TODO send command to LED", cmd)
+	cmdLed, _ := core.ToLedCmd(cmd)
+	if cmdLed == nil {
+		rlog.Error("Cannot parse cmd")
+	}
+	//Get correspnding switchMac
+	led := database.GetLedConfig(s.db, cmdLed.Mac)
+	if led == nil {
+		rlog.Error("Cannot find config for " + cmdLed.Mac)
+	}
+	url := "/write/switch/" + led.SwitchMac + "/update/settings"
+	switchSetup := deviceswitch.SwitchConfig{}
+	switchSetup.Mac = led.SwitchMac
+	switchSetup.LedsConfig = make(map[string]driverled.LedConf)
+
+	ledCfg := driverled.LedConf{
+		Mac:      led.Mac,
+		Auto:     &cmdLed.Auto,
+		Setpoint: &cmdLed.Setpoint,
+	}
+	switchSetup.LedsConfig[led.Mac] = ledCfg
+
+	dump, _ := switchSetup.ToJSON()
+	err := s.server.SendCommand(url, dump)
+	if err != nil {
+		rlog.Error("Cannot send update config to " + led.SwitchMac + " on topic: " + url + " err:" + err.Error())
+	} else {
+		rlog.Info("Send update config to " + led.SwitchMac + " on topic: " + url)
+	}
+
 }
 
 func (s *CoreService) readAPIEvents() {
