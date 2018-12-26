@@ -325,65 +325,63 @@ func (api *API) webEvents(w http.ResponseWriter, r *http.Request) {
 	}
 	api.clients[ws] = true
 
-	go func() {
-		for {
-			select {
-			case events := <-api.eventsAPI:
-				for eventType, event := range events {
-					var leds []EventLed
-					var sensors []EventSensor
-					res := strings.Split(eventType, ".")
-					driver := res[0]
-					action := res[1]
-					// Convert Type
-					switch driver {
-					case "sensor":
-						sensor, err := driversensor.ToSensor(event)
+	for {
+		select {
+		case events := <-api.eventsAPI:
+			for eventType, event := range events {
+				var leds []EventLed
+				var sensors []EventSensor
+				res := strings.Split(eventType, ".")
+				driver := res[0]
+				action := res[1]
+				// Convert Type
+				switch driver {
+				case "sensor":
+					sensor, err := driversensor.ToSensor(event)
 
-						if err == nil && sensor != nil {
-							label := ""
-							project := database.GetProjectByMac(api.db, sensor.Mac)
-							if project != nil {
-								label = project.Label
-							}
-							evt := EventSensor{
-								Sensor: *sensor,
-								Label:  label,
-							}
-							sensors = append(sensors, evt)
+					if err == nil && sensor != nil {
+						label := ""
+						project := database.GetProjectByMac(api.db, sensor.Mac)
+						if project != nil {
+							label = project.Label
 						}
-					case "led":
-						led, err := driverled.ToLed(event)
-						if err == nil && led != nil {
-							label := ""
-							project := database.GetProjectByMac(api.db, led.Mac)
-							if project != nil {
-								label = project.Label
-							}
-							evt := EventLed{
-								Led:   *led,
-								Label: label,
-							}
-							leds = append(leds, evt)
+						evt := EventSensor{
+							Sensor: *sensor,
+							Label:  label,
 						}
+						sensors = append(sensors, evt)
 					}
-					evt := make(map[string]EventStatus)
-					evt[action] = EventStatus{
-						Leds:    leds,
-						Sensors: sensors,
+				case "led":
+					led, err := driverled.ToLed(event)
+					if err == nil && led != nil {
+						label := ""
+						project := database.GetProjectByMac(api.db, led.Mac)
+						if project != nil {
+							label = project.Label
+						}
+						evt := EventLed{
+							Led:   *led,
+							Label: label,
+						}
+						leds = append(leds, evt)
 					}
+				}
+				evt := make(map[string]EventStatus)
+				evt[action] = EventStatus{
+					Leds:    leds,
+					Sensors: sensors,
+				}
 
-					for client := range api.clients {
-						if err := client.WriteJSON(evt); err != nil {
-							rlog.Error("Error writing in websocket" + err.Error())
-							client.Close()
-							delete(api.clients, client)
-						}
+				for client := range api.clients {
+					if err := client.WriteJSON(evt); err != nil {
+						rlog.Error("Error writing in websocket" + err.Error())
+						client.Close()
+						delete(api.clients, client)
 					}
 				}
 			}
 		}
-	}()
+	}
 }
 
 func (api *API) swagger() {
