@@ -287,7 +287,26 @@ func (s *CoreService) registerConfig(config core.ServerConfig) {
 func (s *CoreService) updateLedCfg(config interface{}) {
 	cfg, _ := driverled.ToLedConf(config)
 	database.UpdateLedConfig(s.db, *cfg)
-	//TODO send order to switch
+	//Get correspnding switchMac
+	led := database.GetLedConfig(s.db, cfg.Mac)
+	if led == nil {
+		rlog.Error("Cannot find config for " + cfg.Mac)
+		return
+	}
+	url := "/write/switch/" + led.SwitchMac + "/update/settings"
+	switchSetup := deviceswitch.SwitchConfig{}
+	switchSetup.Mac = led.SwitchMac
+	switchSetup.LedsConfig = make(map[string]driverled.LedConf)
+
+	switchSetup.LedsConfig[cfg.Mac] = *cfg
+
+	dump, _ := switchSetup.ToJSON()
+	err := s.server.SendCommand(url, dump)
+	if err != nil {
+		rlog.Error("Cannot send update config to " + led.SwitchMac + " on topic: " + url + " err:" + err.Error())
+	} else {
+		rlog.Info("Send update config to " + led.SwitchMac + " on topic: " + url)
+	}
 }
 
 func (s *CoreService) updateGroupCfg(config interface{}) {
@@ -305,7 +324,26 @@ func (s *CoreService) updateSwitchCfg(config interface{}) {
 func (s *CoreService) updateSensorCfg(config interface{}) {
 	cfg, _ := driversensor.ToSensorConf(config)
 	database.UpdateSensorConfig(s.db, *cfg)
-	//TODO send order to switch
+	//Get correspnding switchMac
+	sensor := database.GetSensorConfig(s.db, cfg.Mac)
+	if sensor == nil {
+		rlog.Error("Cannot find config for " + cfg.Mac)
+		return
+	}
+	url := "/write/switch/" + sensor.SwitchMac + "/update/settings"
+	switchSetup := deviceswitch.SwitchConfig{}
+	switchSetup.Mac = sensor.SwitchMac
+	switchSetup.SensorsConfig = make(map[string]driversensor.SensorConf)
+
+	switchSetup.SensorsConfig[cfg.Mac] = *cfg
+
+	dump, _ := switchSetup.ToJSON()
+	err := s.server.SendCommand(url, dump)
+	if err != nil {
+		rlog.Error("Cannot send update config to " + sensor.SwitchMac + " on topic: " + url + " err:" + err.Error())
+	} else {
+		rlog.Info("Send update config to " + sensor.SwitchMac + " on topic: " + url)
+	}
 }
 
 func (s *CoreService) sendGroupCmd(cmd interface{}) {
@@ -337,6 +375,8 @@ func (s *CoreService) sendLedCmd(cmd interface{}) {
 		Auto:     &auto,
 		Setpoint: &setpoint,
 	}
+	rlog.Info("Ready to send ", ledCfg)
+	rlog.Info("To switch", led.SwitchMac)
 	switchSetup.LedsConfig[led.Mac] = ledCfg
 
 	dump, _ := switchSetup.ToJSON()
@@ -354,6 +394,7 @@ func (s *CoreService) readAPIEvents() {
 		select {
 		case apiEvents := <-s.api.EventsToBackend:
 			for eventType, event := range apiEvents {
+				rlog.Info("get API event", eventType, event)
 				switch eventType {
 				case "led":
 					s.updateLedCfg(event)

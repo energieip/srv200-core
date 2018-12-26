@@ -84,6 +84,7 @@ func (api *API) sendLedCommand(w http.ResponseWriter, req *http.Request) {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error())
 		return
 	}
+	rlog.Info("Received led cmd", led)
 	event := make(map[string]interface{})
 	event["ledCmd"] = led
 	api.EventsToBackend <- event
