@@ -42,6 +42,7 @@ type API struct {
 	eventsAPI       chan map[string]interface{}
 	EventsToBackend chan map[string]interface{}
 	apiMutex        sync.Mutex
+	installMode     *bool
 }
 
 //Status
@@ -87,12 +88,13 @@ type Dump struct {
 }
 
 //InitAPI start API connection
-func InitAPI(db database.Database, eventsAPI chan map[string]interface{}) *API {
+func InitAPI(db database.Database, eventsAPI chan map[string]interface{}, installMode *bool) *API {
 	api := API{
 		db:              db,
 		eventsAPI:       eventsAPI,
 		EventsToBackend: make(chan map[string]interface{}),
 		clients:         make(map[*websocket.Conn]bool),
+		installMode:     installMode,
 		upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
 				return true
@@ -123,6 +125,44 @@ func (api *API) sendError(w http.ResponseWriter, errorCode int, message string) 
 func (api *API) sendCommand(w http.ResponseWriter, req *http.Request) {
 	//TODO
 	api.sendError(w, APIErrorBodyParsing, "Not yet Implemented")
+}
+
+type InstallModeStruct struct {
+	InstallMode bool `json:"installMode"`
+}
+
+func (api *API) setInstallMode(w http.ResponseWriter, req *http.Request) {
+	api.setDefaultHeader(w)
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		api.sendError(w, APIErrorBodyParsing, "Error reading request body")
+		return
+	}
+
+	inputMode := InstallModeStruct{}
+	err = json.Unmarshal([]byte(body), &inputMode)
+	if err != nil {
+		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error())
+		return
+	}
+	*api.installMode = inputMode.InstallMode
+
+	status := InstallModeStruct{
+		InstallMode: *api.installMode,
+	}
+
+	inrec, _ := json.MarshalIndent(status, "", "  ")
+	w.Write(inrec)
+}
+
+func (api *API) getInstallMode(w http.ResponseWriter, req *http.Request) {
+	api.setDefaultHeader(w)
+	status := InstallModeStruct{
+		InstallMode: *api.installMode,
+	}
+
+	inrec, _ := json.MarshalIndent(status, "", "  ")
+	w.Write(inrec)
 }
 
 func (api *API) getStatus(w http.ResponseWriter, req *http.Request) {
@@ -390,6 +430,8 @@ func (api *API) swagger() {
 	router.HandleFunc("/setup/switch/{mac}", api.getSwitchSetup).Methods("GET")
 	router.HandleFunc("/setup/switch/{mac}", api.removeSwitchSetup).Methods("DELETE")
 	router.HandleFunc("/setup/switch", api.setSwitchSetup).Methods("POST")
+	router.HandleFunc("/setup/installMode", api.getInstallMode).Methods("GET")
+	router.HandleFunc("/setup/installMode", api.setInstallMode).Methods("POST")
 
 	//config API
 	router.HandleFunc("/config/led", api.setLedConfig).Methods("POST")

@@ -614,7 +614,7 @@
                 ],
                 "summary": "Update runtime configuration",
                 "description": "Update runtime configuration",
-                "operationId": "setConfig",
+                "operationId": "setConfigs",
                 "produces":[
                     "application/json"
                 ],
@@ -719,7 +719,7 @@
                 ],
                 "summary": "Send command",
                 "description": "Send command",
-                "operationId": "setConfig",
+                "operationId": "sendCommands",
                 "produces":[
                     "application/json"
                 ],
@@ -1180,6 +1180,87 @@
                           "$ref": "#/definitions/Error"
                         }
                       }
+                }
+            }
+        },
+        "/setup/installMode":{
+            "get":{
+                "tags":[
+                    "setup"
+                ],
+                "summary": "Get the current mode",
+                "description": "Dump the current mode",
+                "operationId": "getInstallMode",
+                "produces":[
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema":{
+                            "type": "object",
+                            "properties": {
+                                "installMode": {
+                                    "description": "True will allow every driver",
+                                    "type": "boolean"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "post":{
+                "tags":[
+                    "setup"
+                ],
+                "summary": "Change the current mode",
+                "description": "Change the current mode",
+                "operationId": "setInstallMode",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "installMode",
+                        "in": "body",
+                        "description": "installation mode",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "installMode": {
+                                    "description": "True will allow every driver",
+                                    "type": "boolean"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema":{
+                            "type": "object",
+                            "properties": {
+                                "installMode": {
+                                    "description": "True will allow every driver",
+                                    "type": "boolean"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
                 }
             }
         }
