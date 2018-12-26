@@ -209,6 +209,9 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 
 	lights := database.GetLedsStatus(api.db)
 	lightsConfig := database.GetLedsConfig(api.db)
+	cells := database.GetSensorsStatus(api.db)
+	cellsConfig := database.GetSensorsConfig(api.db)
+
 	ifcs := database.GetIfcs(api.db)
 	for _, ifc := range ifcs {
 		if filterByLabel {
@@ -221,53 +224,34 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 				continue
 			}
 		}
-		dump := DumpLed{}
 
-		led, ok := lights[ifc.Mac]
-		if ok {
-			dump.Status = led
-		}
-
-		config, ok := lightsConfig[ifc.Mac]
-		if ok {
-			dump.Config = config
-		}
-
-		dump.Ifc = ifc
-
-		if filterByLabel {
-			if _, ok := labels[ifc.Label]; !ok {
-				continue
+		switch ifc.DeviceType {
+		case "led":
+			dump := DumpLed{}
+			led, ok := lights[ifc.Mac]
+			if ok {
+				dump.Status = led
 			}
-		}
-		leds = append(leds, dump)
-	}
-
-	cells := database.GetSensorsStatus(api.db)
-	cellsConfig := database.GetSensorsConfig(api.db)
-	for _, sensor := range cells {
-		if filterByMac {
-			if _, ok := macs[sensor.Mac]; !ok {
-				continue
+			config, ok := lightsConfig[ifc.Mac]
+			if ok {
+				dump.Config = config
 			}
-		}
-		cell := DumpSensor{}
-		cell.Status = sensor
-		config, ok := cellsConfig[sensor.Mac]
-		if ok {
-			cell.Config = config
-		}
-		ifc, ok := ifcs[sensor.Mac]
-		if ok {
-			cell.Ifc = ifc
-		}
+			dump.Ifc = ifc
 
-		if filterByLabel {
-			if _, ok := labels[cell.Ifc.Label]; !ok {
-				continue
+			leds = append(leds, dump)
+		case "sensor":
+			dump := DumpSensor{}
+			sensor, ok := cells[ifc.Mac]
+			if ok {
+				dump.Status = sensor
 			}
+			config, ok := cellsConfig[sensor.Mac]
+			if ok {
+				dump.Config = config
+			}
+			dump.Ifc = ifc
+			sensors = append(sensors, dump)
 		}
-		sensors = append(sensors, cell)
 	}
 
 	dump := Dump{
