@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/energieip/common-group-go/pkg/groupmodel"
 	"github.com/energieip/common-led-go/pkg/driverled"
@@ -40,6 +41,7 @@ type API struct {
 	db              database.Database
 	eventsAPI       chan map[string]interface{}
 	EventsToBackend chan map[string]interface{}
+	apiMutex        sync.Mutex
 }
 
 //Status
@@ -356,6 +358,7 @@ func (api *API) webEvents(w http.ResponseWriter, r *http.Request) {
 					Sensors: sensors,
 				}
 
+				api.apiMutex.Lock()
 				for client := range api.clients {
 					if err := client.WriteJSON(evt); err != nil {
 						rlog.Error("Error writing in websocket" + err.Error())
@@ -363,6 +366,7 @@ func (api *API) webEvents(w http.ResponseWriter, r *http.Request) {
 						delete(api.clients, client)
 					}
 				}
+				api.apiMutex.Unlock()
 			}
 		}
 	}
