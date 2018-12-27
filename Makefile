@@ -1,4 +1,4 @@
-COMPONENT=energieip-core
+COMPONENT=energieip-srv200-core
 
 BINARIES=bin/$(COMPONENT)-amd64
 
