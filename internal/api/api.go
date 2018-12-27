@@ -443,6 +443,7 @@ func (api *API) swagger() {
 	//status API
 	router.HandleFunc("/status/sensor/{mac}", api.getSensorStatus).Methods("GET")
 	router.HandleFunc("/status/led/{mac}", api.getLedStatus).Methods("GET")
+	router.HandleFunc("/status/group/{groupID}", api.getGroupStatus).Methods("GET")
 	router.HandleFunc("/status", api.getStatus).Methods("GET")
 
 	//events API

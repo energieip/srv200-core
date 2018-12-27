@@ -136,3 +136,18 @@ func SaveGroupStatus(db Database, status group.GroupStatus) error {
 	}
 	return err
 }
+
+//GetGroupStatus return the group status
+func GetGroupStatus(db Database, grID int) *group.GroupStatus {
+	criteria := make(map[string]interface{})
+	criteria["Group"] = grID
+	stored, err := db.GetRecord(StatusDB, GroupsTable, criteria)
+	if err != nil || stored == nil {
+		return nil
+	}
+	gr, err := group.ToGroupStatus(stored)
+	if err != nil {
+		return nil
+	}
+	return gr
+}

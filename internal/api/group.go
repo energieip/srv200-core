@@ -113,3 +113,21 @@ func (api *API) removeGroupSetup(w http.ResponseWriter, req *http.Request) {
 	}
 	w.Write([]byte(""))
 }
+
+func (api *API) getGroupStatus(w http.ResponseWriter, req *http.Request) {
+	api.setDefaultHeader(w)
+	params := mux.Vars(req)
+	grID := params["groupID"]
+	i, err := strconv.Atoi(grID)
+	if err != nil {
+		api.sendError(w, APIErrorDeviceNotFound, "Group "+grID+" not found")
+		return
+	}
+	res := database.GetGroupStatus(api.db, i)
+	if res == nil {
+		api.sendError(w, APIErrorDeviceNotFound, "Group "+grID+" not found")
+		return
+	}
+	inrec, _ := json.MarshalIndent(res, "", "  ")
+	w.Write(inrec)
+}

@@ -1050,6 +1050,40 @@
                 }
             }
         },
+        "/status/group/{groupID}": {
+            "get": {
+                "tags": [
+                    "status"
+                ],
+                "summary": "Return Group Status",
+                "description": "Return the given group status",
+                "operationId": "getGroupStatus",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[{
+                    "name": "groupID",
+                    "in": "path",
+                    "description": "group ID",
+                    "required": true,
+                    "type": "string"
+                }],
+                "responses": {
+                    "200": {
+                        "description": "sucessful operation",
+                        "schema":{
+                            "$ref": "#/definitions/GroupStatus"
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                      }
+                }
+            }
+        },
         "/status/led/{mac}":{
             "get":{
                 "tags":[
@@ -1649,6 +1683,89 @@
                 "presence": {
                     "type": "integer",
                     "description": "Presence in Second"
+                }
+            }
+        },
+        "GroupStatus":{
+            "type": "object",
+            "required": [
+                "group"
+            ],
+            "properties": {
+                "group": {
+                    "type": "integer",
+                    "description": "Associate group"
+                },
+                "auto": {
+                    "type": "boolean",
+                    "description": "Automatic mode"
+                },
+                "watchdog": {
+                    "type": "integer",
+                    "description": "watchdog in second"
+                },
+                "slopeStart": {
+                    "type": "integer",
+                    "description": "slopeStart in second"
+                },
+                "slopeStop": {
+                    "type": "integer",
+                    "description": "slopeStop in second"
+                },
+                "sensorRule": {
+                    "type": "string",
+                    "enum": [
+                        "average",
+                        "min",
+                        "max"
+                    ],
+                    "default": "average",
+                    "description": "Rule when multiple sensors are presents in the same group"
+                },
+                "correctionInterval": {
+                    "type": "integer",
+                    "description": "correctionInterval in second"
+                },
+                "leds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Array of LED mac addresses"
+                },
+                "sensors": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Array of Sensor mac addresses"
+                },
+                "groupRules": {
+                    "$ref": "#/definitions/GroupRule"
+                },
+                "error": {
+                    "type": "integer",
+                    "description": "Error code value: 0 means no error"
+                },
+                "presence": {
+                    "type": "boolean",
+                    "description": "is set to true if at least one sensor detect a movment"
+                },
+                "timeToAuto": {
+                    "type": "integer",
+                    "description": "Remaining time before switching back to auto mode"
+                },
+                "timeToLeave": {
+                    "type": "integer",
+                    "description": "Remaining time before considering the room as empty"
+                },
+                "setpointLeds": {
+                    "type": "integer",
+                    "description": "Current led setpoint value in percentage"
+                },
+                "friendlyName": {
+                    "type": "string",
+                    "description": "Sensor FriendlyName"
                 }
             }
         },
