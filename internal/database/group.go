@@ -50,6 +50,29 @@ func GetGroupConfig(db Database, grID int) *group.GroupConfig {
 	return gr
 }
 
+//GetGroupSwitchs return the corresponding running switch list
+func GetGroupSwitchs(db Database, grID int) map[string]bool {
+	switchs := make(map[string]bool)
+	criteria := make(map[string]interface{})
+	criteria["Group"] = grID
+	stored, err := db.GetRecord(ConfigDB, GroupsTable, criteria)
+	if err != nil || stored == nil {
+		return nil
+	}
+	gr, err := group.ToGroupConfig(stored)
+	if err != nil {
+		return nil
+	}
+	for _, ledMac := range gr.Leds {
+		led := GetLedConfig(db, ledMac)
+		if led == nil {
+			continue
+		}
+		switchs[led.SwitchMac] = true
+	}
+	return switchs
+}
+
 //UpdateGroupConfig update led config in database
 func UpdateGroupConfig(db Database, config group.GroupConfig) error {
 	criteria := make(map[string]interface{})

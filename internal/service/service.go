@@ -315,7 +315,20 @@ func (s *CoreService) updateLedCfg(config interface{}) {
 func (s *CoreService) updateGroupCfg(config interface{}) {
 	cfg, _ := groupmodel.ToGroupConfig(config)
 	database.UpdateGroupConfig(s.db, *cfg)
-	//TODO send order to switch
+	for sw := range database.GetGroupSwitchs(s.db, cfg.Group) {
+		url := "/write/switch/" + sw + "/update/settings"
+		switchSetup := deviceswitch.SwitchConfig{}
+		switchSetup.Mac = sw
+		switchSetup.Groups = make(map[int]groupmodel.GroupConfig)
+		switchSetup.Groups[cfg.Group] = *cfg
+		dump, _ := switchSetup.ToJSON()
+		err := s.server.SendCommand(url, dump)
+		if err != nil {
+			rlog.Error("Cannot send update group config to " + sw + " on topic: " + url + " err:" + err.Error())
+		} else {
+			rlog.Info("Send update group config to " + sw + " on topic: " + url)
+		}
+	}
 }
 
 func (s *CoreService) updateSwitchCfg(config interface{}) {
