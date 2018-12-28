@@ -84,6 +84,30 @@ func UpdateGroupConfig(db Database, config group.GroupConfig) error {
 	if config.FriendlyName != nil {
 		setup.FriendlyName = config.FriendlyName
 	}
+
+	if config.CorrectionInterval != nil {
+		setup.CorrectionInterval = config.CorrectionInterval
+	}
+
+	if config.Watchdog != nil {
+		setup.Watchdog = config.Watchdog
+	}
+
+	if config.SlopeStart != nil {
+		setup.SlopeStart = config.SlopeStart
+	}
+
+	if config.SlopeStop != nil {
+		setup.SlopeStop = config.SlopeStop
+	}
+
+	if config.SensorRule != nil {
+		setup.SensorRule = config.SensorRule
+	}
+
+	if config.Auto != nil {
+		setup.Auto = config.Auto
+	}
 	return db.UpdateRecord(ConfigDB, GroupsTable, dbID, setup)
 }
 
