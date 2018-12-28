@@ -77,6 +77,10 @@ func UpdateLedConfig(db Database, config led.LedConf) error {
 		setup.ThresholdHigh = config.ThresholdHigh
 	}
 
+	if config.ThresholdLow != nil {
+		setup.ThresholdLow = config.ThresholdLow
+	}
+
 	if config.FriendlyName != nil {
 		setup.FriendlyName = config.FriendlyName
 	}
@@ -87,6 +91,14 @@ func UpdateLedConfig(db Database, config led.LedConf) error {
 
 	if config.IsBleEnabled != nil {
 		setup.IsBleEnabled = config.IsBleEnabled
+	}
+
+	if config.DumpFrequency != nil {
+		setup.DumpFrequency = *config.DumpFrequency
+	}
+
+	if config.Watchdog != nil {
+		setup.Watchdog = config.Watchdog
 	}
 
 	return db.UpdateRecord(ConfigDB, LedsTable, dbID, setup)

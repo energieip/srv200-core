@@ -132,6 +132,7 @@ func (s *CoreService) prepareSwitchConfig(switchStatus deviceswitch.SwitchStatus
 	setup.IsConfigured = &isConfigured
 
 	defaultGroup := 0
+	dumpFreq := 1
 	defaultWatchdog := 600
 
 	setup.LedsSetup = make(map[string]driverled.LedSetup)
@@ -159,6 +160,7 @@ func (s *CoreService) prepareSwitchConfig(switchStatus deviceswitch.SwitchStatus
 					ThresholdHigh: &high,
 					ThresholdLow:  &low,
 					SwitchMac:     switchStatus.Mac,
+					DumpFrequency: dumpFreq,
 				}
 				lsetup = &dled
 				// saved default config
@@ -182,7 +184,7 @@ func (s *CoreService) prepareSwitchConfig(switchStatus deviceswitch.SwitchStatus
 	for mac, sensor := range switchStatus.Sensors {
 		if !sensor.IsConfigured {
 			ssetup := database.GetSensorConfig(s.db, mac)
-			if ssetup == nil {
+			if ssetup == nil && s.installMode {
 				enableBle := true
 				brightnessCorrection := 1
 				thresholdPresence := 10
@@ -195,6 +197,7 @@ func (s *CoreService) prepareSwitchConfig(switchStatus deviceswitch.SwitchStatus
 					ThresholdPresence:          &thresholdPresence,
 					TemperatureOffset:          &temperatureOffset,
 					SwitchMac:                  switchStatus.Mac,
+					DumpFrequency:              dumpFreq,
 				}
 				ssetup = &dsensor
 				// saved default config

@@ -75,6 +75,10 @@ func UpdateSensorConfig(db Database, sensorConfig sensor.SensorConf) error {
 		sensorSetup.ThresholdPresence = sensorConfig.ThresholdPresence
 	}
 
+	if sensorConfig.DumpFrequency != nil {
+		sensorSetup.DumpFrequency = *sensorConfig.DumpFrequency
+	}
+
 	return db.UpdateRecord(ConfigDB, SensorsTable, dbID, sensorSetup)
 }
 
