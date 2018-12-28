@@ -256,10 +256,6 @@ func (s *CoreService) sendSwitchUpdateConfig(sw deviceswitch.SwitchStatus) {
 	}
 }
 
-func (s *CoreService) sendSwitchCommand(cmd core.ServerCmd) {
-	rlog.Info("Send switch cmd", cmd)
-}
-
 func (s *CoreService) registerSwitchStatus(switchStatus deviceswitch.SwitchStatus) {
 	for _, led := range switchStatus.Leds {
 		database.SaveLedStatus(s.db, led)
@@ -444,11 +440,6 @@ func (s *CoreService) Run() error {
 					s.registerConfig(event)
 				}
 			}
-		case installModeEvent := <-s.server.EventsInstallMode:
-			s.installMode = installModeEvent
-			rlog.Info("Installation mode status is now:", s.installMode)
-		case cmd := <-s.server.EventsCmd:
-			s.sendSwitchCommand(cmd)
 		}
 	}
 }
