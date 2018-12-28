@@ -151,14 +151,14 @@ func (s *CoreService) prepareSwitchConfig(switchStatus deviceswitch.SwitchStatus
 				low := 0
 				high := 100
 				dled := driverled.LedSetup{
-					Mac:          led.Mac,
-					IMax:         100,
-					Group:        &defaultGroup,
-					Watchdog:     &defaultWatchdog,
-					IsBleEnabled: &enableBle,
-					ThresoldHigh: &high,
-					ThresoldLow:  &low,
-					SwitchMac:    switchStatus.Mac,
+					Mac:           led.Mac,
+					IMax:          100,
+					Group:         &defaultGroup,
+					Watchdog:      &defaultWatchdog,
+					IsBleEnabled:  &enableBle,
+					ThresholdHigh: &high,
+					ThresholdLow:  &low,
+					SwitchMac:     switchStatus.Mac,
 				}
 				lsetup = &dled
 				// saved default config
@@ -185,14 +185,14 @@ func (s *CoreService) prepareSwitchConfig(switchStatus deviceswitch.SwitchStatus
 			if ssetup == nil {
 				enableBle := true
 				brightnessCorrection := 1
-				thresoldPresence := 10
+				thresholdPresence := 10
 				temperatureOffset := 0
 				dsensor := driversensor.SensorSetup{
 					Mac:                        sensor.Mac,
 					Group:                      &defaultGroup,
 					IsBleEnabled:               &enableBle,
 					BrightnessCorrectionFactor: &brightnessCorrection,
-					ThresoldPresence:           &thresoldPresence,
+					ThresholdPresence:          &thresholdPresence,
 					TemperatureOffset:          &temperatureOffset,
 					SwitchMac:                  switchStatus.Mac,
 				}

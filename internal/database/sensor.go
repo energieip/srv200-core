@@ -71,8 +71,8 @@ func UpdateSensorConfig(db Database, sensorConfig sensor.SensorConf) error {
 		sensorSetup.TemperatureOffset = sensorConfig.TemperatureOffset
 	}
 
-	if sensorConfig.ThresoldPresence != nil {
-		sensorSetup.ThresoldPresence = sensorConfig.ThresoldPresence
+	if sensorConfig.ThresholdPresence != nil {
+		sensorSetup.ThresholdPresence = sensorConfig.ThresholdPresence
 	}
 
 	return db.UpdateRecord(ConfigDB, SensorsTable, dbID, sensorSetup)

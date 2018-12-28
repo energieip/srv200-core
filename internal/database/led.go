@@ -73,8 +73,8 @@ func UpdateLedConfig(db Database, config led.LedConf) error {
 		return NewError("Device " + config.Mac + "not found")
 	}
 
-	if config.ThresoldHigh != nil {
-		setup.ThresoldHigh = config.ThresoldHigh
+	if config.ThresholdHigh != nil {
+		setup.ThresholdHigh = config.ThresholdHigh
 	}
 
 	if config.FriendlyName != nil {

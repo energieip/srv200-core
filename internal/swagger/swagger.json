@@ -1372,9 +1372,9 @@
                     "type": "string",
                     "description": "Sensor FriendlyName"
                 },
-                "thresoldPresence": {
+                "thresholdPresence": {
                     "type": "integer",
-                    "description": "Thresold presence"
+                    "description": "Threshold presence"
                 },
                 "temperatureOffset": {
                     "type": "integer",
@@ -1416,9 +1416,9 @@
                     "type": "string",
                     "description": "Sensor FriendlyName"
                 },
-                "thresoldPresence": {
+                "thresholdPresence": {
                     "type": "integer",
-                    "description": "Thresold presence"
+                    "description": "Threshold presence"
                 },
                 "temperatureOffset": {
                     "type": "integer",
@@ -1461,13 +1461,13 @@
                     "type": "integer",
                     "description": "watchdog in second"
                 },
-                "thresoldLow": {
+                "thresholdLow": {
                     "type": "integer",
-                    "description": "Thresold low"
+                    "description": "Threshold low in percentage"
                 },
-                "thresoldHigh": {
+                "thresholdHigh": {
                     "type": "integer",
-                    "description": "Thresold high"
+                    "description": "Threshold high in percentage"
                 },
                 "friendlyName": {
                     "type": "string",
@@ -1509,13 +1509,13 @@
                     "type": "integer",
                     "description": "watchdog in second"
                 },
-                "thresoldLow": {
+                "thresholdLow": {
                     "type": "integer",
-                    "description": "Thresold low"
+                    "description": "Threshold low"
                 },
-                "thresoldHigh": {
+                "thresholdHigh": {
                     "type": "integer",
-                    "description": "Thresold high"
+                    "description": "Threshold high"
                 },
                 "friendlyName": {
                     "type": "string",
@@ -2016,9 +2016,9 @@
                     "type": "integer",
                     "description": "Brightness correction factor"
                 },
-                "thresoldPresence": {
+                "thresholdPresence": {
                     "type": "integer",
-                    "description": "Thresold presence"
+                    "description": "Threshold presence in Seconds"
                 },
                 "temperatureOffset": {
                     "type": "integer",
@@ -2211,13 +2211,13 @@
                     "type": "integer",
                     "description": "Setpoint value in percentage"
                 },
-                "thresoldLow": {
+                "thresholdLow": {
                     "type": "integer",
-                    "description": "Thresold low"
+                    "description": "Threshold low in percentage"
                 },
-                "thresoldHigh": {
+                "thresholdHigh": {
                     "type": "integer",
-                    "description": "Thresold high"
+                    "description": "Threshold high in percentage"
                 },
                 "daisyChainEnabled": {
                     "type": "boolean",
