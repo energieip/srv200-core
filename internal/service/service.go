@@ -191,7 +191,7 @@ func (s *CoreService) prepareSwitchConfig(switchStatus deviceswitch.SwitchStatus
 					Mac:                        sensor.Mac,
 					Group:                      &defaultGroup,
 					IsBleEnabled:               &enableBle,
-					BrigthnessCorrectionFactor: &brightnessCorrection,
+					BrightnessCorrectionFactor: &brightnessCorrection,
 					ThresoldPresence:           &thresoldPresence,
 					TemperatureOffset:          &temperatureOffset,
 					SwitchMac:                  switchStatus.Mac,
@@ -266,6 +266,10 @@ func (s *CoreService) registerSwitchStatus(switchStatus deviceswitch.SwitchStatu
 	}
 	for _, group := range switchStatus.Groups {
 		database.SaveGroupStatus(s.db, group)
+		event := make(map[string]interface{})
+		evtType := "group." + EventUpdate
+		event[evtType] = group
+		s.eventsAPI <- event
 	}
 
 	for _, service := range switchStatus.Services {

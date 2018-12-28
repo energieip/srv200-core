@@ -63,8 +63,9 @@ type EventSensor struct {
 
 //EventStatus
 type EventStatus struct {
-	Leds    []EventLed    `json:"leds"`
-	Sensors []EventSensor `json:"sensors"`
+	Leds    []EventLed               `json:"leds"`
+	Sensors []EventSensor            `json:"sensors"`
+	Groups  []groupmodel.GroupStatus `json:"groups"`
 }
 
 //DumpLed
@@ -357,6 +358,7 @@ func (api *API) webEvents(w http.ResponseWriter, r *http.Request) {
 			for eventType, event := range events {
 				var leds []EventLed
 				var sensors []EventSensor
+				var groups []groupmodel.GroupStatus
 				res := strings.Split(eventType, ".")
 				driver := res[0]
 				action := res[1]
@@ -391,11 +393,17 @@ func (api *API) webEvents(w http.ResponseWriter, r *http.Request) {
 						}
 						leds = append(leds, evt)
 					}
+				case "group":
+					group, err := groupmodel.ToGroupStatus(event)
+					if err == nil && group != nil {
+						groups = append(groups, *group)
+					}
 				}
 				evt := make(map[string]EventStatus)
 				evt[action] = EventStatus{
 					Leds:    leds,
 					Sensors: sensors,
+					Groups:  groups,
 				}
 
 				api.apiMutex.Lock()

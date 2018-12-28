@@ -1364,7 +1364,7 @@
                     "type": "boolean",
                     "description": "bluetooth activation"
                 },
-                "brigthnessCorrectionFactor": {
+                "brightnessCorrectionFactor": {
                     "type": "integer",
                     "description": "Brightness correction factor"
                 },
@@ -1408,7 +1408,7 @@
                     "type": "boolean",
                     "description": "bluetooth activation"
                 },
-                "brigthnessCorrectionFactor": {
+                "brightnessCorrectionFactor": {
                     "type": "integer",
                     "description": "Brightness correction factor"
                 },
@@ -1678,7 +1678,7 @@
             "properties": {
                 "brightness": {
                     "type": "integer",
-                    "description": "Brigthness in Lux"
+                    "description": "Brightness in Lux"
                 },
                 "presence": {
                     "type": "integer",
@@ -1749,7 +1749,7 @@
                 },
                 "presence": {
                     "type": "boolean",
-                    "description": "is set to true if at least one sensor detect a movment"
+                    "description": "is set to true if at least one sensor detect a movement"
                 },
                 "timeToAuto": {
                     "type": "integer",
@@ -2012,7 +2012,7 @@
                     "type": "boolean",
                     "description": "Presence"
                 },
-                "brigthnessCorrectionFactor": {
+                "brightnessCorrectionFactor": {
                     "type": "integer",
                     "description": "Brightness correction factor"
                 },
@@ -2024,9 +2024,9 @@
                     "type": "integer",
                     "description": "Temperature offset correcion"
                 },
-                "brigthnessRaw": {
+                "brightnessRaw": {
                     "type": "integer",
-                    "description": "Brigthness Raw value in Lux"
+                    "description": "Brightness Raw value in Lux"
                 },
                 "lastMovement": {
                     "type": "integer",
@@ -2066,6 +2066,13 @@
                         "$ref": "#/definitions/SensorStatus"
                     },
                     "description": "List of sensors status"
+                },
+                "groups": {
+                    "type": "array",
+                    "items":{
+                        "$ref": "#/definitions/GroupStatus"
+                    },
+                    "description": "List of groups status"
                 }
             }
         },

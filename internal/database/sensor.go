@@ -51,8 +51,8 @@ func UpdateSensorConfig(db Database, sensorConfig sensor.SensorConf) error {
 		return NewError("Device " + sensorConfig.Mac + "not found")
 	}
 
-	if sensorConfig.BrigthnessCorrectionFactor != nil {
-		sensorSetup.BrigthnessCorrectionFactor = sensorConfig.BrigthnessCorrectionFactor
+	if sensorConfig.BrightnessCorrectionFactor != nil {
+		sensorSetup.BrightnessCorrectionFactor = sensorConfig.BrightnessCorrectionFactor
 	}
 
 	if sensorConfig.FriendlyName != nil {
