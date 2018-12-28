@@ -9,9 +9,9 @@ type LedCmd struct {
 }
 
 type GroupCmd struct {
-	Group       int  `json:"group"`
-	Auto        bool `json:"auto"`
-	LedSetpoint int  `json:"ledSetPoint"`
+	Group        int  `json:"group"`
+	Auto         bool `json:"auto"`
+	SetpointLeds int  `json:"setpointLeds"`
 }
 
 // ToJSON dump LedCmd struct

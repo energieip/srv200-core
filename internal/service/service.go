@@ -363,7 +363,30 @@ func (s *CoreService) updateSensorCfg(config interface{}) {
 }
 
 func (s *CoreService) sendGroupCmd(cmd interface{}) {
-	rlog.Info("TODO send command to group", cmd)
+	cmdGr, _ := core.ToGroupCmd(cmd)
+	if cmdGr == nil {
+		rlog.Error("Cannot parse cmd")
+		return
+	}
+	for sw := range database.GetGroupSwitchs(s.db, cmdGr.Group) {
+		url := "/write/switch/" + sw + "/update/settings"
+		switchSetup := deviceswitch.SwitchConfig{}
+		switchSetup.Mac = sw
+		switchSetup.Groups = make(map[int]groupmodel.GroupConfig)
+		cfg := groupmodel.GroupConfig{}
+		cfg.Group = cmdGr.Group
+		cfg.Auto = &cmdGr.Auto
+		cfg.SetpointLeds = &cmdGr.SetpointLeds
+		switchSetup.Groups[cmdGr.Group] = cfg
+		dump, _ := switchSetup.ToJSON()
+		err := s.server.SendCommand(url, dump)
+		if err != nil {
+			rlog.Error("Cannot send update group config to " + sw + " on topic: " + url + " err:" + err.Error())
+		} else {
+			rlog.Info("Send update group config to " + sw + " on topic: " + url)
+		}
+	}
+
 }
 
 func (s *CoreService) sendLedCmd(cmd interface{}) {
