@@ -381,9 +381,9 @@ func (s *CoreService) sendGroupCmd(cmd interface{}) {
 		dump, _ := switchSetup.ToJSON()
 		err := s.server.SendCommand(url, dump)
 		if err != nil {
-			rlog.Error("Cannot send update group config to " + sw + " on topic: " + url + " err:" + err.Error())
+			rlog.Error("Cannot group command to " + sw + " on topic: " + url + " err:" + err.Error())
 		} else {
-			rlog.Info("Send update group config to " + sw + " on topic: " + url)
+			rlog.Info("Send group command to " + sw + " on topic: " + url + " dump:" + dump)
 		}
 	}
 
