@@ -410,9 +410,9 @@ func (s *CoreService) sendLedCmd(cmd interface{}) {
 	setpoint := cmdLed.Setpoint
 
 	ledCfg := driverled.LedConf{
-		Mac:      led.Mac,
-		Auto:     &auto,
-		Setpoint: &setpoint,
+		Mac:            led.Mac,
+		Auto:           &auto,
+		SetpointManual: &setpoint,
 	}
 	rlog.Info("Ready to send ", ledCfg)
 	rlog.Info("To switch", led.SwitchMac)
