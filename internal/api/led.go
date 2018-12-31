@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 
 	"github.com/energieip/common-led-go/pkg/driverled"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
@@ -63,6 +64,18 @@ func (api *API) setLedConfig(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error())
 		return
+	}
+
+	if led.Group != nil {
+		if *led.Group < 0 {
+			api.sendError(w, APIErrorInvalidValue, "Invalid groupID "+strconv.Itoa(*led.Group))
+			return
+		}
+		gr := database.GetGroupConfig(api.db, *led.Group)
+		if gr == nil {
+			api.sendError(w, APIErrorDeviceNotFound, "Group "+strconv.Itoa(*led.Group)+" not found")
+			return
+		}
 	}
 	event := make(map[string]interface{})
 	event["led"] = led

@@ -289,12 +289,49 @@ func (s *CoreService) registerConfig(config core.ServerConfig) {
 
 func (s *CoreService) updateLedCfg(config interface{}) {
 	cfg, _ := driverled.ToLedConf(config)
+	if cfg == nil {
+		rlog.Error("Cannot parse ")
+		return
+	}
+
+	oldLed := database.GetLedConfig(s.db, cfg.Mac)
+	if oldLed == nil {
+		rlog.Error("Cannot find config for " + cfg.Mac)
+		return
+	}
+
 	database.UpdateLedConfig(s.db, *cfg)
-	//Get correspnding switchMac
+	//Get corresponding switchMac
 	led := database.GetLedConfig(s.db, cfg.Mac)
 	if led == nil {
 		rlog.Error("Cannot find config for " + cfg.Mac)
 		return
+	}
+
+	if led.Group != nil {
+		if oldLed.Group != led.Group {
+			if oldLed.Group != nil {
+				rlog.Info("Update old group", *oldLed.Group)
+				gr := database.GetGroupConfig(s.db, *oldLed.Group)
+				if gr != nil {
+					for i, v := range gr.Leds {
+						if v == led.Mac {
+							gr.Leds = append(gr.Leds[:i], gr.Leds[i+1:]...)
+							break
+						}
+					}
+					rlog.Info("Old group will be ", gr.Leds)
+					s.updateGroupCfg(gr)
+				}
+			}
+			rlog.Info("Update new group", *led.Group)
+			grNew := database.GetGroupConfig(s.db, *led.Group)
+			if grNew != nil {
+				grNew.Leds = append(grNew.Leds, cfg.Mac)
+				rlog.Info("new group will be", grNew.Leds)
+				s.updateGroupCfg(grNew)
+			}
+		}
 	}
 	url := "/write/switch/" + led.SwitchMac + "/update/settings"
 	switchSetup := deviceswitch.SwitchConfig{}
@@ -308,7 +345,7 @@ func (s *CoreService) updateLedCfg(config interface{}) {
 	if err != nil {
 		rlog.Error("Cannot send update config to " + led.SwitchMac + " on topic: " + url + " err:" + err.Error())
 	} else {
-		rlog.Info("Send update config to " + led.SwitchMac + " on topic: " + url)
+		rlog.Info("Send update config to " + led.SwitchMac + " on topic: " + url + " dump:" + dump)
 	}
 }
 
@@ -326,7 +363,7 @@ func (s *CoreService) updateGroupCfg(config interface{}) {
 		if err != nil {
 			rlog.Error("Cannot send update group config to " + sw + " on topic: " + url + " err:" + err.Error())
 		} else {
-			rlog.Info("Send update group config to " + sw + " on topic: " + url)
+			rlog.Info("Send update group config to " + sw + " on topic: " + url + " dump:" + dump)
 		}
 	}
 }

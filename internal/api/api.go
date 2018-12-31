@@ -23,6 +23,7 @@ const (
 	APIErrorDeviceNotFound = 1
 	APIErrorBodyParsing    = 2
 	APIErrorDatabase       = 3
+	APIErrorInvalidValue   = 4
 
 	FilterTypeAll    = "all"
 	FilterTypeSensor = "sensor"
