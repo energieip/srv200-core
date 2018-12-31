@@ -376,6 +376,13 @@ func (s *CoreService) updateSwitchCfg(config interface{}) {
 
 func (s *CoreService) updateSensorCfg(config interface{}) {
 	cfg, _ := driversensor.ToSensorConf(config)
+
+	oldSensor := database.GetSensorConfig(s.db, cfg.Mac)
+	if oldSensor == nil {
+		rlog.Error("Cannot find config for " + cfg.Mac)
+		return
+	}
+
 	database.UpdateSensorConfig(s.db, *cfg)
 	//Get correspnding switchMac
 	sensor := database.GetSensorConfig(s.db, cfg.Mac)
@@ -383,6 +390,33 @@ func (s *CoreService) updateSensorCfg(config interface{}) {
 		rlog.Error("Cannot find config for " + cfg.Mac)
 		return
 	}
+
+	if sensor.Group != nil {
+		if oldSensor.Group != sensor.Group {
+			if oldSensor.Group != nil {
+				rlog.Info("Update old group", *oldSensor.Group)
+				gr := database.GetGroupConfig(s.db, *oldSensor.Group)
+				if gr != nil {
+					for i, v := range gr.Sensors {
+						if v == sensor.Mac {
+							gr.Sensors = append(gr.Sensors[:i], gr.Sensors[i+1:]...)
+							break
+						}
+					}
+					rlog.Info("Old group will be ", gr.Sensors)
+					s.updateGroupCfg(gr)
+				}
+			}
+			rlog.Info("Update new group", *sensor.Group)
+			grNew := database.GetGroupConfig(s.db, *sensor.Group)
+			if grNew != nil {
+				grNew.Sensors = append(grNew.Sensors, cfg.Mac)
+				rlog.Info("new group will be", grNew.Sensors)
+				s.updateGroupCfg(grNew)
+			}
+		}
+	}
+
 	url := "/write/switch/" + sensor.SwitchMac + "/update/settings"
 	switchSetup := deviceswitch.SwitchConfig{}
 	switchSetup.Mac = sensor.SwitchMac
