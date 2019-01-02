@@ -94,7 +94,7 @@ func (api *API) sendGroupCommand(w http.ResponseWriter, req *http.Request) {
 	event := make(map[string]interface{})
 	event["groupCmd"] = gr
 	api.EventsToBackend <- event
-	w.Write([]byte(""))
+	w.Write([]byte("{}"))
 }
 
 func (api *API) removeGroupSetup(w http.ResponseWriter, req *http.Request) {

@@ -1673,19 +1673,6 @@
                 }
             }
         },
-        "GroupRule":{
-            "type": "object",
-            "properties": {
-                "brightness": {
-                    "type": "integer",
-                    "description": "Brightness in Lux"
-                },
-                "presence": {
-                    "type": "integer",
-                    "description": "Presence in Second"
-                }
-            }
-        },
         "GroupStatus":{
             "type": "object",
             "required": [
@@ -1740,8 +1727,13 @@
                     },
                     "description": "Array of Sensor mac addresses"
                 },
-                "groupRules": {
-                    "$ref": "#/definitions/GroupRule"
+                "ruleBrightness": {
+                    "type": "integer",
+                    "description": "Brightness in Lux"
+                },
+                "rulePresence": {
+                    "type": "integer",
+                    "description": "Presence in Second"
                 },
                 "error": {
                     "type": "integer",
@@ -1823,8 +1815,13 @@
                     },
                     "description": "Array of Sensor mac addresses"
                 },
-                "groupRules": {
-                    "$ref": "#/definitions/GroupRule"
+                "ruleBrightness": {
+                    "type": "integer",
+                    "description": "Brightness in Lux"
+                },
+                "rulePresence": {
+                    "type": "integer",
+                    "description": "Presence in Second"
                 },
                 "friendlyName": {
                     "type": "string",
@@ -1886,8 +1883,13 @@
                     },
                     "description": "Array of Sensor mac addresses"
                 },
-                "groupRules": {
-                    "$ref": "#/definitions/GroupRule"
+                "ruleBrightness": {
+                    "type": "integer",
+                    "description": "Brightness in Lux"
+                },
+                "rulePresence": {
+                    "type": "integer",
+                    "description": "Presence in Second"
                 },
                 "friendlyName": {
                     "type": "string",
