@@ -108,3 +108,22 @@ func GetSwitchConfig(db Database, mac string) *core.SwitchSetup {
 	}
 	return sw
 }
+
+//GetCluster get cluster Config list
+func GetCluster(db Database, cluster int) []core.SwitchSetup {
+	var res []core.SwitchSetup
+	criteria := make(map[string]interface{})
+	criteria["Cluster"] = cluster
+	swStored, err := db.GetRecords(ConfigDB, SwitchsTable, criteria)
+	if err != nil || swStored == nil {
+		return res
+	}
+	for _, elt := range swStored {
+		sw, err := core.ToSwitchSetup(elt)
+		if err != nil || sw == nil {
+			continue
+		}
+		res = append(res, *sw)
+	}
+	return res
+}

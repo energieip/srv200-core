@@ -8,6 +8,7 @@ import (
 	"github.com/energieip/common-sensor-go/pkg/driversensor"
 	pkg "github.com/energieip/common-service-go/pkg/service"
 	"github.com/energieip/common-switch-go/pkg/deviceswitch"
+	"github.com/energieip/common-tools-go/pkg/tools"
 	"github.com/energieip/srv200-coreservice-go/internal/api"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
@@ -29,7 +30,8 @@ const (
 type CoreService struct {
 	server          network.ServerNetwork //Remote server
 	db              database.Database
-	mac             string //Switch mac address
+	mac             string
+	ip              string
 	events          chan string
 	installMode     bool
 	eventsAPI       chan map[string]core.EventStatus
@@ -42,6 +44,7 @@ type CoreService struct {
 func (s *CoreService) Initialize(confFile string) error {
 	clientID := "Server"
 	s.installMode = false
+	s.mac, s.ip = tools.GetNetworkInfo()
 	s.events = make(chan string)
 	s.eventsAPI = make(chan map[string]core.EventStatus)
 	s.bufAPI = make(map[string]core.EventStatus)
@@ -101,7 +104,7 @@ func (s *CoreService) prepareSetupSwitchConfig(switchStatus deviceswitch.SwitchS
 	setup.Mac = switchStatus.Mac
 	setup.FriendlyName = config.FriendlyName
 	setup.IsConfigured = &isConfigured
-	setup.Services = database.GetServiceConfigs(s.db)
+	setup.Services = database.GetServiceConfigs(s.db, switchStatus.IP, s.ip, config.Cluster)
 	if s.installMode {
 		switchSetup := core.SwitchSetup{}
 		switchSetup.Mac = setup.Mac
@@ -221,7 +224,7 @@ func (s *CoreService) sendSwitchSetup(sw deviceswitch.SwitchStatus) {
 	if err != nil {
 		rlog.Error("Cannot send setup config to " + sw.Mac + " on topic: " + url + " err:" + err.Error())
 	} else {
-		rlog.Info("Send update config to " + sw.Mac + " on topic: " + url)
+		rlog.Info("Send update config to " + sw.Mac + " on topic: " + url + " dump:" + dump)
 	}
 }
 
@@ -239,7 +242,7 @@ func (s *CoreService) sendSwitchUpdateConfig(sw deviceswitch.SwitchStatus) {
 	if err != nil {
 		rlog.Error("Cannot send update config to " + sw.Mac + " on topic: " + url + " err:" + err.Error())
 	} else {
-		rlog.Info("Send update config to " + sw.Mac + " on topic: " + url)
+		rlog.Info("Send update config to " + sw.Mac + " on topic: " + url + " dump:" + dump)
 	}
 }
 
