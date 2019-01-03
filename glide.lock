@@ -1,5 +1,5 @@
 hash: 7873f75061b03685fab1d37fa10ae2d9249507813e75d280fc0acfb9b629147f
-updated: 2019-01-02T14:44:54.096447815+01:00
+updated: 2019-01-02T16:20:47.962877965+01:00
 imports:
 - name: github.com/cenkalti/backoff
   version: 62661b46c4093e2c1f38d943e663db1a29873e80
@@ -28,11 +28,11 @@ imports:
   subpackages:
   - pkg/driversensor
 - name: github.com/energieip/common-service-go
-  version: b961505ab34088b37ffe57641fbb5451dcb03e83
+  version: e2dfe9087587d0a4e506cd2b0523c927d9fa3bca
   subpackages:
   - pkg/service
 - name: github.com/energieip/common-switch-go
-  version: 867442a8f7005f5e312c062252b71bde61f50ffa
+  version: 5f66b4d452e2efb6c251351d580fe42e8dff00de
   subpackages:
   - pkg/deviceswitch
 - name: github.com/golang/protobuf

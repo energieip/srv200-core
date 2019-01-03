@@ -23,10 +23,6 @@ const (
 
 	UrlStatus = "status/dump"
 	UrlHello  = "setup/hello"
-
-	EventRemove = "remove"
-	EventUpdate = "update"
-	EventAdd    = "add"
 )
 
 //CoreService content
@@ -36,9 +32,10 @@ type CoreService struct {
 	mac             string //Switch mac address
 	events          chan string
 	installMode     bool
-	eventsAPI       chan map[string]interface{}
+	eventsAPI       chan map[string]core.EventStatus
 	eventsToBackend chan map[string]interface{}
 	api             *api.API
+	bufAPI          map[string]core.EventStatus
 }
 
 //Initialize service
@@ -46,7 +43,8 @@ func (s *CoreService) Initialize(confFile string) error {
 	clientID := "Server"
 	s.installMode = false
 	s.events = make(chan string)
-	s.eventsAPI = make(chan map[string]interface{})
+	s.eventsAPI = make(chan map[string]core.EventStatus)
+	s.bufAPI = make(map[string]core.EventStatus)
 
 	conf, err := pkg.ReadServiceConfig(confFile)
 	if err != nil {
@@ -122,6 +120,7 @@ func (s *CoreService) prepareSetupSwitchConfig(switchStatus deviceswitch.SwitchS
 func (s *CoreService) prepareSwitchConfig(switchStatus deviceswitch.SwitchStatus) *deviceswitch.SwitchConfig {
 	config := database.GetSwitchConfig(s.db, switchStatus.Mac)
 	if config == nil && !s.installMode {
+		rlog.Warn("Cannot find configuration for switch", switchStatus.Mac)
 		return nil
 	}
 
@@ -168,16 +167,10 @@ func (s *CoreService) prepareSwitchConfig(switchStatus deviceswitch.SwitchStatus
 			}
 			if lsetup != nil {
 				setup.LedsSetup[mac] = *lsetup
-				event := make(map[string]interface{})
-				evtType := "led." + EventAdd
-				event[evtType] = led
-				s.eventsAPI <- event
 			}
+			s.prepareAPIEvent(EventAdd, LedElt, led)
 		} else {
-			event := make(map[string]interface{})
-			evtType := "led." + EventUpdate
-			event[evtType] = led
-			s.eventsAPI <- event
+			s.prepareAPIEvent(EventUpdate, LedElt, led)
 		}
 	}
 
@@ -205,16 +198,10 @@ func (s *CoreService) prepareSwitchConfig(switchStatus deviceswitch.SwitchStatus
 			}
 			if ssetup != nil {
 				setup.SensorsSetup[mac] = *ssetup
-				event := make(map[string]interface{})
-				evtType := "sensor." + EventAdd
-				event[evtType] = sensor
-				s.eventsAPI <- event
 			}
+			s.prepareAPIEvent(EventAdd, SensorElt, sensor)
 		} else {
-			event := make(map[string]interface{})
-			evtType := "sensor." + EventUpdate
-			event[evtType] = sensor
-			s.eventsAPI <- event
+			s.prepareAPIEvent(EventUpdate, SensorElt, sensor)
 		}
 	}
 	return &setup
@@ -265,10 +252,7 @@ func (s *CoreService) registerSwitchStatus(switchStatus deviceswitch.SwitchStatu
 	}
 	for _, group := range switchStatus.Groups {
 		database.SaveGroupStatus(s.db, group)
-		event := make(map[string]interface{})
-		evtType := "group." + EventUpdate
-		event[evtType] = group
-		s.eventsAPI <- event
+		s.prepareAPIEvent(EventUpdate, GroupElt, group)
 	}
 
 	for _, service := range switchStatus.Services {
@@ -526,6 +510,7 @@ func (s *CoreService) readAPIEvents() {
 
 //Run service mainloop
 func (s *CoreService) Run() error {
+	go s.pushAPIEvent()
 	go s.readAPIEvents()
 	for {
 		select {

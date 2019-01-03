@@ -40,7 +40,7 @@ type API struct {
 	clients         map[*websocket.Conn]bool
 	upgrader        websocket.Upgrader
 	db              database.Database
-	eventsAPI       chan map[string]interface{}
+	eventsAPI       chan map[string]core.EventStatus
 	EventsToBackend chan map[string]interface{}
 	apiMutex        sync.Mutex
 	installMode     *bool
@@ -50,23 +50,6 @@ type API struct {
 type Status struct {
 	Leds    []driverled.Led       `json:"leds"`
 	Sensors []driversensor.Sensor `json:"sensors"`
-}
-
-type EventLed struct {
-	Led   driverled.Led `json:"led"`
-	Label string        `json:"label"`
-}
-
-type EventSensor struct {
-	Sensor driversensor.Sensor `json:"sensor"`
-	Label  string              `json:"label"`
-}
-
-//EventStatus
-type EventStatus struct {
-	Leds    []EventLed               `json:"leds"`
-	Sensors []EventSensor            `json:"sensors"`
-	Groups  []groupmodel.GroupStatus `json:"groups"`
 }
 
 //DumpLed
@@ -90,7 +73,7 @@ type Dump struct {
 }
 
 //InitAPI start API connection
-func InitAPI(db database.Database, eventsAPI chan map[string]interface{}, installMode *bool) *API {
+func InitAPI(db database.Database, eventsAPI chan map[string]core.EventStatus, installMode *bool) *API {
 	api := API{
 		db:              db,
 		eventsAPI:       eventsAPI,
@@ -355,68 +338,16 @@ func (api *API) webEvents(w http.ResponseWriter, r *http.Request) {
 
 	for {
 		select {
-		case events := <-api.eventsAPI:
-			for eventType, event := range events {
-				var leds []EventLed
-				var sensors []EventSensor
-				var groups []groupmodel.GroupStatus
-				res := strings.Split(eventType, ".")
-				driver := res[0]
-				action := res[1]
-				// Convert Type
-				switch driver {
-				case "sensor":
-					sensor, err := driversensor.ToSensor(event)
-
-					if err == nil && sensor != nil {
-						label := ""
-						project := database.GetProjectByMac(api.db, sensor.Mac)
-						if project != nil {
-							label = project.Label
-						}
-						evt := EventSensor{
-							Sensor: *sensor,
-							Label:  label,
-						}
-						sensors = append(sensors, evt)
-					}
-				case "led":
-					led, err := driverled.ToLed(event)
-					if err == nil && led != nil {
-						label := ""
-						project := database.GetProjectByMac(api.db, led.Mac)
-						if project != nil {
-							label = project.Label
-						}
-						evt := EventLed{
-							Led:   *led,
-							Label: label,
-						}
-						leds = append(leds, evt)
-					}
-				case "group":
-					group, err := groupmodel.ToGroupStatus(event)
-					if err == nil && group != nil {
-						groups = append(groups, *group)
-					}
+		case event := <-api.eventsAPI:
+			api.apiMutex.Lock()
+			for client := range api.clients {
+				if err := client.WriteJSON(event); err != nil {
+					rlog.Error("Error writing in websocket" + err.Error())
+					client.Close()
+					delete(api.clients, client)
 				}
-				evt := make(map[string]EventStatus)
-				evt[action] = EventStatus{
-					Leds:    leds,
-					Sensors: sensors,
-					Groups:  groups,
-				}
-
-				api.apiMutex.Lock()
-				for client := range api.clients {
-					if err := client.WriteJSON(evt); err != nil {
-						rlog.Error("Error writing in websocket" + err.Error())
-						client.Close()
-						delete(api.clients, client)
-					}
-				}
-				api.apiMutex.Unlock()
 			}
+			api.apiMutex.Unlock()
 		}
 	}
 }
