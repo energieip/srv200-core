@@ -357,54 +357,55 @@ func (api *API) swagger() {
 	sh := http.StripPrefix("/swaggerui/", http.FileServer(http.Dir("/var/www/swaggerui/")))
 	router.PathPrefix("/swaggerui/").Handler(sh)
 
+	apiV1 := "/v1.0"
 	//setup API
-	router.HandleFunc("/setup/sensor/{mac}", api.getSensorSetup).Methods("GET")
-	router.HandleFunc("/setup/sensor/{mac}", api.removeSensorSetup).Methods("DELETE")
-	router.HandleFunc("/setup/sensor", api.setSensorSetup).Methods("POST")
-	router.HandleFunc("/setup/led/{mac}", api.getLedSetup).Methods("GET")
-	router.HandleFunc("/setup/led/{mac}", api.removeLedSetup).Methods("DELETE")
-	router.HandleFunc("/setup/led", api.setLedSetup).Methods("POST")
-	router.HandleFunc("/setup/group/{groupID}", api.getGroupSetup).Methods("GET")
-	router.HandleFunc("/setup/group/{groupID}", api.removeGroupSetup).Methods("DELETE")
-	router.HandleFunc("/setup/group", api.setGroupSetup).Methods("POST")
-	router.HandleFunc("/setup/switch/{mac}", api.getSwitchSetup).Methods("GET")
-	router.HandleFunc("/setup/switch/{mac}", api.removeSwitchSetup).Methods("DELETE")
-	router.HandleFunc("/setup/switch", api.setSwitchSetup).Methods("POST")
-	router.HandleFunc("/setup/installMode", api.getInstallMode).Methods("GET")
-	router.HandleFunc("/setup/installMode", api.setInstallMode).Methods("POST")
+	router.HandleFunc(apiV1+"/setup/sensor/{mac}", api.getSensorSetup).Methods("GET")
+	router.HandleFunc(apiV1+"/setup/sensor/{mac}", api.removeSensorSetup).Methods("DELETE")
+	router.HandleFunc(apiV1+"/setup/sensor", api.setSensorSetup).Methods("POST")
+	router.HandleFunc(apiV1+"/setup/led/{mac}", api.getLedSetup).Methods("GET")
+	router.HandleFunc(apiV1+"/setup/led/{mac}", api.removeLedSetup).Methods("DELETE")
+	router.HandleFunc(apiV1+"/setup/led", api.setLedSetup).Methods("POST")
+	router.HandleFunc(apiV1+"/setup/group/{groupID}", api.getGroupSetup).Methods("GET")
+	router.HandleFunc(apiV1+"/setup/group/{groupID}", api.removeGroupSetup).Methods("DELETE")
+	router.HandleFunc(apiV1+"/setup/group", api.setGroupSetup).Methods("POST")
+	router.HandleFunc(apiV1+"/setup/switch/{mac}", api.getSwitchSetup).Methods("GET")
+	router.HandleFunc(apiV1+"/setup/switch/{mac}", api.removeSwitchSetup).Methods("DELETE")
+	router.HandleFunc(apiV1+"/setup/switch", api.setSwitchSetup).Methods("POST")
+	router.HandleFunc(apiV1+"/setup/installMode", api.getInstallMode).Methods("GET")
+	router.HandleFunc(apiV1+"/setup/installMode", api.setInstallMode).Methods("POST")
 
 	//config API
-	router.HandleFunc("/config/led", api.setLedConfig).Methods("POST")
-	router.HandleFunc("/config/sensor", api.setSensorConfig).Methods("POST")
-	router.HandleFunc("/config/group", api.setGroupConfig).Methods("POST")
-	router.HandleFunc("/config/switch", api.setSwitchConfig).Methods("POST")
-	router.HandleFunc("/configs", api.setConfig).Methods("POST")
+	router.HandleFunc(apiV1+"/config/led", api.setLedConfig).Methods("POST")
+	router.HandleFunc(apiV1+"/config/sensor", api.setSensorConfig).Methods("POST")
+	router.HandleFunc(apiV1+"/config/group", api.setGroupConfig).Methods("POST")
+	router.HandleFunc(apiV1+"/config/switch", api.setSwitchConfig).Methods("POST")
+	router.HandleFunc(apiV1+"/configs", api.setConfig).Methods("POST")
 
 	//status API
-	router.HandleFunc("/status/sensor/{mac}", api.getSensorStatus).Methods("GET")
-	router.HandleFunc("/status/led/{mac}", api.getLedStatus).Methods("GET")
-	router.HandleFunc("/status/group/{groupID}", api.getGroupStatus).Methods("GET")
-	router.HandleFunc("/status", api.getStatus).Methods("GET")
+	router.HandleFunc(apiV1+"/status/sensor/{mac}", api.getSensorStatus).Methods("GET")
+	router.HandleFunc(apiV1+"/status/led/{mac}", api.getLedStatus).Methods("GET")
+	router.HandleFunc(apiV1+"/status/group/{groupID}", api.getGroupStatus).Methods("GET")
+	router.HandleFunc(apiV1+"/status", api.getStatus).Methods("GET")
 
 	//events API
-	router.HandleFunc("/events", api.webEvents)
+	router.HandleFunc(apiV1+"/events", api.webEvents)
 
 	//command API
-	router.HandleFunc("/command/led", api.sendLedCommand).Methods("POST")
-	router.HandleFunc("/command/group", api.sendGroupCommand).Methods("POST")
-	router.HandleFunc("/commands", api.sendCommand).Methods("POST")
+	router.HandleFunc(apiV1+"/command/led", api.sendLedCommand).Methods("POST")
+	router.HandleFunc(apiV1+"/command/group", api.sendGroupCommand).Methods("POST")
+	router.HandleFunc(apiV1+"/commands", api.sendCommand).Methods("POST")
 
 	//project API
-	router.HandleFunc("/project/ifcInfo/{label}", api.getIfcInfo).Methods("GET")
-	router.HandleFunc("/project/ifcInfo/{label}", api.removeIfcInfo).Methods("DELETE")
-	router.HandleFunc("/project/ifcInfo", api.setIfcInfo).Methods("POST")
-	router.HandleFunc("/project/model/{modelName}", api.getModelInfo).Methods("GET")
-	router.HandleFunc("/project/model/{modelName}", api.removeModelInfo).Methods("DELETE")
-	router.HandleFunc("/project/model", api.setModelInfo).Methods("POST")
-	router.HandleFunc("/project", api.getIfc).Methods("GET")
+	router.HandleFunc(apiV1+"/project/ifcInfo/{label}", api.getIfcInfo).Methods("GET")
+	router.HandleFunc(apiV1+"/project/ifcInfo/{label}", api.removeIfcInfo).Methods("DELETE")
+	router.HandleFunc(apiV1+"/project/ifcInfo", api.setIfcInfo).Methods("POST")
+	router.HandleFunc(apiV1+"/project/model/{modelName}", api.getModelInfo).Methods("GET")
+	router.HandleFunc(apiV1+"/project/model/{modelName}", api.removeModelInfo).Methods("DELETE")
+	router.HandleFunc(apiV1+"/project/model", api.setModelInfo).Methods("POST")
+	router.HandleFunc(apiV1+"/project", api.getIfc).Methods("GET")
 
 	//dump API
-	router.HandleFunc("/dump", api.getDump).Methods("GET")
+	router.HandleFunc(apiV1+"/dump", api.getDump).Methods("GET")
 
 	log.Fatal(http.ListenAndServe(":8888", router))
 }

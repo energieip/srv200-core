@@ -46,6 +46,7 @@
     "schemes":[
         "http"
     ],
+    "basePath": "/v1.0",
     "paths":{
         "/setup/sensor/{mac}":{
             "get":{
