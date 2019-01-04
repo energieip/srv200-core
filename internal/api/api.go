@@ -66,10 +66,18 @@ type DumpSensor struct {
 	Config driversensor.SensorSetup `json:"config"`
 }
 
+//DumpSwitch
+type DumpSwitch struct {
+	Ifc    core.IfcInfo     `json:"ifc"`
+	Status core.SwitchDump  `json:"status"`
+	Config core.SwitchSetup `json:"config"`
+}
+
 //Dump
 type Dump struct {
 	Leds    []DumpLed    `json:"leds"`
 	Sensors []DumpSensor `json:"sensors"`
+	Switchs []DumpSwitch `json:"switchs"`
 }
 
 //InitAPI start API connection
@@ -212,6 +220,7 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 	api.setDefaultHeader(w)
 	var leds []DumpLed
 	var sensors []DumpSensor
+	var switchs []DumpSwitch
 	macs := make(map[string]bool)
 	labels := make(map[string]bool)
 	filterByMac := false
@@ -238,6 +247,8 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 	lightsConfig := database.GetLedsConfig(api.db)
 	cells := database.GetSensorsStatus(api.db)
 	cellsConfig := database.GetSensorsConfig(api.db)
+	switchElts := database.GetSwitchsDump(api.db)
+	switchEltsConfig := database.GetSwitchsConfig(api.db)
 
 	ifcs := database.GetIfcs(api.db)
 	for _, ifc := range ifcs {
@@ -272,18 +283,31 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 			if ok {
 				dump.Status = sensor
 			}
-			config, ok := cellsConfig[sensor.Mac]
+			config, ok := cellsConfig[ifc.Mac]
 			if ok {
 				dump.Config = config
 			}
 			dump.Ifc = ifc
 			sensors = append(sensors, dump)
+		case "switch":
+			dump := DumpSwitch{}
+			switchElt, ok := switchElts[ifc.Mac]
+			if ok {
+				dump.Status = switchElt
+			}
+			config, ok := switchEltsConfig[ifc.Mac]
+			if ok {
+				dump.Config = config
+			}
+			dump.Ifc = ifc
+			switchs = append(switchs, dump)
 		}
 	}
 
 	dump := Dump{
 		Leds:    leds,
 		Sensors: sensors,
+		Switchs: switchs,
 	}
 
 	inrec, _ := json.MarshalIndent(dump, "", "  ")

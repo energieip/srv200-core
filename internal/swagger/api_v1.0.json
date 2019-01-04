@@ -1696,7 +1696,8 @@
                     "type": "string",
                     "enum": [
                         "led",
-                        "sensor"
+                        "sensor",
+                        "switch"
                     ],
                     "default": "led",
                     "description": "device category LED|Sensor|etc."
@@ -2128,6 +2129,13 @@
                         "$ref": "#/definitions/SensorDump"
                     },
                     "description": "List of sensors dump"
+                },
+                "switchs": {
+                    "type": "array",
+                    "items":{
+                        "$ref": "#/definitions/SwitchDump"
+                    },
+                    "description": "List of switchs dump"
                 }
             }
         },
@@ -2159,6 +2167,69 @@
                     "$ref": "#/definitions/SensorSetup"
                 }
 
+            }
+        },
+        "SwitchDump": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "$ref": "#/definitions/SwitchStatus"
+                },
+                "ifc": {
+                    "$ref": "#/definitions/IfcInfo"
+                },
+                "config": {
+                    "$ref": "#/definitions/SwitchConfig"
+                }
+
+            }
+        },
+        "SwitchStatus": {
+            "type": "object",
+            "required": [
+                "mac"
+            ],
+            "properties": {
+                "mac": {
+                    "type": "string",
+                    "description": "LED mac address"
+                },
+                "ip": {
+                    "type": "string",
+                    "description": "Led IP address"
+                },
+                "cluster": {
+                    "type": "integer",
+                    "description": "Associate cluster"
+                },
+                "protocol": {
+                    "type": "string",
+                    "description": "Sensor communication protocol"
+                },
+                "topic": {
+                    "type": "string",
+                    "description": "Sensor communication topic"
+                },
+                "isConfigured": {
+                    "type": "boolean",
+                    "description": "Is the sensor configured"
+                },
+                "error": {
+                    "type": "integer",
+                    "description": "Error code value: 0 means no error"
+                },
+                "friendlyName": {
+                    "type": "string",
+                    "description": "Sensor FriendlyName"
+                },
+                "dumpFrequency": {
+                    "type": "integer",
+                    "description": "Dump frequency by default: 1s"
+                },
+                "lastSystemUpgradeDate": {
+                    "type": "string",
+                    "description": "Last system upgrade date"
+                }
             }
         },
         "LedStatus": {

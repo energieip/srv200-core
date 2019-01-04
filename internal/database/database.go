@@ -6,7 +6,6 @@ import (
 	led "github.com/energieip/common-led-go/pkg/driverled"
 	sensor "github.com/energieip/common-sensor-go/pkg/driversensor"
 	pkg "github.com/energieip/common-service-go/pkg/service"
-	sdevice "github.com/energieip/common-switch-go/pkg/deviceswitch"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/romana/rlog"
 )
@@ -38,11 +37,6 @@ func NewError(text string) error {
 }
 
 type Database = database.DatabaseInterface
-
-type switchDump struct {
-	sdevice.Switch
-	ErrorCode *int `json:"errorCode"`
-}
 
 //ConnectDatabase plug datbase
 func ConnectDatabase(ip, port string) (*Database, error) {
@@ -81,7 +75,7 @@ func ConnectDatabase(ip, port string) (*Database, error) {
 			tableCfg[LedsTable] = led.Led{}
 			tableCfg[SensorsTable] = sensor.Sensor{}
 			tableCfg[GroupsTable] = group.GroupStatus{}
-			tableCfg[SwitchsTable] = switchDump{}
+			tableCfg[SwitchsTable] = core.SwitchDump{}
 			tableCfg[ServicesTable] = pkg.ServiceStatus{}
 		}
 		for tableName, objs := range tableCfg {

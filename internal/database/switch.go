@@ -7,7 +7,7 @@ import (
 
 //SaveSwitchStatus dump switch status in database
 func SaveSwitchStatus(db Database, status sdevice.SwitchStatus) error {
-	swStatus := switchDump{}
+	swStatus := core.SwitchDump{}
 	swStatus.Mac = status.Mac
 	swStatus.IP = status.IP
 	swStatus.ErrorCode = status.ErrorCode
@@ -107,6 +107,40 @@ func GetSwitchConfig(db Database, mac string) *core.SwitchSetup {
 		return nil
 	}
 	return sw
+}
+
+//GetSwitchsConfig return the switch config list
+func GetSwitchsConfig(db Database) map[string]core.SwitchSetup {
+	switchs := map[string]core.SwitchSetup{}
+	stored, err := db.FetchAllRecords(ConfigDB, SwitchsTable)
+	if err != nil || stored == nil {
+		return switchs
+	}
+	for _, l := range stored {
+		sw, err := core.ToSwitchSetup(l)
+		if err != nil || sw == nil {
+			continue
+		}
+		switchs[sw.Mac] = *sw
+	}
+	return switchs
+}
+
+//GetSwitchsDump return the switch status list
+func GetSwitchsDump(db Database) map[string]core.SwitchDump {
+	switchs := map[string]core.SwitchDump{}
+	stored, err := db.FetchAllRecords(StatusDB, SwitchsTable)
+	if err != nil || stored == nil {
+		return switchs
+	}
+	for _, l := range stored {
+		sw, err := core.ToSwitchDump(l)
+		if err != nil || sw == nil {
+			continue
+		}
+		switchs[sw.Mac] = *sw
+	}
+	return switchs
 }
 
 //GetCluster get cluster Config list
