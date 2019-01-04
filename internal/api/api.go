@@ -356,6 +356,10 @@ type APIInfo struct {
 	Versions []string `json:"versions"`
 }
 
+type APIFunctions struct {
+	Functions []string `json:"functions"`
+}
+
 func (api *API) getAPIs(w http.ResponseWriter, req *http.Request) {
 	api.setDefaultHeader(w)
 	versions := []string{"v1.0"}
@@ -366,12 +370,45 @@ func (api *API) getAPIs(w http.ResponseWriter, req *http.Request) {
 	w.Write(inrec)
 }
 
+func (api *API) getV1Functions(w http.ResponseWriter, req *http.Request) {
+	api.setDefaultHeader(w)
+	apiV1 := "/v1.0"
+	functions := []string{apiV1 + "/setup/sensor/{mac}", apiV1 + "/setup/sensor",
+		apiV1 + "/setup/led/{mac}", apiV1 + "/setup/led", apiV1 + "/setup/group/{groupID}",
+		apiV1 + "/setup/group", apiV1 + "/setup/switch/{mac}", apiV1 + "/setup/switch",
+		apiV1 + "/setup/installMode", apiV1 + "/config/led", apiV1 + "/config/sensor",
+		apiV1 + "/config/group", apiV1 + "/config/switch", apiV1 + "/configs", apiV1 + "/status/sensor/{mac}",
+		apiV1 + "/status/led/{mac}", apiV1 + "/status/group/{groupID}", apiV1 + "/status",
+		apiV1 + "/events", apiV1 + "/command/led", apiV1 + "/command/group", apiV1 + "/commands",
+		apiV1 + "/project/ifcInfo/{label}", apiV1 + "/project/ifcInfo", apiV1 + "/project/model/{modelName}",
+		apiV1 + "/project/model", apiV1 + "/project", apiV1 + "/dump",
+	}
+	apiInfo := APIFunctions{
+		Functions: functions,
+	}
+	inrec, _ := json.MarshalIndent(apiInfo, "", "  ")
+	w.Write(inrec)
+}
+
+func (api *API) getFunctions(w http.ResponseWriter, req *http.Request) {
+	api.setDefaultHeader(w)
+	functions := []string{"/versions"}
+	apiInfo := APIFunctions{
+		Functions: functions,
+	}
+	inrec, _ := json.MarshalIndent(apiInfo, "", "  ")
+	w.Write(inrec)
+}
+
 func (api *API) swagger() {
 	router := mux.NewRouter()
 	sh := http.StripPrefix("/swaggerui/", http.FileServer(http.Dir("/var/www/swaggerui/")))
 	router.PathPrefix("/swaggerui/").Handler(sh)
 
+	// API v1.0
 	apiV1 := "/v1.0"
+	router.HandleFunc(apiV1+"/functions", api.getV1Functions).Methods("GET")
+
 	//setup API
 	router.HandleFunc(apiV1+"/setup/sensor/{mac}", api.getSensorSetup).Methods("GET")
 	router.HandleFunc(apiV1+"/setup/sensor/{mac}", api.removeSensorSetup).Methods("DELETE")
@@ -423,6 +460,7 @@ func (api *API) swagger() {
 
 	//unversionned API
 	router.HandleFunc("/versions", api.getAPIs).Methods("GET")
+	router.HandleFunc("/functions", api.getFunctions).Methods("GET")
 
 	log.Fatal(http.ListenAndServe(":8888", router))
 }

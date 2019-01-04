@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "GTB server API",
+        "description": "GTB server API unversioned",
         "version": "0.0",
         "title": "GTB Swagger",
         "termsOfService": "http://swagger.io/terms/",
@@ -33,6 +33,39 @@
                             "properties": {
                                 "versions": {
                                     "description": "list of available APIs",
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/functions":{
+            "get":{
+                "summary": "Return the list of available API functions",
+                "description": "Return the list of available API functions",
+                "operationId": "getFunctions",
+                "produces":[
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "sucessful operation",
+                        "schema":{
+                            "type": "object",
+                            "properties": {
+                                "functions": {
+                                    "description": "list of available functions",
                                     "type": "array",
                                     "items": {
                                         "type": "string"
