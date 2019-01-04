@@ -325,7 +325,7 @@ func (api *API) setConfig(w http.ResponseWriter, req *http.Request) {
 		event["switch"] = sw
 	}
 	api.EventsToBackend <- event
-	w.Write([]byte(""))
+	w.Write([]byte("{}"))
 }
 
 func (api *API) webEvents(w http.ResponseWriter, r *http.Request) {
@@ -350,6 +350,20 @@ func (api *API) webEvents(w http.ResponseWriter, r *http.Request) {
 			api.apiMutex.Unlock()
 		}
 	}
+}
+
+type APIInfo struct {
+	Versions []string `json:"versions"`
+}
+
+func (api *API) getAPIs(w http.ResponseWriter, req *http.Request) {
+	api.setDefaultHeader(w)
+	versions := []string{"v1.0"}
+	apiInfo := APIInfo{
+		Versions: versions,
+	}
+	inrec, _ := json.MarshalIndent(apiInfo, "", "  ")
+	w.Write(inrec)
 }
 
 func (api *API) swagger() {
@@ -406,6 +420,9 @@ func (api *API) swagger() {
 
 	//dump API
 	router.HandleFunc(apiV1+"/dump", api.getDump).Methods("GET")
+
+	//unversionned API
+	router.HandleFunc("/versions", api.getAPIs).Methods("GET")
 
 	log.Fatal(http.ListenAndServe(":8888", router))
 }
