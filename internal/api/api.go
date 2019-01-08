@@ -115,11 +115,6 @@ func (api *API) sendError(w http.ResponseWriter, errorCode int, message string) 
 		http.StatusInternalServerError)
 }
 
-func (api *API) sendCommand(w http.ResponseWriter, req *http.Request) {
-	//TODO
-	api.sendError(w, APIErrorBodyParsing, "Not yet Implemented")
-}
-
 type InstallModeStruct struct {
 	InstallMode bool `json:"installMode"`
 }

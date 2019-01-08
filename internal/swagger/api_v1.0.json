@@ -740,41 +740,6 @@
                 }
             }
         },
-        "/commands":{
-            "post":{
-                "tags":[
-                    "command"
-                ],
-                "summary": "Send command",
-                "description": "Send command",
-                "operationId": "sendCommands",
-                "produces":[
-                    "application/json"
-                ],
-                "parameters":[
-                    {
-                        "name": "config",
-                        "in": "body",
-                        "description": "Command",
-                        "required": false,
-                        "schema": {
-                            "$ref": "#/definitions/Command"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "sucessful operation"
-                    },
-                    "default": {
-                        "description": "unexpected error",
-                        "schema": {
-                          "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            }
-        },
         "/project/ifcInfo/{label}":{
             "get":{
                 "tags":[
@@ -1353,23 +1318,6 @@
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/SensorConfig"
-                    }
-                }
-            }
-        },
-        "Command":{
-            "type": "object",
-            "properties": {
-                "groups": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/GroupCommand"
-                    }
-                },
-                "leds": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/LedCommand"
                     }
                 }
             }
