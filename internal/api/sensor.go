@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/energieip/common-sensor-go/pkg/driversensor"
+	ds "github.com/energieip/common-sensor-go/pkg/driversensor"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
 	"github.com/gorilla/mux"
 	"github.com/romana/rlog"
@@ -36,7 +36,7 @@ func (api *API) setSensorSetup(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	sensor := driversensor.SensorSetup{}
+	sensor := ds.SensorSetup{}
 	err = json.Unmarshal([]byte(body), &sensor)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error())
@@ -57,7 +57,7 @@ func (api *API) setSensorConfig(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	sensor := driversensor.SensorConf{}
+	sensor := ds.SensorConf{}
 	err = json.Unmarshal([]byte(body), &sensor)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error())

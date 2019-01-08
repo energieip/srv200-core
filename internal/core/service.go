@@ -1,6 +1,10 @@
 package core
 
-import "encoding/json"
+import (
+	"encoding/json"
+
+	pkg "github.com/energieip/common-service-go/pkg/service"
+)
 
 //Service describe the link between the object in the building map and the configuration
 type Service struct {
@@ -10,6 +14,12 @@ type Service struct {
 	PackageName        string   `json:"packageName"`        //DebianPackageName
 	PersistentDataPath string   `json:"persistentDataPath"` // link to store persistent data
 	ConfigPath         string   `json:"configPath"`
+}
+
+//ServiceDump content
+type ServiceDump struct {
+	pkg.ServiceStatus
+	SwitchMac string `json:"switchMac"`
 }
 
 // ToJSON dump ToService struct

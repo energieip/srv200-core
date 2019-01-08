@@ -6,11 +6,10 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/energieip/common-group-go/pkg/groupmodel"
+	gm "github.com/energieip/common-group-go/pkg/groupmodel"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
 	"github.com/gorilla/mux"
-	"github.com/romana/rlog"
 )
 
 func (api *API) readGroupConfig(w http.ResponseWriter, grID int) {
@@ -36,25 +35,7 @@ func (api *API) getGroupSetup(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) setGroupSetup(w http.ResponseWriter, req *http.Request) {
-	api.setDefaultHeader(w)
-
-	body, err := ioutil.ReadAll(req.Body)
-	if err != nil {
-		api.sendError(w, APIErrorBodyParsing, "Error reading request body")
-		return
-	}
-
-	gr := groupmodel.GroupConfig{}
-	err = json.Unmarshal([]byte(body), &gr)
-	if err != nil {
-		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error())
-		return
-	}
-
-	rlog.Info("Try to save ", gr)
-	database.SaveGroupConfig(api.db, gr)
-
-	api.readGroupConfig(w, gr.Group)
+	api.setGroupConfig(w, req)
 }
 
 func (api *API) setGroupConfig(w http.ResponseWriter, req *http.Request) {
@@ -65,7 +46,7 @@ func (api *API) setGroupConfig(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	gr := groupmodel.GroupConfig{}
+	gr := gm.GroupConfig{}
 	err = json.Unmarshal([]byte(body), &gr)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error())
@@ -74,7 +55,7 @@ func (api *API) setGroupConfig(w http.ResponseWriter, req *http.Request) {
 	event := make(map[string]interface{})
 	event["group"] = gr
 	api.EventsToBackend <- event
-	w.Write([]byte(""))
+	w.Write([]byte("{}"))
 }
 
 func (api *API) sendGroupCommand(w http.ResponseWriter, req *http.Request) {
@@ -111,7 +92,7 @@ func (api *API) removeGroupSetup(w http.ResponseWriter, req *http.Request) {
 		api.sendError(w, APIErrorDeviceNotFound, "Group "+grID+" not found")
 		return
 	}
-	w.Write([]byte(""))
+	w.Write([]byte("{}"))
 }
 
 func (api *API) getGroupStatus(w http.ResponseWriter, req *http.Request) {

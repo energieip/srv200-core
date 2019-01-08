@@ -2,9 +2,9 @@ package database
 
 import (
 	"github.com/energieip/common-database-go/pkg/database"
-	group "github.com/energieip/common-group-go/pkg/groupmodel"
-	led "github.com/energieip/common-led-go/pkg/driverled"
-	sensor "github.com/energieip/common-sensor-go/pkg/driversensor"
+	gm "github.com/energieip/common-group-go/pkg/groupmodel"
+	dl "github.com/energieip/common-led-go/pkg/driverled"
+	ds "github.com/energieip/common-sensor-go/pkg/driversensor"
 	pkg "github.com/energieip/common-service-go/pkg/service"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/romana/rlog"
@@ -64,17 +64,17 @@ func ConnectDatabase(ip, port string) (*Database, error) {
 
 		tableCfg := make(map[string]interface{})
 		if dbName == ConfigDB {
-			tableCfg[LedsTable] = led.LedSetup{}
-			tableCfg[SensorsTable] = sensor.SensorSetup{}
-			tableCfg[GroupsTable] = group.GroupConfig{}
-			tableCfg[SwitchsTable] = core.SwitchSetup{}
+			tableCfg[LedsTable] = dl.LedSetup{}
+			tableCfg[SensorsTable] = ds.SensorSetup{}
+			tableCfg[GroupsTable] = gm.GroupConfig{}
+			tableCfg[SwitchsTable] = core.SwitchConfig{}
 			tableCfg[ServicesTable] = pkg.Service{}
 			tableCfg[ModelsTable] = core.Model{}
 			tableCfg[ProjectsTable] = core.Project{}
 		} else {
-			tableCfg[LedsTable] = led.Led{}
-			tableCfg[SensorsTable] = sensor.Sensor{}
-			tableCfg[GroupsTable] = group.GroupStatus{}
+			tableCfg[LedsTable] = dl.Led{}
+			tableCfg[SensorsTable] = ds.Sensor{}
+			tableCfg[GroupsTable] = gm.GroupStatus{}
 			tableCfg[SwitchsTable] = core.SwitchDump{}
 			tableCfg[ServicesTable] = pkg.ServiceStatus{}
 		}

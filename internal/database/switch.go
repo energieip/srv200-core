@@ -1,12 +1,12 @@
 package database
 
 import (
-	sdevice "github.com/energieip/common-switch-go/pkg/deviceswitch"
+	sd "github.com/energieip/common-switch-go/pkg/deviceswitch"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 )
 
 //SaveSwitchStatus dump switch status in database
-func SaveSwitchStatus(db Database, status sdevice.SwitchStatus) error {
+func SaveSwitchStatus(db Database, status sd.SwitchStatus) error {
 	swStatus := core.SwitchDump{}
 	swStatus.Mac = status.Mac
 	swStatus.IP = status.IP
@@ -60,6 +60,13 @@ func UpdateSwitchConfig(db Database, config core.SwitchConfig) error {
 	}
 
 	setup.FriendlyName = config.FriendlyName
+	if config.DumpFrequency != nil {
+		setup.DumpFrequency = config.DumpFrequency
+	}
+
+	setup.IP = config.IP
+	setup.Cluster = config.Cluster
+
 	return db.UpdateRecord(ConfigDB, SwitchsTable, dbID, setup)
 }
 
@@ -71,7 +78,7 @@ func RemoveSwitchConfig(db Database, mac string) error {
 }
 
 //SaveSwitchConfig register switch config in database
-func SaveSwitchConfig(db Database, sw core.SwitchSetup) error {
+func SaveSwitchConfig(db Database, sw core.SwitchConfig) error {
 	var dbID string
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = sw.Mac
@@ -95,14 +102,14 @@ func SaveSwitchConfig(db Database, sw core.SwitchSetup) error {
 }
 
 //GetSwitchConfig get switch Config
-func GetSwitchConfig(db Database, mac string) *core.SwitchSetup {
+func GetSwitchConfig(db Database, mac string) *core.SwitchConfig {
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = mac
 	swStored, err := db.GetRecord(ConfigDB, SwitchsTable, criteria)
 	if err != nil || swStored == nil {
 		return nil
 	}
-	sw, err := core.ToSwitchSetup(swStored)
+	sw, err := core.ToSwitchConfig(swStored)
 	if err != nil || sw == nil {
 		return nil
 	}
@@ -110,14 +117,14 @@ func GetSwitchConfig(db Database, mac string) *core.SwitchSetup {
 }
 
 //GetSwitchsConfig return the switch config list
-func GetSwitchsConfig(db Database) map[string]core.SwitchSetup {
-	switchs := map[string]core.SwitchSetup{}
+func GetSwitchsConfig(db Database) map[string]core.SwitchConfig {
+	switchs := map[string]core.SwitchConfig{}
 	stored, err := db.FetchAllRecords(ConfigDB, SwitchsTable)
 	if err != nil || stored == nil {
 		return switchs
 	}
 	for _, l := range stored {
-		sw, err := core.ToSwitchSetup(l)
+		sw, err := core.ToSwitchConfig(l)
 		if err != nil || sw == nil {
 			continue
 		}
@@ -144,8 +151,8 @@ func GetSwitchsDump(db Database) map[string]core.SwitchDump {
 }
 
 //GetCluster get cluster Config list
-func GetCluster(db Database, cluster int) []core.SwitchSetup {
-	var res []core.SwitchSetup
+func GetCluster(db Database, cluster int) []core.SwitchConfig {
+	var res []core.SwitchConfig
 	criteria := make(map[string]interface{})
 	criteria["Cluster"] = cluster
 	swStored, err := db.GetRecords(ConfigDB, SwitchsTable, criteria)
@@ -153,7 +160,7 @@ func GetCluster(db Database, cluster int) []core.SwitchSetup {
 		return res
 	}
 	for _, elt := range swStored {
-		sw, err := core.ToSwitchSetup(elt)
+		sw, err := core.ToSwitchConfig(elt)
 		if err != nil || sw == nil {
 			continue
 		}

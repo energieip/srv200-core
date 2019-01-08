@@ -3,11 +3,11 @@ package service
 import (
 	"os"
 
-	"github.com/energieip/common-group-go/pkg/groupmodel"
-	"github.com/energieip/common-led-go/pkg/driverled"
-	"github.com/energieip/common-sensor-go/pkg/driversensor"
+	gm "github.com/energieip/common-group-go/pkg/groupmodel"
+	dl "github.com/energieip/common-led-go/pkg/driverled"
+	ds "github.com/energieip/common-sensor-go/pkg/driversensor"
 	pkg "github.com/energieip/common-service-go/pkg/service"
-	"github.com/energieip/common-switch-go/pkg/deviceswitch"
+	sd "github.com/energieip/common-switch-go/pkg/deviceswitch"
 	"github.com/energieip/common-tools-go/pkg/tools"
 	"github.com/energieip/srv200-coreservice-go/internal/api"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
@@ -93,20 +93,20 @@ func (s *CoreService) Stop() {
 	rlog.Info("ServerCore service stopped")
 }
 
-func (s *CoreService) prepareSetupSwitchConfig(switchStatus deviceswitch.SwitchStatus) *deviceswitch.SwitchConfig {
+func (s *CoreService) prepareSetupSwitchConfig(switchStatus sd.SwitchStatus) *sd.SwitchConfig {
 	config := database.GetSwitchConfig(s.db, switchStatus.Mac)
 	if config == nil && !s.installMode {
 		return nil
 	}
 
 	isConfigured := true
-	setup := deviceswitch.SwitchConfig{}
+	setup := sd.SwitchConfig{}
 	setup.Mac = switchStatus.Mac
 	setup.FriendlyName = config.FriendlyName
 	setup.IsConfigured = &isConfigured
 	setup.Services = database.GetServiceConfigs(s.db, switchStatus.IP, s.ip, config.Cluster)
 	if s.installMode {
-		switchSetup := core.SwitchSetup{}
+		switchSetup := core.SwitchConfig{}
 		switchSetup.Mac = setup.Mac
 		switchSetup.IP = switchStatus.IP
 		switchSetup.Cluster = 0
@@ -120,7 +120,7 @@ func (s *CoreService) prepareSetupSwitchConfig(switchStatus deviceswitch.SwitchS
 	return &setup
 }
 
-func (s *CoreService) prepareSwitchConfig(switchStatus deviceswitch.SwitchStatus) *deviceswitch.SwitchConfig {
+func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.SwitchConfig {
 	config := database.GetSwitchConfig(s.db, switchStatus.Mac)
 	if config == nil && !s.installMode {
 		rlog.Warn("Cannot find configuration for switch", switchStatus.Mac)
@@ -128,7 +128,7 @@ func (s *CoreService) prepareSwitchConfig(switchStatus deviceswitch.SwitchStatus
 	}
 
 	isConfigured := true
-	setup := deviceswitch.SwitchConfig{}
+	setup := sd.SwitchConfig{}
 	setup.Mac = switchStatus.Mac
 	setup.FriendlyName = config.FriendlyName
 	setup.IsConfigured = &isConfigured
@@ -137,8 +137,8 @@ func (s *CoreService) prepareSwitchConfig(switchStatus deviceswitch.SwitchStatus
 	dumpFreq := 1
 	defaultWatchdog := 600
 
-	setup.LedsSetup = make(map[string]driverled.LedSetup)
-	setup.SensorsSetup = make(map[string]driversensor.SensorSetup)
+	setup.LedsSetup = make(map[string]dl.LedSetup)
+	setup.SensorsSetup = make(map[string]ds.SensorSetup)
 
 	driversMac := make(map[string]bool)
 	for _, led := range switchStatus.Leds {
@@ -153,7 +153,7 @@ func (s *CoreService) prepareSwitchConfig(switchStatus deviceswitch.SwitchStatus
 				enableBle := false
 				low := 0
 				high := 100
-				dled := driverled.LedSetup{
+				dled := dl.LedSetup{
 					Mac:           led.Mac,
 					IMax:          100,
 					Group:         &defaultGroup,
@@ -185,7 +185,7 @@ func (s *CoreService) prepareSwitchConfig(switchStatus deviceswitch.SwitchStatus
 				brightnessCorrection := 1
 				thresholdPresence := 10
 				temperatureOffset := 0
-				dsensor := driversensor.SensorSetup{
+				dsensor := ds.SensorSetup{
 					Mac:                        sensor.Mac,
 					Group:                      &defaultGroup,
 					IsBleEnabled:               &enableBle,
@@ -210,7 +210,7 @@ func (s *CoreService) prepareSwitchConfig(switchStatus deviceswitch.SwitchStatus
 	return &setup
 }
 
-func (s *CoreService) sendSwitchSetup(sw deviceswitch.SwitchStatus) {
+func (s *CoreService) sendSwitchSetup(sw sd.SwitchStatus) {
 	conf := s.prepareSetupSwitchConfig(sw)
 	if conf == nil {
 		rlog.Warn("This device " + sw.Mac + " is not authorized")
@@ -228,7 +228,7 @@ func (s *CoreService) sendSwitchSetup(sw deviceswitch.SwitchStatus) {
 	}
 }
 
-func (s *CoreService) sendSwitchUpdateConfig(sw deviceswitch.SwitchStatus) {
+func (s *CoreService) sendSwitchUpdateConfig(sw sd.SwitchStatus) {
 	conf := s.prepareSwitchConfig(sw)
 	if conf == nil {
 		rlog.Warn("This device " + sw.Mac + " is not authorized")
@@ -246,7 +246,7 @@ func (s *CoreService) sendSwitchUpdateConfig(sw deviceswitch.SwitchStatus) {
 	}
 }
 
-func (s *CoreService) registerSwitchStatus(switchStatus deviceswitch.SwitchStatus) {
+func (s *CoreService) registerSwitchStatus(switchStatus sd.SwitchStatus) {
 	for _, led := range switchStatus.Leds {
 		database.SaveLedStatus(s.db, led)
 	}
@@ -275,7 +275,7 @@ func (s *CoreService) registerConfig(config core.ServerConfig) {
 }
 
 func (s *CoreService) updateLedCfg(config interface{}) {
-	cfg, _ := driverled.ToLedConf(config)
+	cfg, _ := dl.ToLedConf(config)
 	if cfg == nil {
 		rlog.Error("Cannot parse ")
 		return
@@ -321,9 +321,9 @@ func (s *CoreService) updateLedCfg(config interface{}) {
 		}
 	}
 	url := "/write/switch/" + led.SwitchMac + "/update/settings"
-	switchSetup := deviceswitch.SwitchConfig{}
+	switchSetup := sd.SwitchConfig{}
 	switchSetup.Mac = led.SwitchMac
-	switchSetup.LedsConfig = make(map[string]driverled.LedConf)
+	switchSetup.LedsConfig = make(map[string]dl.LedConf)
 
 	switchSetup.LedsConfig[cfg.Mac] = *cfg
 
@@ -337,13 +337,34 @@ func (s *CoreService) updateLedCfg(config interface{}) {
 }
 
 func (s *CoreService) updateGroupCfg(config interface{}) {
-	cfg, _ := groupmodel.ToGroupConfig(config)
-	database.UpdateGroupConfig(s.db, *cfg)
+	cfg, _ := gm.ToGroupConfig(config)
+
+	gr := database.GetGroupConfig(s.db, cfg.Group)
+	if gr != nil {
+		database.UpdateGroupConfig(s.db, *cfg)
+	} else {
+		database.SaveGroupConfig(s.db, *cfg)
+		for _, led := range cfg.Leds {
+			light := dl.LedConf{
+				Mac:   led,
+				Group: &cfg.Group,
+			}
+			s.updateLedCfg(light)
+		}
+		for _, sensor := range cfg.Sensors {
+			cell := ds.SensorConf{
+				Mac:   sensor,
+				Group: &cfg.Group,
+			}
+			s.updateSensorCfg(cell)
+		}
+	}
+
 	for sw := range database.GetGroupSwitchs(s.db, cfg.Group) {
 		url := "/write/switch/" + sw + "/update/settings"
-		switchSetup := deviceswitch.SwitchConfig{}
+		switchSetup := sd.SwitchConfig{}
 		switchSetup.Mac = sw
-		switchSetup.Groups = make(map[int]groupmodel.GroupConfig)
+		switchSetup.Groups = make(map[int]gm.GroupConfig)
 		switchSetup.Groups[cfg.Group] = *cfg
 		dump, _ := switchSetup.ToJSON()
 		err := s.server.SendCommand(url, dump)
@@ -357,12 +378,33 @@ func (s *CoreService) updateGroupCfg(config interface{}) {
 
 func (s *CoreService) updateSwitchCfg(config interface{}) {
 	cfg, _ := core.ToSwitchConfig(config)
-	database.UpdateSwitchConfig(s.db, *cfg)
-	//TODO send order to switch
+	sw := database.GetSwitchConfig(s.db, cfg.Mac)
+	if sw != nil {
+		database.UpdateSwitchConfig(s.db, *cfg)
+	} else {
+		database.SaveSwitchConfig(s.db, *cfg)
+	}
+
+	url := "/write/switch/" + cfg.Mac + "/update/settings"
+	switchCfg := sd.SwitchConfig{}
+	switchCfg.Mac = cfg.Mac
+	if cfg.DumpFrequency != nil {
+		switchCfg.DumpFrequency = *cfg.DumpFrequency
+	}
+	switchCfg.FriendlyName = cfg.FriendlyName
+	// TODO Resend service configuration if the cluster change
+
+	dump, _ := switchCfg.ToJSON()
+	err := s.server.SendCommand(url, dump)
+	if err != nil {
+		rlog.Error("Cannot send update config to " + cfg.Mac + " on topic: " + url + " err:" + err.Error())
+	} else {
+		rlog.Info("Send update config to " + cfg.Mac + " on topic: " + url + " dump:" + dump)
+	}
 }
 
 func (s *CoreService) updateSensorCfg(config interface{}) {
-	cfg, _ := driversensor.ToSensorConf(config)
+	cfg, _ := ds.ToSensorConf(config)
 
 	oldSensor := database.GetSensorConfig(s.db, cfg.Mac)
 	if oldSensor == nil {
@@ -405,9 +447,9 @@ func (s *CoreService) updateSensorCfg(config interface{}) {
 	}
 
 	url := "/write/switch/" + sensor.SwitchMac + "/update/settings"
-	switchSetup := deviceswitch.SwitchConfig{}
+	switchSetup := sd.SwitchConfig{}
 	switchSetup.Mac = sensor.SwitchMac
-	switchSetup.SensorsConfig = make(map[string]driversensor.SensorConf)
+	switchSetup.SensorsConfig = make(map[string]ds.SensorConf)
 
 	switchSetup.SensorsConfig[cfg.Mac] = *cfg
 
@@ -428,10 +470,10 @@ func (s *CoreService) sendGroupCmd(cmd interface{}) {
 	}
 	for sw := range database.GetGroupSwitchs(s.db, cmdGr.Group) {
 		url := "/write/switch/" + sw + "/update/settings"
-		switchSetup := deviceswitch.SwitchConfig{}
+		switchSetup := sd.SwitchConfig{}
 		switchSetup.Mac = sw
-		switchSetup.Groups = make(map[int]groupmodel.GroupConfig)
-		cfg := groupmodel.GroupConfig{}
+		switchSetup.Groups = make(map[int]gm.GroupConfig)
+		cfg := gm.GroupConfig{}
 		cfg.Group = cmdGr.Group
 		cfg.Auto = &cmdGr.Auto
 		cfg.SetpointLeds = &cmdGr.SetpointLeds
@@ -460,14 +502,14 @@ func (s *CoreService) sendLedCmd(cmd interface{}) {
 		return
 	}
 	url := "/write/switch/" + led.SwitchMac + "/update/settings"
-	switchSetup := deviceswitch.SwitchConfig{}
+	switchSetup := sd.SwitchConfig{}
 	switchSetup.Mac = led.SwitchMac
-	switchSetup.LedsConfig = make(map[string]driverled.LedConf)
+	switchSetup.LedsConfig = make(map[string]dl.LedConf)
 
 	auto := cmdLed.Auto
 	setpoint := cmdLed.Setpoint
 
-	ledCfg := driverled.LedConf{
+	ledCfg := dl.LedConf{
 		Mac:            led.Mac,
 		Auto:           &auto,
 		SetpointManual: &setpoint,

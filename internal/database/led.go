@@ -1,11 +1,11 @@
 package database
 
 import (
-	led "github.com/energieip/common-led-go/pkg/driverled"
+	dl "github.com/energieip/common-led-go/pkg/driverled"
 )
 
 //SaveLedConfig dump led config in database
-func SaveLedConfig(db Database, ledStatus led.LedSetup) error {
+func SaveLedConfig(db Database, ledStatus dl.LedSetup) error {
 	var dbID string
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = ledStatus.Mac
@@ -36,14 +36,14 @@ func RemoveLedConfig(db Database, mac string) error {
 }
 
 //GetLedConfig return the led configuration
-func GetLedConfig(db Database, mac string) *led.LedSetup {
+func GetLedConfig(db Database, mac string) *dl.LedSetup {
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = mac
 	ledStored, err := db.GetRecord(ConfigDB, LedsTable, criteria)
 	if err != nil || ledStored == nil {
 		return nil
 	}
-	light, err := led.ToLedSetup(ledStored)
+	light, err := dl.ToLedSetup(ledStored)
 	if err != nil {
 		return nil
 	}
@@ -51,7 +51,7 @@ func GetLedConfig(db Database, mac string) *led.LedSetup {
 }
 
 //UpdateLedConfig update led config in database
-func UpdateLedConfig(db Database, config led.LedConf) error {
+func UpdateLedConfig(db Database, config dl.LedConf) error {
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = config.Mac
 	stored, err := db.GetRecord(ConfigDB, LedsTable, criteria)
@@ -68,7 +68,7 @@ func UpdateLedConfig(db Database, config led.LedConf) error {
 	}
 	dbID := id.(string)
 
-	setup, err := led.ToLedSetup(stored)
+	setup, err := dl.ToLedSetup(stored)
 	if err != nil || stored == nil {
 		return NewError("Device " + config.Mac + "not found")
 	}
@@ -105,14 +105,14 @@ func UpdateLedConfig(db Database, config led.LedConf) error {
 }
 
 //GetLedsConfig return the led config list
-func GetLedsConfig(db Database) map[string]led.LedSetup {
-	leds := map[string]led.LedSetup{}
+func GetLedsConfig(db Database) map[string]dl.LedSetup {
+	leds := map[string]dl.LedSetup{}
 	stored, err := db.FetchAllRecords(ConfigDB, LedsTable)
 	if err != nil || stored == nil {
 		return leds
 	}
 	for _, l := range stored {
-		light, err := led.ToLedSetup(l)
+		light, err := dl.ToLedSetup(l)
 		if err != nil || light == nil {
 			continue
 		}
@@ -122,7 +122,7 @@ func GetLedsConfig(db Database) map[string]led.LedSetup {
 }
 
 //SaveLedStatus dump led status in database
-func SaveLedStatus(db Database, ledStatus led.Led) error {
+func SaveLedStatus(db Database, ledStatus dl.Led) error {
 	var dbID string
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = ledStatus.Mac
@@ -146,14 +146,14 @@ func SaveLedStatus(db Database, ledStatus led.Led) error {
 }
 
 //GetLedsStatus return the led status list
-func GetLedsStatus(db Database) map[string]led.Led {
-	leds := map[string]led.Led{}
+func GetLedsStatus(db Database) map[string]dl.Led {
+	leds := map[string]dl.Led{}
 	stored, err := db.FetchAllRecords(StatusDB, LedsTable)
 	if err != nil || stored == nil {
 		return leds
 	}
 	for _, l := range stored {
-		light, err := led.ToLed(l)
+		light, err := dl.ToLed(l)
 		if err != nil || light == nil {
 			continue
 		}
@@ -163,14 +163,14 @@ func GetLedsStatus(db Database) map[string]led.Led {
 }
 
 //GetLedStatus return the led status
-func GetLedStatus(db Database, mac string) *led.Led {
+func GetLedStatus(db Database, mac string) *dl.Led {
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = mac
 	ledStored, err := db.GetRecord(StatusDB, LedsTable, criteria)
 	if err != nil || ledStored == nil {
 		return nil
 	}
-	light, err := led.ToLed(ledStored)
+	light, err := dl.ToLed(ledStored)
 	if err != nil {
 		return nil
 	}

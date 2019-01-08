@@ -1,11 +1,11 @@
 package database
 
 import (
-	group "github.com/energieip/common-group-go/pkg/groupmodel"
+	gm "github.com/energieip/common-group-go/pkg/groupmodel"
 )
 
 //SaveGroupConfig dump group config in database
-func SaveGroupConfig(db Database, status group.GroupConfig) error {
+func SaveGroupConfig(db Database, status gm.GroupConfig) error {
 	var dbID string
 	criteria := make(map[string]interface{})
 	criteria["Group"] = status.Group
@@ -36,14 +36,14 @@ func RemoveGroupConfig(db Database, grID int) error {
 }
 
 //GetGroupConfig return the group configuration
-func GetGroupConfig(db Database, grID int) *group.GroupConfig {
+func GetGroupConfig(db Database, grID int) *gm.GroupConfig {
 	criteria := make(map[string]interface{})
 	criteria["Group"] = grID
 	stored, err := db.GetRecord(ConfigDB, GroupsTable, criteria)
 	if err != nil || stored == nil {
 		return nil
 	}
-	gr, err := group.ToGroupConfig(stored)
+	gr, err := gm.ToGroupConfig(stored)
 	if err != nil {
 		return nil
 	}
@@ -59,7 +59,7 @@ func GetGroupSwitchs(db Database, grID int) map[string]bool {
 	if err != nil || stored == nil {
 		return nil
 	}
-	gr, err := group.ToGroupConfig(stored)
+	gr, err := gm.ToGroupConfig(stored)
 	if err != nil {
 		return nil
 	}
@@ -73,8 +73,8 @@ func GetGroupSwitchs(db Database, grID int) map[string]bool {
 	return switchs
 }
 
-//UpdateGroupConfig update led config in database
-func UpdateGroupConfig(db Database, config group.GroupConfig) error {
+//UpdateGroupConfig update group config in database
+func UpdateGroupConfig(db Database, config gm.GroupConfig) error {
 	criteria := make(map[string]interface{})
 	criteria["Group"] = config.Group
 	stored, err := db.GetRecord(ConfigDB, GroupsTable, criteria)
@@ -91,7 +91,7 @@ func UpdateGroupConfig(db Database, config group.GroupConfig) error {
 	}
 	dbID := id.(string)
 
-	setup, err := group.ToGroupConfig(stored)
+	setup, err := gm.ToGroupConfig(stored)
 	if err != nil || stored == nil {
 		return NewError("Group " + string(config.Group) + "not found")
 	}
@@ -135,14 +135,14 @@ func UpdateGroupConfig(db Database, config group.GroupConfig) error {
 }
 
 //GetGroupConfigs get group Config
-func GetGroupConfigs(db Database, driversMac map[string]bool) map[int]group.GroupConfig {
-	groups := make(map[int]group.GroupConfig)
+func GetGroupConfigs(db Database, driversMac map[string]bool) map[int]gm.GroupConfig {
+	groups := make(map[int]gm.GroupConfig)
 	stored, err := db.FetchAllRecords(ConfigDB, GroupsTable)
 	if err != nil || stored == nil {
 		return groups
 	}
 	for _, val := range stored {
-		gr, err := group.ToGroupConfig(val)
+		gr, err := gm.ToGroupConfig(val)
 		if err != nil || gr == nil {
 			continue
 		}
@@ -161,7 +161,7 @@ func GetGroupConfigs(db Database, driversMac map[string]bool) map[int]group.Grou
 }
 
 //SaveGroupStatus dump group status in database
-func SaveGroupStatus(db Database, status group.GroupStatus) error {
+func SaveGroupStatus(db Database, status gm.GroupStatus) error {
 	var dbID string
 	criteria := make(map[string]interface{})
 	criteria["Group"] = status.Group
@@ -185,14 +185,14 @@ func SaveGroupStatus(db Database, status group.GroupStatus) error {
 }
 
 //GetGroupStatus return the group status
-func GetGroupStatus(db Database, grID int) *group.GroupStatus {
+func GetGroupStatus(db Database, grID int) *gm.GroupStatus {
 	criteria := make(map[string]interface{})
 	criteria["Group"] = grID
 	stored, err := db.GetRecord(StatusDB, GroupsTable, criteria)
 	if err != nil || stored == nil {
 		return nil
 	}
-	gr, err := group.ToGroupStatus(stored)
+	gr, err := gm.ToGroupStatus(stored)
 	if err != nil {
 		return nil
 	}

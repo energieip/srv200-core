@@ -6,7 +6,7 @@ import (
 
 	genericNetwork "github.com/energieip/common-network-go/pkg/network"
 	pkg "github.com/energieip/common-service-go/pkg/service"
-	"github.com/energieip/common-switch-go/pkg/deviceswitch"
+	sd "github.com/energieip/common-switch-go/pkg/deviceswitch"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/romana/rlog"
 )
@@ -21,7 +21,7 @@ const (
 //ServerNetwork network object
 type ServerNetwork struct {
 	Iface     genericNetwork.NetworkInterface
-	Events    chan map[string]deviceswitch.SwitchStatus
+	Events    chan map[string]sd.SwitchStatus
 	EventsCfg chan map[string]core.ServerConfig
 }
 
@@ -33,7 +33,7 @@ func CreateServerNetwork() (*ServerNetwork, error) {
 	}
 	serverNet := ServerNetwork{
 		Iface:     serverBroker,
-		Events:    make(chan map[string]deviceswitch.SwitchStatus),
+		Events:    make(chan map[string]sd.SwitchStatus),
 		EventsCfg: make(chan map[string]core.ServerConfig),
 	}
 	return &serverNet, nil
@@ -76,14 +76,14 @@ func (net ServerNetwork) LocalConnection(conf pkg.ServiceConfig, clientID string
 func (net ServerNetwork) onHello(client genericNetwork.Client, msg genericNetwork.Message) {
 	payload := msg.Payload()
 	rlog.Debug("Received switch Hello: Received topic: " + msg.Topic() + " payload: " + string(payload))
-	var switchStatus deviceswitch.SwitchStatus
+	var switchStatus sd.SwitchStatus
 	err := json.Unmarshal(payload, &switchStatus)
 	if err != nil {
 		rlog.Error("Cannot parse config ", err.Error())
 		return
 	}
 
-	event := make(map[string]deviceswitch.SwitchStatus)
+	event := make(map[string]sd.SwitchStatus)
 	event[EventHello] = switchStatus
 	net.Events <- event
 }
@@ -91,14 +91,14 @@ func (net ServerNetwork) onHello(client genericNetwork.Client, msg genericNetwor
 func (net ServerNetwork) onDump(client genericNetwork.Client, msg genericNetwork.Message) {
 	payload := msg.Payload()
 	rlog.Debug("Received switch Dump: Received topic: " + msg.Topic() + " payload: " + string(payload))
-	var switchStatus deviceswitch.SwitchStatus
+	var switchStatus sd.SwitchStatus
 	err := json.Unmarshal(payload, &switchStatus)
 	if err != nil {
 		rlog.Error("Cannot parse config ", err.Error())
 		return
 	}
 
-	event := make(map[string]deviceswitch.SwitchStatus)
+	event := make(map[string]sd.SwitchStatus)
 	event[EventDump] = switchStatus
 	net.Events <- event
 }

@@ -382,10 +382,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "sucessful operation",
-                        "schema":{
-                            "$ref": "#/definitions/GroupSetup"
-                        }
+                        "description": "sucessful operation"
                     },
                     "default": {
                         "description": "unexpected error",
@@ -420,7 +417,7 @@
                     "200": {
                         "description": "sucessful operation",
                         "schema":{
-                            "$ref": "#/definitions/SwitchSetup"
+                            "$ref": "#/definitions/SwitchConfig"
                         }
                     },
                     "default": {
@@ -481,16 +478,13 @@
                         "description": "Switch config",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/SwitchSetup"
+                            "$ref": "#/definitions/SwitchConfig"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "sucessful operation",
-                        "schema":{
-                            "$ref": "#/definitions/SwitchSetup"
-                        }
+                        "description": "sucessful operation"
                     },
                     "default": {
                         "description": "unexpected error",
@@ -1578,34 +1572,6 @@
                 "setpoint": {
                     "type": "integer",
                     "description": "Setpoint value in percentage"
-                }
-            }
-        },
-        "SwitchSetup":{
-            "type": "object",
-            "required": [
-                "mac"
-            ],
-            "properties": {
-                "mac": {
-                    "type": "string",
-                    "description": "Sensor mac address"
-                },
-                "cluster": {
-                    "type": "integer",
-                    "description": "Associate Cluster number"
-                },
-                "ip": {
-                    "type": "string",
-                    "description": "Switch IP address"
-                },
-                "friendlyName": {
-                    "type": "string",
-                    "description": "Sensor FriendlyName"
-                },
-                "dumpFrequency": {
-                    "type": "integer",
-                    "description": "Dump frequency by default: 1s"
                 }
             }
         },

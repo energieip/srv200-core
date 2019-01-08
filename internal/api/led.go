@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/energieip/common-led-go/pkg/driverled"
+	dl "github.com/energieip/common-led-go/pkg/driverled"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
 	"github.com/gorilla/mux"
@@ -38,7 +38,7 @@ func (api *API) setLedSetup(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	led := driverled.LedSetup{}
+	led := dl.LedSetup{}
 	err = json.Unmarshal([]byte(body), &led)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error())
@@ -59,7 +59,7 @@ func (api *API) setLedConfig(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	led := driverled.LedConf{}
+	led := dl.LedConf{}
 	err = json.Unmarshal([]byte(body), &led)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error())

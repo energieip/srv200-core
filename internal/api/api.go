@@ -9,9 +9,9 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/energieip/common-group-go/pkg/groupmodel"
-	"github.com/energieip/common-led-go/pkg/driverled"
-	"github.com/energieip/common-sensor-go/pkg/driversensor"
+	gm "github.com/energieip/common-group-go/pkg/groupmodel"
+	dl "github.com/energieip/common-led-go/pkg/driverled"
+	ds "github.com/energieip/common-sensor-go/pkg/driversensor"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
 	"github.com/gorilla/mux"
@@ -48,29 +48,29 @@ type API struct {
 
 //Status
 type Status struct {
-	Leds    []driverled.Led       `json:"leds"`
-	Sensors []driversensor.Sensor `json:"sensors"`
+	Leds    []dl.Led    `json:"leds"`
+	Sensors []ds.Sensor `json:"sensors"`
 }
 
 //DumpLed
 type DumpLed struct {
-	Ifc    core.IfcInfo       `json:"ifc"`
-	Status driverled.Led      `json:"status"`
-	Config driverled.LedSetup `json:"config"`
+	Ifc    core.IfcInfo `json:"ifc"`
+	Status dl.Led       `json:"status"`
+	Config dl.LedSetup  `json:"config"`
 }
 
 //DumpSensor
 type DumpSensor struct {
-	Ifc    core.IfcInfo             `json:"ifc"`
-	Status driversensor.Sensor      `json:"status"`
-	Config driversensor.SensorSetup `json:"config"`
+	Ifc    core.IfcInfo   `json:"ifc"`
+	Status ds.Sensor      `json:"status"`
+	Config ds.SensorSetup `json:"config"`
 }
 
 //DumpSwitch
 type DumpSwitch struct {
-	Ifc    core.IfcInfo     `json:"ifc"`
-	Status core.SwitchDump  `json:"status"`
-	Config core.SwitchSetup `json:"config"`
+	Ifc    core.IfcInfo      `json:"ifc"`
+	Status core.SwitchDump   `json:"status"`
+	Config core.SwitchConfig `json:"config"`
 }
 
 //Dump
@@ -160,8 +160,8 @@ func (api *API) getInstallMode(w http.ResponseWriter, req *http.Request) {
 
 func (api *API) getStatus(w http.ResponseWriter, req *http.Request) {
 	api.setDefaultHeader(w)
-	var leds []driverled.Led
-	var sensors []driversensor.Sensor
+	var leds []dl.Led
+	var sensors []ds.Sensor
 	var grID *int
 	var isConfig *bool
 	driverType := req.FormValue("type")
@@ -315,10 +315,10 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 }
 
 type Conf struct {
-	Leds    []driverled.LedConf       `json:"leds"`
-	Sensors []driversensor.SensorConf `json:"sensors"`
-	Groups  []groupmodel.GroupConfig  `json:"groups"`
-	Switchs []core.SwitchConfig       `json:"switchs"`
+	Leds    []dl.LedConf        `json:"leds"`
+	Sensors []ds.SensorConf     `json:"sensors"`
+	Groups  []gm.GroupConfig    `json:"groups"`
+	Switchs []core.SwitchConfig `json:"switchs"`
 }
 
 func (api *API) setConfig(w http.ResponseWriter, req *http.Request) {
