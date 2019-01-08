@@ -396,8 +396,8 @@ func (api *API) getV1Functions(w http.ResponseWriter, req *http.Request) {
 		apiV1 + "/setup/group", apiV1 + "/setup/switch", apiV1 + "/setup/installMode",
 		apiV1 + "/config/led", apiV1 + "/config/sensor", apiV1 + "/config/group",
 		apiV1 + "/config/switch", apiV1 + "/configs", apiV1 + "/status", apiV1 + "/events",
-		apiV1 + "/command/led", apiV1 + "/command/group", apiV1 + "/commands",
-		apiV1 + "/project/ifcInfo", apiV1 + "/project/model", apiV1 + "/project", apiV1 + "/dump",
+		apiV1 + "/command/led", apiV1 + "/command/group", apiV1 + "/project/ifcInfo",
+		apiV1 + "/project/model", apiV1 + "/project", apiV1 + "/dump",
 	}
 	apiInfo := APIFunctions{
 		Functions: functions,
