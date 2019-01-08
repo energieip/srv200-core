@@ -460,7 +460,6 @@ func (api *API) swagger() {
 	//command API
 	router.HandleFunc(apiV1+"/command/led", api.sendLedCommand).Methods("POST")
 	router.HandleFunc(apiV1+"/command/group", api.sendGroupCommand).Methods("POST")
-	router.HandleFunc(apiV1+"/commands", api.sendCommand).Methods("POST")
 
 	//project API
 	router.HandleFunc(apiV1+"/project/ifcInfo/{label}", api.getIfcInfo).Methods("GET")

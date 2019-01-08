@@ -393,6 +393,9 @@ func (s *CoreService) updateSwitchCfg(config interface{}) {
 	}
 	switchCfg.FriendlyName = cfg.FriendlyName
 	// TODO Resend service configuration if the cluster change
+	if cfg.IsConfigured != nil {
+		switchCfg.IsConfigured = cfg.IsConfigured
+	}
 
 	dump, _ := switchCfg.ToJSON()
 	err := s.server.SendCommand(url, dump)
