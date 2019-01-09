@@ -48,11 +48,15 @@ func (net ServerNetwork) LocalConnection(conf pkg.ServiceConfig, clientID string
 	cbkServer["/write/server/components/config"] = net.registerConfigs
 
 	confServer := genericNetwork.NetworkConfig{
-		IP:         conf.NetworkBroker.IP,
-		Port:       conf.NetworkBroker.Port,
-		ClientName: clientID,
-		Callbacks:  cbkServer,
-		LogLevel:   conf.LogLevel,
+		IP:               conf.NetworkBroker.IP,
+		Port:             conf.NetworkBroker.Port,
+		ClientName:       clientID,
+		Callbacks:        cbkServer,
+		LogLevel:         conf.LogLevel,
+		User:             conf.NetworkBroker.Login,
+		Password:         conf.NetworkBroker.Password,
+		ClientKey:        conf.NetworkBroker.KeyPath,
+		ServerCertificat: conf.NetworkBroker.CaPath,
 	}
 
 	for {
@@ -90,7 +94,7 @@ func (net ServerNetwork) onHello(client genericNetwork.Client, msg genericNetwor
 
 func (net ServerNetwork) onDump(client genericNetwork.Client, msg genericNetwork.Message) {
 	payload := msg.Payload()
-	rlog.Debug("Received switch Dump: Received topic: " + msg.Topic() + " payload: " + string(payload))
+	rlog.Info("Received switch Dump: Received topic: " + msg.Topic() + " payload: " + string(payload))
 	var switchStatus sd.SwitchStatus
 	err := json.Unmarshal(payload, &switchStatus)
 	if err != nil {

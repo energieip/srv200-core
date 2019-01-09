@@ -218,7 +218,7 @@ func (s *CoreService) sendSwitchSetup(sw sd.SwitchStatus) {
 	}
 	switchSetup := *conf
 
-	url := "/write/" + sw.Topic + "/setup/config"
+	url := "/write/switch/" + sw.Mac + "/setup/config"
 	dump, _ := switchSetup.ToJSON()
 	err := s.server.SendCommand(url, dump)
 	if err != nil {
@@ -236,7 +236,7 @@ func (s *CoreService) sendSwitchUpdateConfig(sw sd.SwitchStatus) {
 	}
 	switchSetup := *conf
 
-	url := "/write/" + sw.Topic + "/update/settings"
+	url := "/write/switch/" + sw.Mac + "/update/settings"
 	dump, _ := switchSetup.ToJSON()
 	err := s.server.SendCommand(url, dump)
 	if err != nil {

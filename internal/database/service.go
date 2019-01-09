@@ -8,12 +8,11 @@ import (
 //SaveServiceConfig dump sensor config in database
 func SaveServiceConfig(db Database, service pkg.Service) error {
 	serv := core.Service{
-		Name:               service.Name,
-		Systemd:            service.Systemd,
-		Version:            service.Version,
-		PackageName:        service.PackageName,
-		PersistentDataPath: service.Config.PersistentDataPath,
-		ConfigPath:         service.ConfigPath,
+		Name:        service.Name,
+		Systemd:     service.Systemd,
+		Version:     service.Version,
+		PackageName: service.PackageName,
+		ConfigPath:  service.ConfigPath,
 	}
 	var dbID string
 	criteria := make(map[string]interface{})
@@ -76,11 +75,10 @@ func GetServiceConfigs(db Database, switchIP, serverIP string, cluster int) map[
 			DBCluster:  rack,
 		}
 		cfg := pkg.ServiceConfig{
-			LocalBroker:        localBroker,
-			NetworkBroker:      netBroker,
-			DB:                 dbConnector,
-			LogLevel:           "INFO",
-			PersistentDataPath: serv.PersistentDataPath,
+			LocalBroker:   localBroker,
+			NetworkBroker: netBroker,
+			DB:            dbConnector,
+			LogLevel:      "INFO",
 		}
 		service := pkg.Service{
 			Name:        serv.Name,
