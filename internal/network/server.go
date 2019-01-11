@@ -7,7 +7,6 @@ import (
 	genericNetwork "github.com/energieip/common-network-go/pkg/network"
 	pkg "github.com/energieip/common-service-go/pkg/service"
 	sd "github.com/energieip/common-switch-go/pkg/deviceswitch"
-	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/romana/rlog"
 )
 
@@ -20,9 +19,8 @@ const (
 
 //ServerNetwork network object
 type ServerNetwork struct {
-	Iface     genericNetwork.NetworkInterface
-	Events    chan map[string]sd.SwitchStatus
-	EventsCfg chan map[string]core.ServerConfig
+	Iface  genericNetwork.NetworkInterface
+	Events chan map[string]sd.SwitchStatus
 }
 
 //CreateServerNetwork create network server object
@@ -32,9 +30,8 @@ func CreateServerNetwork() (*ServerNetwork, error) {
 		return nil, err
 	}
 	serverNet := ServerNetwork{
-		Iface:     serverBroker,
-		Events:    make(chan map[string]sd.SwitchStatus),
-		EventsCfg: make(chan map[string]core.ServerConfig),
+		Iface:  serverBroker,
+		Events: make(chan map[string]sd.SwitchStatus),
 	}
 	return &serverNet, nil
 
@@ -45,7 +42,6 @@ func (net ServerNetwork) LocalConnection(conf pkg.ServiceConfig, clientID string
 	cbkServer := make(map[string]func(genericNetwork.Client, genericNetwork.Message))
 	cbkServer["/read/switch/+/setup/hello"] = net.onHello
 	cbkServer["/read/switch/+/status/dump"] = net.onDump
-	cbkServer["/write/server/components/config"] = net.registerConfigs
 
 	confServer := genericNetwork.NetworkConfig{
 		IP:               conf.NetworkBroker.IP,
@@ -79,7 +75,7 @@ func (net ServerNetwork) LocalConnection(conf pkg.ServiceConfig, clientID string
 
 func (net ServerNetwork) onHello(client genericNetwork.Client, msg genericNetwork.Message) {
 	payload := msg.Payload()
-	rlog.Debug("Received switch Hello: Received topic: " + msg.Topic() + " payload: " + string(payload))
+	rlog.Info("Received switch Hello: Received topic: " + msg.Topic() + " payload: " + string(payload))
 	var switchStatus sd.SwitchStatus
 	err := json.Unmarshal(payload, &switchStatus)
 	if err != nil {
@@ -105,21 +101,6 @@ func (net ServerNetwork) onDump(client genericNetwork.Client, msg genericNetwork
 	event := make(map[string]sd.SwitchStatus)
 	event[EventDump] = switchStatus
 	net.Events <- event
-}
-
-func (net ServerNetwork) registerConfigs(client genericNetwork.Client, msg genericNetwork.Message) {
-	payload := msg.Payload()
-	rlog.Debug("Received registerConfigs: Received topic: " + msg.Topic() + " payload: " + string(payload))
-	var servCfg core.ServerConfig
-	err := json.Unmarshal(payload, &servCfg)
-	if err != nil {
-		rlog.Error("Cannot parse config ", err.Error())
-		return
-	}
-
-	event := make(map[string]core.ServerConfig)
-	event[EventWriteCfg] = servCfg
-	net.EventsCfg <- event
 }
 
 //Disconnect from server

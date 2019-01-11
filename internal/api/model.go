@@ -37,7 +37,7 @@ func (api *API) removeModelInfo(w http.ResponseWriter, req *http.Request) {
 		api.sendError(w, APIErrorDeviceNotFound, "Device "+modelName+" not found")
 		return
 	}
-	w.Write([]byte(""))
+	w.Write([]byte("{}"))
 }
 
 func (api *API) setModelInfo(w http.ResponseWriter, req *http.Request) {
@@ -49,13 +49,13 @@ func (api *API) setModelInfo(w http.ResponseWriter, req *http.Request) {
 	}
 
 	model := core.Model{}
-	err = json.Unmarshal([]byte(body), &model)
+	err = json.Unmarshal(body, &model)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error())
 		return
 	}
 
-	rlog.Info("Try to save ", model)
+	rlog.Info("Try to save Model ", model)
 	database.SaveModel(api.db, model)
 	api.readModelInfo(w, model.Name)
 }

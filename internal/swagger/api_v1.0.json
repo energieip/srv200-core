@@ -845,6 +845,111 @@
                 }
             }
         },
+        "/project/bim":{
+            "post":{
+                "tags":[
+                    "project"
+                ],
+                "summary": "Add/update bim information",
+                "description": "Add/update bim information",
+                "operationId": "setBim",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "bim",
+                        "in": "body",
+                        "description": "bim detail description",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/BimInfo"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "sucessful operation",
+                        "schema":{
+                            "$ref": "#/definitions/BimInfo"
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/project/bim/{label}":{
+            "get":{
+                "tags":[
+                    "project"
+                ],
+                "summary": "Return bim information",
+                "description": "Describe the model information",
+                "operationId": "getBim",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "label",
+                        "in": "path",
+                        "description": "Ifc label value",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "sucessful operation",
+                        "schema":{
+                            "$ref": "#/definitions/BimInfo"
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "delete":{
+                "tags":[
+                    "project"
+                ],
+                "summary": "Remove Bim information",
+                "description": "Remove Bim information",
+                "operationId": "removeBim",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "label",
+                        "in": "path",
+                        "description": "Label name",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "sucessful operation"
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
         "/project/model/{modelName}":{
             "get":{
                 "tags":[
@@ -1578,9 +1683,29 @@
                     "default": "led",
                     "description": "device category LED|Sensor|etc."
                 },
-                "URL": {
+                "url": {
                     "type": "string",
                     "description": "weblink to the technical description"
+                }
+            }
+        },
+        "BimInfo":{
+            "type": "object",
+            "required": [
+                "label"
+            ],
+            "properties": {
+                "label": {
+                    "type": "string",
+                    "description": "label name available in the IFC for identifying the element"
+                },
+                "modelName": {
+                    "type": "string",
+                    "description": "Model name"
+                },
+                "mac": {
+                    "type": "string",
+                    "description": "device mac address"
                 }
             }
         },
@@ -1616,7 +1741,7 @@
                     "default": "led",
                     "description": "device category LED|Sensor|etc."
                 },
-                "URL": {
+                "url": {
                     "type": "string",
                     "description": "weblink to the technical description"
                 }

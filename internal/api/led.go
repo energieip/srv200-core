@@ -37,15 +37,14 @@ func (api *API) setLedSetup(w http.ResponseWriter, req *http.Request) {
 		api.sendError(w, APIErrorBodyParsing, "Error reading request body")
 		return
 	}
-
 	led := dl.LedSetup{}
-	err = json.Unmarshal([]byte(body), &led)
+	err = json.Unmarshal(body, &led)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error())
 		return
 	}
 
-	rlog.Info("Try to save ", led)
+	rlog.Info("Try to save Led ", led)
 	database.SaveLedConfig(api.db, led)
 
 	api.readLedConfig(w, led.Mac)
@@ -60,7 +59,7 @@ func (api *API) setLedConfig(w http.ResponseWriter, req *http.Request) {
 	}
 
 	led := dl.LedConf{}
-	err = json.Unmarshal([]byte(body), &led)
+	err = json.Unmarshal(body, &led)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error())
 		return
@@ -80,7 +79,7 @@ func (api *API) setLedConfig(w http.ResponseWriter, req *http.Request) {
 	event := make(map[string]interface{})
 	event["led"] = led
 	api.EventsToBackend <- event
-	w.Write([]byte(""))
+	w.Write([]byte("{}"))
 }
 
 func (api *API) sendLedCommand(w http.ResponseWriter, req *http.Request) {
@@ -101,7 +100,7 @@ func (api *API) sendLedCommand(w http.ResponseWriter, req *http.Request) {
 	event := make(map[string]interface{})
 	event["ledCmd"] = led
 	api.EventsToBackend <- event
-	w.Write([]byte(""))
+	w.Write([]byte("{}"))
 }
 
 func (api *API) getLedStatus(w http.ResponseWriter, req *http.Request) {
@@ -126,5 +125,5 @@ func (api *API) removeLedSetup(w http.ResponseWriter, req *http.Request) {
 		api.sendError(w, APIErrorDeviceNotFound, "Device "+mac+" not found")
 		return
 	}
-	w.Write([]byte(""))
+	w.Write([]byte("{}"))
 }

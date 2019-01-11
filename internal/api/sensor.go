@@ -37,13 +37,13 @@ func (api *API) setSensorSetup(w http.ResponseWriter, req *http.Request) {
 	}
 
 	sensor := ds.SensorSetup{}
-	err = json.Unmarshal([]byte(body), &sensor)
+	err = json.Unmarshal(body, &sensor)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error())
 		return
 	}
 
-	rlog.Info("Try to save ", sensor)
+	rlog.Info("Try to save sensor ", sensor)
 	database.SaveSensorConfig(api.db, sensor)
 
 	api.readSensorConfig(w, sensor.Mac)
@@ -58,7 +58,7 @@ func (api *API) setSensorConfig(w http.ResponseWriter, req *http.Request) {
 	}
 
 	sensor := ds.SensorConf{}
-	err = json.Unmarshal([]byte(body), &sensor)
+	err = json.Unmarshal(body, &sensor)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error())
 		return
@@ -66,7 +66,7 @@ func (api *API) setSensorConfig(w http.ResponseWriter, req *http.Request) {
 	event := make(map[string]interface{})
 	event["sensor"] = sensor
 	api.EventsToBackend <- event
-	w.Write([]byte(""))
+	w.Write([]byte("{}"))
 }
 
 func (api *API) getSensorStatus(w http.ResponseWriter, req *http.Request) {
@@ -91,5 +91,5 @@ func (api *API) removeSensorSetup(w http.ResponseWriter, req *http.Request) {
 		api.sendError(w, APIErrorDeviceNotFound, "Device "+mac+" not found")
 		return
 	}
-	w.Write([]byte(""))
+	w.Write([]byte("{}"))
 }

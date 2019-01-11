@@ -11,6 +11,59 @@ import (
 	"github.com/romana/rlog"
 )
 
+func (api *API) readBim(w http.ResponseWriter, label string) {
+	project := database.GetProject(api.db, label)
+	if project == nil {
+		api.sendError(w, APIErrorDeviceNotFound, "Could not found information on device "+label)
+		return
+	}
+	inrec, _ := json.MarshalIndent(*project, "", "  ")
+	w.Write(inrec)
+}
+
+func (api *API) getBim(w http.ResponseWriter, req *http.Request) {
+	api.setDefaultHeader(w)
+	params := mux.Vars(req)
+	label := params["label"]
+	api.readBim(w, label)
+}
+
+func (api *API) removeBim(w http.ResponseWriter, req *http.Request) {
+	api.setDefaultHeader(w)
+	params := mux.Vars(req)
+	label := params["label"]
+	res := database.RemoveProject(api.db, label)
+	if res != nil {
+		api.sendError(w, APIErrorDeviceNotFound, "Device "+label+" not found")
+		return
+	}
+	w.Write([]byte("{}"))
+}
+
+func (api *API) setBim(w http.ResponseWriter, req *http.Request) {
+	api.setDefaultHeader(w)
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		api.sendError(w, APIErrorBodyParsing, "Error reading request body")
+		return
+	}
+
+	proj := core.Project{}
+	err = json.Unmarshal(body, &proj)
+	if err != nil {
+		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error())
+		return
+	}
+
+	rlog.Info("Try to save IfcInfo", proj)
+	err = database.SaveProject(api.db, proj)
+	if err != nil {
+		api.sendError(w, APIErrorDatabase, "Ifc information "+proj.Label+" cannot be added in database")
+		return
+	}
+	api.readBim(w, proj.Label)
+}
+
 func (api *API) readIfcInfo(w http.ResponseWriter, label string) {
 	project := database.GetProject(api.db, label)
 	if project == nil {
@@ -46,7 +99,7 @@ func (api *API) removeIfcInfo(w http.ResponseWriter, req *http.Request) {
 		api.sendError(w, APIErrorDeviceNotFound, "Device "+label+" not found")
 		return
 	}
-	w.Write([]byte(""))
+	w.Write([]byte("{}"))
 }
 
 func (api *API) setIfcInfo(w http.ResponseWriter, req *http.Request) {
@@ -58,13 +111,13 @@ func (api *API) setIfcInfo(w http.ResponseWriter, req *http.Request) {
 	}
 
 	ifcInfo := core.IfcInfo{}
-	err = json.Unmarshal([]byte(body), &ifcInfo)
+	err = json.Unmarshal(body, &ifcInfo)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error())
 		return
 	}
 
-	rlog.Info("Try to save ", ifcInfo)
+	rlog.Info("Try to save IfcInfo", ifcInfo)
 	model := core.Model{
 		Name:       ifcInfo.ModelName,
 		Vendor:     ifcInfo.Vendor,

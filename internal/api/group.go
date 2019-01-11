@@ -47,7 +47,7 @@ func (api *API) setGroupConfig(w http.ResponseWriter, req *http.Request) {
 	}
 
 	gr := gm.GroupConfig{}
-	err = json.Unmarshal([]byte(body), &gr)
+	err = json.Unmarshal(body, &gr)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error())
 		return
@@ -67,7 +67,7 @@ func (api *API) sendGroupCommand(w http.ResponseWriter, req *http.Request) {
 	}
 
 	gr := core.GroupCmd{}
-	err = json.Unmarshal([]byte(body), &gr)
+	err = json.Unmarshal(body, &gr)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error())
 		return

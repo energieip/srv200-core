@@ -270,10 +270,6 @@ func (s *CoreService) registerSwitchStatus(switchStatus sd.SwitchStatus) {
 	database.SaveSwitchStatus(s.db, switchStatus)
 }
 
-func (s *CoreService) registerConfig(config core.ServerConfig) {
-	database.SaveServerConfig(s.db, config)
-}
-
 func (s *CoreService) updateLedCfg(config interface{}) {
 	cfg, _ := dl.ToLedConf(config)
 	if cfg == nil {
@@ -571,13 +567,6 @@ func (s *CoreService) Run() error {
 				case network.EventDump:
 					s.sendSwitchUpdateConfig(event)
 					s.registerSwitchStatus(event)
-				}
-			}
-		case configEvents := <-s.server.EventsCfg:
-			for eventType, event := range configEvents {
-				switch eventType {
-				case network.EventWriteCfg:
-					s.registerConfig(event)
 				}
 			}
 		}

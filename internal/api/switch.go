@@ -40,7 +40,7 @@ func (api *API) setSwitchConfig(w http.ResponseWriter, req *http.Request) {
 	}
 
 	device := core.SwitchConfig{}
-	err = json.Unmarshal([]byte(body), &device)
+	err = json.Unmarshal(body, &device)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error())
 		return
@@ -60,5 +60,5 @@ func (api *API) removeSwitchSetup(w http.ResponseWriter, req *http.Request) {
 		api.sendError(w, APIErrorDeviceNotFound, "Switch "+mac+" not found")
 		return
 	}
-	w.Write([]byte(""))
+	w.Write([]byte("{}"))
 }

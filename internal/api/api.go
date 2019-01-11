@@ -128,7 +128,7 @@ func (api *API) setInstallMode(w http.ResponseWriter, req *http.Request) {
 	}
 
 	inputMode := InstallModeStruct{}
-	err = json.Unmarshal([]byte(body), &inputMode)
+	err = json.Unmarshal(body, &inputMode)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error())
 		return
@@ -397,7 +397,7 @@ func (api *API) getV1Functions(w http.ResponseWriter, req *http.Request) {
 		apiV1 + "/config/led", apiV1 + "/config/sensor", apiV1 + "/config/group",
 		apiV1 + "/config/switch", apiV1 + "/configs", apiV1 + "/status", apiV1 + "/events",
 		apiV1 + "/command/led", apiV1 + "/command/group", apiV1 + "/project/ifcInfo",
-		apiV1 + "/project/model", apiV1 + "/project", apiV1 + "/dump",
+		apiV1 + "/project/model", apiV1 + "/project/bim", apiV1 + "/project", apiV1 + "/dump",
 	}
 	apiInfo := APIFunctions{
 		Functions: functions,
@@ -468,6 +468,9 @@ func (api *API) swagger() {
 	router.HandleFunc(apiV1+"/project/model/{modelName}", api.getModelInfo).Methods("GET")
 	router.HandleFunc(apiV1+"/project/model/{modelName}", api.removeModelInfo).Methods("DELETE")
 	router.HandleFunc(apiV1+"/project/model", api.setModelInfo).Methods("POST")
+	router.HandleFunc(apiV1+"/project/bim/{label}", api.getBim).Methods("GET")
+	router.HandleFunc(apiV1+"/project/bim/{label}", api.removeBim).Methods("DELETE")
+	router.HandleFunc(apiV1+"/project/bim", api.setBim).Methods("POST")
 	router.HandleFunc(apiV1+"/project", api.getIfc).Methods("GET")
 
 	//dump API
