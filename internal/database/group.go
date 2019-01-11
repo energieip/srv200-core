@@ -1,7 +1,7 @@
 package database
 
 import (
-	gm "github.com/energieip/common-group-go/pkg/groupmodel"
+	gm "github.com/energieip/common-components-go/pkg/dgroup"
 )
 
 //SaveGroupConfig dump group config in database
@@ -116,12 +116,20 @@ func UpdateGroupConfig(db Database, config gm.GroupConfig) error {
 		setup.Watchdog = config.Watchdog
 	}
 
-	if config.SlopeStart != nil {
-		setup.SlopeStart = config.SlopeStart
+	if config.SlopeStartManual != nil {
+		setup.SlopeStartManual = config.SlopeStartManual
 	}
 
-	if config.SlopeStop != nil {
-		setup.SlopeStop = config.SlopeStop
+	if config.SlopeStopManual != nil {
+		setup.SlopeStopManual = config.SlopeStopManual
+	}
+
+	if config.SlopeStartAuto != nil {
+		setup.SlopeStartAuto = config.SlopeStartAuto
+	}
+
+	if config.SlopeStopAuto != nil {
+		setup.SlopeStopAuto = config.SlopeStopAuto
 	}
 
 	if config.SensorRule != nil {

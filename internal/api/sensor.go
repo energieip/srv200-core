@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	ds "github.com/energieip/common-sensor-go/pkg/driversensor"
+	ds "github.com/energieip/common-components-go/pkg/dsensor"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
 	"github.com/gorilla/mux"
 	"github.com/romana/rlog"

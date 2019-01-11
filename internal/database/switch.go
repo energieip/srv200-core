@@ -1,7 +1,7 @@
 package database
 
 import (
-	sd "github.com/energieip/common-switch-go/pkg/deviceswitch"
+	sd "github.com/energieip/common-components-go/pkg/dswitch"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 )
 
@@ -12,7 +12,6 @@ func SaveSwitchStatus(db Database, status sd.SwitchStatus) error {
 	swStatus.IP = status.IP
 	swStatus.ErrorCode = status.ErrorCode
 	swStatus.IsConfigured = status.IsConfigured
-	swStatus.Topic = status.Topic
 	swStatus.Protocol = status.Protocol
 	swStatus.FriendlyName = status.FriendlyName
 	swStatus.LastSystemUpgradeDate = status.LastSystemUpgradeDate

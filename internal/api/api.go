@@ -9,9 +9,9 @@ import (
 	"strings"
 	"sync"
 
-	gm "github.com/energieip/common-group-go/pkg/groupmodel"
-	dl "github.com/energieip/common-led-go/pkg/driverled"
-	ds "github.com/energieip/common-sensor-go/pkg/driversensor"
+	gm "github.com/energieip/common-components-go/pkg/dgroup"
+	dl "github.com/energieip/common-components-go/pkg/dled"
+	ds "github.com/energieip/common-components-go/pkg/dsensor"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
 	"github.com/gorilla/mux"

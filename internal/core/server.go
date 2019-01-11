@@ -1,10 +1,10 @@
 package core
 
 import (
-	gm "github.com/energieip/common-group-go/pkg/groupmodel"
-	dl "github.com/energieip/common-led-go/pkg/driverled"
-	ds "github.com/energieip/common-sensor-go/pkg/driversensor"
-	pkg "github.com/energieip/common-service-go/pkg/service"
+	gm "github.com/energieip/common-components-go/pkg/dgroup"
+	dl "github.com/energieip/common-components-go/pkg/dled"
+	ds "github.com/energieip/common-components-go/pkg/dsensor"
+	pkg "github.com/energieip/common-components-go/pkg/service"
 )
 
 //ServerConfig server configuration

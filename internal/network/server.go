@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"time"
 
-	genericNetwork "github.com/energieip/common-network-go/pkg/network"
-	pkg "github.com/energieip/common-service-go/pkg/service"
-	sd "github.com/energieip/common-switch-go/pkg/deviceswitch"
+	sd "github.com/energieip/common-components-go/pkg/dswitch"
+	genericNetwork "github.com/energieip/common-components-go/pkg/network"
+	pkg "github.com/energieip/common-components-go/pkg/service"
 	"github.com/romana/rlog"
 )
 

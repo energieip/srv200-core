@@ -1,7 +1,7 @@
 package database
 
 import (
-	pkg "github.com/energieip/common-service-go/pkg/service"
+	pkg "github.com/energieip/common-components-go/pkg/service"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 )
 

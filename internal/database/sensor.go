@@ -1,11 +1,11 @@
 package database
 
 import (
-	sensor "github.com/energieip/common-sensor-go/pkg/driversensor"
+	ds "github.com/energieip/common-components-go/pkg/dsensor"
 )
 
 //SaveSensorConfig dump sensor config in database
-func SaveSensorConfig(db Database, sensorStatus sensor.SensorSetup) error {
+func SaveSensorConfig(db Database, sensorStatus ds.SensorSetup) error {
 	var dbID string
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = sensorStatus.Mac
@@ -29,7 +29,7 @@ func SaveSensorConfig(db Database, sensorStatus sensor.SensorSetup) error {
 }
 
 //UpdateSensorConfig update sensor config in database
-func UpdateSensorConfig(db Database, sensorConfig sensor.SensorConf) error {
+func UpdateSensorConfig(db Database, sensorConfig ds.SensorConf) error {
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = sensorConfig.Mac
 	sensorStored, err := db.GetRecord(ConfigDB, SensorsTable, criteria)
@@ -46,7 +46,7 @@ func UpdateSensorConfig(db Database, sensorConfig sensor.SensorConf) error {
 	}
 	dbID := id.(string)
 
-	sensorSetup, err := sensor.ToSensorSetup(sensorStored)
+	sensorSetup, err := ds.ToSensorSetup(sensorStored)
 	if err != nil || sensorSetup == nil {
 		return NewError("Device " + sensorConfig.Mac + "not found")
 	}
@@ -90,14 +90,14 @@ func RemoveSensorConfig(db Database, mac string) error {
 }
 
 //GetSensorConfig return the sensor configuration
-func GetSensorConfig(db Database, mac string) *sensor.SensorSetup {
+func GetSensorConfig(db Database, mac string) *ds.SensorSetup {
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = mac
 	sensorStored, err := db.GetRecord(ConfigDB, SensorsTable, criteria)
 	if err != nil || sensorStored == nil {
 		return nil
 	}
-	cell, err := sensor.ToSensorSetup(sensorStored)
+	cell, err := ds.ToSensorSetup(sensorStored)
 	if err != nil {
 		return nil
 	}
@@ -105,14 +105,14 @@ func GetSensorConfig(db Database, mac string) *sensor.SensorSetup {
 }
 
 //GetSensorsConfig return the sensor config list
-func GetSensorsConfig(db Database) map[string]sensor.SensorSetup {
-	sensors := map[string]sensor.SensorSetup{}
+func GetSensorsConfig(db Database) map[string]ds.SensorSetup {
+	sensors := map[string]ds.SensorSetup{}
 	stored, err := db.FetchAllRecords(ConfigDB, SensorsTable)
 	if err != nil || stored == nil {
 		return sensors
 	}
 	for _, l := range stored {
-		cell, err := sensor.ToSensorSetup(l)
+		cell, err := ds.ToSensorSetup(l)
 		if err != nil || cell == nil {
 			continue
 		}
@@ -122,7 +122,7 @@ func GetSensorsConfig(db Database) map[string]sensor.SensorSetup {
 }
 
 //SaveSensorStatus dump sensor status in database
-func SaveSensorStatus(db Database, sensorStatus sensor.Sensor) error {
+func SaveSensorStatus(db Database, sensorStatus ds.Sensor) error {
 	var dbID string
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = sensorStatus.Mac
@@ -146,14 +146,14 @@ func SaveSensorStatus(db Database, sensorStatus sensor.Sensor) error {
 }
 
 //GetSensorsStatus return the led status list
-func GetSensorsStatus(db Database) map[string]sensor.Sensor {
-	sensors := map[string]sensor.Sensor{}
+func GetSensorsStatus(db Database) map[string]ds.Sensor {
+	sensors := map[string]ds.Sensor{}
 	stored, err := db.FetchAllRecords(StatusDB, SensorsTable)
 	if err != nil || stored == nil {
 		return sensors
 	}
 	for _, l := range stored {
-		cell, err := sensor.ToSensor(l)
+		cell, err := ds.ToSensor(l)
 		if err != nil || cell == nil {
 			continue
 		}
@@ -163,14 +163,14 @@ func GetSensorsStatus(db Database) map[string]sensor.Sensor {
 }
 
 //GetSensorStatus return the led status
-func GetSensorStatus(db Database, mac string) *sensor.Sensor {
+func GetSensorStatus(db Database, mac string) *ds.Sensor {
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = mac
 	stored, err := db.GetRecord(StatusDB, SensorsTable, criteria)
 	if err != nil || stored == nil {
 		return nil
 	}
-	cell, err := sensor.ToSensor(stored)
+	cell, err := ds.ToSensor(stored)
 	if err != nil {
 		return nil
 	}

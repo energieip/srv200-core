@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
-	dl "github.com/energieip/common-led-go/pkg/driverled"
+	dl "github.com/energieip/common-components-go/pkg/dled"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
 	"github.com/gorilla/mux"

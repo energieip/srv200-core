@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
-	gm "github.com/energieip/common-group-go/pkg/groupmodel"
+	gm "github.com/energieip/common-components-go/pkg/dgroup"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
 	"github.com/gorilla/mux"

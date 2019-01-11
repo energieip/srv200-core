@@ -1,7 +1,7 @@
 package database
 
 import (
-	dl "github.com/energieip/common-led-go/pkg/driverled"
+	dl "github.com/energieip/common-components-go/pkg/dled"
 )
 
 //SaveLedConfig dump led config in database

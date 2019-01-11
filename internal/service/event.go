@@ -3,9 +3,9 @@ package service
 import (
 	"time"
 
-	gm "github.com/energieip/common-group-go/pkg/groupmodel"
-	dl "github.com/energieip/common-led-go/pkg/driverled"
-	ds "github.com/energieip/common-sensor-go/pkg/driversensor"
+	gm "github.com/energieip/common-components-go/pkg/dgroup"
+	dl "github.com/energieip/common-components-go/pkg/dled"
+	ds "github.com/energieip/common-components-go/pkg/dsensor"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
 	"github.com/romana/rlog"
@@ -103,9 +103,9 @@ func (s *CoreService) pushAPIEvent() {
 			if len(s.bufAPI) != 0 {
 				select {
 				case s.eventsAPI <- s.bufAPI:
-					rlog.Info("API event Sent", s.bufAPI)
+					rlog.Debug("API event Sent", s.bufAPI)
 				default:
-					rlog.Warn("API event Dropped", s.bufAPI)
+					rlog.Debug("API event Dropped", s.bufAPI)
 				}
 			}
 			s.bufAPI = make(map[string]core.EventStatus)

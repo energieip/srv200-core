@@ -3,12 +3,12 @@ package service
 import (
 	"os"
 
-	gm "github.com/energieip/common-group-go/pkg/groupmodel"
-	dl "github.com/energieip/common-led-go/pkg/driverled"
-	ds "github.com/energieip/common-sensor-go/pkg/driversensor"
-	pkg "github.com/energieip/common-service-go/pkg/service"
-	sd "github.com/energieip/common-switch-go/pkg/deviceswitch"
-	"github.com/energieip/common-tools-go/pkg/tools"
+	gm "github.com/energieip/common-components-go/pkg/dgroup"
+	dl "github.com/energieip/common-components-go/pkg/dled"
+	ds "github.com/energieip/common-components-go/pkg/dsensor"
+	sd "github.com/energieip/common-components-go/pkg/dswitch"
+	pkg "github.com/energieip/common-components-go/pkg/service"
+	"github.com/energieip/common-components-go/pkg/tools"
 	"github.com/energieip/srv200-coreservice-go/internal/api"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
@@ -457,7 +457,7 @@ func (s *CoreService) updateSensorCfg(config interface{}) {
 	if err != nil {
 		rlog.Error("Cannot send update config to " + sensor.SwitchMac + " on topic: " + url + " err:" + err.Error())
 	} else {
-		rlog.Info("Send update config to " + sensor.SwitchMac + " on topic: " + url)
+		rlog.Info("Send update config to " + sensor.SwitchMac + " on topic: " + url + " dump:" + dump)
 	}
 }
 
@@ -522,7 +522,7 @@ func (s *CoreService) sendLedCmd(cmd interface{}) {
 	if err != nil {
 		rlog.Error("Cannot send update config to " + led.SwitchMac + " on topic: " + url + " err:" + err.Error())
 	} else {
-		rlog.Info("Send update config to " + led.SwitchMac + " on topic: " + url)
+		rlog.Info("Send update config to " + led.SwitchMac + " on topic: " + url + " dump:" + dump)
 	}
 
 }

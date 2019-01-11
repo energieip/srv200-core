@@ -3,7 +3,7 @@ package core
 import (
 	"encoding/json"
 
-	pkg "github.com/energieip/common-service-go/pkg/service"
+	pkg "github.com/energieip/common-components-go/pkg/service"
 )
 
 //Service describe the link between the object in the building map and the configuration

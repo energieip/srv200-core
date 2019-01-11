@@ -3,7 +3,7 @@ package core
 import (
 	"encoding/json"
 
-	sd "github.com/energieip/common-switch-go/pkg/deviceswitch"
+	sd "github.com/energieip/common-components-go/pkg/dswitch"
 )
 
 //SwitchConfig content
