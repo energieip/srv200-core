@@ -1,5 +1,5 @@
 hash: 7873f75061b03685fab1d37fa10ae2d9249507813e75d280fc0acfb9b629147f
-updated: 2019-01-11T18:34:44.329332141+01:00
+updated: 2019-01-12T20:17:59.919053173+01:00
 imports:
 - name: github.com/cenkalti/backoff
   version: 1e4cf3da559842a91afcb6ea6141451e6c30c618
@@ -8,7 +8,7 @@ imports:
   subpackages:
   - packets
 - name: github.com/energieip/common-components-go
-  version: a8d903a763cd4ce59142160bd0fc80c06a9303e2
+  version: 9a80ebc53e865d86da3620d1605d1d7a6d36758a
   subpackages:
   - pkg/database
   - pkg/dgroup
@@ -38,7 +38,7 @@ imports:
 - name: github.com/romana/rlog
   version: f018bc92e7d71f27c04e04cbf008860416c21d01
 - name: github.com/sirupsen/logrus
-  version: eef6b768ab01a0598a0a6db97bad2a37d31df1d1
+  version: 78fb3852d92683dc28da6cc3d5f965100677c27d
 - name: golang.org/x/crypto
   version: ff983b9c42bc9fbf91556e191cc8efb585c16908
   subpackages:

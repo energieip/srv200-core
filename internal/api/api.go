@@ -12,6 +12,7 @@ import (
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
 	dl "github.com/energieip/common-components-go/pkg/dled"
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
+	pkg "github.com/energieip/common-components-go/pkg/service"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
 	"github.com/gorilla/mux"
@@ -44,6 +45,8 @@ type API struct {
 	EventsToBackend chan map[string]interface{}
 	apiMutex        sync.Mutex
 	installMode     *bool
+	certificate     string
+	keyfile         string
 }
 
 //Status
@@ -81,7 +84,7 @@ type Dump struct {
 }
 
 //InitAPI start API connection
-func InitAPI(db database.Database, eventsAPI chan map[string]core.EventStatus, installMode *bool) *API {
+func InitAPI(db database.Database, eventsAPI chan map[string]core.EventStatus, installMode *bool, conf pkg.ServiceConfig) *API {
 	api := API{
 		db:              db,
 		eventsAPI:       eventsAPI,
@@ -93,6 +96,8 @@ func InitAPI(db database.Database, eventsAPI chan map[string]core.EventStatus, i
 				return true
 			},
 		},
+		certificate: conf.Certificate,
+		keyfile:     conf.Key,
 	}
 	go api.swagger()
 	return &api
@@ -480,5 +485,5 @@ func (api *API) swagger() {
 	router.HandleFunc("/versions", api.getAPIs).Methods("GET")
 	router.HandleFunc("/functions", api.getFunctions).Methods("GET")
 
-	log.Fatal(http.ListenAndServe(":8888", router))
+	log.Fatal(http.ListenAndServeTLS(":8888", api.certificate, api.keyfile, router))
 }

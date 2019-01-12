@@ -44,7 +44,7 @@
         }
     ],
     "schemes":[
-        "http"
+        "https"
     ],
     "basePath": "/v1.0",
     "paths":{

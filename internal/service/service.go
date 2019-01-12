@@ -78,7 +78,7 @@ func (s *CoreService) Initialize(confFile string) error {
 		rlog.Error("Cannot connect to drivers broker " + conf.NetworkBroker.IP + " error: " + err.Error())
 		return err
 	}
-	web := api.InitAPI(s.db, s.eventsAPI, &s.installMode)
+	web := api.InitAPI(s.db, s.eventsAPI, &s.installMode, *conf)
 	s.api = web
 
 	rlog.Info("ServerCore service started")
