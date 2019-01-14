@@ -66,6 +66,13 @@ func GetGroupSwitchs(db Database, grID int) map[string]bool {
 		}
 		switchs[led.SwitchMac] = true
 	}
+	for _, blindMac := range gr.Blinds {
+		blind, _ := GetBlindConfig(db, blindMac)
+		if blind == nil {
+			continue
+		}
+		switchs[blind.SwitchMac] = true
+	}
 	return switchs
 }
 
@@ -82,6 +89,10 @@ func UpdateGroupConfig(db Database, config gm.GroupConfig) error {
 
 	if config.Sensors != nil {
 		setup.Sensors = config.Sensors
+	}
+
+	if config.Blinds != nil {
+		setup.Blinds = config.Blinds
 	}
 
 	if config.FriendlyName != nil {
@@ -139,6 +150,14 @@ func GetGroupConfigs(db Database, driversMac map[string]bool) map[int]gm.GroupCo
 			if _, ok := driversMac[mac]; ok {
 				addGroup = true
 				break
+			}
+		}
+		if addGroup != true {
+			for _, mac := range gr.Blinds {
+				if _, ok := driversMac[mac]; ok {
+					addGroup = true
+					break
+				}
 			}
 		}
 		if addGroup {

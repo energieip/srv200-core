@@ -3,6 +3,7 @@ package service
 import (
 	"time"
 
+	"github.com/energieip/common-components-go/pkg/dblind"
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
 	dl "github.com/energieip/common-components-go/pkg/dled"
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
@@ -18,6 +19,7 @@ const (
 
 	LedElt    = "led"
 	SensorElt = "sensor"
+	BlindElt  = "blind"
 	GroupElt  = "group"
 )
 
@@ -44,6 +46,7 @@ func (s *CoreService) prepareAPIEvent(evtType, evtObj string, event interface{})
 				Leds:    []core.EventLed{},
 				Sensors: []core.EventSensor{},
 				Groups:  []gm.GroupStatus{},
+				Blinds:  []core.EventBlind{},
 			}
 		}
 		val, ok := s.bufAPI[evtType]
@@ -71,11 +74,41 @@ func (s *CoreService) prepareAPIEvent(evtType, evtObj string, event interface{})
 				Leds:    []core.EventLed{},
 				Sensors: []core.EventSensor{},
 				Groups:  []gm.GroupStatus{},
+				Blinds:  []core.EventBlind{},
 			}
 		}
 		val, ok := s.bufAPI[evtType]
 		val.Leds = append(val.Leds, evt)
 		s.bufAPI[evtType] = val
+
+	case BlindElt:
+		blind, err := dblind.ToBlind(event)
+		if err != nil || blind == nil {
+			return
+		}
+		label := ""
+		project := database.GetProjectByMac(s.db, blind.Mac)
+		if project != nil {
+			label = project.Label
+		}
+		evt := core.EventBlind{
+			Blind: *blind,
+			Label: label,
+		}
+
+		_, ok := s.bufAPI[evtType]
+		if !ok {
+			s.bufAPI[evtType] = core.EventStatus{
+				Leds:    []core.EventLed{},
+				Sensors: []core.EventSensor{},
+				Groups:  []gm.GroupStatus{},
+				Blinds:  []core.EventBlind{},
+			}
+		}
+		val, ok := s.bufAPI[evtType]
+		val.Blinds = append(val.Blinds, evt)
+		s.bufAPI[evtType] = val
+
 	case GroupElt:
 		group, err := gm.ToGroupStatus(event)
 		if err != nil || group == nil {

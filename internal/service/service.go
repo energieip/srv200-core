@@ -3,6 +3,8 @@ package service
 import (
 	"os"
 
+	"github.com/energieip/common-components-go/pkg/dblind"
+
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
 	dl "github.com/energieip/common-components-go/pkg/dled"
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
@@ -139,10 +141,14 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 
 	setup.LedsSetup = make(map[string]dl.LedSetup)
 	setup.SensorsSetup = make(map[string]ds.SensorSetup)
+	setup.BlindsSetup = make(map[string]dblind.BlindSetup)
 
 	driversMac := make(map[string]bool)
 	for _, led := range switchStatus.Leds {
 		driversMac[led.Mac] = true
+	}
+	for _, blind := range switchStatus.Blinds {
+		driversMac[blind.Mac] = true
 	}
 	setup.Groups = database.GetGroupConfigs(s.db, driversMac)
 
@@ -163,6 +169,7 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 					ThresholdLow:  &low,
 					SwitchMac:     switchStatus.Mac,
 					DumpFrequency: dumpFreq,
+					FriendlyName:  &led.Mac,
 				}
 				lsetup = &dled
 				// saved default config
@@ -174,6 +181,32 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 			s.prepareAPIEvent(EventAdd, LedElt, led)
 		} else {
 			s.prepareAPIEvent(EventUpdate, LedElt, led)
+		}
+	}
+
+	for mac, blind := range switchStatus.Blinds {
+		if !blind.IsConfigured {
+			bsetup, _ := database.GetBlindConfig(s.db, mac)
+			if bsetup == nil && s.installMode {
+				enableBle := false
+				confBlind := dblind.BlindSetup{
+					Mac:           blind.Mac,
+					Group:         &defaultGroup,
+					IsBleEnabled:  &enableBle,
+					SwitchMac:     switchStatus.Mac,
+					DumpFrequency: dumpFreq,
+					FriendlyName:  &blind.Mac,
+				}
+				bsetup = &confBlind
+				// saved default config
+				database.SaveBlindConfig(s.db, confBlind)
+			}
+			if bsetup != nil {
+				setup.BlindsSetup[mac] = *bsetup
+			}
+			s.prepareAPIEvent(EventAdd, BlindElt, blind)
+		} else {
+			s.prepareAPIEvent(EventUpdate, BlindElt, blind)
 		}
 	}
 
@@ -194,6 +227,7 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 					TemperatureOffset:          &temperatureOffset,
 					SwitchMac:                  switchStatus.Mac,
 					DumpFrequency:              dumpFreq,
+					FriendlyName:               &sensor.Mac,
 				}
 				ssetup = &dsensor
 				// saved default config
@@ -252,6 +286,9 @@ func (s *CoreService) registerSwitchStatus(switchStatus sd.SwitchStatus) {
 	}
 	for _, sensor := range switchStatus.Sensors {
 		database.SaveSensorStatus(s.db, sensor)
+	}
+	for _, blind := range switchStatus.Blinds {
+		database.SaveBlindStatus(s.db, blind)
 	}
 	for _, group := range switchStatus.Groups {
 		database.SaveGroupStatus(s.db, group)
@@ -332,6 +369,68 @@ func (s *CoreService) updateLedCfg(config interface{}) {
 	}
 }
 
+func (s *CoreService) updateBlindCfg(config interface{}) {
+	cfg, _ := dblind.ToBlindConf(config)
+	if cfg == nil {
+		rlog.Error("Cannot parse ")
+		return
+	}
+
+	oldBlind, _ := database.GetBlindConfig(s.db, cfg.Mac)
+	if oldBlind == nil {
+		rlog.Error("Cannot find config for " + cfg.Mac)
+		return
+	}
+
+	database.UpdateBlindConfig(s.db, *cfg)
+	//Get corresponding switchMac
+	blind, _ := database.GetBlindConfig(s.db, cfg.Mac)
+	if blind == nil {
+		rlog.Error("Cannot find config for " + cfg.Mac)
+		return
+	}
+
+	if blind.Group != nil {
+		if oldBlind.Group != blind.Group {
+			if oldBlind.Group != nil {
+				rlog.Info("Update old group", *oldBlind.Group)
+				gr, _ := database.GetGroupConfig(s.db, *oldBlind.Group)
+				if gr != nil {
+					for i, v := range gr.Blinds {
+						if v == blind.Mac {
+							gr.Blinds = append(gr.Blinds[:i], gr.Blinds[i+1:]...)
+							break
+						}
+					}
+					rlog.Info("Old group will be ", gr.Blinds)
+					s.updateGroupCfg(gr)
+				}
+			}
+			rlog.Info("Update new group", *blind.Group)
+			grNew, _ := database.GetGroupConfig(s.db, *blind.Group)
+			if grNew != nil {
+				grNew.Blinds = append(grNew.Blinds, cfg.Mac)
+				rlog.Info("new group will be", grNew.Blinds)
+				s.updateGroupCfg(grNew)
+			}
+		}
+	}
+	url := "/write/switch/" + blind.SwitchMac + "/update/settings"
+	switchSetup := sd.SwitchConfig{}
+	switchSetup.Mac = blind.SwitchMac
+	switchSetup.BlindsConfig = make(map[string]dblind.BlindConf)
+
+	switchSetup.BlindsConfig[cfg.Mac] = *cfg
+
+	dump, _ := switchSetup.ToJSON()
+	err := s.server.SendCommand(url, dump)
+	if err != nil {
+		rlog.Error("Cannot send update config to " + blind.SwitchMac + " on topic: " + url + " err:" + err.Error())
+	} else {
+		rlog.Info("Send update config to " + blind.SwitchMac + " on topic: " + url + " dump:" + dump)
+	}
+}
+
 func (s *CoreService) updateGroupCfg(config interface{}) {
 	cfg, _ := gm.ToGroupConfig(config)
 
@@ -353,6 +452,13 @@ func (s *CoreService) updateGroupCfg(config interface{}) {
 				Group: &cfg.Group,
 			}
 			s.updateSensorCfg(cell)
+		}
+		for _, blind := range cfg.Blinds {
+			bl := dblind.BlindConf{
+				Mac:   blind,
+				Group: &cfg.Group,
+			}
+			s.updateBlindCfg(bl)
 		}
 	}
 
@@ -524,7 +630,43 @@ func (s *CoreService) sendLedCmd(cmd interface{}) {
 	} else {
 		rlog.Info("Send update config to " + led.SwitchMac + " on topic: " + url + " dump:" + dump)
 	}
+}
 
+func (s *CoreService) sendBlindCmd(cmdBlind interface{}) {
+	cmd, _ := core.ToBlindCmd(cmdBlind)
+	if cmd == nil {
+		rlog.Error("Cannot parse cmd")
+		return
+	}
+	//Get correspnding switchMac
+	driver, _ := database.GetBlindConfig(s.db, cmd.Mac)
+	if driver == nil {
+		rlog.Error("Cannot find config for " + cmd.Mac)
+		return
+	}
+	url := "/write/switch/" + driver.SwitchMac + "/update/settings"
+	switchSetup := sd.SwitchConfig{}
+	switchSetup.Mac = driver.SwitchMac
+	switchSetup.BlindsConfig = make(map[string]dblind.BlindConf)
+
+	cfg := dblind.BlindConf{
+		Mac:    cmd.Mac,
+		Blind1: &cmd.Blind1,
+		Blind2: &cmd.Blind2,
+		Slat1:  &cmd.Slat1,
+		Slat2:  &cmd.Slat2,
+	}
+	rlog.Info("Ready to send ", cfg)
+	rlog.Info("To switch", driver.SwitchMac)
+	switchSetup.BlindsConfig[cmd.Mac] = cfg
+
+	dump, _ := switchSetup.ToJSON()
+	err := s.server.SendCommand(url, dump)
+	if err != nil {
+		rlog.Error("Cannot send update config to " + driver.SwitchMac + " on topic: " + url + " err:" + err.Error())
+	} else {
+		rlog.Info("Send update config to " + driver.SwitchMac + " on topic: " + url + " dump:" + dump)
+	}
 }
 
 func (s *CoreService) readAPIEvents() {
@@ -536,6 +678,8 @@ func (s *CoreService) readAPIEvents() {
 				switch eventType {
 				case "led":
 					s.updateLedCfg(event)
+				case "blind":
+					s.updateBlindCfg(event)
 				case "sensor":
 					s.updateSensorCfg(event)
 				case "group":
@@ -546,6 +690,8 @@ func (s *CoreService) readAPIEvents() {
 					s.sendGroupCmd(event)
 				case "ledCmd":
 					s.sendLedCmd(event)
+				case "blindCmd":
+					s.sendBlindCmd(event)
 				}
 			}
 		}

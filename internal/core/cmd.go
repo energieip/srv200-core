@@ -8,10 +8,38 @@ type LedCmd struct {
 	Setpoint int    `json:"setpoint"`
 }
 
+type BlindCmd struct {
+	Mac    string `json:"mac"`
+	Blind1 int    `json:"blind1"`
+	Blind2 int    `json:"blind2"`
+	Slat1  int    `json:"slat1"`
+	Slat2  int    `json:"slat2"`
+}
+
 type GroupCmd struct {
 	Group        int  `json:"group"`
 	Auto         bool `json:"auto"`
 	SetpointLeds int  `json:"setpointLeds"`
+}
+
+// ToJSON dump BlindCmd struct
+func (m BlindCmd) ToJSON() (string, error) {
+	inrec, err := json.Marshal(m)
+	if err != nil {
+		return "", err
+	}
+	return string(inrec[:]), err
+}
+
+//ToBlindCmd convert map interface to ToBlindCmd object
+func ToBlindCmd(val interface{}) (*BlindCmd, error) {
+	var m BlindCmd
+	inrec, err := json.Marshal(val)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(inrec, &m)
+	return &m, err
 }
 
 // ToJSON dump LedCmd struct

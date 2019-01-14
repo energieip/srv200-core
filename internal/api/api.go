@@ -9,6 +9,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/energieip/common-components-go/pkg/dblind"
+
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
 	dl "github.com/energieip/common-components-go/pkg/dled"
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
@@ -317,6 +319,7 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 type Conf struct {
 	Leds    []dl.LedConf        `json:"leds"`
 	Sensors []ds.SensorConf     `json:"sensors"`
+	Blinds  []dblind.BlindConf  `json:"blinds"`
 	Groups  []gm.GroupConfig    `json:"groups"`
 	Switchs []core.SwitchConfig `json:"switchs"`
 }
@@ -347,6 +350,9 @@ func (api *API) setConfig(w http.ResponseWriter, req *http.Request) {
 	}
 	for _, sw := range config.Switchs {
 		event["switch"] = sw
+	}
+	for _, sw := range config.Blinds {
+		event["blind"] = sw
 	}
 	api.EventsToBackend <- event
 	w.Write([]byte("{}"))
@@ -399,10 +405,11 @@ func (api *API) getV1Functions(w http.ResponseWriter, req *http.Request) {
 	apiV1 := "/v1.0"
 	functions := []string{apiV1 + "/setup/sensor", apiV1 + "/setup/led",
 		apiV1 + "/setup/group", apiV1 + "/setup/switch", apiV1 + "/setup/installMode",
-		apiV1 + "/setup/service",
-		apiV1 + "/config/led", apiV1 + "/config/sensor", apiV1 + "/config/group",
+		apiV1 + "/setup/service", apiV1 + "/setup/blind",
+		apiV1 + "/config/led", apiV1 + "/config/sensor", apiV1 + "/config/blind",
+		apiV1 + "/config/group",
 		apiV1 + "/config/switch", apiV1 + "/configs", apiV1 + "/status", apiV1 + "/events",
-		apiV1 + "/command/led", apiV1 + "/command/group", apiV1 + "/project/ifcInfo",
+		apiV1 + "/command/led", apiV1 + "/command/blind", apiV1 + "/command/group", apiV1 + "/project/ifcInfo",
 		apiV1 + "/project/model", apiV1 + "/project/bim", apiV1 + "/project", apiV1 + "/dump",
 	}
 	apiInfo := APIFunctions{
@@ -438,6 +445,9 @@ func (api *API) swagger() {
 	router.HandleFunc(apiV1+"/setup/led/{mac}", api.getLedSetup).Methods("GET")
 	router.HandleFunc(apiV1+"/setup/led/{mac}", api.removeLedSetup).Methods("DELETE")
 	router.HandleFunc(apiV1+"/setup/led", api.setLedSetup).Methods("POST")
+	router.HandleFunc(apiV1+"/setup/blind/{mac}", api.getBlindSetup).Methods("GET")
+	router.HandleFunc(apiV1+"/setup/blind/{mac}", api.removeBlindSetup).Methods("DELETE")
+	router.HandleFunc(apiV1+"/setup/blind", api.setBlindSetup).Methods("POST")
 	router.HandleFunc(apiV1+"/setup/group/{groupID}", api.getGroupSetup).Methods("GET")
 	router.HandleFunc(apiV1+"/setup/group/{groupID}", api.removeGroupSetup).Methods("DELETE")
 	router.HandleFunc(apiV1+"/setup/group", api.setGroupSetup).Methods("POST")
@@ -453,12 +463,14 @@ func (api *API) swagger() {
 	//config API
 	router.HandleFunc(apiV1+"/config/led", api.setLedConfig).Methods("POST")
 	router.HandleFunc(apiV1+"/config/sensor", api.setSensorConfig).Methods("POST")
+	router.HandleFunc(apiV1+"/config/blind", api.setBlindConfig).Methods("POST")
 	router.HandleFunc(apiV1+"/config/group", api.setGroupConfig).Methods("POST")
 	router.HandleFunc(apiV1+"/config/switch", api.setSwitchConfig).Methods("POST")
 	router.HandleFunc(apiV1+"/configs", api.setConfig).Methods("POST")
 
 	//status API
 	router.HandleFunc(apiV1+"/status/sensor/{mac}", api.getSensorStatus).Methods("GET")
+	router.HandleFunc(apiV1+"/status/blind/{mac}", api.getBlindStatus).Methods("GET")
 	router.HandleFunc(apiV1+"/status/led/{mac}", api.getLedStatus).Methods("GET")
 	router.HandleFunc(apiV1+"/status/group/{groupID}", api.getGroupStatus).Methods("GET")
 	router.HandleFunc(apiV1+"/status", api.getStatus).Methods("GET")
@@ -468,6 +480,7 @@ func (api *API) swagger() {
 
 	//command API
 	router.HandleFunc(apiV1+"/command/led", api.sendLedCommand).Methods("POST")
+	router.HandleFunc(apiV1+"/command/blind", api.sendBlindCommand).Methods("POST")
 	router.HandleFunc(apiV1+"/command/group", api.sendGroupCommand).Methods("POST")
 
 	//project API

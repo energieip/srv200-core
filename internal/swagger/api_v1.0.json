@@ -186,6 +186,111 @@
                 }
             }
         },
+        "/setup/blind/{mac}":{
+            "get":{
+                "tags":[
+                    "setup"
+                ],
+                "summary": "Return Blind Setup configuration",
+                "description": "Return Blind Setup configuration",
+                "operationId": "getBlindSetup",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "mac",
+                        "in": "path",
+                        "description": "Blind Mac address",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "sucessful operation",
+                        "schema":{
+                            "$ref": "#/definitions/BlindSetup"
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "delete":{
+                "tags":[
+                    "setup"
+                ],
+                "summary": "Remove Blind Setup configuration",
+                "description": "Remove Blind Setup configuration. It means the driver Blind will be blacklisted",
+                "operationId": "removeBlindSetup",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "mac",
+                        "in": "path",
+                        "description": "Blind Mac address",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "sucessful operation"
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },        
+        "/setup/blind":{
+            "post":{
+                "tags":[
+                    "setup"
+                ],
+                "summary": " Sensor Blind configuration",
+                "description": "Sensor Blind configuration",
+                "operationId": "setBlindSetup",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "sensor",
+                        "in": "body",
+                        "description": "Blind config",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/BlindSetup"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "sucessful operation",
+                        "schema":{
+                            "$ref": "#/definitions/BlindSetup"
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
         "/setup/led/{mac}":{
             "get":{
                 "tags":[
@@ -654,6 +759,41 @@
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/LedConfig"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "sucessful operation, Configuration read from database"
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/config/blind":{
+            "post":{
+                "tags":[
+                    "config"
+                ],
+                "summary": "Change Blind runtime configuration",
+                "description": "Change Blind runtime configuration",
+                "operationId": "setBlindConfig",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "blind",
+                        "in": "body",
+                        "description": "Blind runtime config",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/BlindConfig"
                         }
                     }
                 ],
@@ -1529,6 +1669,12 @@
                     "items": {
                         "$ref": "#/definitions/SensorConfig"
                     }
+                },
+                "blinds": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/BlindConfig"
+                    }
                 }
             }
         },
@@ -1616,6 +1762,158 @@
                 }
             }
         },
+        "ActionProfile":{
+            "type": "object",
+            "required": [
+                "action"
+            ],
+            "properties": {
+                "action": {
+                    "type": "integer",
+                    "description": "Action on the Blind: 0:stop, 1 Openning, 2: Closing"
+                },
+                "duration": {
+                    "type": "integer",
+                    "description": "Action duration in milliseconds"
+                }
+            }
+        },
+        "BlindProfile":{
+            "type": "object",
+            "required": [
+                "up",
+                "down",
+                "stop",
+                "windowOpen",
+                "slatDuration"
+            ],
+            "properties": {
+                "up": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ActionProfile"
+                    },
+                    "description": "Action sequences"
+                },
+                "down": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ActionProfile"
+                    },
+                    "description": "Action sequences"
+                },
+                "stop": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ActionProfile"
+                    },
+                    "description": "Action sequences"
+                },
+                "windowOpen": {
+                    "type": "boolean",
+                    "description": "When the window is open, is the driver still up and running?"
+                },
+                "slatDuration": {
+                    "type": "string",
+                    "description": "Timing for the slat configuration in Milliseconds"
+                }
+            }
+        },
+        "BlindSetup":{
+            "type": "object",
+            "required": [
+                "mac",
+                "profile"
+            ],
+            "properties": {
+                "mac": {
+                    "type": "string",
+                    "description": "Blind mac address"
+                },
+                "group": {
+                    "type": "integer",
+                    "description": "Associate group"
+                },
+                "isBleEnabled": {
+                    "type": "boolean",
+                    "description": "bluetooth activation"
+                },
+                "profile": {
+                    "$ref": "#/definitions/BlindProfile"
+                },
+                "friendlyName": {
+                    "type": "string",
+                    "description": "Sensor FriendlyName"
+                },
+                "dumpFrequency": {
+                    "type": "integer",
+                    "description": "Dump frequency by default: 1s"
+                }
+            }
+        },
+        "BlindConfig":{
+            "type": "object",
+            "required": [
+                "mac"
+            ],
+            "properties": {
+                "mac": {
+                    "type": "string",
+                    "description": "Blind mac address"
+                },
+                "group": {
+                    "type": "integer",
+                    "description": "Associate group"
+                },
+                "isBleEnabled": {
+                    "type": "boolean",
+                    "description": "bluetooth activation"
+                },
+                "profile": {
+                    "$ref": "#/definitions/BlindProfile"
+                },
+                "friendlyName": {
+                    "type": "string",
+                    "description": "Sensor FriendlyName"
+                },
+                "dumpFrequency": {
+                    "type": "integer",
+                    "description": "Dump frequency by default: 1s"
+                },
+                "isConfigured": {
+                    "type": "boolean",
+                    "description": "Is the Blind configured"
+                }
+            }
+        },
+        "BlindCommand":{
+            "type": "object",
+            "required": [
+                "mac"
+            ],
+            "properties": {
+                "mac": {
+                    "type": "string",
+                    "description": "Sensor mac address"
+                },
+                "blind1": {
+                    "type": "integer",
+                    "description": "blind1 0: stop, 1: Openning, 2: Closing"
+                },
+                "blind2": {
+                    "type": "integer",
+                    "description": "blind2 0: stop, 1: Openning, 2: Closing"
+                },
+                "slat1": {
+                    "type": "integer",
+                    "description": "Slat orientation"
+                },
+                "slat2": {
+                    "type": "integer",
+                    "description": "Slat orientation"
+                }
+            }
+        },
         "LedSetup":{
             "type": "object",
             "required": [
@@ -1664,7 +1962,7 @@
                     "description": "Dump frequency by default: 1s"
                 }
             }
-        },        
+        },
         "LedConfig":{
             "type": "object",
             "required": [
@@ -2171,20 +2469,6 @@
                     "type": "integer",
                     "description": "Error code value: 0 means no error"
                 },
-                "resetNumbers": {
-                    "type": "integer",
-                    "description": "Number of reset"
-                },
-                "initialSetupDate": {
-                    "type": "number",
-                    "format": "float64",
-                    "description": "First installation date"
-                },
-                "lastResetDate": {
-                    "type": "number",
-                    "format": "float64",
-                    "description": "Last reset date"
-                },
                 "brightness": {
                     "type": "integer",
                     "description": "Corrected Brightness in Lux"
@@ -2247,6 +2531,13 @@
                         "$ref": "#/definitions/SensorStatus"
                     },
                     "description": "List of sensors status"
+                },
+                "blinds": {
+                    "type": "array",
+                    "items":{
+                        "$ref": "#/definitions/BlindStatus"
+                    },
+                    "description": "List of blinds status"
                 },
                 "groups": {
                     "type": "array",
@@ -2376,6 +2667,75 @@
                 }
             }
         },
+        "BlindStatus": {
+            "type": "object",
+            "required": [
+                "mac"
+            ],
+            "properties": {
+                "mac": {
+                    "type": "string",
+                    "description": "LED mac address"
+                },
+                "ip": {
+                    "type": "string",
+                    "description": "Led IP address"
+                },
+                "group": {
+                    "type": "integer",
+                    "description": "Associate group"
+                },
+                "protocol": {
+                    "type": "string",
+                    "description": "Sensor communication protocol"
+                },
+                "switchMac": {
+                    "type": "string",
+                    "description": "Associate switch mac address"
+                },
+                "isConfigured": {
+                    "type": "boolean",
+                    "description": "Is the sensor configured"
+                },
+                "softwareVersion": {
+                    "type": "number",
+                    "format": "float32",
+                    "description": "Sensor Software version"
+                },
+                "hardwareVersion": {
+                    "type": "string",
+                    "description": "Sensor Hardware version"
+                },
+                "isBleEnabled": {
+                    "type": "boolean",
+                    "description": "Is the bluetooth activate"
+                },
+                "error": {
+                    "type": "integer",
+                    "description": "Error code value: 0 means no error"
+                },
+                "friendlyName": {
+                    "type": "string",
+                    "description": "Sensor FriendlyName"
+                },
+                "daisyChainEnabled": {
+                    "type": "boolean",
+                    "description": "Daisy chained enabled"
+                },
+                "daisyChainPos": {
+                    "type": "integer",
+                    "description": "Daisy chained position"
+                },
+                "voltageInput": {
+                    "type": "integer",
+                    "description": "Voltage input"
+                },
+                "dumpFrequency": {
+                    "type": "integer",
+                    "description": "Dump frequency by default: 1s"
+                }
+            }
+        },
         "LedStatus": {
             "type": "object",
             "required": [
@@ -2423,27 +2783,9 @@
                     "type": "boolean",
                     "description": "Is the bluetooth activate"
                 },
-                "temperature": {
-                    "type": "integer",
-                    "description": "On board temperature"
-                },
                 "error": {
                     "type": "integer",
                     "description": "Error code value: 0 means no error"
-                },
-                "resetNumbers": {
-                    "type": "integer",
-                    "description": "Number of reset"
-                },
-                "initialSetupDate": {
-                    "type": "number",
-                    "format": "float64",
-                    "description": "First installation date"
-                },
-                "lastResetDate": {
-                    "type": "number",
-                    "format": "float64",
-                    "description": "Last reset date"
                 },
                 "friendlyName": {
                     "type": "string",
