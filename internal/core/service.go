@@ -8,12 +8,11 @@ import (
 
 //Service describe the link between the object in the building map and the configuration
 type Service struct {
-	Name               string   `json:"name"`
-	Systemd            []string `json:"systemd"` //systemd service
-	Version            string   `json:"version"`
-	PackageName        string   `json:"packageName"`        //DebianPackageName
-	PersistentDataPath string   `json:"persistentDataPath"` // link to store persistent data
-	ConfigPath         string   `json:"configPath"`
+	Name        string   `json:"name"`
+	Systemd     []string `json:"systemd"` //systemd service
+	Version     string   `json:"version"`
+	PackageName string   `json:"packageName"` //DebianPackageName
+	ConfigPath  string   `json:"configPath"`
 }
 
 //ServiceDump content

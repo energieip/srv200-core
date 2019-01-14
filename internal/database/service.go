@@ -26,6 +26,21 @@ func SaveServiceConfig(db Database, service pkg.Service) error {
 	return err
 }
 
+//GetServiceConfig get service Config
+func GetServiceConfig(db Database, name string) *core.Service {
+	criteria := make(map[string]interface{})
+	criteria["Name"] = name
+	stored, err := db.GetRecord(ConfigDB, ServicesTable, criteria)
+	if err != nil || stored == nil {
+		return nil
+	}
+	service, err := core.ToService(stored)
+	if err != nil || service == nil {
+		return nil
+	}
+	return service
+}
+
 //GetServiceConfigs return the sensor configuration
 func GetServiceConfigs(db Database, switchIP, serverIP string, cluster int) map[string]pkg.Service {
 	services := map[string]pkg.Service{}
@@ -99,4 +114,11 @@ func SaveServiceStatus(db Database, status core.ServiceDump) error {
 		err = db.UpdateRecord(StatusDB, ServicesTable, dbID, status)
 	}
 	return err
+}
+
+//RemoveServiceConfig remove sensor config in database
+func RemoveServiceConfig(db Database, mac string) error {
+	criteria := make(map[string]interface{})
+	criteria["Mac"] = mac
+	return db.DeleteRecord(ConfigDB, ServicesTable, criteria)
 }

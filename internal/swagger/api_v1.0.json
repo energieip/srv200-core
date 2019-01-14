@@ -494,7 +494,112 @@
                     }
                 }
             }
-        },       
+        },
+        "/setup/service/{name}":{
+            "get":{
+                "tags":[
+                    "setup"
+                ],
+                "summary": "Return Service Setup configuration",
+                "description": "Return Service Setup configuration",
+                "operationId": "getServiceSetup",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "name",
+                        "in": "path",
+                        "description": "Service name",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "sucessful operation",
+                        "schema":{
+                            "$ref": "#/definitions/ServiceSetup"
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "delete":{
+                "tags":[
+                    "setup"
+                ],
+                "summary": "Remove Service Setup configuration",
+                "description": "Remove Service Setup configuration",
+                "operationId": "removeServiceSetup",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "name",
+                        "in": "path",
+                        "description": "Service name",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "sucessful operation"
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },        
+        "/setup/service":{
+            "post":{
+                "tags":[
+                    "setup"
+                ],
+                "summary": "Service Setup configuration",
+                "description": "Service Setup configuration",
+                "operationId": "setServiceSetup",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "service",
+                        "in": "body",
+                        "description": "service config",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ServiceSetup"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "sucessful operation",
+                        "schema":{
+                            "$ref": "#/definitions/ServiceSetup"
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
         "/config/sensor":{
             "post":{
                 "tags":[
@@ -2409,6 +2514,37 @@
                 "dumpFrequency": {
                     "type": "integer",
                     "description": "Dump frequency by default: 1s"
+                }
+            }
+        },
+        "ServiceSetup":{
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "Service Name"
+                },
+                "systemd": {
+                    "description": "Systemd scripts",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "version": {
+                    "type": "string",
+                    "description": "Package Version"
+                },
+                "packageName": {
+                    "type": "string",
+                    "description": "Debian Package Name"
+                },
+                "configPath": {
+                    "type": "string",
+                    "description": "Configuration Path"
                 }
             }
         },

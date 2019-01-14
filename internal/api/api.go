@@ -399,6 +399,7 @@ func (api *API) getV1Functions(w http.ResponseWriter, req *http.Request) {
 	apiV1 := "/v1.0"
 	functions := []string{apiV1 + "/setup/sensor", apiV1 + "/setup/led",
 		apiV1 + "/setup/group", apiV1 + "/setup/switch", apiV1 + "/setup/installMode",
+		apiV1 + "/setup/service",
 		apiV1 + "/config/led", apiV1 + "/config/sensor", apiV1 + "/config/group",
 		apiV1 + "/config/switch", apiV1 + "/configs", apiV1 + "/status", apiV1 + "/events",
 		apiV1 + "/command/led", apiV1 + "/command/group", apiV1 + "/project/ifcInfo",
@@ -445,6 +446,9 @@ func (api *API) swagger() {
 	router.HandleFunc(apiV1+"/setup/switch", api.setSwitchSetup).Methods("POST")
 	router.HandleFunc(apiV1+"/setup/installMode", api.getInstallMode).Methods("GET")
 	router.HandleFunc(apiV1+"/setup/installMode", api.setInstallMode).Methods("POST")
+	router.HandleFunc(apiV1+"/setup/service/{name}", api.getServiceSetup).Methods("GET")
+	router.HandleFunc(apiV1+"/setup/service/{name}", api.removeServiceSetup).Methods("DELETE")
+	router.HandleFunc(apiV1+"/setup/service", api.setServiceSetup).Methods("POST")
 
 	//config API
 	router.HandleFunc(apiV1+"/config/led", api.setLedConfig).Methods("POST")
