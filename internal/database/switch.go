@@ -16,17 +16,11 @@ func SaveSwitchStatus(db Database, status sd.SwitchStatus) error {
 	swStatus.FriendlyName = status.FriendlyName
 	swStatus.LastSystemUpgradeDate = status.LastSystemUpgradeDate
 
-	var dbID string
+	var err error
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = status.Mac
-	swStored, err := db.GetRecord(StatusDB, SwitchsTable, criteria)
-	if err == nil && swStored != nil {
-		m := swStored.(map[string]interface{})
-		id, ok := m["id"]
-		if ok {
-			dbID = id.(string)
-		}
-	}
+	dbID := GetObjectID(db, StatusDB, SwitchsTable, criteria)
+
 	if dbID == "" {
 		_, err = db.InsertRecord(StatusDB, SwitchsTable, swStatus)
 	} else {
@@ -45,9 +39,6 @@ func UpdateSwitchConfig(db Database, config core.SwitchConfig) error {
 	}
 	m := stored.(map[string]interface{})
 	id, ok := m["id"]
-	if !ok {
-		id, ok = m["ID"]
-	}
 	if !ok {
 		return NewError("Switch " + config.Mac + "not found")
 	}
@@ -78,20 +69,10 @@ func RemoveSwitchConfig(db Database, mac string) error {
 
 //SaveSwitchConfig register switch config in database
 func SaveSwitchConfig(db Database, sw core.SwitchConfig) error {
-	var dbID string
+	var err error
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = sw.Mac
-	switchStored, err := db.GetRecord(ConfigDB, SwitchsTable, criteria)
-	if err == nil && switchStored != nil {
-		m := switchStored.(map[string]interface{})
-		id, ok := m["id"]
-		if !ok {
-			id, ok = m["ID"]
-		}
-		if ok {
-			dbID = id.(string)
-		}
-	}
+	dbID := GetObjectID(db, ConfigDB, SwitchsTable, criteria)
 	if dbID == "" {
 		_, err = db.InsertRecord(ConfigDB, SwitchsTable, sw)
 	} else {

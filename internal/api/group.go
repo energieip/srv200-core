@@ -13,7 +13,7 @@ import (
 )
 
 func (api *API) readGroupConfig(w http.ResponseWriter, grID int) {
-	group := database.GetGroupConfig(api.db, grID)
+	group, _ := database.GetGroupConfig(api.db, grID)
 	if group == nil {
 		api.sendError(w, APIErrorDeviceNotFound, "Group "+strconv.Itoa(grID)+" not found")
 		return

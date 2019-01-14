@@ -148,7 +148,7 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 
 	for mac, led := range switchStatus.Leds {
 		if !led.IsConfigured {
-			lsetup := database.GetLedConfig(s.db, mac)
+			lsetup, _ := database.GetLedConfig(s.db, mac)
 			if lsetup == nil && s.installMode {
 				enableBle := false
 				low := 0
@@ -179,7 +179,7 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 
 	for mac, sensor := range switchStatus.Sensors {
 		if !sensor.IsConfigured {
-			ssetup := database.GetSensorConfig(s.db, mac)
+			ssetup, _ := database.GetSensorConfig(s.db, mac)
 			if ssetup == nil && s.installMode {
 				enableBle := true
 				brightnessCorrection := 1
@@ -277,7 +277,7 @@ func (s *CoreService) updateLedCfg(config interface{}) {
 		return
 	}
 
-	oldLed := database.GetLedConfig(s.db, cfg.Mac)
+	oldLed, _ := database.GetLedConfig(s.db, cfg.Mac)
 	if oldLed == nil {
 		rlog.Error("Cannot find config for " + cfg.Mac)
 		return
@@ -285,7 +285,7 @@ func (s *CoreService) updateLedCfg(config interface{}) {
 
 	database.UpdateLedConfig(s.db, *cfg)
 	//Get corresponding switchMac
-	led := database.GetLedConfig(s.db, cfg.Mac)
+	led, _ := database.GetLedConfig(s.db, cfg.Mac)
 	if led == nil {
 		rlog.Error("Cannot find config for " + cfg.Mac)
 		return
@@ -295,7 +295,7 @@ func (s *CoreService) updateLedCfg(config interface{}) {
 		if oldLed.Group != led.Group {
 			if oldLed.Group != nil {
 				rlog.Info("Update old group", *oldLed.Group)
-				gr := database.GetGroupConfig(s.db, *oldLed.Group)
+				gr, _ := database.GetGroupConfig(s.db, *oldLed.Group)
 				if gr != nil {
 					for i, v := range gr.Leds {
 						if v == led.Mac {
@@ -308,7 +308,7 @@ func (s *CoreService) updateLedCfg(config interface{}) {
 				}
 			}
 			rlog.Info("Update new group", *led.Group)
-			grNew := database.GetGroupConfig(s.db, *led.Group)
+			grNew, _ := database.GetGroupConfig(s.db, *led.Group)
 			if grNew != nil {
 				grNew.Leds = append(grNew.Leds, cfg.Mac)
 				rlog.Info("new group will be", grNew.Leds)
@@ -335,7 +335,7 @@ func (s *CoreService) updateLedCfg(config interface{}) {
 func (s *CoreService) updateGroupCfg(config interface{}) {
 	cfg, _ := gm.ToGroupConfig(config)
 
-	gr := database.GetGroupConfig(s.db, cfg.Group)
+	gr, _ := database.GetGroupConfig(s.db, cfg.Group)
 	if gr != nil {
 		database.UpdateGroupConfig(s.db, *cfg)
 	} else {
@@ -405,7 +405,7 @@ func (s *CoreService) updateSwitchCfg(config interface{}) {
 func (s *CoreService) updateSensorCfg(config interface{}) {
 	cfg, _ := ds.ToSensorConf(config)
 
-	oldSensor := database.GetSensorConfig(s.db, cfg.Mac)
+	oldSensor, _ := database.GetSensorConfig(s.db, cfg.Mac)
 	if oldSensor == nil {
 		rlog.Error("Cannot find config for " + cfg.Mac)
 		return
@@ -413,7 +413,7 @@ func (s *CoreService) updateSensorCfg(config interface{}) {
 
 	database.UpdateSensorConfig(s.db, *cfg)
 	//Get correspnding switchMac
-	sensor := database.GetSensorConfig(s.db, cfg.Mac)
+	sensor, _ := database.GetSensorConfig(s.db, cfg.Mac)
 	if sensor == nil {
 		rlog.Error("Cannot find config for " + cfg.Mac)
 		return
@@ -423,7 +423,7 @@ func (s *CoreService) updateSensorCfg(config interface{}) {
 		if oldSensor.Group != sensor.Group {
 			if oldSensor.Group != nil {
 				rlog.Info("Update old group", *oldSensor.Group)
-				gr := database.GetGroupConfig(s.db, *oldSensor.Group)
+				gr, _ := database.GetGroupConfig(s.db, *oldSensor.Group)
 				if gr != nil {
 					for i, v := range gr.Sensors {
 						if v == sensor.Mac {
@@ -436,7 +436,7 @@ func (s *CoreService) updateSensorCfg(config interface{}) {
 				}
 			}
 			rlog.Info("Update new group", *sensor.Group)
-			grNew := database.GetGroupConfig(s.db, *sensor.Group)
+			grNew, _ := database.GetGroupConfig(s.db, *sensor.Group)
 			if grNew != nil {
 				grNew.Sensors = append(grNew.Sensors, cfg.Mac)
 				rlog.Info("new group will be", grNew.Sensors)
@@ -495,7 +495,7 @@ func (s *CoreService) sendLedCmd(cmd interface{}) {
 		return
 	}
 	//Get correspnding switchMac
-	led := database.GetLedConfig(s.db, cmdLed.Mac)
+	led, _ := database.GetLedConfig(s.db, cmdLed.Mac)
 	if led == nil {
 		rlog.Error("Cannot find config for " + cmdLed.Mac)
 		return

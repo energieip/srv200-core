@@ -2,6 +2,7 @@ package database
 
 import (
 	"github.com/energieip/common-components-go/pkg/database"
+	"github.com/energieip/common-components-go/pkg/dblind"
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
 	dl "github.com/energieip/common-components-go/pkg/dled"
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
@@ -15,6 +16,7 @@ const (
 	StatusDB = "status"
 
 	LedsTable     = "leds"
+	BlindsTable   = "blinds"
 	SensorsTable  = "sensors"
 	GroupsTable   = "groups"
 	SwitchsTable  = "switchs"
@@ -71,12 +73,14 @@ func ConnectDatabase(ip, port string) (*Database, error) {
 			tableCfg[ServicesTable] = pkg.Service{}
 			tableCfg[ModelsTable] = core.Model{}
 			tableCfg[ProjectsTable] = core.Project{}
+			tableCfg[BlindsTable] = dblind.BlindSetup{}
 		} else {
 			tableCfg[LedsTable] = dl.Led{}
 			tableCfg[SensorsTable] = ds.Sensor{}
 			tableCfg[GroupsTable] = gm.GroupStatus{}
 			tableCfg[SwitchsTable] = core.SwitchDump{}
 			tableCfg[ServicesTable] = pkg.ServiceStatus{}
+			tableCfg[BlindsTable] = dblind.Blind{}
 		}
 		for tableName, objs := range tableCfg {
 			err = db.CreateTable(dbName, tableName, &objs)
@@ -87,4 +91,17 @@ func ConnectDatabase(ip, port string) (*Database, error) {
 	}
 
 	return &db, nil
+}
+
+//GetObjectID return id
+func GetObjectID(db Database, dbName, tbName string, criteria map[string]interface{}) string {
+	stored, err := db.GetRecord(dbName, tbName, criteria)
+	if err == nil && stored != nil {
+		m := stored.(map[string]interface{})
+		id, ok := m["id"]
+		if ok {
+			return id.(string)
+		}
+	}
+	return ""
 }

@@ -5,22 +5,15 @@ import (
 )
 
 //SaveProject dump project in database
-func SaveProject(db Database, m core.Project) error {
-	var dbID string
+func SaveProject(db Database, cfg core.Project) error {
+	var err error
 	criteria := make(map[string]interface{})
-	criteria["Label"] = m.Label
-	stored, err := db.GetRecord(ConfigDB, ProjectsTable, criteria)
-	if err == nil && stored != nil {
-		m := stored.(map[string]interface{})
-		id, ok := m["id"]
-		if ok {
-			dbID = id.(string)
-		}
-	}
+	criteria["Label"] = cfg.Label
+	dbID := GetObjectID(db, ConfigDB, ProjectsTable, criteria)
 	if dbID == "" {
-		_, err = db.InsertRecord(ConfigDB, ProjectsTable, m)
+		_, err = db.InsertRecord(ConfigDB, ProjectsTable, cfg)
 	} else {
-		err = db.UpdateRecord(ConfigDB, ProjectsTable, dbID, m)
+		err = db.UpdateRecord(ConfigDB, ProjectsTable, dbID, cfg)
 	}
 	return err
 }

@@ -5,81 +5,55 @@ import (
 )
 
 //SaveSensorConfig dump sensor config in database
-func SaveSensorConfig(db Database, sensorStatus ds.SensorSetup) error {
-	var dbID string
+func SaveSensorConfig(db Database, cfg ds.SensorSetup) error {
+	var err error
 	criteria := make(map[string]interface{})
-	criteria["Mac"] = sensorStatus.Mac
-	sensorStored, err := db.GetRecord(ConfigDB, SensorsTable, criteria)
-	if err == nil && sensorStored != nil {
-		m := sensorStored.(map[string]interface{})
-		id, ok := m["id"]
-		if !ok {
-			id, ok = m["ID"]
-		}
-		if ok {
-			dbID = id.(string)
-		}
-	}
+	criteria["Mac"] = cfg.Mac
+	dbID := GetObjectID(db, ConfigDB, SensorsTable, criteria)
 	if dbID == "" {
-		_, err = db.InsertRecord(ConfigDB, SensorsTable, sensorStatus)
+		_, err = db.InsertRecord(ConfigDB, SensorsTable, cfg)
 	} else {
-		err = db.UpdateRecord(ConfigDB, SensorsTable, dbID, sensorStatus)
+		err = db.UpdateRecord(ConfigDB, SensorsTable, dbID, cfg)
 	}
 	return err
 }
 
 //UpdateSensorConfig update sensor config in database
-func UpdateSensorConfig(db Database, sensorConfig ds.SensorConf) error {
-	criteria := make(map[string]interface{})
-	criteria["Mac"] = sensorConfig.Mac
-	sensorStored, err := db.GetRecord(ConfigDB, SensorsTable, criteria)
-	if err != nil || sensorStored == nil {
-		return NewError("Device " + sensorConfig.Mac + "not found")
-	}
-	m := sensorStored.(map[string]interface{})
-	id, ok := m["id"]
-	if !ok {
-		id, ok = m["ID"]
-	}
-	if !ok {
-		return NewError("Device " + sensorConfig.Mac + "not found")
-	}
-	dbID := id.(string)
-
-	sensorSetup, err := ds.ToSensorSetup(sensorStored)
-	if err != nil || sensorSetup == nil {
-		return NewError("Device " + sensorConfig.Mac + "not found")
+func UpdateSensorConfig(db Database, cfg ds.SensorConf) error {
+	setup, dbID := GetSensorConfig(db, cfg.Mac)
+	if setup == nil || dbID == "" {
+		return NewError("Device " + cfg.Mac + "not found")
 	}
 
-	if sensorConfig.BrightnessCorrectionFactor != nil {
-		sensorSetup.BrightnessCorrectionFactor = sensorConfig.BrightnessCorrectionFactor
+	if cfg.BrightnessCorrectionFactor != nil {
+		setup.BrightnessCorrectionFactor = cfg.BrightnessCorrectionFactor
 	}
 
-	if sensorConfig.FriendlyName != nil {
-		sensorSetup.FriendlyName = sensorConfig.FriendlyName
+	if cfg.FriendlyName != nil {
+		setup.FriendlyName = cfg.FriendlyName
 	}
 
-	if sensorConfig.Group != nil {
-		sensorSetup.Group = sensorConfig.Group
+	if cfg.Group != nil {
+		setup.Group = cfg.Group
 	}
 
-	if sensorConfig.IsBleEnabled != nil {
-		sensorSetup.IsBleEnabled = sensorConfig.IsBleEnabled
+	if cfg.IsBleEnabled != nil {
+		setup.IsBleEnabled = cfg.IsBleEnabled
 	}
 
-	if sensorConfig.TemperatureOffset != nil {
-		sensorSetup.TemperatureOffset = sensorConfig.TemperatureOffset
+	if cfg.TemperatureOffset != nil {
+		setup.TemperatureOffset = cfg.TemperatureOffset
 	}
 
-	if sensorConfig.ThresholdPresence != nil {
-		sensorSetup.ThresholdPresence = sensorConfig.ThresholdPresence
+	if cfg.ThresholdPresence != nil {
+		setup.ThresholdPresence = cfg.ThresholdPresence
 	}
 
-	if sensorConfig.DumpFrequency != nil {
-		sensorSetup.DumpFrequency = *sensorConfig.DumpFrequency
+	if cfg.DumpFrequency != nil {
+		setup.DumpFrequency = *cfg.DumpFrequency
 	}
 
-	return db.UpdateRecord(ConfigDB, SensorsTable, dbID, sensorSetup)
+	return db.UpdateRecord(ConfigDB, SensorsTable, dbID, setup)
 }
 
 //RemoveSensorConfig remove sensor config in database
@@ -90,76 +64,79 @@ func RemoveSensorConfig(db Database, mac string) error {
 }
 
 //GetSensorConfig return the sensor configuration
-func GetSensorConfig(db Database, mac string) *ds.SensorSetup {
+func GetSensorConfig(db Database, mac string) (*ds.SensorSetup, string) {
+	var dbID string
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = mac
-	sensorStored, err := db.GetRecord(ConfigDB, SensorsTable, criteria)
-	if err != nil || sensorStored == nil {
-		return nil
+	stored, err := db.GetRecord(ConfigDB, SensorsTable, criteria)
+	if err != nil || stored == nil {
+		return nil, dbID
 	}
-	cell, err := ds.ToSensorSetup(sensorStored)
+	m := stored.(map[string]interface{})
+	id, ok := m["id"]
+	if ok {
+		dbID = id.(string)
+	}
+	driver, err := ds.ToSensorSetup(stored)
 	if err != nil {
-		return nil
+		return nil, dbID
 	}
-	return cell
+	return driver, dbID
 }
 
 //GetSensorsConfig return the sensor config list
 func GetSensorsConfig(db Database) map[string]ds.SensorSetup {
-	sensors := map[string]ds.SensorSetup{}
+	drivers := map[string]ds.SensorSetup{}
 	stored, err := db.FetchAllRecords(ConfigDB, SensorsTable)
 	if err != nil || stored == nil {
-		return sensors
+		return drivers
 	}
 	for _, l := range stored {
-		cell, err := ds.ToSensorSetup(l)
-		if err != nil || cell == nil {
+		driver, err := ds.ToSensorSetup(l)
+		if err != nil || driver == nil {
 			continue
 		}
-		sensors[cell.Mac] = *cell
+		drivers[driver.Mac] = *driver
 	}
-	return sensors
+	return drivers
 }
 
 //SaveSensorStatus dump sensor status in database
-func SaveSensorStatus(db Database, sensorStatus ds.Sensor) error {
+func SaveSensorStatus(db Database, status ds.Sensor) error {
 	var dbID string
 	criteria := make(map[string]interface{})
-	criteria["Mac"] = sensorStatus.Mac
-	sensorStored, err := db.GetRecord(StatusDB, SensorsTable, criteria)
-	if err == nil && sensorStored != nil {
-		m := sensorStored.(map[string]interface{})
+	criteria["Mac"] = status.Mac
+	stored, err := db.GetRecord(StatusDB, SensorsTable, criteria)
+	if err == nil && stored != nil {
+		m := stored.(map[string]interface{})
 		id, ok := m["id"]
-		if !ok {
-			id, ok = m["ID"]
-		}
 		if ok {
 			dbID = id.(string)
 		}
 	}
 	if dbID == "" {
-		_, err = db.InsertRecord(StatusDB, SensorsTable, sensorStatus)
+		_, err = db.InsertRecord(StatusDB, SensorsTable, status)
 	} else {
-		err = db.UpdateRecord(StatusDB, SensorsTable, dbID, sensorStatus)
+		err = db.UpdateRecord(StatusDB, SensorsTable, dbID, status)
 	}
 	return err
 }
 
 //GetSensorsStatus return the led status list
 func GetSensorsStatus(db Database) map[string]ds.Sensor {
-	sensors := map[string]ds.Sensor{}
+	drivers := map[string]ds.Sensor{}
 	stored, err := db.FetchAllRecords(StatusDB, SensorsTable)
 	if err != nil || stored == nil {
-		return sensors
+		return drivers
 	}
 	for _, l := range stored {
-		cell, err := ds.ToSensor(l)
-		if err != nil || cell == nil {
+		driver, err := ds.ToSensor(l)
+		if err != nil || driver == nil {
 			continue
 		}
-		sensors[cell.Mac] = *cell
+		drivers[driver.Mac] = *driver
 	}
-	return sensors
+	return drivers
 }
 
 //GetSensorStatus return the led status
@@ -170,9 +147,9 @@ func GetSensorStatus(db Database, mac string) *ds.Sensor {
 	if err != nil || stored == nil {
 		return nil
 	}
-	cell, err := ds.ToSensor(stored)
+	driver, err := ds.ToSensor(stored)
 	if err != nil {
 		return nil
 	}
-	return cell
+	return driver
 }

@@ -5,25 +5,15 @@ import (
 )
 
 //SaveGroupConfig dump group config in database
-func SaveGroupConfig(db Database, status gm.GroupConfig) error {
-	var dbID string
+func SaveGroupConfig(db Database, cfg gm.GroupConfig) error {
+	var err error
 	criteria := make(map[string]interface{})
-	criteria["Group"] = status.Group
-	grStored, err := db.GetRecord(ConfigDB, GroupsTable, criteria)
-	if err == nil && grStored != nil {
-		m := grStored.(map[string]interface{})
-		id, ok := m["id"]
-		if !ok {
-			id, ok = m["ID"]
-		}
-		if ok {
-			dbID = id.(string)
-		}
-	}
+	criteria["Group"] = cfg.Group
+	dbID := GetObjectID(db, ConfigDB, GroupsTable, criteria)
 	if dbID == "" {
-		_, err = db.InsertRecord(ConfigDB, GroupsTable, status)
+		_, err = db.InsertRecord(ConfigDB, GroupsTable, cfg)
 	} else {
-		err = db.UpdateRecord(ConfigDB, GroupsTable, dbID, status)
+		err = db.UpdateRecord(ConfigDB, GroupsTable, dbID, cfg)
 	}
 	return err
 }
@@ -36,18 +26,24 @@ func RemoveGroupConfig(db Database, grID int) error {
 }
 
 //GetGroupConfig return the group configuration
-func GetGroupConfig(db Database, grID int) *gm.GroupConfig {
+func GetGroupConfig(db Database, grID int) (*gm.GroupConfig, string) {
+	var dbID string
 	criteria := make(map[string]interface{})
 	criteria["Group"] = grID
 	stored, err := db.GetRecord(ConfigDB, GroupsTable, criteria)
 	if err != nil || stored == nil {
-		return nil
+		return nil, dbID
+	}
+	m := stored.(map[string]interface{})
+	id, ok := m["id"]
+	if ok {
+		dbID = id.(string)
 	}
 	gr, err := gm.ToGroupConfig(stored)
 	if err != nil {
-		return nil
+		return nil, dbID
 	}
-	return gr
+	return gr, dbID
 }
 
 //GetGroupSwitchs return the corresponding running switch list
@@ -64,7 +60,7 @@ func GetGroupSwitchs(db Database, grID int) map[string]bool {
 		return nil
 	}
 	for _, ledMac := range gr.Leds {
-		led := GetLedConfig(db, ledMac)
+		led, _ := GetLedConfig(db, ledMac)
 		if led == nil {
 			continue
 		}
@@ -75,24 +71,8 @@ func GetGroupSwitchs(db Database, grID int) map[string]bool {
 
 //UpdateGroupConfig update group config in database
 func UpdateGroupConfig(db Database, config gm.GroupConfig) error {
-	criteria := make(map[string]interface{})
-	criteria["Group"] = config.Group
-	stored, err := db.GetRecord(ConfigDB, GroupsTable, criteria)
-	if err != nil || stored == nil {
-		return NewError("Group " + string(config.Group) + "not found")
-	}
-	m := stored.(map[string]interface{})
-	id, ok := m["id"]
-	if !ok {
-		id, ok = m["ID"]
-	}
-	if !ok {
-		return NewError("Group " + string(config.Group) + "not found")
-	}
-	dbID := id.(string)
-
-	setup, err := gm.ToGroupConfig(stored)
-	if err != nil || stored == nil {
+	setup, dbID := GetGroupConfig(db, config.Group)
+	if setup == nil || dbID == "" {
 		return NewError("Group " + string(config.Group) + "not found")
 	}
 
@@ -170,20 +150,10 @@ func GetGroupConfigs(db Database, driversMac map[string]bool) map[int]gm.GroupCo
 
 //SaveGroupStatus dump group status in database
 func SaveGroupStatus(db Database, status gm.GroupStatus) error {
-	var dbID string
+	var err error
 	criteria := make(map[string]interface{})
 	criteria["Group"] = status.Group
-	grStored, err := db.GetRecord(StatusDB, GroupsTable, criteria)
-	if err == nil && grStored != nil {
-		m := grStored.(map[string]interface{})
-		id, ok := m["id"]
-		if !ok {
-			id, ok = m["ID"]
-		}
-		if ok {
-			dbID = id.(string)
-		}
-	}
+	dbID := GetObjectID(db, StatusDB, GroupsTable, criteria)
 	if dbID == "" {
 		_, err = db.InsertRecord(StatusDB, GroupsTable, status)
 	} else {

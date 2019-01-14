@@ -12,7 +12,7 @@ import (
 )
 
 func (api *API) readSensorConfig(w http.ResponseWriter, mac string) {
-	sensor := database.GetSensorConfig(api.db, mac)
+	sensor, _ := database.GetSensorConfig(api.db, mac)
 	if sensor == nil {
 		api.sendError(w, APIErrorDeviceNotFound, "Device "+mac+" not found")
 		return

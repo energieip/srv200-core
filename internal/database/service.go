@@ -14,17 +14,10 @@ func SaveServiceConfig(db Database, service pkg.Service) error {
 		PackageName: service.PackageName,
 		ConfigPath:  service.ConfigPath,
 	}
-	var dbID string
+	var err error
 	criteria := make(map[string]interface{})
-	criteria["Name"] = serv.Name
-	stored, err := db.GetRecord(ConfigDB, ServicesTable, criteria)
-	if err == nil && stored != nil {
-		m := stored.(map[string]interface{})
-		id, ok := m["id"]
-		if ok {
-			dbID = id.(string)
-		}
-	}
+	criteria["Name"] = service.Name
+	dbID := GetObjectID(db, ConfigDB, ServicesTable, criteria)
 	if dbID == "" {
 		_, err = db.InsertRecord(ConfigDB, ServicesTable, serv)
 	} else {
@@ -95,18 +88,11 @@ func GetServiceConfigs(db Database, switchIP, serverIP string, cluster int) map[
 
 //SaveServiceStatus dump service status in database
 func SaveServiceStatus(db Database, status core.ServiceDump) error {
-	var dbID string
+	var err error
 	criteria := make(map[string]interface{})
 	criteria["Name"] = status.Name
 	criteria["SwitchMac"] = status.SwitchMac
-	stored, err := db.GetRecord(StatusDB, ServicesTable, criteria)
-	if err == nil && stored != nil {
-		m := stored.(map[string]interface{})
-		id, ok := m["id"]
-		if ok {
-			dbID = id.(string)
-		}
-	}
+	dbID := GetObjectID(db, StatusDB, ServicesTable, criteria)
 	if dbID == "" {
 		_, err = db.InsertRecord(StatusDB, ServicesTable, status)
 	} else {

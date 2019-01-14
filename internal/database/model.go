@@ -5,22 +5,15 @@ import (
 )
 
 //SaveModel dump model in database
-func SaveModel(db Database, m core.Model) error {
-	var dbID string
+func SaveModel(db Database, cfg core.Model) error {
+	var err error
 	criteria := make(map[string]interface{})
-	criteria["Name"] = m.Name
-	stored, err := db.GetRecord(ConfigDB, ModelsTable, criteria)
-	if err == nil && stored != nil {
-		m := stored.(map[string]interface{})
-		id, ok := m["id"]
-		if ok {
-			dbID = id.(string)
-		}
-	}
+	criteria["Name"] = cfg.Name
+	dbID := GetObjectID(db, ConfigDB, ModelsTable, criteria)
 	if dbID == "" {
-		_, err = db.InsertRecord(ConfigDB, ModelsTable, m)
+		_, err = db.InsertRecord(ConfigDB, ModelsTable, cfg)
 	} else {
-		err = db.UpdateRecord(ConfigDB, ModelsTable, dbID, m)
+		err = db.UpdateRecord(ConfigDB, ModelsTable, dbID, cfg)
 	}
 	return err
 }

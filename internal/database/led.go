@@ -5,25 +5,15 @@ import (
 )
 
 //SaveLedConfig dump led config in database
-func SaveLedConfig(db Database, ledStatus dl.LedSetup) error {
-	var dbID string
+func SaveLedConfig(db Database, cfg dl.LedSetup) error {
+	var err error
 	criteria := make(map[string]interface{})
-	criteria["Mac"] = ledStatus.Mac
-	ledStored, err := db.GetRecord(ConfigDB, LedsTable, criteria)
-	if err == nil && ledStored != nil {
-		m := ledStored.(map[string]interface{})
-		id, ok := m["id"]
-		if !ok {
-			id, ok = m["ID"]
-		}
-		if ok {
-			dbID = id.(string)
-		}
-	}
+	criteria["Mac"] = cfg.Mac
+	dbID := GetObjectID(db, ConfigDB, LedsTable, criteria)
 	if dbID == "" {
-		_, err = db.InsertRecord(ConfigDB, LedsTable, ledStatus)
+		_, err = db.InsertRecord(ConfigDB, LedsTable, cfg)
 	} else {
-		err = db.UpdateRecord(ConfigDB, LedsTable, dbID, ledStatus)
+		err = db.UpdateRecord(ConfigDB, LedsTable, dbID, cfg)
 	}
 	return err
 }
@@ -36,40 +26,30 @@ func RemoveLedConfig(db Database, mac string) error {
 }
 
 //GetLedConfig return the led configuration
-func GetLedConfig(db Database, mac string) *dl.LedSetup {
+func GetLedConfig(db Database, mac string) (*dl.LedSetup, string) {
+	var dbID string
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = mac
-	ledStored, err := db.GetRecord(ConfigDB, LedsTable, criteria)
-	if err != nil || ledStored == nil {
-		return nil
+	stored, err := db.GetRecord(ConfigDB, LedsTable, criteria)
+	if err != nil || stored == nil {
+		return nil, dbID
 	}
-	light, err := dl.ToLedSetup(ledStored)
+	m := stored.(map[string]interface{})
+	id, ok := m["id"]
+	if ok {
+		dbID = id.(string)
+	}
+	driver, err := dl.ToLedSetup(stored)
 	if err != nil {
-		return nil
+		return nil, dbID
 	}
-	return light
+	return driver, dbID
 }
 
 //UpdateLedConfig update led config in database
 func UpdateLedConfig(db Database, config dl.LedConf) error {
-	criteria := make(map[string]interface{})
-	criteria["Mac"] = config.Mac
-	stored, err := db.GetRecord(ConfigDB, LedsTable, criteria)
-	if err != nil || stored == nil {
-		return NewError("Device " + config.Mac + "not found")
-	}
-	m := stored.(map[string]interface{})
-	id, ok := m["id"]
-	if !ok {
-		id, ok = m["ID"]
-	}
-	if !ok {
-		return NewError("Device " + config.Mac + "not found")
-	}
-	dbID := id.(string)
-
-	setup, err := dl.ToLedSetup(stored)
-	if err != nil || stored == nil {
+	setup, dbID := GetLedConfig(db, config.Mac)
+	if setup == nil || dbID == "" {
 		return NewError("Device " + config.Mac + "not found")
 	}
 
@@ -122,25 +102,15 @@ func GetLedsConfig(db Database) map[string]dl.LedSetup {
 }
 
 //SaveLedStatus dump led status in database
-func SaveLedStatus(db Database, ledStatus dl.Led) error {
-	var dbID string
+func SaveLedStatus(db Database, status dl.Led) error {
+	var err error
 	criteria := make(map[string]interface{})
-	criteria["Mac"] = ledStatus.Mac
-	ledStored, err := db.GetRecord(StatusDB, LedsTable, criteria)
-	if err == nil && ledStored != nil {
-		m := ledStored.(map[string]interface{})
-		id, ok := m["id"]
-		if !ok {
-			id, ok = m["ID"]
-		}
-		if ok {
-			dbID = id.(string)
-		}
-	}
+	criteria["Mac"] = status.Mac
+	dbID := GetObjectID(db, StatusDB, LedsTable, criteria)
 	if dbID == "" {
-		_, err = db.InsertRecord(StatusDB, LedsTable, ledStatus)
+		_, err = db.InsertRecord(StatusDB, LedsTable, status)
 	} else {
-		err = db.UpdateRecord(StatusDB, LedsTable, dbID, ledStatus)
+		err = db.UpdateRecord(StatusDB, LedsTable, dbID, status)
 	}
 	return err
 }

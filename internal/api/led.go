@@ -14,7 +14,7 @@ import (
 )
 
 func (api *API) readLedConfig(w http.ResponseWriter, mac string) {
-	led := database.GetLedConfig(api.db, mac)
+	led, _ := database.GetLedConfig(api.db, mac)
 	if led == nil {
 		api.sendError(w, APIErrorDeviceNotFound, "Device "+mac+" not found")
 		return
@@ -70,7 +70,7 @@ func (api *API) setLedConfig(w http.ResponseWriter, req *http.Request) {
 			api.sendError(w, APIErrorInvalidValue, "Invalid groupID "+strconv.Itoa(*led.Group))
 			return
 		}
-		gr := database.GetGroupConfig(api.db, *led.Group)
+		gr, _ := database.GetGroupConfig(api.db, *led.Group)
 		if gr == nil {
 			api.sendError(w, APIErrorDeviceNotFound, "Group "+strconv.Itoa(*led.Group)+" not found")
 			return
