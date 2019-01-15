@@ -31,6 +31,7 @@ const (
 	FilterTypeAll    = "all"
 	FilterTypeSensor = "sensor"
 	FilterTypeLed    = "led"
+	FilterTypeBlind  = "blind"
 )
 
 //APIError Message error code
@@ -53,8 +54,16 @@ type API struct {
 
 //Status
 type Status struct {
-	Leds    []dl.Led    `json:"leds"`
-	Sensors []ds.Sensor `json:"sensors"`
+	Leds    []dl.Led       `json:"leds"`
+	Sensors []ds.Sensor    `json:"sensors"`
+	Blind   []dblind.Blind `json:"blinds"`
+}
+
+//DumpBlind
+type DumpBlind struct {
+	Ifc    core.IfcInfo      `json:"ifc"`
+	Status dblind.Blind      `json:"status"`
+	Config dblind.BlindSetup `json:"config"`
 }
 
 //DumpLed
@@ -82,6 +91,7 @@ type DumpSwitch struct {
 type Dump struct {
 	Leds    []DumpLed    `json:"leds"`
 	Sensors []DumpSensor `json:"sensors"`
+	Blinds  []DumpBlind  `json:"blinds"`
 	Switchs []DumpSwitch `json:"switchs"`
 }
 
@@ -164,6 +174,7 @@ func (api *API) getStatus(w http.ResponseWriter, req *http.Request) {
 	api.setDefaultHeader(w)
 	var leds []dl.Led
 	var sensors []ds.Sensor
+	var blinds []dblind.Blind
 	var grID *int
 	var isConfig *bool
 	driverType := req.FormValue("type")
@@ -209,9 +220,21 @@ func (api *API) getStatus(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
+	if driverType == FilterTypeAll || driverType == FilterTypeBlind {
+		drivers := database.GetBlindsStatus(api.db)
+		for _, driver := range drivers {
+			if grID == nil || *grID == driver.Group {
+				if isConfig == nil || *isConfig == driver.IsConfigured {
+					blinds = append(blinds, driver)
+				}
+			}
+		}
+	}
+
 	status := Status{
 		Leds:    leds,
 		Sensors: sensors,
+		Blind:   blinds,
 	}
 
 	inrec, _ := json.MarshalIndent(status, "", "  ")
@@ -223,6 +246,7 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 	var leds []DumpLed
 	var sensors []DumpSensor
 	var switchs []DumpSwitch
+	var blinds []DumpBlind
 	macs := make(map[string]bool)
 	labels := make(map[string]bool)
 	filterByMac := false
@@ -249,6 +273,8 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 	lightsConfig := database.GetLedsConfig(api.db)
 	cells := database.GetSensorsStatus(api.db)
 	cellsConfig := database.GetSensorsConfig(api.db)
+	blds := database.GetBlindsStatus(api.db)
+	bldsConfig := database.GetBlindsConfig(api.db)
 	switchElts := database.GetSwitchsDump(api.db)
 	switchEltsConfig := database.GetSwitchsConfig(api.db)
 
@@ -291,6 +317,18 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 			}
 			dump.Ifc = ifc
 			sensors = append(sensors, dump)
+		case "blind":
+			dump := DumpBlind{}
+			bld, ok := blds[ifc.Mac]
+			if ok {
+				dump.Status = bld
+			}
+			config, ok := bldsConfig[ifc.Mac]
+			if ok {
+				dump.Config = config
+			}
+			dump.Ifc = ifc
+			blinds = append(blinds, dump)
 		case "switch":
 			dump := DumpSwitch{}
 			switchElt, ok := switchElts[ifc.Mac]
@@ -309,6 +347,7 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 	dump := Dump{
 		Leds:    leds,
 		Sensors: sensors,
+		Blinds:  blinds,
 		Switchs: switchs,
 	}
 

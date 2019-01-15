@@ -2139,6 +2139,7 @@
                     "enum": [
                         "led",
                         "sensor",
+                        "blind",
                         "switch"
                     ],
                     "default": "led",
@@ -2565,6 +2566,13 @@
                     },
                     "description": "List of sensors dump"
                 },
+                "blinds": {
+                    "type": "array",
+                    "items":{
+                        "$ref": "#/definitions/BlindDump"
+                    },
+                    "description": "List of blinds dump"
+                },
                 "switchs": {
                     "type": "array",
                     "items":{
@@ -2600,6 +2608,21 @@
                 },
                 "config": {
                     "$ref": "#/definitions/SensorSetup"
+                }
+
+            }
+        },
+        "BlindDump": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "$ref": "#/definitions/BlindStatus"
+                },
+                "ifc": {
+                    "$ref": "#/definitions/IfcInfo"
+                },
+                "config": {
+                    "$ref": "#/definitions/BlindSetup"
                 }
 
             }
