@@ -6,16 +6,9 @@ import (
 
 //SaveSensorConfig dump sensor config in database
 func SaveSensorConfig(db Database, cfg ds.SensorSetup) error {
-	var err error
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = cfg.Mac
-	dbID := GetObjectID(db, ConfigDB, SensorsTable, criteria)
-	if dbID == "" {
-		_, err = db.InsertRecord(ConfigDB, SensorsTable, cfg)
-	} else {
-		err = db.UpdateRecord(ConfigDB, SensorsTable, dbID, cfg)
-	}
-	return err
+	return SaveOnUpdateObject(db, cfg, ConfigDB, SensorsTable, criteria)
 }
 
 //UpdateSensorConfig update sensor config in database
@@ -103,23 +96,9 @@ func GetSensorsConfig(db Database) map[string]ds.SensorSetup {
 
 //SaveSensorStatus dump sensor status in database
 func SaveSensorStatus(db Database, status ds.Sensor) error {
-	var dbID string
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = status.Mac
-	stored, err := db.GetRecord(StatusDB, SensorsTable, criteria)
-	if err == nil && stored != nil {
-		m := stored.(map[string]interface{})
-		id, ok := m["id"]
-		if ok {
-			dbID = id.(string)
-		}
-	}
-	if dbID == "" {
-		_, err = db.InsertRecord(StatusDB, SensorsTable, status)
-	} else {
-		err = db.UpdateRecord(StatusDB, SensorsTable, dbID, status)
-	}
-	return err
+	return SaveOnUpdateObject(db, status, StatusDB, SensorsTable, criteria)
 }
 
 //GetSensorsStatus return the led status list

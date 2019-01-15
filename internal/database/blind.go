@@ -6,16 +6,9 @@ import (
 
 //SaveBlindConfig dump blind config in database
 func SaveBlindConfig(db Database, cfg dblind.BlindSetup) error {
-	var err error
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = cfg.Mac
-	dbID := GetObjectID(db, ConfigDB, BlindsTable, criteria)
-	if dbID == "" {
-		_, err = db.InsertRecord(ConfigDB, BlindsTable, cfg)
-	} else {
-		err = db.UpdateRecord(ConfigDB, BlindsTable, dbID, cfg)
-	}
-	return err
+	return SaveOnUpdateObject(db, cfg, ConfigDB, BlindsTable, criteria)
 }
 
 //UpdateBlindConfig update blind config in database
@@ -91,16 +84,9 @@ func GetBlindsConfig(db Database) map[string]dblind.BlindSetup {
 
 //SaveBlindStatus dump blind status in database
 func SaveBlindStatus(db Database, status dblind.Blind) error {
-	var err error
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = status.Mac
-	dbID := GetObjectID(db, StatusDB, BlindsTable, criteria)
-	if dbID == "" {
-		_, err = db.InsertRecord(StatusDB, BlindsTable, status)
-	} else {
-		err = db.UpdateRecord(StatusDB, BlindsTable, dbID, status)
-	}
-	return err
+	return SaveOnUpdateObject(db, status, StatusDB, BlindsTable, criteria)
 }
 
 //GetBlindsStatus return the blind status list

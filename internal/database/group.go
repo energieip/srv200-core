@@ -6,16 +6,9 @@ import (
 
 //SaveGroupConfig dump group config in database
 func SaveGroupConfig(db Database, cfg gm.GroupConfig) error {
-	var err error
 	criteria := make(map[string]interface{})
 	criteria["Group"] = cfg.Group
-	dbID := GetObjectID(db, ConfigDB, GroupsTable, criteria)
-	if dbID == "" {
-		_, err = db.InsertRecord(ConfigDB, GroupsTable, cfg)
-	} else {
-		err = db.UpdateRecord(ConfigDB, GroupsTable, dbID, cfg)
-	}
-	return err
+	return SaveOnUpdateObject(db, cfg, ConfigDB, GroupsTable, criteria)
 }
 
 //RemoveGroupConfig remove group config in database
@@ -169,16 +162,9 @@ func GetGroupConfigs(db Database, driversMac map[string]bool) map[int]gm.GroupCo
 
 //SaveGroupStatus dump group status in database
 func SaveGroupStatus(db Database, status gm.GroupStatus) error {
-	var err error
 	criteria := make(map[string]interface{})
 	criteria["Group"] = status.Group
-	dbID := GetObjectID(db, StatusDB, GroupsTable, criteria)
-	if dbID == "" {
-		_, err = db.InsertRecord(StatusDB, GroupsTable, status)
-	} else {
-		err = db.UpdateRecord(StatusDB, GroupsTable, dbID, status)
-	}
-	return err
+	return SaveOnUpdateObject(db, status, StatusDB, GroupsTable, criteria)
 }
 
 //GetGroupStatus return the group status

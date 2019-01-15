@@ -6,16 +6,9 @@ import (
 
 //SaveProject dump project in database
 func SaveProject(db Database, cfg core.Project) error {
-	var err error
 	criteria := make(map[string]interface{})
 	criteria["Label"] = cfg.Label
-	dbID := GetObjectID(db, ConfigDB, ProjectsTable, criteria)
-	if dbID == "" {
-		_, err = db.InsertRecord(ConfigDB, ProjectsTable, cfg)
-	} else {
-		err = db.UpdateRecord(ConfigDB, ProjectsTable, dbID, cfg)
-	}
-	return err
+	return SaveOnUpdateObject(db, cfg, ConfigDB, ProjectsTable, criteria)
 }
 
 //RemoveProject remove project entry in database

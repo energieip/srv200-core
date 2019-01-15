@@ -14,16 +14,9 @@ func SaveServiceConfig(db Database, service pkg.Service) error {
 		PackageName: service.PackageName,
 		ConfigPath:  service.ConfigPath,
 	}
-	var err error
 	criteria := make(map[string]interface{})
 	criteria["Name"] = service.Name
-	dbID := GetObjectID(db, ConfigDB, ServicesTable, criteria)
-	if dbID == "" {
-		_, err = db.InsertRecord(ConfigDB, ServicesTable, serv)
-	} else {
-		err = db.UpdateRecord(ConfigDB, ServicesTable, dbID, serv)
-	}
-	return err
+	return SaveOnUpdateObject(db, serv, ConfigDB, ServicesTable, criteria)
 }
 
 //GetServiceConfig get service Config
@@ -103,17 +96,10 @@ func GetServiceConfigs(db Database, switchIP, serverIP string, cluster int) map[
 
 //SaveServiceStatus dump service status in database
 func SaveServiceStatus(db Database, status core.ServiceDump) error {
-	var err error
 	criteria := make(map[string]interface{})
 	criteria["Name"] = status.Name
 	criteria["SwitchMac"] = status.SwitchMac
-	dbID := GetObjectID(db, StatusDB, ServicesTable, criteria)
-	if dbID == "" {
-		_, err = db.InsertRecord(StatusDB, ServicesTable, status)
-	} else {
-		err = db.UpdateRecord(StatusDB, ServicesTable, dbID, status)
-	}
-	return err
+	return SaveOnUpdateObject(db, status, StatusDB, ServicesTable, criteria)
 }
 
 //RemoveServiceConfig remove sensor config in database

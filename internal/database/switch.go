@@ -16,17 +16,9 @@ func SaveSwitchStatus(db Database, status sd.SwitchStatus) error {
 	swStatus.FriendlyName = status.FriendlyName
 	swStatus.LastSystemUpgradeDate = status.LastSystemUpgradeDate
 
-	var err error
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = status.Mac
-	dbID := GetObjectID(db, StatusDB, SwitchsTable, criteria)
-
-	if dbID == "" {
-		_, err = db.InsertRecord(StatusDB, SwitchsTable, swStatus)
-	} else {
-		err = db.UpdateRecord(StatusDB, SwitchsTable, dbID, swStatus)
-	}
-	return err
+	return SaveOnUpdateObject(db, swStatus, StatusDB, SwitchsTable, criteria)
 }
 
 //UpdateSwitchConfig update server config to database
@@ -69,16 +61,9 @@ func RemoveSwitchConfig(db Database, mac string) error {
 
 //SaveSwitchConfig register switch config in database
 func SaveSwitchConfig(db Database, sw core.SwitchConfig) error {
-	var err error
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = sw.Mac
-	dbID := GetObjectID(db, ConfigDB, SwitchsTable, criteria)
-	if dbID == "" {
-		_, err = db.InsertRecord(ConfigDB, SwitchsTable, sw)
-	} else {
-		err = db.UpdateRecord(ConfigDB, SwitchsTable, dbID, sw)
-	}
-	return err
+	return SaveOnUpdateObject(db, sw, ConfigDB, SwitchsTable, criteria)
 }
 
 //GetSwitchConfig get switch Config

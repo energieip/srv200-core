@@ -6,16 +6,9 @@ import (
 
 //SaveModel dump model in database
 func SaveModel(db Database, cfg core.Model) error {
-	var err error
 	criteria := make(map[string]interface{})
 	criteria["Name"] = cfg.Name
-	dbID := GetObjectID(db, ConfigDB, ModelsTable, criteria)
-	if dbID == "" {
-		_, err = db.InsertRecord(ConfigDB, ModelsTable, cfg)
-	} else {
-		err = db.UpdateRecord(ConfigDB, ModelsTable, dbID, cfg)
-	}
-	return err
+	return SaveOnUpdateObject(db, cfg, ConfigDB, ModelsTable, criteria)
 }
 
 //RemoveModel remove ifc config in database

@@ -6,16 +6,9 @@ import (
 
 //SaveLedConfig dump led config in database
 func SaveLedConfig(db Database, cfg dl.LedSetup) error {
-	var err error
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = cfg.Mac
-	dbID := GetObjectID(db, ConfigDB, LedsTable, criteria)
-	if dbID == "" {
-		_, err = db.InsertRecord(ConfigDB, LedsTable, cfg)
-	} else {
-		err = db.UpdateRecord(ConfigDB, LedsTable, dbID, cfg)
-	}
-	return err
+	return SaveOnUpdateObject(db, cfg, ConfigDB, LedsTable, criteria)
 }
 
 //RemoveLedConfig remove led config in database
@@ -103,16 +96,9 @@ func GetLedsConfig(db Database) map[string]dl.LedSetup {
 
 //SaveLedStatus dump led status in database
 func SaveLedStatus(db Database, status dl.Led) error {
-	var err error
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = status.Mac
-	dbID := GetObjectID(db, StatusDB, LedsTable, criteria)
-	if dbID == "" {
-		_, err = db.InsertRecord(StatusDB, LedsTable, status)
-	} else {
-		err = db.UpdateRecord(StatusDB, LedsTable, dbID, status)
-	}
-	return err
+	return SaveOnUpdateObject(db, status, StatusDB, LedsTable, criteria)
 }
 
 //GetLedsStatus return the led status list

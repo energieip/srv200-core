@@ -105,3 +105,15 @@ func GetObjectID(db Database, dbName, tbName string, criteria map[string]interfa
 	}
 	return ""
 }
+
+//SaveOnUpdateObject in database
+func SaveOnUpdateObject(db Database, obj interface{}, dbName, tbName string, criteria map[string]interface{}) error {
+	var err error
+	dbID := GetObjectID(db, dbName, tbName, criteria)
+	if dbID == "" {
+		_, err = db.InsertRecord(dbName, tbName, obj)
+	} else {
+		err = db.UpdateRecord(dbName, tbName, dbID, obj)
+	}
+	return err
+}
