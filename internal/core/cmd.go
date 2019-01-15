@@ -17,9 +17,11 @@ type BlindCmd struct {
 }
 
 type GroupCmd struct {
-	Group        int  `json:"group"`
-	Auto         bool `json:"auto"`
-	SetpointLeds int  `json:"setpointLeds"`
+	Group          int   `json:"group"`
+	Auto           *bool `json:"auto"`
+	SetpointLeds   *int  `json:"setpointLeds"`
+	SetpointBlinds *int  `json:"setpointBlinds"`
+	SetpointSlats  *int  `json:"setpointSlats"`
 }
 
 // ToJSON dump BlindCmd struct

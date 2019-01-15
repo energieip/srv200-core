@@ -580,8 +580,10 @@ func (s *CoreService) sendGroupCmd(cmd interface{}) {
 		switchSetup.Groups = make(map[int]gm.GroupConfig)
 		cfg := gm.GroupConfig{}
 		cfg.Group = cmdGr.Group
-		cfg.Auto = &cmdGr.Auto
-		cfg.SetpointLeds = &cmdGr.SetpointLeds
+		cfg.Auto = cmdGr.Auto
+		cfg.SetpointLeds = cmdGr.SetpointLeds
+		cfg.SetpointBlinds = cmdGr.SetpointBlinds
+		cfg.SetpointSlatBlinds = cmdGr.SetpointSlats
 		switchSetup.Groups[cmdGr.Group] = cfg
 		dump, _ := switchSetup.ToJSON()
 		err := s.server.SendCommand(url, dump)
