@@ -950,6 +950,41 @@
                 }
             }
         },
+        "/command/blind":{
+            "post":{
+                "tags":[
+                    "command"
+                ],
+                "summary": "Send Blind command",
+                "description": "Send Blind command",
+                "operationId": "sendBlindCommand",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "blind",
+                        "in": "body",
+                        "description": "Blind Command",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/BlindCommand"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "sucessful operation"
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
         "/command/group":{
             "post":{
                 "tags":[
@@ -1450,6 +1485,40 @@
                         "description": "successful operation",
                         "schema":{
                             "$ref": "#/definitions/LedStatus"
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                      }
+                }
+            }
+        },
+        "/status/blind/{mac}":{
+            "get":{
+                "tags":[
+                    "status"
+                ],
+                "summary": "Return Blind Status",
+                "description": "Return the given Blind status",
+                "operationId": "getBlindStatus",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[{
+                    "name": "mac",
+                    "in": "path",
+                    "description": "Blind Mac address",
+                    "required": true,
+                    "type": "string"
+                }],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema":{
+                            "$ref": "#/definitions/BlindStatus"
                         }
                     },
                     "default": {
@@ -2389,9 +2458,17 @@
                     "type": "boolean",
                     "description": "Automatic mode"
                 },
-                "ledSetPoint": {
+                "setpointLeds": {
                     "type": "integer",
-                    "description": "Led SetPoint value"
+                    "description": "Led Setpoint value"
+                },
+                "setpointBlinds": {
+                    "type": "integer",
+                    "description": "Blind Setoint value"
+                },
+                "setpointSlats": {
+                    "type": "integer",
+                    "description": "Slat Setoint value"
                 }
             }
         },
