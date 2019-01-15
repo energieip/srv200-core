@@ -7,27 +7,20 @@ import (
 
 //SaveServiceConfig dump sensor config in database
 func SaveServiceConfig(db Database, service pkg.Service) error {
-	serv := core.Service{
-		Name:        service.Name,
-		Systemd:     service.Systemd,
-		Version:     service.Version,
-		PackageName: service.PackageName,
-		ConfigPath:  service.ConfigPath,
-	}
 	criteria := make(map[string]interface{})
 	criteria["Name"] = service.Name
-	return SaveOnUpdateObject(db, serv, ConfigDB, ServicesTable, criteria)
+	return SaveOnUpdateObject(db, service, ConfigDB, ServicesTable, criteria)
 }
 
 //GetServiceConfig get service Config
-func GetServiceConfig(db Database, name string) *core.Service {
+func GetServiceConfig(db Database, name string) *pkg.Service {
 	criteria := make(map[string]interface{})
 	criteria["Name"] = name
 	stored, err := db.GetRecord(ConfigDB, ServicesTable, criteria)
 	if err != nil || stored == nil {
 		return nil
 	}
-	service, err := core.ToService(stored)
+	service, err := pkg.ToService(stored)
 	if err != nil || service == nil {
 		return nil
 	}
@@ -42,54 +35,8 @@ func GetServiceConfigs(db Database, switchIP, serverIP string, cluster int) map[
 		return services
 	}
 	for _, s := range stored {
-		serv, err := core.ToService(s)
-		if err != nil || serv == nil {
-			continue
-		}
-		localBroker := pkg.Broker{
-			IP:   "127.0.0.1",
-			Port: "1883",
-		}
-		netBroker := pkg.Broker{
-			IP:   serverIP,
-			Port: "1883",
-		}
-
-		var clusterConnector []pkg.Connector
-		clusters := GetCluster(db, cluster)
-		for _, c := range clusters {
-			if c.IP == switchIP {
-				continue
-			}
-			connector := pkg.Connector{
-				IP:   c.IP,
-				Port: "29015",
-			}
-			clusterConnector = append(clusterConnector, connector)
-		}
-		rack := pkg.Cluster{
-			Connectors: clusterConnector,
-		}
-		dbConnector := pkg.DBConnector{
-			ClientIP:   "127.0.0.1",
-			ClientPort: "28015",
-			DBCluster:  rack,
-		}
-		cfg := pkg.ServiceConfig{
-			LocalBroker:   localBroker,
-			NetworkBroker: netBroker,
-			DB:            dbConnector,
-			LogLevel:      "INFO",
-		}
-		service := pkg.Service{
-			Name:        serv.Name,
-			Systemd:     serv.Systemd,
-			Version:     serv.Version,
-			PackageName: serv.PackageName,
-			ConfigPath:  serv.ConfigPath,
-			Config:      cfg,
-		}
-		services[serv.Name] = service
+		serv, _ := pkg.ToService(s)
+		services[serv.Name] = *serv
 	}
 	return services
 }
