@@ -41,6 +41,10 @@
         {
             "name": "dump",
             "description": "Drivers and groups dump"
+        },
+        {
+            "name": "history",
+            "description": "Driver consumption histories"
         }
     ],
     "schemes":[
@@ -1709,6 +1713,33 @@
                     }
                 }
             }
+        },
+        "/history":{
+            "get":{
+                "tags":[
+                    "history"
+                ],
+                "summary": "Return Complete consumption history",
+                "description": "Return Complete consumption history",
+                "operationId": "getHistory",
+                "produces":[
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema":{
+                            "$ref": "#/definitions/History"
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                      }
+                }
+            }
         }
     },
     "definitions": {
@@ -2623,6 +2654,86 @@
                         "$ref": "#/definitions/GroupStatus"
                     },
                     "description": "List of groups status"
+                }
+            }
+        },
+        "History": {
+            "type": "object",
+            "properties": {
+                "leds": {
+                    "type": "array",
+                    "items":{
+                        "$ref": "#/definitions/LedHistory"
+                    },
+                    "description": "List of leds history"
+                },
+                "blinds": {
+                    "type": "array",
+                    "items":{
+                        "$ref": "#/definitions/BlindHistory"
+                    },
+                    "description": "List of blinds history"
+                },
+                "switchs": {
+                    "type": "array",
+                    "items":{
+                        "$ref": "#/definitions/SwitchHistory"
+                    },
+                    "description": "List of switchs history"
+                }
+            }
+        },
+        "LedHistory": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string",
+                    "description": "Date"
+                },
+                "energy": {
+                    "type": "number",
+                    "format": "float64",
+                    "description": "Energy"
+                },
+                "power": {
+                    "type": "integer",
+                    "description": "Power"
+                }
+            }
+        },
+        "BlindHistory": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string",
+                    "description": "Date"
+                },
+                "energy": {
+                    "type": "number",
+                    "format": "float64",
+                    "description": "Energy"
+                },
+                "power": {
+                    "type": "integer",
+                    "description": "Power"
+                }
+            }
+        },
+        "SwitchHistory": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string",
+                    "description": "Date"
+                },
+                "energy": {
+                    "type": "number",
+                    "format": "float64",
+                    "description": "Energy"
+                },
+                "power": {
+                    "type": "integer",
+                    "description": "Power"
                 }
             }
         },

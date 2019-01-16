@@ -14,6 +14,7 @@ import (
 	"github.com/energieip/srv200-coreservice-go/internal/api"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
+	"github.com/energieip/srv200-coreservice-go/internal/history"
 	"github.com/energieip/srv200-coreservice-go/internal/network"
 	"github.com/romana/rlog"
 )
@@ -32,6 +33,7 @@ const (
 type CoreService struct {
 	server          network.ServerNetwork //Remote server
 	db              database.Database
+	historyDb       history.HistoryDb
 	mac             string
 	ip              string
 	events          chan string
@@ -68,6 +70,13 @@ func (s *CoreService) Initialize(confFile string) error {
 	}
 	s.db = *db
 
+	historydb, err := history.ConnectDatabase(conf.HistoryDB.ClientIP, conf.HistoryDB.ClientPort)
+	if err != nil {
+		rlog.Error("Cannot connect to database " + err.Error())
+		return err
+	}
+	s.historyDb = *historydb
+
 	serverNet, err := network.CreateServerNetwork()
 	if err != nil {
 		rlog.Error("Cannot connect to broker " + conf.NetworkBroker.IP + " error: " + err.Error())
@@ -80,7 +89,7 @@ func (s *CoreService) Initialize(confFile string) error {
 		rlog.Error("Cannot connect to drivers broker " + conf.NetworkBroker.IP + " error: " + err.Error())
 		return err
 	}
-	web := api.InitAPI(s.db, s.eventsAPI, &s.installMode, *conf)
+	web := api.InitAPI(s.db, s.historyDb, s.eventsAPI, &s.installMode, *conf)
 	s.api = web
 
 	rlog.Info("ServerCore service started")
@@ -92,6 +101,7 @@ func (s *CoreService) Stop() {
 	rlog.Info("Stopping ServerCore service")
 	s.server.Disconnect()
 	s.db.Close()
+	s.historyDb.Close()
 	rlog.Info("ServerCore service stopped")
 }
 
@@ -181,6 +191,7 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 			s.prepareAPIEvent(EventAdd, LedElt, led)
 		} else {
 			s.prepareAPIEvent(EventUpdate, LedElt, led)
+			history.SaveLedHistory(s.historyDb, led)
 		}
 	}
 

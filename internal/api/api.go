@@ -9,6 +9,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/energieip/srv200-coreservice-go/internal/history"
+
 	"github.com/energieip/common-components-go/pkg/dblind"
 
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
@@ -44,6 +46,7 @@ type API struct {
 	clients         map[*websocket.Conn]bool
 	upgrader        websocket.Upgrader
 	db              database.Database
+	historydb       history.HistoryDb
 	eventsAPI       chan map[string]core.EventStatus
 	EventsToBackend chan map[string]interface{}
 	apiMutex        sync.Mutex
@@ -96,9 +99,10 @@ type Dump struct {
 }
 
 //InitAPI start API connection
-func InitAPI(db database.Database, eventsAPI chan map[string]core.EventStatus, installMode *bool, conf pkg.ServiceConfig) *API {
+func InitAPI(db database.Database, historydb history.HistoryDb, eventsAPI chan map[string]core.EventStatus, installMode *bool, conf pkg.ServiceConfig) *API {
 	api := API{
 		db:              db,
+		historydb:       historydb,
 		eventsAPI:       eventsAPI,
 		EventsToBackend: make(chan map[string]interface{}),
 		clients:         make(map[*websocket.Conn]bool),
@@ -355,6 +359,51 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 	w.Write(inrec)
 }
 
+type LedHist struct {
+	Energy float64 `json:"energy"`
+	Power  int     `json:"power"`
+	Date   string  `json:"date"`
+}
+
+type GlobalHistory struct {
+	Leds []LedHist `json:"leds"`
+}
+
+func (api *API) getHistory(w http.ResponseWriter, req *http.Request) {
+	api.setDefaultHeader(w)
+
+	var leds []LedHist
+
+	ledHistories := make(map[string]LedHist)
+	ledDrivers := history.GetLedsHistory(api.historydb)
+	// rlog.Info("==== ledDrivers ", ledDrivers)
+	for _, l := range ledDrivers {
+		rlog.Info("==== date ", l.Date)
+		val, ok := ledHistories[l.Date]
+		if !ok {
+			ledHistories[l.Date] = LedHist{
+				Energy: l.Energy,
+				Power:  l.Power,
+				Date:   l.Date,
+			}
+		} else {
+			val.Energy += l.Energy
+			val.Power += l.Power
+			ledHistories[l.Date] = val
+		}
+	}
+	for _, hist := range ledHistories {
+		leds = append(leds, hist)
+	}
+
+	dump := GlobalHistory{
+		Leds: leds,
+	}
+
+	inrec, _ := json.MarshalIndent(dump, "", "  ")
+	w.Write(inrec)
+}
+
 type Conf struct {
 	Leds    []dl.LedConf        `json:"leds"`
 	Sensors []ds.SensorConf     `json:"sensors"`
@@ -446,8 +495,8 @@ func (api *API) getV1Functions(w http.ResponseWriter, req *http.Request) {
 		apiV1 + "/setup/group", apiV1 + "/setup/switch", apiV1 + "/setup/installMode",
 		apiV1 + "/setup/service", apiV1 + "/setup/blind",
 		apiV1 + "/config/led", apiV1 + "/config/sensor", apiV1 + "/config/blind",
-		apiV1 + "/config/group",
-		apiV1 + "/config/switch", apiV1 + "/configs", apiV1 + "/status", apiV1 + "/events",
+		apiV1 + "/config/group", apiV1 + "/config/switch", apiV1 + "/configs",
+		apiV1 + "/status", apiV1 + "/events", apiV1 + "/history",
 		apiV1 + "/command/led", apiV1 + "/command/blind", apiV1 + "/command/group", apiV1 + "/project/ifcInfo",
 		apiV1 + "/project/model", apiV1 + "/project/bim", apiV1 + "/project", apiV1 + "/dump",
 	}
@@ -536,6 +585,9 @@ func (api *API) swagger() {
 
 	//dump API
 	router.HandleFunc(apiV1+"/dump", api.getDump).Methods("GET")
+
+	//History API
+	router.HandleFunc(apiV1+"/history", api.getHistory).Methods("GET")
 
 	//unversionned API
 	router.HandleFunc("/versions", api.getAPIs).Methods("GET")
