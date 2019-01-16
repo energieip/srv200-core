@@ -31,17 +31,19 @@ const (
 
 //CoreService content
 type CoreService struct {
-	server          network.ServerNetwork //Remote server
-	db              database.Database
-	historyDb       history.HistoryDb
-	mac             string
-	ip              string
-	events          chan string
-	installMode     bool
-	eventsAPI       chan map[string]core.EventStatus
-	eventsToBackend chan map[string]interface{}
-	api             *api.API
-	bufAPI          map[string]core.EventStatus
+	server               network.ServerNetwork //Remote server
+	db                   database.Database
+	historyDb            history.HistoryDb
+	mac                  string
+	ip                   string
+	events               chan string
+	installMode          bool
+	eventsAPI            chan map[string]core.EventStatus
+	eventsToBackend      chan map[string]interface{}
+	api                  *api.API
+	bufAPI               map[string]core.EventStatus
+	bufConsumption       map[string]int
+	eventsConsumptionAPI chan core.EventConsumption
 }
 
 //Initialize service
@@ -52,6 +54,8 @@ func (s *CoreService) Initialize(confFile string) error {
 	s.events = make(chan string)
 	s.eventsAPI = make(chan map[string]core.EventStatus)
 	s.bufAPI = make(map[string]core.EventStatus)
+	s.bufConsumption = make(map[string]int)
+	s.eventsConsumptionAPI = make(chan core.EventConsumption)
 
 	conf, err := pkg.ReadServiceConfig(confFile)
 	if err != nil {
@@ -89,7 +93,7 @@ func (s *CoreService) Initialize(confFile string) error {
 		rlog.Error("Cannot connect to drivers broker " + conf.NetworkBroker.IP + " error: " + err.Error())
 		return err
 	}
-	web := api.InitAPI(s.db, s.historyDb, s.eventsAPI, &s.installMode, *conf)
+	web := api.InitAPI(s.db, s.historyDb, s.eventsAPI, s.eventsConsumptionAPI, &s.installMode, *conf)
 	s.api = web
 
 	rlog.Info("ServerCore service started")
@@ -192,6 +196,7 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 		} else {
 			s.prepareAPIEvent(EventUpdate, LedElt, led)
 			history.SaveLedHistory(s.historyDb, led)
+			s.prepareAPIConsumption(LedElt, led.LinePower)
 		}
 	}
 
@@ -714,6 +719,7 @@ func (s *CoreService) readAPIEvents() {
 //Run service mainloop
 func (s *CoreService) Run() error {
 	go s.pushAPIEvent()
+	go s.pushConsumptionEvent()
 	go s.readAPIEvents()
 	for {
 		select {

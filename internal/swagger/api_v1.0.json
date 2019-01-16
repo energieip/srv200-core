@@ -1398,6 +1398,34 @@
                 }
             }
         },
+        "/events/consumption":{
+            "get":{
+                "tags":[
+                    "event"
+                ],
+                "summary": "Websocket for Event Consumption",
+                "description": "pop event consumption",
+                "operationId": "eventsConsumption",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[],
+                "responses": {
+                    "101": {
+                        "description": "sucessful operation",
+                        "schema":{
+                            "$ref": "#/definitions/ConsumptionEvent"
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                      }
+                }
+            }
+        },
         "/status/sensor/{mac}": {
             "get": {
                 "tags": [
@@ -2516,6 +2544,31 @@
                 },
                 "status": {
                     "$ref": "#/definitions/Status"
+                }
+            }
+        },
+        "ConsumptionEvent": {
+            "type": "object",
+            "required": [
+                "date"
+            ],
+            "properties": {
+                "date": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Event date"
+                },
+                "leds": {
+                    "type": "integer",
+                    "description": "Cumulative puissance leds in Watts"
+                },
+                "blinds": {
+                    "type": "string",
+                    "description": "Cumulative puissance blinds in Watts"
+                },
+                "hvacs": {
+                    "type": "string",
+                    "description": "Cumulative puissance hvacs in Watts"
                 }
             }
         },

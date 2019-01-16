@@ -44,10 +44,12 @@ type APIError struct {
 
 type API struct {
 	clients         map[*websocket.Conn]bool
+	clientsConso    map[*websocket.Conn]bool
 	upgrader        websocket.Upgrader
 	db              database.Database
 	historydb       history.HistoryDb
 	eventsAPI       chan map[string]core.EventStatus
+	eventsConso     chan core.EventConsumption
 	EventsToBackend chan map[string]interface{}
 	apiMutex        sync.Mutex
 	installMode     *bool
@@ -99,13 +101,16 @@ type Dump struct {
 }
 
 //InitAPI start API connection
-func InitAPI(db database.Database, historydb history.HistoryDb, eventsAPI chan map[string]core.EventStatus, installMode *bool, conf pkg.ServiceConfig) *API {
+func InitAPI(db database.Database, historydb history.HistoryDb, eventsAPI chan map[string]core.EventStatus,
+	eventsConso chan core.EventConsumption, installMode *bool, conf pkg.ServiceConfig) *API {
 	api := API{
 		db:              db,
 		historydb:       historydb,
 		eventsAPI:       eventsAPI,
+		eventsConso:     eventsConso,
 		EventsToBackend: make(chan map[string]interface{}),
 		clients:         make(map[*websocket.Conn]bool),
+		clientsConso:    make(map[*websocket.Conn]bool),
 		installMode:     installMode,
 		upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
@@ -376,9 +381,7 @@ func (api *API) getHistory(w http.ResponseWriter, req *http.Request) {
 
 	ledHistories := make(map[string]LedHist)
 	ledDrivers := history.GetLedsHistory(api.historydb)
-	// rlog.Info("==== ledDrivers ", ledDrivers)
 	for _, l := range ledDrivers {
-		rlog.Info("==== date ", l.Date)
 		val, ok := ledHistories[l.Date]
 		if !ok {
 			ledHistories[l.Date] = LedHist{
@@ -470,6 +473,30 @@ func (api *API) webEvents(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (api *API) consumptionEvents(w http.ResponseWriter, r *http.Request) {
+	ws, err := api.upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		rlog.Error("Error when switching in consumption websocket " + err.Error())
+		return
+	}
+	api.clientsConso[ws] = true
+
+	for {
+		select {
+		case event := <-api.eventsConso:
+			api.apiMutex.Lock()
+			for client := range api.clientsConso {
+				if err := client.WriteJSON(event); err != nil {
+					rlog.Error("Error writing in websocket" + err.Error())
+					client.Close()
+					delete(api.clientsConso, client)
+				}
+			}
+			api.apiMutex.Unlock()
+		}
+	}
+}
+
 type APIInfo struct {
 	Versions []string `json:"versions"`
 }
@@ -496,7 +523,7 @@ func (api *API) getV1Functions(w http.ResponseWriter, req *http.Request) {
 		apiV1 + "/setup/service", apiV1 + "/setup/blind",
 		apiV1 + "/config/led", apiV1 + "/config/sensor", apiV1 + "/config/blind",
 		apiV1 + "/config/group", apiV1 + "/config/switch", apiV1 + "/configs",
-		apiV1 + "/status", apiV1 + "/events", apiV1 + "/history",
+		apiV1 + "/status", apiV1 + "/events", apiV1 + "/events/consumption", apiV1 + "/history",
 		apiV1 + "/command/led", apiV1 + "/command/blind", apiV1 + "/command/group", apiV1 + "/project/ifcInfo",
 		apiV1 + "/project/model", apiV1 + "/project/bim", apiV1 + "/project", apiV1 + "/dump",
 	}
@@ -565,6 +592,7 @@ func (api *API) swagger() {
 
 	//events API
 	router.HandleFunc(apiV1+"/events", api.webEvents)
+	router.HandleFunc(apiV1+"/events/consumption", api.consumptionEvents)
 
 	//command API
 	router.HandleFunc(apiV1+"/command/led", api.sendLedCommand).Methods("POST")

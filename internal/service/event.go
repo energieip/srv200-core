@@ -21,6 +21,7 @@ const (
 	SensorElt = "sensor"
 	BlindElt  = "blind"
 	GroupElt  = "group"
+	HvacElt   = "hvac"
 )
 
 func (s *CoreService) prepareAPIEvent(evtType, evtObj string, event interface{}) {
