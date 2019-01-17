@@ -28,7 +28,7 @@ func GetServiceConfig(db Database, name string) *pkg.Service {
 }
 
 //GetServiceConfigs return the sensor configuration
-func GetServiceConfigs(db Database, switchIP, serverIP string, cluster int) map[string]pkg.Service {
+func GetServiceConfigs(db Database) map[string]pkg.Service {
 	services := map[string]pkg.Service{}
 	stored, err := db.FetchAllRecords(ConfigDB, ServicesTable)
 	if err != nil || stored == nil {

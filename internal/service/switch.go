@@ -5,6 +5,7 @@ import (
 	dl "github.com/energieip/common-components-go/pkg/dled"
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
 	sd "github.com/energieip/common-components-go/pkg/dswitch"
+	pkg "github.com/energieip/common-components-go/pkg/service"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
 	"github.com/energieip/srv200-coreservice-go/internal/history"
@@ -114,7 +115,17 @@ func (s *CoreService) prepareSetupSwitchConfig(switchStatus sd.SwitchStatus) *sd
 	setup.Mac = switchStatus.Mac
 	setup.FriendlyName = config.FriendlyName
 	setup.IsConfigured = &isConfigured
-	setup.Services = database.GetServiceConfigs(s.db, switchStatus.IP, s.ip, config.Cluster)
+
+	services := make(map[string]pkg.Service)
+	srv := database.GetServiceConfigs(s.db)
+	for _, service := range srv {
+		val, ok := switchStatus.Services[service.Name]
+		if !ok || val.Version != service.Version {
+			services[service.Name] = service
+		}
+	}
+
+	setup.Services = services
 	if s.installMode {
 		switchSetup := core.SwitchConfig{}
 		switchSetup.Mac = setup.Mac
