@@ -131,6 +131,7 @@ func (s *CoreService) prepareSetupSwitchConfig(switchStatus sd.SwitchStatus) *sd
 		switchSetup.Mac = setup.Mac
 		switchSetup.IP = switchStatus.IP
 		switchSetup.Cluster = 0
+		config.Cluster = 0
 		switchSetup.FriendlyName = switchStatus.FriendlyName
 		database.SaveSwitchConfig(s.db, switchSetup)
 	}
@@ -138,6 +139,26 @@ func (s *CoreService) prepareSetupSwitchConfig(switchStatus sd.SwitchStatus) *sd
 		config.IP = switchStatus.IP
 		database.SaveSwitchConfig(s.db, *config)
 	}
+
+	//Prepare Cluster
+	var clusters map[string]core.SwitchConfig
+	switchCluster := make(map[string]pkg.Broker)
+	if config.Cluster != 0 {
+		clusters = database.GetCluster(s.db, config.Cluster)
+	} else {
+		cl := core.SwitchConfig{
+			IP: switchStatus.IP,
+		}
+		clusters[cl.IP] = cl
+	}
+	for _, cluster := range clusters {
+		br := pkg.Broker{
+			IP:   cluster.IP,
+			Port: "8883",
+		}
+		switchCluster[cluster.IP] = br
+	}
+	setup.ClusterBroker = switchCluster
 	return &setup
 }
 

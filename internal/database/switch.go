@@ -116,8 +116,8 @@ func GetSwitchsDump(db Database) map[string]core.SwitchDump {
 }
 
 //GetCluster get cluster Config list
-func GetCluster(db Database, cluster int) []core.SwitchConfig {
-	var res []core.SwitchConfig
+func GetCluster(db Database, cluster int) map[string]core.SwitchConfig {
+	res := make(map[string]core.SwitchConfig)
 	criteria := make(map[string]interface{})
 	criteria["Cluster"] = cluster
 	swStored, err := db.GetRecords(ConfigDB, SwitchsTable, criteria)
@@ -129,7 +129,7 @@ func GetCluster(db Database, cluster int) []core.SwitchConfig {
 		if err != nil || sw == nil {
 			continue
 		}
-		res = append(res, *sw)
+		res[sw.IP] = *sw
 	}
 	return res
 }
