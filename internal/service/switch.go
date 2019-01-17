@@ -283,5 +283,25 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 			s.prepareAPIEvent(EventUpdate, SensorElt, sensor)
 		}
 	}
+
+	//Prepare Cluster
+	var clusters map[string]core.SwitchConfig
+	switchCluster := make(map[string]pkg.Broker)
+	if config.Cluster != 0 {
+		clusters = database.GetCluster(s.db, config.Cluster)
+	} else {
+		cl := core.SwitchConfig{
+			IP: switchStatus.IP,
+		}
+		clusters[cl.IP] = cl
+	}
+	for _, cluster := range clusters {
+		br := pkg.Broker{
+			IP:   cluster.IP,
+			Port: "8883",
+		}
+		switchCluster[cluster.IP] = br
+	}
+	setup.ClusterBroker = switchCluster
 	return &setup
 }
