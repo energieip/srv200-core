@@ -157,7 +157,7 @@ func (s *CoreService) prepareSetupSwitchConfig(switchStatus sd.SwitchStatus) *sd
 			IP:  cluster.IP,
 			Mac: cluster.Mac,
 		}
-		switchCluster[cluster.IP] = br
+		switchCluster[cluster.Mac] = br
 	}
 	setup.ClusterBroker = switchCluster
 	return &setup
@@ -315,7 +315,7 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 			IP:  cluster.IP,
 			Mac: cluster.Mac,
 		}
-		switchCluster[cluster.IP] = br
+		switchCluster[cluster.Mac] = br
 	}
 	setup.ClusterBroker = switchCluster
 	return &setup
