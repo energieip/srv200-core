@@ -4,6 +4,7 @@ import (
 	"github.com/energieip/common-components-go/pkg/dblind"
 	dl "github.com/energieip/common-components-go/pkg/dled"
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
+	"github.com/energieip/common-components-go/pkg/dswitch"
 	sd "github.com/energieip/common-components-go/pkg/dswitch"
 	pkg "github.com/energieip/common-components-go/pkg/service"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
@@ -126,7 +127,7 @@ func (s *CoreService) prepareSetupSwitchConfig(switchStatus sd.SwitchStatus) *sd
 	}
 
 	setup.Services = services
-	if s.installMode {
+	if s.installMode && config == nil {
 		switchSetup := core.SwitchConfig{}
 		switchSetup.Mac = setup.Mac
 		switchSetup.IP = switchStatus.IP
@@ -142,7 +143,7 @@ func (s *CoreService) prepareSetupSwitchConfig(switchStatus sd.SwitchStatus) *sd
 
 	//Prepare Cluster
 	var clusters map[string]core.SwitchConfig
-	switchCluster := make(map[string]pkg.Broker)
+	switchCluster := make(map[string]dswitch.SwitchCluster)
 	if config.Cluster != 0 {
 		clusters = database.GetCluster(s.db, config.Cluster)
 	} else {
@@ -152,9 +153,9 @@ func (s *CoreService) prepareSetupSwitchConfig(switchStatus sd.SwitchStatus) *sd
 		clusters[cl.IP] = cl
 	}
 	for _, cluster := range clusters {
-		br := pkg.Broker{
-			IP:   cluster.IP,
-			Port: "8883",
+		br := dswitch.SwitchCluster{
+			IP:  cluster.IP,
+			Mac: cluster.Mac,
 		}
 		switchCluster[cluster.IP] = br
 	}
@@ -168,10 +169,24 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 		rlog.Warn("Cannot find configuration for switch", switchStatus.Mac)
 		return nil
 	}
+	if s.installMode && config == nil {
+		switchSetup := core.SwitchConfig{}
+		switchSetup.Mac = switchStatus.Mac
+		switchSetup.IP = switchStatus.IP
+		switchSetup.Cluster = 0
+		config.Cluster = 0
+		switchSetup.FriendlyName = switchStatus.FriendlyName
+		database.SaveSwitchConfig(s.db, switchSetup)
+	}
+	if config.IP == "" {
+		config.IP = switchStatus.IP
+		database.SaveSwitchConfig(s.db, *config)
+	}
 
 	isConfigured := true
 	setup := sd.SwitchConfig{}
 	setup.Mac = switchStatus.Mac
+	setup.IP = config.IP
 	setup.FriendlyName = config.FriendlyName
 	setup.IsConfigured = &isConfigured
 
@@ -286,7 +301,7 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 
 	//Prepare Cluster
 	var clusters map[string]core.SwitchConfig
-	switchCluster := make(map[string]pkg.Broker)
+	switchCluster := make(map[string]dswitch.SwitchCluster)
 	if config.Cluster != 0 {
 		clusters = database.GetCluster(s.db, config.Cluster)
 	} else {
@@ -296,9 +311,9 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 		clusters[cl.IP] = cl
 	}
 	for _, cluster := range clusters {
-		br := pkg.Broker{
-			IP:   cluster.IP,
-			Port: "8883",
+		br := dswitch.SwitchCluster{
+			IP:  cluster.IP,
+			Mac: cluster.Mac,
 		}
 		switchCluster[cluster.IP] = br
 	}
