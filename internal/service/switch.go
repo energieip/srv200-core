@@ -146,18 +146,15 @@ func (s *CoreService) prepareSetupSwitchConfig(switchStatus sd.SwitchStatus) *sd
 	switchCluster := make(map[string]dswitch.SwitchCluster)
 	if config.Cluster != 0 {
 		clusters = database.GetCluster(s.db, config.Cluster)
-	} else {
-		cl := core.SwitchConfig{
-			IP: switchStatus.IP,
-		}
-		clusters[cl.IP] = cl
 	}
 	for _, cluster := range clusters {
-		br := dswitch.SwitchCluster{
-			IP:  cluster.IP,
-			Mac: cluster.Mac,
+		if cluster.Mac != switchStatus.Mac {
+			br := dswitch.SwitchCluster{
+				IP:  cluster.IP,
+				Mac: cluster.Mac,
+			}
+			switchCluster[cluster.Mac] = br
 		}
-		switchCluster[cluster.Mac] = br
 	}
 	setup.ClusterBroker = switchCluster
 	return &setup
@@ -304,18 +301,15 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 	switchCluster := make(map[string]dswitch.SwitchCluster)
 	if config.Cluster != 0 {
 		clusters = database.GetCluster(s.db, config.Cluster)
-	} else {
-		cl := core.SwitchConfig{
-			IP: switchStatus.IP,
+		for _, cluster := range clusters {
+			if cluster.Mac != switchStatus.Mac {
+				br := dswitch.SwitchCluster{
+					IP:  cluster.IP,
+					Mac: cluster.Mac,
+				}
+				switchCluster[cluster.Mac] = br
+			}
 		}
-		clusters[cl.IP] = cl
-	}
-	for _, cluster := range clusters {
-		br := dswitch.SwitchCluster{
-			IP:  cluster.IP,
-			Mac: cluster.Mac,
-		}
-		switchCluster[cluster.Mac] = br
 	}
 	setup.ClusterBroker = switchCluster
 	return &setup
