@@ -13,7 +13,7 @@ func (s *CoreService) prepareAPIConsumption(evtObj string, power int) {
 }
 
 func (s *CoreService) pushConsumptionEvent() {
-	timerDump := time.NewTicker(10 * time.Second)
+	timerDump := time.NewTicker(1 * time.Second)
 	for {
 		select {
 		case <-timerDump.C:
