@@ -44,15 +44,45 @@ func (s *CoreService) updateSwitchCfg(config interface{}) {
 }
 
 func (s *CoreService) registerSwitchStatus(switchStatus sd.SwitchStatus) {
-	for _, led := range switchStatus.Leds {
+	oldLeds := database.GetLedSwitchStatus(s.db, switchStatus.Mac)
+	for mac, led := range switchStatus.Leds {
 		database.SaveLedStatus(s.db, led)
+		_, ok := oldLeds[mac]
+		if ok {
+			delete(oldLeds, mac)
+		}
 	}
-	for _, sensor := range switchStatus.Sensors {
+	for _, led := range oldLeds {
+		database.RemoveLedStatus(s.db, led.Mac)
+		s.prepareAPIEvent(EventRemove, LedElt, led)
+	}
+
+	oldSensors := database.GetSensorSwitchStatus(s.db, switchStatus.Mac)
+	for mac, sensor := range switchStatus.Sensors {
 		database.SaveSensorStatus(s.db, sensor)
+		_, ok := oldSensors[mac]
+		if ok {
+			delete(oldSensors, mac)
+		}
 	}
-	for _, blind := range switchStatus.Blinds {
+	for _, sensor := range oldSensors {
+		database.RemoveSensorStatus(s.db, sensor.Mac)
+		s.prepareAPIEvent(EventRemove, SensorElt, sensor)
+	}
+
+	oldBlinds := database.GetBlindSwitchStatus(s.db, switchStatus.Mac)
+	for mac, blind := range switchStatus.Blinds {
 		database.SaveBlindStatus(s.db, blind)
+		_, ok := oldBlinds[mac]
+		if ok {
+			delete(oldBlinds, mac)
+		}
 	}
+	for _, blind := range oldBlinds {
+		database.RemoveBlindStatus(s.db, blind.Mac)
+		s.prepareAPIEvent(EventRemove, BlindElt, blind)
+	}
+
 	for _, group := range switchStatus.Groups {
 		database.SaveGroupStatus(s.db, group)
 		s.prepareAPIEvent(EventUpdate, GroupElt, group)

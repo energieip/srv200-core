@@ -44,6 +44,32 @@ func RemoveBlindConfig(db Database, mac string) error {
 	return db.DeleteRecord(ConfigDB, BlindsTable, criteria)
 }
 
+//RemoveBlindStatus remove led status in database
+func RemoveBlindStatus(db Database, mac string) error {
+	criteria := make(map[string]interface{})
+	criteria["Mac"] = mac
+	return db.DeleteRecord(StatusDB, BlindsTable, criteria)
+}
+
+//GetBlindSwitchStatus get cluster Config list
+func GetBlindSwitchStatus(db Database, swMac string) map[string]dblind.Blind {
+	res := map[string]dblind.Blind{}
+	criteria := make(map[string]interface{})
+	criteria["SwitchMac"] = swMac
+	stored, err := db.GetRecords(StatusDB, BlindsTable, criteria)
+	if err != nil || stored == nil {
+		return res
+	}
+	for _, elt := range stored {
+		driver, err := dblind.ToBlind(elt)
+		if err != nil || driver == nil {
+			continue
+		}
+		res[driver.Mac] = *driver
+	}
+	return res
+}
+
 //GetBlindConfig return the sensor configuration
 func GetBlindConfig(db Database, mac string) (*dblind.BlindSetup, string) {
 	var dbID string

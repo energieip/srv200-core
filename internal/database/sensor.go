@@ -56,6 +56,32 @@ func RemoveSensorConfig(db Database, mac string) error {
 	return db.DeleteRecord(ConfigDB, SensorsTable, criteria)
 }
 
+//RemoveSensorStatus remove led status in database
+func RemoveSensorStatus(db Database, mac string) error {
+	criteria := make(map[string]interface{})
+	criteria["Mac"] = mac
+	return db.DeleteRecord(StatusDB, SensorsTable, criteria)
+}
+
+//GetSensorSwitchStatus get cluster Config list
+func GetSensorSwitchStatus(db Database, swMac string) map[string]ds.Sensor {
+	res := map[string]ds.Sensor{}
+	criteria := make(map[string]interface{})
+	criteria["SwitchMac"] = swMac
+	stored, err := db.GetRecords(StatusDB, SensorsTable, criteria)
+	if err != nil || stored == nil {
+		return res
+	}
+	for _, elt := range stored {
+		driver, err := ds.ToSensor(elt)
+		if err != nil || driver == nil {
+			continue
+		}
+		res[driver.Mac] = *driver
+	}
+	return res
+}
+
 //GetSensorConfig return the sensor configuration
 func GetSensorConfig(db Database, mac string) (*ds.SensorSetup, string) {
 	var dbID string

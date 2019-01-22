@@ -18,6 +18,13 @@ func RemoveLedConfig(db Database, mac string) error {
 	return db.DeleteRecord(ConfigDB, LedsTable, criteria)
 }
 
+//RemoveLedStatus remove led status in database
+func RemoveLedStatus(db Database, mac string) error {
+	criteria := make(map[string]interface{})
+	criteria["Mac"] = mac
+	return db.DeleteRecord(StatusDB, LedsTable, criteria)
+}
+
 //GetLedConfig return the led configuration
 func GetLedConfig(db Database, mac string) (*dl.LedSetup, string) {
 	var dbID string
@@ -116,6 +123,25 @@ func GetLedsStatus(db Database) map[string]dl.Led {
 		leds[light.Mac] = *light
 	}
 	return leds
+}
+
+//GetLedSwitchStatus get cluster Config list
+func GetLedSwitchStatus(db Database, swMac string) map[string]dl.Led {
+	res := map[string]dl.Led{}
+	criteria := make(map[string]interface{})
+	criteria["SwitchMac"] = swMac
+	stored, err := db.GetRecords(StatusDB, LedsTable, criteria)
+	if err != nil || stored == nil {
+		return res
+	}
+	for _, elt := range stored {
+		driver, err := dl.ToLed(elt)
+		if err != nil || driver == nil {
+			continue
+		}
+		res[driver.Mac] = *driver
+	}
+	return res
 }
 
 //GetLedStatus return the led status
