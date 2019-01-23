@@ -29,7 +29,6 @@ func (s *CoreService) updateSwitchCfg(config interface{}) {
 		switchCfg.DumpFrequency = *cfg.DumpFrequency
 	}
 	switchCfg.FriendlyName = cfg.FriendlyName
-	// TODO Resend service configuration if the cluster change
 	if cfg.IsConfigured != nil {
 		switchCfg.IsConfigured = cfg.IsConfigured
 	}
@@ -332,12 +331,16 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 	if config.Cluster != 0 {
 		clusters = database.GetCluster(s.db, config.Cluster)
 		for _, cluster := range clusters {
-			if cluster.Mac != switchStatus.Mac {
-				br := dswitch.SwitchCluster{
-					IP:  cluster.IP,
-					Mac: cluster.Mac,
+			_, ok := switchStatus.ClusterBroker[cluster.Mac]
+			if !ok {
+				//add only new cluster member only
+				if cluster.Mac != switchStatus.Mac {
+					br := dswitch.SwitchCluster{
+						IP:  cluster.IP,
+						Mac: cluster.Mac,
+					}
+					switchCluster[cluster.Mac] = br
 				}
-				switchCluster[cluster.Mac] = br
 			}
 		}
 	}
