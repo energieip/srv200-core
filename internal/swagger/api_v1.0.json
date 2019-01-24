@@ -2065,6 +2065,10 @@
                     "type": "integer",
                     "description": "iMax"
                 },
+                "pMax": {
+                    "type": "integer",
+                    "description": "pMax"
+                },
                 "auto": {
                     "type": "boolean",
                     "description": "Automatic mode"
@@ -2297,13 +2301,21 @@
                     "type": "integer",
                     "description": "watchdog in second"
                 },
-                "slopeStart": {
+                "slopeStartManual": {
                     "type": "integer",
-                    "description": "slopeStart in second"
+                    "description": "slopeStart Manual in second"
                 },
-                "slopeStop": {
+                "slopeStopManual": {
                     "type": "integer",
-                    "description": "slopeStop in second"
+                    "description": "slopeStop Manual in second"
+                },
+                "slopeStartAuto": {
+                    "type": "integer",
+                    "description": "slopeStart Auto in second"
+                },
+                "slopeStopAuto": {
+                    "type": "integer",
+                    "description": "slopeStop Auto in second"
                 },
                 "sensorRule": {
                     "type": "string",
@@ -2385,13 +2397,21 @@
                     "type": "integer",
                     "description": "watchdog in second"
                 },
-                "slopeStart": {
+                "slopeStartManual": {
                     "type": "integer",
-                    "description": "slopeStart in second"
+                    "description": "slopeStart Manual in second"
                 },
-                "slopeStop": {
+                "slopeStopManual": {
                     "type": "integer",
-                    "description": "slopeStop in second"
+                    "description": "slopeStop Manual in second"
+                },
+                "slopeStartAuto": {
+                    "type": "integer",
+                    "description": "slopeStart Auto in second"
+                },
+                "slopeStopAuto": {
+                    "type": "integer",
+                    "description": "slopeStop Auto in second"
                 },
                 "sensorRule": {
                     "type": "string",
@@ -2453,13 +2473,21 @@
                     "type": "integer",
                     "description": "watchdog in second"
                 },
-                "slopeStart": {
+                "slopeStartAuto": {
                     "type": "integer",
-                    "description": "slopeStart in second"
+                    "description": "slopeStart Auto in second"
                 },
-                "slopeStop": {
+                "slopeStopAuto": {
                     "type": "integer",
-                    "description": "slopeStop in second"
+                    "description": "slopeStop Auto in second"
+                },
+                "slopeStartManual": {
+                    "type": "integer",
+                    "description": "slopeStart Manual in second"
+                },
+                "slopeStopManual": {
+                    "type": "integer",
+                    "description": "slopeStop Manual in second"
                 },
                 "sensorRule": {
                     "type": "string",
@@ -3058,6 +3086,10 @@
                 "iMax": {
                     "type": "integer",
                     "description": "iMax"
+                },
+                "pMax": {
+                    "type": "integer",
+                    "description": "pMax"
                 },
                 "duration": {
                     "type": "number",

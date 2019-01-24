@@ -19,6 +19,7 @@ func (s *CoreService) updateGroupCfg(config interface{}) {
 		database.UpdateGroupConfig(s.db, *cfg)
 	} else {
 		database.SaveGroupConfig(s.db, *cfg)
+
 		for _, led := range cfg.Leds {
 			light := dl.LedConf{
 				Mac:   led,
