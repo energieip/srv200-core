@@ -17,21 +17,22 @@ func (s *CoreService) pushConsumptionEvent() {
 	for {
 		select {
 		case <-timerDump.C:
-			if len(s.bufConsumption) != 0 {
-				conso := core.EventConsumption{}
-				led, _ := s.bufConsumption[LedElt]
-				conso.Leds = led
-				blind, _ := s.bufConsumption[BlindElt]
-				conso.Blinds = blind
-				conso.Date = time.Now().Format(time.RFC3339)
-				select {
-				case s.eventsConsumptionAPI <- conso:
-					rlog.Debug("Consumption API event Sent", s.bufConsumption)
-				default:
-					rlog.Debug("Consumption event Dropped", s.bufConsumption)
-				}
+			conso := core.EventConsumption{}
+			led, _ := s.bufConsumption[LedElt]
+			conso.Leds = led
+			blind, _ := s.bufConsumption[BlindElt]
+			conso.Blinds = blind
+			conso.Date = time.Now().Format(time.RFC3339)
+			select {
+			case s.eventsConsumptionAPI <- conso:
+				rlog.Debug("Consumption API event Sent", s.bufConsumption)
+			default:
+				rlog.Debug("Consumption event Dropped", s.bufConsumption)
 			}
+
 			s.bufConsumption = make(map[string]int)
+			s.bufConsumption[LedElt] = 0
+			s.bufConsumption[BlindElt] = 0
 		}
 	}
 }
