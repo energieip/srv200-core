@@ -12,7 +12,7 @@ import (
 )
 
 func (api *API) readBim(w http.ResponseWriter, label string) {
-	project := database.GetProject(api.db, label)
+	project, _ := database.GetProject(api.db, label)
 	if project == nil {
 		api.sendError(w, APIErrorDeviceNotFound, "Could not found information on device "+label)
 		return
@@ -65,20 +65,25 @@ func (api *API) setBim(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) readIfcInfo(w http.ResponseWriter, label string) {
-	project := database.GetProject(api.db, label)
+	project, _ := database.GetProject(api.db, label)
 	if project == nil {
 		api.sendError(w, APIErrorDeviceNotFound, "Could not found information on device "+label)
 		return
 	}
-	model := database.GetModel(api.db, project.ModelName)
 	info := core.IfcInfo{
-		Label:      label,
-		ModelName:  model.Name,
-		Mac:        project.Mac,
-		Vendor:     model.Vendor,
-		URL:        model.URL,
-		DeviceType: model.DeviceType,
+		Label: label,
 	}
+	if project.ModelName != nil {
+		model := database.GetModel(api.db, *project.ModelName)
+		info.ModelName = model.Name
+		info.Vendor = model.Vendor
+		info.URL = model.URL
+		info.DeviceType = model.DeviceType
+	}
+	if project.Mac != nil {
+		info.Mac = *project.Mac
+	}
+
 	inrec, _ := json.MarshalIndent(info, "", "  ")
 	w.Write(inrec)
 }
@@ -132,8 +137,8 @@ func (api *API) setIfcInfo(w http.ResponseWriter, req *http.Request) {
 
 	proj := core.Project{
 		Label:     ifcInfo.Label,
-		ModelName: ifcInfo.ModelName,
-		Mac:       ifcInfo.Mac,
+		ModelName: &ifcInfo.ModelName,
+		Mac:       &ifcInfo.Mac,
 	}
 	err = database.SaveProject(api.db, proj)
 	if err != nil {

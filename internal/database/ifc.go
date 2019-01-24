@@ -10,15 +10,21 @@ func GetIfcs(db Database) []core.IfcInfo {
 	models := GetModels(db)
 
 	for _, project := range projects {
-		model, ok := models[project.ModelName]
+		if project.ModelName == nil {
+			continue
+		}
+		model, ok := models[*project.ModelName]
 		if !ok {
 			continue
 		}
-
+		mac := ""
+		if project.Mac != nil {
+			mac = *project.Mac
+		}
 		res = append(res, core.IfcInfo{
 			Label:      project.Label,
 			ModelName:  model.Name,
-			Mac:        project.Mac,
+			Mac:        mac,
 			Vendor:     model.Vendor,
 			URL:        model.URL,
 			DeviceType: model.DeviceType,

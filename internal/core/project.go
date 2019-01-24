@@ -4,9 +4,9 @@ import "encoding/json"
 
 //Project describe the link between the object in the building map and the configuration
 type Project struct {
-	Label     string `json:"label"` //cable label
-	ModelName string `json:"modelName"`
-	Mac       string `json:"mac"` //device Mac address
+	Label     string  `json:"label"` //cable label
+	ModelName *string `json:"modelName"`
+	Mac       *string `json:"mac"` //device Mac address
 }
 
 // ToJSON dump Project struct

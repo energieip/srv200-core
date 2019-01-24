@@ -8,7 +8,22 @@ import (
 func SaveProject(db Database, cfg core.Project) error {
 	criteria := make(map[string]interface{})
 	criteria["Label"] = cfg.Label
-	return SaveOnUpdateObject(db, cfg, ConfigDB, ProjectsTable, criteria)
+
+	proj, dbID := GetProject(db, cfg.Label)
+	if proj == nil || dbID == "" {
+		_, err := db.InsertRecord(ConfigDB, ProjectsTable, cfg)
+		return err
+	}
+
+	if cfg.Mac != nil {
+		proj.Mac = cfg.Mac
+	}
+	if cfg.ModelName != nil {
+		proj.ModelName = cfg.ModelName
+	}
+	err := db.UpdateRecord(ConfigDB, ProjectsTable, dbID, proj)
+	return err
+
 }
 
 //RemoveProject remove project entry in database
@@ -19,18 +34,24 @@ func RemoveProject(db Database, label string) error {
 }
 
 //GetProject return the project configuration
-func GetProject(db Database, label string) *core.Project {
+func GetProject(db Database, label string) (*core.Project, string) {
 	criteria := make(map[string]interface{})
 	criteria["Label"] = label
 	stored, err := db.GetRecord(ConfigDB, ProjectsTable, criteria)
 	if err != nil || stored == nil {
-		return nil
+		return nil, ""
+	}
+	var dbID string
+	m := stored.(map[string]interface{})
+	id, ok := m["id"]
+	if ok {
+		dbID = id.(string)
 	}
 	project, err := core.ToProject(stored)
 	if err != nil {
-		return nil
+		return nil, dbID
 	}
-	return project
+	return project, dbID
 }
 
 //GetProjectByMac return the project configuration
