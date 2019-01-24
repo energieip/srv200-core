@@ -6,7 +6,6 @@ import (
 
 	"github.com/energieip/common-components-go/pkg/database"
 	"github.com/energieip/common-components-go/pkg/dblind"
-	"github.com/energieip/common-components-go/pkg/dled"
 	dl "github.com/energieip/common-components-go/pkg/dled"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/romana/rlog"
@@ -115,7 +114,7 @@ func SaveHistory(db HistoryDb, dbName, tbName string, obj interface{}) error {
 	return err
 }
 
-func SaveLedHistory(db HistoryDb, driver dled.Led) error {
+func SaveLedHistory(db HistoryDb, driver dl.Led) error {
 	led := LedHistory{
 		Mac:    driver.Mac,
 		Energy: driver.Energy,
