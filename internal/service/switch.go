@@ -290,6 +290,8 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 			s.prepareAPIEvent(EventAdd, BlindElt, blind)
 		} else {
 			s.prepareAPIEvent(EventUpdate, BlindElt, blind)
+			history.SaveBlindHistory(s.historyDb, blind)
+			s.prepareAPIConsumption(BlindElt, blind.LinePower)
 		}
 	}
 

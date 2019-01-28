@@ -109,6 +109,17 @@ func ToLedHistory(val interface{}) (*LedHistory, error) {
 	return &driver, err
 }
 
+//ToBlindHistory convert map interface to blind object
+func ToBlindHistory(val interface{}) (*BlindHistory, error) {
+	var driver BlindHistory
+	inrec, err := json.Marshal(val)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(inrec, &driver)
+	return &driver, err
+}
+
 func SaveHistory(db HistoryDb, dbName, tbName string, obj interface{}) error {
 	_, err := db.InsertRecord(dbName, tbName, obj)
 	return err
@@ -125,6 +136,33 @@ func SaveLedHistory(db HistoryDb, driver dl.Led) error {
 	return SaveHistory(db, HistoryDB, LedsTable, led)
 }
 
+func SaveBlindHistory(db HistoryDb, driver dblind.Blind) error {
+	blind := BlindHistory{
+		Mac: driver.Mac,
+		// Energy: driver.Energy,
+		Power: driver.LinePower,
+		Group: driver.Group,
+		Date:  time.Now().Format(time.RFC850),
+	}
+	return SaveHistory(db, HistoryDB, BlindsTable, blind)
+}
+
+func GetBlindsHistory(db HistoryDb) []BlindHistory {
+	var history []BlindHistory
+	stored, err := db.FetchAllRecords(HistoryDB, BlindsTable)
+	if err != nil || stored == nil {
+		return history
+	}
+	for _, l := range stored {
+		driver, err := ToBlindHistory(l)
+		if err != nil || driver == nil {
+			continue
+		}
+		history = append(history, *driver)
+	}
+	return history
+}
+
 func GetLedsHistory(db HistoryDb) []LedHistory {
 	var history []LedHistory
 	stored, err := db.FetchAllRecords(HistoryDB, LedsTable)
@@ -136,7 +174,6 @@ func GetLedsHistory(db HistoryDb) []LedHistory {
 		if err != nil || driver == nil {
 			continue
 		}
-		rlog.Info("=== convert ", *driver)
 		history = append(history, *driver)
 	}
 	return history
