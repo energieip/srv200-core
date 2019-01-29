@@ -130,7 +130,7 @@ func (s *CoreService) prepareAPIEvent(evtType, evtObj string, event interface{})
 }
 
 func (s *CoreService) pushAPIEvent() {
-	timerDump := time.NewTicker(5 * time.Second)
+	timerDump := time.NewTicker(1 * time.Second)
 	for {
 		select {
 		case <-timerDump.C:
