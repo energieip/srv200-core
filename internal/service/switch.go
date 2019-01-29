@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/energieip/common-components-go/pkg/dblind"
+	gm "github.com/energieip/common-components-go/pkg/dgroup"
 	dl "github.com/energieip/common-components-go/pkg/dled"
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
 	"github.com/energieip/common-components-go/pkg/dswitch"
@@ -231,7 +232,16 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 	for _, blind := range switchStatus.Blinds {
 		driversMac[blind.Mac] = true
 	}
-	setup.Groups = database.GetGroupConfigs(s.db, driversMac)
+	newGroups := make(map[int]gm.GroupConfig)
+	groups := database.GetGroupConfigs(s.db, driversMac)
+	for _, gr := range groups {
+		old, ok := switchStatus.Groups[gr.Group]
+		if ok && !s.isGroupRequiredUpdate(old, gr) {
+			continue
+		}
+		newGroups[gr.Group] = gr
+	}
+	setup.Groups = newGroups
 
 	for mac, led := range switchStatus.Leds {
 		if !led.IsConfigured {

@@ -11,6 +11,90 @@ import (
 	"github.com/romana/rlog"
 )
 
+func (s *CoreService) isGroupRequiredUpdate(old gm.GroupStatus, new gm.GroupConfig) bool {
+	for i, v := range old.Leds {
+		if v != new.Leds[i] {
+			return true
+		}
+	}
+	if old.RuleBrightness != nil && new.RuleBrightness != nil {
+		if *old.RuleBrightness != *new.RuleBrightness {
+			return true
+		}
+	}
+	if old.RuleBrightness != nil && new.RuleBrightness == nil {
+		return true
+	}
+	if old.RuleBrightness == nil && new.RuleBrightness != nil {
+		return true
+	}
+
+	if old.RulePresence != nil && new.RulePresence != nil {
+		if *old.RulePresence != *new.RulePresence {
+			return true
+		}
+	}
+	if old.RulePresence != nil && new.RulePresence == nil {
+		return true
+	}
+	if old.RulePresence == nil && new.RulePresence != nil {
+		return true
+	}
+	for i, v := range old.Sensors {
+		if v != new.Sensors[i] {
+			return true
+		}
+	}
+	for i, v := range old.Blinds {
+		if v != new.Blinds[i] {
+			return true
+		}
+	}
+	if new.FriendlyName != nil {
+		if old.FriendlyName != *new.FriendlyName {
+			return true
+		}
+	}
+	if new.SensorRule != nil {
+		if old.SensorRule != *new.SensorRule {
+			return true
+		}
+	}
+	if new.SlopeStartAuto != nil {
+		if old.SlopeStartAuto != *new.SlopeStartAuto {
+			return true
+		}
+	}
+
+	if new.SlopeStopAuto != nil {
+		if old.SlopeStopAuto != *new.SlopeStopAuto {
+			return true
+		}
+	}
+	if new.SlopeStartManual != nil {
+		if old.SlopeStartManual != *new.SlopeStartManual {
+			return true
+		}
+	}
+
+	if new.SlopeStopManual != nil {
+		if old.SlopeStopManual != *new.SlopeStopManual {
+			return true
+		}
+	}
+	if new.CorrectionInterval != nil {
+		if old.CorrectionInterval != *new.CorrectionInterval {
+			return true
+		}
+	}
+	if new.Watchdog != nil {
+		if old.Watchdog != *new.Watchdog {
+			return true
+		}
+	}
+	return false
+}
+
 func (s *CoreService) updateGroupCfg(config interface{}) {
 	cfg, _ := gm.ToGroupConfig(config)
 
