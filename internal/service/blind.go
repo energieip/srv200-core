@@ -62,12 +62,7 @@ func (s *CoreService) updateBlindCfg(config interface{}) {
 	switchSetup.BlindsConfig[cfg.Mac] = *cfg
 
 	dump, _ := switchSetup.ToJSON()
-	err := s.server.SendCommand(url, dump)
-	if err != nil {
-		rlog.Error("Cannot send update config to " + blind.SwitchMac + " on topic: " + url + " err:" + err.Error())
-	} else {
-		rlog.Info("Send update config to " + blind.SwitchMac + " on topic: " + url + " dump:" + dump)
-	}
+	s.server.SendCommand(url, dump)
 }
 
 func (s *CoreService) sendBlindCmd(cmdBlind interface{}) {
@@ -94,15 +89,8 @@ func (s *CoreService) sendBlindCmd(cmdBlind interface{}) {
 		Slat1:  &cmd.Slat1,
 		Slat2:  &cmd.Slat2,
 	}
-	rlog.Info("Ready to send ", cfg)
-	rlog.Info("To switch", driver.SwitchMac)
 	switchSetup.BlindsConfig[cmd.Mac] = cfg
 
 	dump, _ := switchSetup.ToJSON()
-	err := s.server.SendCommand(url, dump)
-	if err != nil {
-		rlog.Error("Cannot send update config to " + driver.SwitchMac + " on topic: " + url + " err:" + err.Error())
-	} else {
-		rlog.Info("Send update config to " + driver.SwitchMac + " on topic: " + url + " dump:" + dump)
-	}
+	s.server.SendCommand(url, dump)
 }

@@ -75,7 +75,7 @@ func (net ServerNetwork) LocalConnection(conf pkg.ServiceConfig, clientID string
 
 func (net ServerNetwork) onHello(client genericNetwork.Client, msg genericNetwork.Message) {
 	payload := msg.Payload()
-	rlog.Info("Received switch Hello: Received topic: " + msg.Topic() + " payload: " + string(payload))
+	rlog.Info(msg.Topic() + " : " + string(payload))
 	var switchStatus sd.SwitchStatus
 	err := json.Unmarshal(payload, &switchStatus)
 	if err != nil {
@@ -90,7 +90,7 @@ func (net ServerNetwork) onHello(client genericNetwork.Client, msg genericNetwor
 
 func (net ServerNetwork) onDump(client genericNetwork.Client, msg genericNetwork.Message) {
 	payload := msg.Payload()
-	rlog.Info("Received switch Dump: Received topic: " + msg.Topic() + " payload: " + string(payload))
+	rlog.Info(msg.Topic() + " : " + string(payload))
 	var switchStatus sd.SwitchStatus
 	err := json.Unmarshal(payload, &switchStatus)
 	if err != nil {
@@ -110,5 +110,11 @@ func (net ServerNetwork) Disconnect() {
 
 //SendCommand to server
 func (net ServerNetwork) SendCommand(topic, content string) error {
-	return net.Iface.SendCommand(topic, content)
+	err := net.Iface.SendCommand(topic, content)
+	if err != nil {
+		rlog.Error("Cannot send : " + content + " on: " + topic + " Error: " + err.Error())
+	} else {
+		rlog.Info("Sent : " + content + " on: " + topic)
+	}
+	return err
 }

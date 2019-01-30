@@ -44,8 +44,8 @@ func (api *API) setLedSetup(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	rlog.Info("Try to save Led ", led)
 	database.SaveLedConfig(api.db, led)
+	rlog.Info("Led configuration " + led.Mac + " saved")
 
 	api.readLedConfig(w, led.Mac)
 }

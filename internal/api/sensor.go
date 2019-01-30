@@ -43,9 +43,8 @@ func (api *API) setSensorSetup(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	rlog.Info("Try to save sensor ", sensor)
 	database.SaveSensorConfig(api.db, sensor)
-
+	rlog.Info("Save sensor configuration ", sensor.Mac)
 	api.readSensorConfig(w, sensor.Mac)
 }
 

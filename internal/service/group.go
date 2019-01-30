@@ -134,12 +134,7 @@ func (s *CoreService) updateGroupCfg(config interface{}) {
 		switchSetup.Groups = make(map[int]gm.GroupConfig)
 		switchSetup.Groups[cfg.Group] = *cfg
 		dump, _ := switchSetup.ToJSON()
-		err := s.server.SendCommand(url, dump)
-		if err != nil {
-			rlog.Error("Cannot send update group config to " + sw + " on topic: " + url + " err:" + err.Error())
-		} else {
-			rlog.Info("Send update group config to " + sw + " on topic: " + url + " dump:" + dump)
-		}
+		s.server.SendCommand(url, dump)
 	}
 }
 
@@ -162,12 +157,6 @@ func (s *CoreService) sendGroupCmd(cmd interface{}) {
 		cfg.SetpointSlatBlinds = cmdGr.SetpointSlats
 		switchSetup.Groups[cmdGr.Group] = cfg
 		dump, _ := switchSetup.ToJSON()
-		err := s.server.SendCommand(url, dump)
-		if err != nil {
-			rlog.Error("Cannot group command to " + sw + " on topic: " + url + " err:" + err.Error())
-		} else {
-			rlog.Info("Send group command to " + sw + " on topic: " + url + " dump:" + dump)
-		}
+		s.server.SendCommand(url, dump)
 	}
-
 }

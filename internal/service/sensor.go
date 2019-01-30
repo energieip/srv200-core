@@ -58,10 +58,5 @@ func (s *CoreService) updateSensorCfg(config interface{}) {
 	switchSetup.SensorsConfig[cfg.Mac] = *cfg
 
 	dump, _ := switchSetup.ToJSON()
-	err := s.server.SendCommand(url, dump)
-	if err != nil {
-		rlog.Error("Cannot send update config to " + sensor.SwitchMac + " on topic: " + url + " err:" + err.Error())
-	} else {
-		rlog.Info("Send update config to " + sensor.SwitchMac + " on topic: " + url + " dump:" + dump)
-	}
+	s.server.SendCommand(url, dump)
 }

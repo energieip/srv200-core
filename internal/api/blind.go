@@ -45,9 +45,8 @@ func (api *API) setBlindSetup(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	rlog.Info("Try to save Blind ", setup)
 	database.SaveBlindConfig(api.db, setup)
-
+	rlog.Info("Blind config" + setup.Mac + " saved")
 	api.readBlindConfig(w, setup.Mac)
 }
 

@@ -5,7 +5,6 @@ import (
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
 	dl "github.com/energieip/common-components-go/pkg/dled"
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
-	"github.com/energieip/common-components-go/pkg/dswitch"
 	sd "github.com/energieip/common-components-go/pkg/dswitch"
 	pkg "github.com/energieip/common-components-go/pkg/service"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
@@ -35,12 +34,7 @@ func (s *CoreService) updateSwitchCfg(config interface{}) {
 	}
 
 	dump, _ := switchCfg.ToJSON()
-	err := s.server.SendCommand(url, dump)
-	if err != nil {
-		rlog.Error("Cannot send update config to " + cfg.Mac + " on topic: " + url + " err:" + err.Error())
-	} else {
-		rlog.Info("Send update config to " + cfg.Mac + " on topic: " + url + " dump:" + dump)
-	}
+	s.server.SendCommand(url, dump)
 }
 
 func (s *CoreService) registerSwitchStatus(switchStatus sd.SwitchStatus) {
@@ -110,12 +104,7 @@ func (s *CoreService) sendSwitchSetup(sw sd.SwitchStatus) {
 
 	url := "/write/switch/" + sw.Mac + "/setup/config"
 	dump, _ := switchSetup.ToJSON()
-	err := s.server.SendCommand(url, dump)
-	if err != nil {
-		rlog.Error("Cannot send setup config to " + sw.Mac + " on topic: " + url + " err:" + err.Error())
-	} else {
-		rlog.Info("Send update config to " + sw.Mac + " on topic: " + url + " dump:" + dump)
-	}
+	s.server.SendCommand(url, dump)
 }
 
 func (s *CoreService) sendSwitchUpdateConfig(sw sd.SwitchStatus) {
@@ -128,13 +117,9 @@ func (s *CoreService) sendSwitchUpdateConfig(sw sd.SwitchStatus) {
 
 	url := "/write/switch/" + sw.Mac + "/update/settings"
 	dump, _ := switchSetup.ToJSON()
-	err := s.server.SendCommand(url, dump)
-	if err != nil {
-		rlog.Error("Cannot send update config to " + sw.Mac + " on topic: " + url + " err:" + err.Error())
-	} else {
-		rlog.Info("Send update config to " + sw.Mac + " on topic: " + url + " dump:" + dump)
-	}
+	s.server.SendCommand(url, dump)
 }
+
 func (s *CoreService) prepareSetupSwitchConfig(switchStatus sd.SwitchStatus) *sd.SwitchConfig {
 	config := database.GetSwitchConfig(s.db, switchStatus.Mac)
 	if config == nil && !s.installMode {
@@ -173,13 +158,13 @@ func (s *CoreService) prepareSetupSwitchConfig(switchStatus sd.SwitchStatus) *sd
 
 	//Prepare Cluster
 	var clusters map[string]core.SwitchConfig
-	switchCluster := make(map[string]dswitch.SwitchCluster)
+	switchCluster := make(map[string]sd.SwitchCluster)
 	if config.Cluster != 0 {
 		clusters = database.GetCluster(s.db, config.Cluster)
 	}
 	for _, cluster := range clusters {
 		if cluster.Mac != switchStatus.Mac {
-			br := dswitch.SwitchCluster{
+			br := sd.SwitchCluster{
 				IP:  cluster.IP,
 				Mac: cluster.Mac,
 			}
@@ -339,7 +324,7 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 
 	//Prepare Cluster
 	var clusters map[string]core.SwitchConfig
-	switchCluster := make(map[string]dswitch.SwitchCluster)
+	switchCluster := make(map[string]sd.SwitchCluster)
 	if config.Cluster != 0 {
 		clusters = database.GetCluster(s.db, config.Cluster)
 		for _, cluster := range clusters {
@@ -347,7 +332,7 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 			if !ok {
 				//add only new cluster member only
 				if cluster.Mac != switchStatus.Mac {
-					br := dswitch.SwitchCluster{
+					br := sd.SwitchCluster{
 						IP:  cluster.IP,
 						Mac: cluster.Mac,
 					}

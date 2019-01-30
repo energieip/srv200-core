@@ -55,12 +55,13 @@ func (api *API) setBim(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	rlog.Info("Try to save IfcInfo", proj)
 	err = database.SaveProject(api.db, proj)
 	if err != nil {
 		api.sendError(w, APIErrorDatabase, "Ifc information "+proj.Label+" cannot be added in database")
 		return
 	}
+
+	rlog.Info("IfcInfo for " + proj.Label + " saved")
 	api.readBim(w, proj.Label)
 }
 
@@ -122,7 +123,6 @@ func (api *API) setIfcInfo(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	rlog.Info("Try to save IfcInfo", ifcInfo)
 	model := core.Model{
 		Name:       ifcInfo.ModelName,
 		Vendor:     ifcInfo.Vendor,
@@ -145,6 +145,7 @@ func (api *API) setIfcInfo(w http.ResponseWriter, req *http.Request) {
 		api.sendError(w, APIErrorDatabase, "Ifc information "+ifcInfo.Label+" cannot be added in database")
 		return
 	}
+	rlog.Info("IfcInfo for " + proj.Label + " saved")
 	api.readIfcInfo(w, ifcInfo.Label)
 }
 

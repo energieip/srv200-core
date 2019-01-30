@@ -526,6 +526,7 @@ func (api *API) getV1Functions(w http.ResponseWriter, req *http.Request) {
 		apiV1 + "/status", apiV1 + "/events", apiV1 + "/events/consumption", apiV1 + "/history",
 		apiV1 + "/command/led", apiV1 + "/command/blind", apiV1 + "/command/group", apiV1 + "/project/ifcInfo",
 		apiV1 + "/project/model", apiV1 + "/project/bim", apiV1 + "/project", apiV1 + "/dump",
+		apiV1 + "/status/sensor", apiV1 + "/status/group", apiV1 + "/status/led", apiV1 + "/status/blind",
 	}
 	apiInfo := APIFunctions{
 		Functions: functions,
@@ -546,7 +547,7 @@ func (api *API) getFunctions(w http.ResponseWriter, req *http.Request) {
 
 func (api *API) swagger() {
 	router := mux.NewRouter()
-	sh := http.StripPrefix("/swaggerui/", http.FileServer(http.Dir("/var/www/swaggerui/")))
+	sh := http.StripPrefix("/swaggerui/", http.FileServer(http.Dir("/media/userdata/www/swaggerui/")))
 	router.PathPrefix("/swaggerui/").Handler(sh)
 
 	// API v1.0

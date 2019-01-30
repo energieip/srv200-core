@@ -62,12 +62,7 @@ func (s *CoreService) updateLedCfg(config interface{}) {
 	switchSetup.LedsConfig[cfg.Mac] = *cfg
 
 	dump, _ := switchSetup.ToJSON()
-	err := s.server.SendCommand(url, dump)
-	if err != nil {
-		rlog.Error("Cannot send update config to " + led.SwitchMac + " on topic: " + url + " err:" + err.Error())
-	} else {
-		rlog.Info("Send update config to " + led.SwitchMac + " on topic: " + url + " dump:" + dump)
-	}
+	s.server.SendCommand(url, dump)
 }
 
 func (s *CoreService) sendLedCmd(cmd interface{}) {
@@ -95,15 +90,8 @@ func (s *CoreService) sendLedCmd(cmd interface{}) {
 		Auto:           &auto,
 		SetpointManual: &setpoint,
 	}
-	rlog.Info("Ready to send ", ledCfg)
-	rlog.Info("To switch", led.SwitchMac)
 	switchSetup.LedsConfig[led.Mac] = ledCfg
 
 	dump, _ := switchSetup.ToJSON()
-	err := s.server.SendCommand(url, dump)
-	if err != nil {
-		rlog.Error("Cannot send update config to " + led.SwitchMac + " on topic: " + url + " err:" + err.Error())
-	} else {
-		rlog.Info("Send update config to " + led.SwitchMac + " on topic: " + url + " dump:" + dump)
-	}
+	s.server.SendCommand(url, dump)
 }
