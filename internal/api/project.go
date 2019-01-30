@@ -156,6 +156,10 @@ func (api *API) getIfc(w http.ResponseWriter, req *http.Request) {
 	for _, info := range ifcs {
 		infos = append(infos, info)
 	}
-	inrec, _ := json.MarshalIndent(infos, "", "  ")
-	w.Write(inrec)
+	if ifcs != nil {
+		inrec, _ := json.MarshalIndent(infos, "", "  ")
+		w.Write(inrec)
+	} else {
+		w.Write([]byte("[]"))
+	}
 }

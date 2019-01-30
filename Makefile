@@ -1,11 +1,14 @@
 COMPONENT=energieip-srv200-core
 
-BINARIES=bin/$(COMPONENT)-amd64
+BINARIES=bin/$(COMPONENT)-armhf bin/$(COMPONENT)-amd64
 
 .PHONY: $(BINARIES) clean
 
 bin/$(COMPONENT)-amd64:
 	go build -o $@
+
+bin/$(COMPONENT)-armhf:
+	env GOOS=linux GOARCH=arm go build -o $@
 
 all: $(BINARIES)
 
@@ -19,8 +22,17 @@ deb-amd64: bin/$(COMPONENT)-amd64
 	$(eval BUILD_PATH := $(shell echo "build/$(BUILD_NAME)"))
 	make deb VERSION=$(VERSION) BUILD_PATH=$(BUILD_PATH) ARCH=$(ARCH) BUILD_NAME=$(BUILD_NAME)
 
+
+.ONESHELL:
+deb-armhf: bin/$(COMPONENT)-armhf
+	$(eval VERSION := $(shell cat ./version))
+	$(eval ARCH := $(shell echo "armhf"))
+	$(eval BUILD_NAME := $(shell echo "$(COMPONENT)-$(VERSION)-$(ARCH)"))
+	$(eval BUILD_PATH := $(shell echo "build/$(BUILD_NAME)"))
+	make deb VERSION=$(VERSION) BUILD_PATH=$(BUILD_PATH) ARCH=$(ARCH) BUILD_NAME=$(BUILD_NAME)
+
 deb:
-	mkdir -p $(BUILD_PATH)/usr/local/bin $(BUILD_PATH)/etc/$(COMPONENT) $(BUILD_PATH)/etc/systemd/system $(BUILD_PATH)/var/www/
+	mkdir -p $(BUILD_PATH)/usr/local/bin $(BUILD_PATH)/etc/$(COMPONENT) $(BUILD_PATH)/etc/systemd/system $(BUILD_PATH)/media/userdata/www/
 	cp -r ./scripts/DEBIAN $(BUILD_PATH)/
 	cp ./scripts/config.json $(BUILD_PATH)/etc/$(COMPONENT)/
 	cp ./scripts/*.service $(BUILD_PATH)/etc/systemd/system/
@@ -29,8 +41,8 @@ deb:
 	sed -i "s/COMPONENT/$(COMPONENT)/g" $(BUILD_PATH)/DEBIAN/control
 	cp ./scripts/Makefile $(BUILD_PATH)/../
 	cp bin/$(COMPONENT)-$(ARCH) $(BUILD_PATH)/usr/local/bin/$(COMPONENT)
-	cp -r internal/swaggerui $(BUILD_PATH)/var/www/
-	cp -r internal/swagger/*.json $(BUILD_PATH)/var/www/swaggerui/
+	cp -r internal/swaggerui $(BUILD_PATH)/media/userdata/www/
+	cp -r internal/swagger/*.json $(BUILD_PATH)/media/userdata/www/swaggerui/
 	make -C build DEB_PACKAGE=$(BUILD_NAME) deb
 
 clean:
