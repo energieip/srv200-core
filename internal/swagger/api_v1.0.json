@@ -3025,6 +3025,14 @@
                 "dumpFrequency": {
                     "type": "integer",
                     "description": "Dump frequency by default: 1s"
+                },
+                "windowOpen1": {
+                    "type": "boolean",
+                    "description": "Is the window 1 open"
+                },
+                "windowOpen2": {
+                    "type": "boolean",
+                    "description": "Is the window 2 open"
                 }
             }
         },
