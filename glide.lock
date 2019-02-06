@@ -1,5 +1,5 @@
 hash: 7873f75061b03685fab1d37fa10ae2d9249507813e75d280fc0acfb9b629147f
-updated: 2019-02-04T14:23:42.932687934+01:00
+updated: 2019-02-06T21:49:11.349267483+01:00
 imports:
 - name: github.com/cenkalti/backoff
   version: 1e4cf3da559842a91afcb6ea6141451e6c30c618
@@ -8,7 +8,7 @@ imports:
   subpackages:
   - packets
 - name: github.com/energieip/common-components-go
-  version: 87cfad5d05fe9c93c13c3c2405d6feff62734e22
+  version: 7f21b894ecbd8569038ae077d323bba199dd7cf9
   subpackages:
   - pkg/database
   - pkg/dblind
@@ -20,13 +20,13 @@ imports:
   - pkg/service
   - pkg/tools
 - name: github.com/golang/protobuf
-  version: 347cf4a86c1cb8d262994d8ef5924d4576c5b331
+  version: c823c79ea1570fb5ff454033735a8e68575d1d0f
   subpackages:
   - proto
 - name: github.com/gorilla/mux
   version: a7962380ca08b5a188038c69871b8d3fbdf31e89
 - name: github.com/gorilla/websocket
-  version: 95ba29eb981bbb27d92e1f70bf8a1949452d926b
+  version: 7c8e298727d149d7c329b4dec7e94e1932ac5c11
 - name: github.com/hailocab/go-hostpool
   version: e80d13ce29ede4452c43dea11e79b9bc8a15b478
 - name: github.com/konsorten/go-windows-terminal-sequences
@@ -46,14 +46,14 @@ imports:
   - pbkdf2
   - ssh/terminal
 - name: golang.org/x/net
-  version: d26f9f9a57f3fab6a695bec0d84433c2c50f8bbf
+  version: 65e2d4e15006aab9813ff8769e768bbf4bb667a0
   subpackages:
   - context
   - internal/socks
   - proxy
   - websocket
 - name: golang.org/x/sys
-  version: 980327fe3c65509adaad5a9ff06abdf7611b4411
+  version: 41f3e6584952bb034a481797859f6ab34b6803bd
   subpackages:
   - unix
   - windows
