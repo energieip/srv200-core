@@ -90,7 +90,7 @@ func (net ServerNetwork) onHello(client genericNetwork.Client, msg genericNetwor
 
 func (net ServerNetwork) onDump(client genericNetwork.Client, msg genericNetwork.Message) {
 	payload := msg.Payload()
-	rlog.Info(msg.Topic() + " : " + string(payload))
+	rlog.Debug(msg.Topic() + " : " + string(payload))
 	var switchStatus sd.SwitchStatus
 	err := json.Unmarshal(payload, &switchStatus)
 	if err != nil {
