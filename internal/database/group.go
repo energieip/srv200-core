@@ -123,6 +123,14 @@ func UpdateGroupConfig(db Database, config gm.GroupConfig) error {
 	if config.Auto != nil {
 		setup.Auto = config.Auto
 	}
+
+	if config.RuleBrightness != nil {
+		setup.RuleBrightness = config.RuleBrightness
+	}
+
+	if config.RulePresence != nil {
+		setup.RulePresence = config.RulePresence
+	}
 	return db.UpdateRecord(ConfigDB, GroupsTable, dbID, setup)
 }
 
