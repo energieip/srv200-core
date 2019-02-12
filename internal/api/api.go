@@ -457,6 +457,18 @@ func (api *API) webEvents(w http.ResponseWriter, r *http.Request) {
 	}
 	api.clients[ws] = true
 
+}
+
+func (api *API) consumptionEvents(w http.ResponseWriter, r *http.Request) {
+	ws, err := api.upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		rlog.Error("Error when switching in consumption websocket " + err.Error())
+		return
+	}
+	api.clientsConso[ws] = true
+}
+
+func (api *API) websocketEvents() {
 	for {
 		select {
 		case event := <-api.eventsAPI:
@@ -473,14 +485,7 @@ func (api *API) webEvents(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (api *API) consumptionEvents(w http.ResponseWriter, r *http.Request) {
-	ws, err := api.upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		rlog.Error("Error when switching in consumption websocket " + err.Error())
-		return
-	}
-	api.clientsConso[ws] = true
-
+func (api *API) websocketConsumptions() {
 	for {
 		select {
 		case event := <-api.eventsConso:
@@ -546,6 +551,8 @@ func (api *API) getFunctions(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) swagger() {
+	go api.websocketConsumptions()
+	go api.websocketEvents()
 	router := mux.NewRouter()
 	sh := http.StripPrefix("/swaggerui/", http.FileServer(http.Dir("/media/userdata/www/swaggerui/")))
 	router.PathPrefix("/swaggerui/").Handler(sh)
