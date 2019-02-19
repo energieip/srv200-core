@@ -131,6 +131,14 @@ func UpdateGroupConfig(db Database, config gm.GroupConfig) error {
 	if config.RulePresence != nil {
 		setup.RulePresence = config.RulePresence
 	}
+
+	if config.FirstDay != nil {
+		setup.FirstDay = config.FirstDay
+	}
+
+	if config.FirstDayOffset != nil {
+		setup.FirstDayOffset = config.FirstDayOffset
+	}
 	return db.UpdateRecord(ConfigDB, GroupsTable, dbID, setup)
 }
 

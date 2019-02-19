@@ -2349,6 +2349,10 @@
                     "type": "integer",
                     "description": "Brightness in Lux"
                 },
+                "firstDayOffset": {
+                    "type": "integer",
+                    "description": "Offset in percentage between 1st and 2nd Days"
+                },
                 "rulePresence": {
                     "type": "integer",
                     "description": "Presence in Second"
@@ -2372,6 +2376,17 @@
                 "setpointLeds": {
                     "type": "integer",
                     "description": "Current led setpoint value in percentage"
+                },
+                "firstDay": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Array of LED mac addresses which are in 1st Day"
+                },
+                "setpointLedsFirstDay": {
+                    "type": "integer",
+                    "description": "Current led setpoint value in percentage for the 1st Day"
                 },
                 "friendlyName": {
                     "type": "string",
@@ -2452,6 +2467,17 @@
                 "friendlyName": {
                     "type": "string",
                     "description": "Sensor FriendlyName"
+                },
+                "firstDay": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Array of LED mac addresses which are in 1st Day"
+                },
+                "firstDayOffset": {
+                    "type": "integer",
+                    "description": "Offset in percentage between 1st and 2nd Days"
                 }
             }
         },
@@ -2528,6 +2554,17 @@
                 "friendlyName": {
                     "type": "string",
                     "description": "Sensor FriendlyName"
+                },
+                "firstDay": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Array of LED mac addresses which are in 1st Day"
+                },
+                "firstDayOffset": {
+                    "type": "integer",
+                    "description": "Offset in percentage between 1st and 2nd Days"
                 }
             }
         },

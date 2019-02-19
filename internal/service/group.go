@@ -29,6 +29,18 @@ func (s *CoreService) isGroupRequiredUpdate(old gm.GroupStatus, new gm.GroupConf
 		return true
 	}
 
+	if old.FirstDayOffset != nil && new.FirstDayOffset != nil {
+		if *old.FirstDayOffset != *new.FirstDayOffset {
+			return true
+		}
+	}
+	if old.FirstDayOffset != nil && new.FirstDayOffset == nil {
+		return true
+	}
+	if old.FirstDayOffset == nil && new.FirstDayOffset != nil {
+		return true
+	}
+
 	if old.RulePresence != nil && new.RulePresence != nil {
 		if *old.RulePresence != *new.RulePresence {
 			return true
@@ -50,6 +62,13 @@ func (s *CoreService) isGroupRequiredUpdate(old gm.GroupStatus, new gm.GroupConf
 			return true
 		}
 	}
+
+	for i, v := range old.FirstDay {
+		if v != new.FirstDay[i] {
+			return true
+		}
+	}
+
 	if new.FriendlyName != nil {
 		if old.FriendlyName != *new.FriendlyName {
 			return true
