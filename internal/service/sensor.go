@@ -38,6 +38,7 @@ func (s *CoreService) updateSensorCfg(config interface{}) {
 					}
 					rlog.Info("Old group will be ", gr.Sensors)
 					s.updateGroupCfg(gr)
+					// s.updateDriverGroup(gr.Group)
 				}
 			}
 			rlog.Info("Update new group", *sensor.Group)
@@ -46,6 +47,7 @@ func (s *CoreService) updateSensorCfg(config interface{}) {
 				grNew.Sensors = append(grNew.Sensors, cfg.Mac)
 				rlog.Info("new group will be", grNew.Sensors)
 				s.updateGroupCfg(grNew)
+				// s.updateDriverGroup(grNew.Group)
 			}
 		}
 	}

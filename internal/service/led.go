@@ -1,12 +1,30 @@
 package service
 
 import (
+	gm "github.com/energieip/common-components-go/pkg/dgroup"
 	dl "github.com/energieip/common-components-go/pkg/dled"
 	sd "github.com/energieip/common-components-go/pkg/dswitch"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
 	"github.com/romana/rlog"
 )
+
+func (s *CoreService) updateDriverGroup(grID int) {
+	gr, _ := database.GetGroupConfig(s.db, grID)
+	if gr == nil {
+		return
+	}
+
+	for sw := range database.GetGroupSwitchs(s.db, grID) {
+		url := "/write/switch/" + sw + "/update/settings"
+		switchSetup := sd.SwitchConfig{}
+		switchSetup.Mac = sw
+		switchSetup.Groups = make(map[int]gm.GroupConfig)
+		switchSetup.Groups[gr.Group] = *gr
+		dump, _ := switchSetup.ToJSON()
+		s.server.SendCommand(url, dump)
+	}
+}
 
 func (s *CoreService) updateLedCfg(config interface{}) {
 	cfg, _ := dl.ToLedConf(config)
@@ -35,14 +53,23 @@ func (s *CoreService) updateLedCfg(config interface{}) {
 				rlog.Info("Update old group", *oldLed.Group)
 				gr, _ := database.GetGroupConfig(s.db, *oldLed.Group)
 				if gr != nil {
-					for i, v := range gr.Leds {
-						if v == led.Mac {
-							gr.Leds = append(gr.Leds[:i], gr.Leds[i+1:]...)
-							break
+					leds := []string{}
+					for _, v := range gr.Leds {
+						if v != led.Mac {
+							leds = append(leds, v)
 						}
 					}
+					gr.Leds = leds
+					firstDay := []string{}
+					for _, v := range gr.FirstDay {
+						if v != led.Mac {
+							firstDay = append(firstDay, v)
+						}
+					}
+					gr.FirstDay = firstDay
 					rlog.Info("Old group will be ", gr.Leds)
 					s.updateGroupCfg(gr)
+					//	s.updateDriverGroup(gr.Group)
 				}
 			}
 			rlog.Info("Update new group", *led.Group)
@@ -51,6 +78,7 @@ func (s *CoreService) updateLedCfg(config interface{}) {
 				grNew.Leds = append(grNew.Leds, cfg.Mac)
 				rlog.Info("new group will be", grNew.Leds)
 				s.updateGroupCfg(grNew)
+				//	s.updateDriverGroup(grNew.Group)
 			}
 		}
 	}

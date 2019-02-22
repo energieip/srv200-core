@@ -1,6 +1,8 @@
 package service
 
 import (
+	"reflect"
+
 	"github.com/energieip/common-components-go/pkg/dblind"
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
 	dl "github.com/energieip/common-components-go/pkg/dled"
@@ -12,6 +14,11 @@ import (
 )
 
 func (s *CoreService) isGroupRequiredUpdate(old gm.GroupStatus, new gm.GroupConfig) bool {
+	if len(old.Leds) != len(new.Leds) || len(old.Sensors) != len(new.Sensors) ||
+		len(old.Blinds) != len(new.Blinds) || len(old.FirstDay) != len(new.FirstDay) {
+		return true
+	}
+
 	for i, v := range old.Leds {
 		if v != new.Leds[i] {
 			return true
@@ -114,35 +121,258 @@ func (s *CoreService) isGroupRequiredUpdate(old gm.GroupStatus, new gm.GroupConf
 	return false
 }
 
+func inArray(v interface{}, in interface{}) bool {
+	val := reflect.Indirect(reflect.ValueOf(in))
+	switch val.Kind() {
+	case reflect.Slice, reflect.Array:
+		for i := 0; i < val.Len(); i++ {
+			if ok := v == val.Index(i).Interface(); ok {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func (s *CoreService) sendSaveGroupCfg(cfg gm.GroupConfig) {
+	oldSwitch := database.GetGroupSwitchs(s.db, cfg.Group)
+	database.UpdateGroupConfig(s.db, cfg)
+	newSwitch := database.GetGroupSwitchs(s.db, cfg.Group)
+	for sw := range oldSwitch {
+		url := "/write/switch/" + sw + "/update/settings"
+		switchSetup := sd.SwitchConfig{}
+		switchSetup.Mac = sw
+		switchSetup.Groups = make(map[int]gm.GroupConfig)
+		switchSetup.Groups[cfg.Group] = cfg
+		dump, _ := switchSetup.ToJSON()
+		s.server.SendCommand(url, dump)
+	}
+	for sw := range newSwitch {
+		url := "/write/switch/" + sw + "/update/settings"
+		switchSetup := sd.SwitchConfig{}
+		switchSetup.Mac = sw
+		switchSetup.Groups = make(map[int]gm.GroupConfig)
+		switchSetup.Groups[cfg.Group] = cfg
+		dump, _ := switchSetup.ToJSON()
+		s.server.SendCommand(url, dump)
+	}
+}
+
+func (s *CoreService) updateLedGroup(mac string, grID int) {
+	oldLed, _ := database.GetLedConfig(s.db, mac)
+	if oldLed == nil {
+		return
+	}
+	cfgLed := dl.LedConf{
+		Mac:   mac,
+		Group: &grID,
+	}
+
+	database.UpdateLedConfig(s.db, cfgLed)
+
+	led, _ := database.GetLedConfig(s.db, mac)
+	url := "/write/switch/" + led.SwitchMac + "/update/settings"
+	switchSetup := sd.SwitchConfig{}
+	switchSetup.Mac = led.SwitchMac
+	switchSetup.LedsConfig = make(map[string]dl.LedConf)
+
+	switchSetup.LedsConfig[led.Mac] = cfgLed
+
+	dump, _ := switchSetup.ToJSON()
+	s.server.SendCommand(url, dump)
+	if grID == 0 {
+		//register led in group 0 == remove it from the current group
+		newGr, _ := database.GetGroupConfig(s.db, grID)
+		if newGr != nil {
+			if inArray(mac, newGr.Leds) {
+				return
+			}
+			newGr.Leds = append(newGr.Leds, mac)
+			s.sendSaveGroupCfg(*newGr)
+		}
+		return
+	}
+	if oldLed.Group == nil || *oldLed.Group == grID {
+		return
+	}
+
+	oldGr, _ := database.GetGroupConfig(s.db, *oldLed.Group)
+	if oldGr != nil {
+		leds := []string{}
+		for _, mac := range oldGr.Leds {
+			if mac != led.Mac {
+				leds = append(leds, mac)
+			}
+		}
+		oldGr.Leds = leds
+		firstDays := []string{}
+		for _, mac := range oldGr.FirstDay {
+			if mac != led.Mac {
+				firstDays = append(firstDays, mac)
+			}
+		}
+		oldGr.FirstDay = firstDays
+		s.sendSaveGroupCfg(*oldGr)
+	}
+}
+
+func (s *CoreService) updateSensorGroup(mac string, grID int) {
+	oldSensor, _ := database.GetSensorConfig(s.db, mac)
+	if oldSensor == nil {
+		return
+	}
+	cfgSensor := ds.SensorConf{
+		Mac:   mac,
+		Group: &grID,
+	}
+	database.UpdateSensorConfig(s.db, cfgSensor)
+
+	sensor, _ := database.GetSensorConfig(s.db, mac)
+	url := "/write/switch/" + sensor.SwitchMac + "/update/settings"
+	switchSetup := sd.SwitchConfig{}
+	switchSetup.Mac = sensor.SwitchMac
+	switchSetup.SensorsConfig = make(map[string]ds.SensorConf)
+
+	switchSetup.SensorsConfig[sensor.Mac] = cfgSensor
+
+	dump, _ := switchSetup.ToJSON()
+	s.server.SendCommand(url, dump)
+	if grID == 0 {
+		//register sensor in group 0
+		newGr, _ := database.GetGroupConfig(s.db, grID)
+		if newGr != nil {
+			if inArray(mac, newGr.Sensors) {
+				return
+			}
+			newGr.Sensors = append(newGr.Sensors, mac)
+			s.sendSaveGroupCfg(*newGr)
+		}
+		return
+	}
+	if oldSensor.Group == nil || *oldSensor.Group == grID {
+		return
+	}
+	oldGr, _ := database.GetGroupConfig(s.db, *oldSensor.Group)
+	if oldGr != nil {
+		sensors := []string{}
+		for _, mac := range oldGr.Sensors {
+			if mac != sensor.Mac {
+				sensors = append(sensors, mac)
+			}
+		}
+		oldGr.Sensors = sensors
+		s.sendSaveGroupCfg(*oldGr)
+	}
+}
+
+func (s *CoreService) updateBlindGroup(mac string, grID int) {
+	oldBlind, _ := database.GetBlindConfig(s.db, mac)
+	if oldBlind == nil {
+		return
+	}
+	cfgBlind := dblind.BlindConf{
+		Mac:   mac,
+		Group: &grID,
+	}
+	database.UpdateBlindConfig(s.db, cfgBlind)
+
+	blind, _ := database.GetBlindConfig(s.db, mac)
+	url := "/write/switch/" + blind.SwitchMac + "/update/settings"
+	switchSetup := sd.SwitchConfig{}
+	switchSetup.Mac = blind.SwitchMac
+	switchSetup.BlindsConfig = make(map[string]dblind.BlindConf)
+
+	switchSetup.BlindsConfig[blind.Mac] = cfgBlind
+
+	dump, _ := switchSetup.ToJSON()
+	s.server.SendCommand(url, dump)
+	if grID == 0 {
+		//register blind in group 0
+		newGr, _ := database.GetGroupConfig(s.db, grID)
+		if newGr != nil {
+			if inArray(mac, newGr.Blinds) {
+				return
+			}
+			newGr.Blinds = append(newGr.Blinds, mac)
+			s.sendSaveGroupCfg(*newGr)
+		}
+		return
+	}
+	if oldBlind.Group == nil || *oldBlind.Group == grID {
+		return
+	}
+	oldGr, _ := database.GetGroupConfig(s.db, *oldBlind.Group)
+	if oldGr != nil {
+		blinds := []string{}
+		for _, mac := range oldGr.Blinds {
+			if mac != blind.Mac {
+				blinds = append(blinds, mac)
+			}
+		}
+		oldGr.Blinds = blinds
+		s.sendSaveGroupCfg(*oldGr)
+	}
+}
+
 func (s *CoreService) updateGroupCfg(config interface{}) {
 	cfg, _ := gm.ToGroupConfig(config)
 
-	gr, _ := database.GetGroupConfig(s.db, cfg.Group)
-	if gr != nil {
+	old, _ := database.GetGroupConfig(s.db, cfg.Group)
+	if old != nil {
 		database.UpdateGroupConfig(s.db, *cfg)
+		new, _ := database.GetGroupConfig(s.db, cfg.Group)
+		seen := make(map[string]bool)
+		for _, mac := range new.Leds {
+			if !inArray(mac, old.Leds) {
+				s.updateLedGroup(mac, cfg.Group)
+			}
+			seen[mac] = true
+		}
+		for _, mac := range old.Leds {
+			_, ok := seen[mac]
+			if !ok {
+				s.updateLedGroup(mac, 0)
+			}
+		}
+
+		seen = make(map[string]bool)
+		for _, sensor := range new.Sensors {
+			if !inArray(sensor, old.Sensors) {
+				s.updateSensorGroup(sensor, cfg.Group)
+			}
+			seen[sensor] = true
+		}
+		for _, mac := range old.Sensors {
+			_, ok := seen[mac]
+			if !ok {
+				s.updateSensorGroup(mac, 0)
+			}
+		}
+
+		seen = make(map[string]bool)
+		for _, mac := range new.Blinds {
+			if !inArray(mac, old.Blinds) {
+				s.updateBlindGroup(mac, cfg.Group)
+			}
+			seen[mac] = true
+		}
+		for _, mac := range old.Blinds {
+			_, ok := seen[mac]
+			if !ok {
+				s.updateBlindGroup(mac, 0)
+			}
+		}
+
 	} else {
 		database.SaveGroupConfig(s.db, *cfg)
-
 		for _, led := range cfg.Leds {
-			light := dl.LedConf{
-				Mac:   led,
-				Group: &cfg.Group,
-			}
-			s.updateLedCfg(light)
+			s.updateLedGroup(led, cfg.Group)
 		}
 		for _, sensor := range cfg.Sensors {
-			cell := ds.SensorConf{
-				Mac:   sensor,
-				Group: &cfg.Group,
-			}
-			s.updateSensorCfg(cell)
+			s.updateSensorGroup(sensor, cfg.Group)
 		}
 		for _, blind := range cfg.Blinds {
-			bl := dblind.BlindConf{
-				Mac:   blind,
-				Group: &cfg.Group,
-			}
-			s.updateBlindCfg(bl)
+			s.updateBlindGroup(blind, cfg.Group)
 		}
 	}
 

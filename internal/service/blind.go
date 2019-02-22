@@ -43,6 +43,7 @@ func (s *CoreService) updateBlindCfg(config interface{}) {
 					}
 					rlog.Info("Old group will be ", gr.Blinds)
 					s.updateGroupCfg(gr)
+					// s.updateDriverGroup(gr.Group)
 				}
 			}
 			rlog.Info("Update new group", *blind.Group)
@@ -51,6 +52,7 @@ func (s *CoreService) updateBlindCfg(config interface{}) {
 				grNew.Blinds = append(grNew.Blinds, cfg.Mac)
 				rlog.Info("new group will be", grNew.Blinds)
 				s.updateGroupCfg(grNew)
+				// s.updateDriverGroup(grNew.Group)
 			}
 		}
 	}
