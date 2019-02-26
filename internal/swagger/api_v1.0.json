@@ -2240,7 +2240,11 @@
                 },
                 "mac": {
                     "type": "string",
-                    "description": "device mac address"
+                    "description": "device mac address (short version)"
+                },
+                "fullMac": {
+                    "type": "string",
+                    "description": "device mac address (long version)"
                 }
             }
         },

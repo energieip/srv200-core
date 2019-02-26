@@ -18,6 +18,9 @@ func SaveProject(db Database, cfg core.Project) error {
 	if cfg.Mac != nil {
 		proj.Mac = cfg.Mac
 	}
+	if cfg.FullMac != nil {
+		proj.FullMac = cfg.FullMac
+	}
 	if cfg.ModelName != nil {
 		proj.ModelName = cfg.ModelName
 	}

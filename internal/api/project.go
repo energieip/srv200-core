@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
@@ -12,6 +13,7 @@ import (
 )
 
 func (api *API) readBim(w http.ResponseWriter, label string) {
+	label = strings.Replace(label, "-", "_", -1)
 	project, _ := database.GetProject(api.db, label)
 	if project == nil {
 		api.sendError(w, APIErrorDeviceNotFound, "Could not found information on device "+label)
@@ -32,6 +34,7 @@ func (api *API) removeBim(w http.ResponseWriter, req *http.Request) {
 	api.setDefaultHeader(w)
 	params := mux.Vars(req)
 	label := params["label"]
+	label = strings.Replace(label, "-", "_", -1)
 	res := database.RemoveProject(api.db, label)
 	if res != nil {
 		api.sendError(w, APIErrorDeviceNotFound, "Device "+label+" not found")
@@ -54,7 +57,12 @@ func (api *API) setBim(w http.ResponseWriter, req *http.Request) {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error())
 		return
 	}
-
+	proj.Label = strings.Replace(proj.Label, "-", "_", -1)
+	if proj.FullMac != nil {
+		submac := strings.SplitN(*proj.FullMac, ":", 4)
+		mac := submac[len(submac)-1]
+		proj.Mac = &mac
+	}
 	err = database.SaveProject(api.db, proj)
 	if err != nil {
 		api.sendError(w, APIErrorDatabase, "Ifc information "+proj.Label+" cannot be added in database")
@@ -66,6 +74,7 @@ func (api *API) setBim(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) readIfcInfo(w http.ResponseWriter, label string) {
+	label = strings.Replace(label, "-", "_", -1)
 	project, _ := database.GetProject(api.db, label)
 	if project == nil {
 		api.sendError(w, APIErrorDeviceNotFound, "Could not found information on device "+label)
@@ -93,6 +102,7 @@ func (api *API) getIfcInfo(w http.ResponseWriter, req *http.Request) {
 	api.setDefaultHeader(w)
 	params := mux.Vars(req)
 	label := params["label"]
+	label = strings.Replace(label, "-", "_", -1)
 	api.readIfcInfo(w, label)
 }
 
@@ -100,6 +110,7 @@ func (api *API) removeIfcInfo(w http.ResponseWriter, req *http.Request) {
 	api.setDefaultHeader(w)
 	params := mux.Vars(req)
 	label := params["label"]
+	label = strings.Replace(label, "-", "_", -1)
 	res := database.RemoveProject(api.db, label)
 	if res != nil {
 		api.sendError(w, APIErrorDeviceNotFound, "Device "+label+" not found")
