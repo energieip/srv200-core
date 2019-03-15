@@ -532,6 +532,7 @@ func (api *API) getV1Functions(w http.ResponseWriter, req *http.Request) {
 		apiV1 + "/command/led", apiV1 + "/command/blind", apiV1 + "/command/group", apiV1 + "/project/ifcInfo",
 		apiV1 + "/project/model", apiV1 + "/project/bim", apiV1 + "/project", apiV1 + "/dump",
 		apiV1 + "/status/sensor", apiV1 + "/status/group", apiV1 + "/status/led", apiV1 + "/status/blind",
+		apiV1 + "/maintenance/driver", apiV1 + "/commissioning/install",
 	}
 	apiInfo := APIFunctions{
 		Functions: functions,
@@ -618,6 +619,12 @@ func (api *API) swagger() {
 	router.HandleFunc(apiV1+"/project/bim/{label}", api.removeBim).Methods("DELETE")
 	router.HandleFunc(apiV1+"/project/bim", api.setBim).Methods("POST")
 	router.HandleFunc(apiV1+"/project", api.getIfc).Methods("GET")
+
+	//Maintenance API
+	//router.HandleFunc(apiV1+"/maintenance/driver", api.replaceDriver).Methods("POST")
+
+	//Install API
+	router.HandleFunc(apiV1+"/commissioning/install", api.installDriver).Methods("POST")
 
 	//dump API
 	router.HandleFunc(apiV1+"/dump", api.getDump).Methods("GET")

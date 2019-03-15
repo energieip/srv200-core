@@ -45,6 +45,14 @@
         {
             "name": "history",
             "description": "Driver consumption histories"
+        },
+        {
+            "name": "commissioning",
+            "description": "Installation API"
+        },
+        {
+            "name": "maintenance",
+            "description": "Maintenance API"
         }
     ],
     "schemes":[
@@ -1167,6 +1175,44 @@
                 }
             }
         },
+        "/commissioning/install":{
+            "post":{
+                "tags":[
+                    "commissioning"
+                ],
+                "summary": "Install driver",
+                "description": "Associate a driver to a cable",
+                "operationId": "installDriver",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "driver",
+                        "in": "body",
+                        "description": "driver detail description",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/DriverInfo"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "sucessful operation",
+                        "schema":{
+                            "$ref": "#/definitions/BimInfo"
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
         "/project/bim/{label}":{
             "get":{
                 "tags":[
@@ -2221,6 +2267,28 @@
                 "url": {
                     "type": "string",
                     "description": "weblink to the technical description"
+                }
+            }
+        },
+        "DriverInfo":{
+            "type": "object",
+            "required": [
+                "label",
+                "modelName",
+                "fullMac"
+            ],
+            "properties": {
+                "label": {
+                    "type": "string",
+                    "description": "label name available in the IFC for identifying the element"
+                },
+                "modelName": {
+                    "type": "string",
+                    "description": "Model name"
+                },
+                "fullMac": {
+                    "type": "string",
+                    "description": "device mac address (long version)"
                 }
             }
         },
