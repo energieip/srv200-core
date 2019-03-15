@@ -103,6 +103,17 @@ func GetSensorConfig(db Database, mac string) (*ds.SensorSetup, string) {
 	return driver, dbID
 }
 
+//SwitchSensorConfig update sensor config in database
+func SwitchSensorConfig(db Database, old, oldFull, new, newFull string) error {
+	setup, dbID := GetSensorConfig(db, old)
+	if setup == nil || dbID == "" {
+		return NewError("Device " + old + "not found")
+	}
+	setup.FullMac = newFull
+	setup.Mac = new
+	return db.UpdateRecord(ConfigDB, SensorsTable, dbID, setup)
+}
+
 //GetSensorsConfig return the sensor config list
 func GetSensorsConfig(db Database) map[string]ds.SensorSetup {
 	drivers := map[string]ds.SensorSetup{}

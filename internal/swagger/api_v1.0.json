@@ -1213,6 +1213,41 @@
                 }
             }
         },
+        "/maintenance/driver":{
+            "post":{
+                "tags":[
+                    "maintenance"
+                ],
+                "summary": "Replace a driver",
+                "description": "Replace a driver",
+                "operationId": "replaceDriver",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "driver",
+                        "in": "body",
+                        "description": "driver detail description",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ReplaceDriver"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "sucessful operation"
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
         "/project/bim/{label}":{
             "get":{
                 "tags":[
@@ -2289,6 +2324,23 @@
                 "fullMac": {
                     "type": "string",
                     "description": "device mac address (long version)"
+                }
+            }
+        },
+        "ReplaceDriver":{
+            "type": "object",
+            "required": [
+                "oldFullMac",
+                "newFullMac"
+            ],
+            "properties": {
+                "oldFullMac": {
+                    "type": "string",
+                    "description": "Previous driver mac address"
+                },
+                "newFullMac": {
+                    "type": "string",
+                    "description": "New Driver Mac Address"
                 }
             }
         },

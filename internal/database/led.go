@@ -84,6 +84,17 @@ func UpdateLedConfig(db Database, config dl.LedConf) error {
 	return db.UpdateRecord(ConfigDB, LedsTable, dbID, setup)
 }
 
+//SwitchLedConfig update led config in database
+func SwitchLedConfig(db Database, old, oldFull, new, newFull string) error {
+	setup, dbID := GetLedConfig(db, old)
+	if setup == nil || dbID == "" {
+		return NewError("Device " + old + "not found")
+	}
+	setup.FullMac = newFull
+	setup.Mac = new
+	return db.UpdateRecord(ConfigDB, LedsTable, dbID, setup)
+}
+
 //GetLedsConfig return the led config list
 func GetLedsConfig(db Database) map[string]dl.LedSetup {
 	leds := map[string]dl.LedSetup{}

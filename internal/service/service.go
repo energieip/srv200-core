@@ -126,6 +126,8 @@ func (s *CoreService) readAPIEvents() {
 					s.sendLedCmd(event)
 				case "blindCmd":
 					s.sendBlindCmd(event)
+				case "replaceDriver":
+					s.replaceDriver(event)
 				}
 			}
 		}

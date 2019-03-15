@@ -107,6 +107,12 @@ func (s *CoreService) sendSwitchSetup(sw sd.SwitchStatus) {
 	s.server.SendCommand(url, dump)
 }
 
+func (s *CoreService) sendSwitchRemoveConfig(sw sd.SwitchConfig) {
+	url := "/remove/switch/" + sw.Mac + "/update/settings"
+	dump, _ := sw.ToJSON()
+	s.server.SendCommand(url, dump)
+}
+
 func (s *CoreService) sendSwitchUpdateConfig(sw sd.SwitchStatus) {
 	conf := s.prepareSwitchConfig(sw)
 	if conf == nil {

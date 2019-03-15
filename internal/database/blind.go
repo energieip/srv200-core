@@ -37,6 +37,17 @@ func UpdateBlindConfig(db Database, cfg dblind.BlindConf) error {
 	return db.UpdateRecord(ConfigDB, BlindsTable, dbID, setup)
 }
 
+//SwitchBlindConfig update blind config in database
+func SwitchBlindConfig(db Database, old, oldFull, new, newFull string) error {
+	setup, dbID := GetBlindConfig(db, old)
+	if setup == nil || dbID == "" {
+		return NewError("Device " + old + "not found")
+	}
+	setup.FullMac = newFull
+	setup.Mac = new
+	return db.UpdateRecord(ConfigDB, BlindsTable, dbID, setup)
+}
+
 //RemoveBlindConfig remove blind config in database
 func RemoveBlindConfig(db Database, mac string) error {
 	criteria := make(map[string]interface{})
