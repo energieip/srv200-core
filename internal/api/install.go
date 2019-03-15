@@ -28,9 +28,8 @@ func (api *API) installDriver(w http.ResponseWriter, req *http.Request) {
 	driver.Label = strings.Replace(driver.Label, "-", "_", -1)
 
 	proj := core.Project{
-		Label:     driver.Label,
-		FullMac:   &driver.FullMac,
-		ModelName: &driver.ModelName,
+		Label:   driver.Label,
+		FullMac: &driver.FullMac,
 	}
 
 	submac := strings.SplitN(driver.FullMac, ":", 4)
@@ -42,10 +41,30 @@ func (api *API) installDriver(w http.ResponseWriter, req *http.Request) {
 		api.sendError(w, APIErrorDeviceNotFound, "Unknow label "+driver.Label)
 		return
 	}
+	proj.ModelName = savedProject.ModelName
 
-	if savedProject.ModelName != nil && *savedProject.ModelName != driver.ModelName {
-		api.sendError(w, APIErrorDeviceNotFound, "Unexpected Driver, expected "+*savedProject.ModelName)
-		return
+	if savedProject.ModelName != nil {
+		refModel := *savedProject.ModelName
+		switch driver.ModelName {
+		case "LED":
+			if !strings.HasPrefix(refModel, "led") {
+				api.sendError(w, APIErrorDeviceNotFound, "Unexpected Driver, expected "+refModel)
+				return
+			}
+		case "BLIND":
+			if !strings.HasPrefix(refModel, "bld") {
+				api.sendError(w, APIErrorDeviceNotFound, "Unexpected Driver, expected "+refModel)
+				return
+			}
+		case "SENSOR":
+			if !strings.HasPrefix(refModel, "mca") {
+				api.sendError(w, APIErrorDeviceNotFound, "Unexpected Driver, expected "+refModel)
+				return
+			}
+		default:
+			api.sendError(w, APIErrorDeviceNotFound, "Unexpected Driver type "+driver.ModelName)
+			return
+		}
 	}
 
 	err = database.SaveProject(api.db, proj)
