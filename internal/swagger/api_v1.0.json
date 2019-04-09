@@ -2103,7 +2103,7 @@
             "properties": {
                 "mac": {
                     "type": "string",
-                    "description": "Sensor mac address"
+                    "description": "Blind mac address"
                 },
                 "blind1": {
                     "type": "integer",
@@ -2141,6 +2141,31 @@
                 "isBleEnabled": {
                     "type": "boolean",
                     "description": "bluetooth activation"
+                },
+                "bleMode": {
+                    "type": "string",
+                    "enum": [
+                        "service",
+                        "iBeacon"
+                    ],
+                    "default": "service",
+                    "description": "bluetooth mode"
+                },
+                "iBeaconUUID": {
+                    "type": "string",
+                    "description": "ibeacon UUID"
+                },
+                "iBeaconMajor": {
+                    "type": "integer",
+                    "description": "ibeacon Major"
+                },
+                "iBeaconMinor": {
+                    "type": "integer",
+                    "description": "ibeacon Minor"
+                },
+                "iBeaconTxPower": {
+                    "type": "integer",
+                    "description": "ibeacon Tx power"
                 },
                 "iMax": {
                     "type": "integer",
@@ -2184,7 +2209,7 @@
             "properties": {
                 "mac": {
                     "type": "string",
-                    "description": "Sensor mac address"
+                    "description": "LED mac address"
                 },
                 "group": {
                     "type": "integer",
@@ -2193,6 +2218,31 @@
                 "isBleEnabled": {
                     "type": "boolean",
                     "description": "bluetooth activation"
+                },
+                "bleMode": {
+                    "type": "string",
+                    "enum": [
+                        "service",
+                        "iBeacon"
+                    ],
+                    "default": "service",
+                    "description": "bluetooth mode"
+                },
+                "iBeaconUUID": {
+                    "type": "string",
+                    "description": "ibeacon UUID"
+                },
+                "iBeaconMajor": {
+                    "type": "integer",
+                    "description": "ibeacon Major"
+                },
+                "iBeaconMinor": {
+                    "type": "integer",
+                    "description": "ibeacon Minor"
+                },
+                "iBeaconTxPower": {
+                    "type": "integer",
+                    "description": "ibeacon Tx power"
                 },
                 "isConfigured": {
                     "type": "boolean",
@@ -2232,7 +2282,7 @@
             "properties": {
                 "mac": {
                     "type": "string",
-                    "description": "Sensor mac address"
+                    "description": "Led mac address"
                 },
                 "auto": {
                     "type": "boolean",
@@ -2252,7 +2302,7 @@
             "properties": {
                 "mac": {
                     "type": "string",
-                    "description": "Sensor mac address"
+                    "description": "Switch mac address"
                 },
                 "cluster": {
                     "type": "integer",
