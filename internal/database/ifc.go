@@ -23,6 +23,7 @@ func GetIfcs(db Database) []core.IfcInfo {
 		}
 		res = append(res, core.IfcInfo{
 			Label:      project.Label,
+			ModbusID:   project.ModbusID,
 			ModelName:  model.Name,
 			Mac:        mac,
 			Vendor:     model.Vendor,
