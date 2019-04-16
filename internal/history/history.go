@@ -6,6 +6,7 @@ import (
 
 	"github.com/energieip/common-components-go/pkg/database"
 	"github.com/energieip/common-components-go/pkg/dblind"
+	"github.com/energieip/common-components-go/pkg/dhvac"
 	dl "github.com/energieip/common-components-go/pkg/dled"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/romana/rlog"
@@ -17,6 +18,7 @@ const (
 	LedsTable    = "leds"
 	BlindsTable  = "blinds"
 	SwitchsTable = "switchs"
+	HvacsTable   = "hvacs"
 	TdTable      = "tds"
 )
 
@@ -63,6 +65,7 @@ func ConnectDatabase(ip, port string) (*HistoryDb, error) {
 		tableCfg[LedsTable] = dl.Led{}
 		tableCfg[SwitchsTable] = core.SwitchDump{}
 		tableCfg[BlindsTable] = dblind.Blind{}
+		tableCfg[HvacsTable] = dhvac.Hvac{}
 
 		for tableName, objs := range tableCfg {
 			err = db.CreateTable(dbName, tableName, &objs)

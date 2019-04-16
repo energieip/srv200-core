@@ -12,6 +12,7 @@ import (
 	"github.com/energieip/srv200-coreservice-go/internal/history"
 
 	"github.com/energieip/common-components-go/pkg/dblind"
+	"github.com/energieip/common-components-go/pkg/dhvac"
 
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
 	dl "github.com/energieip/common-components-go/pkg/dled"
@@ -34,6 +35,7 @@ const (
 	FilterTypeSensor = "sensor"
 	FilterTypeLed    = "led"
 	FilterTypeBlind  = "blind"
+	FilterTypeHvac   = "hvac"
 )
 
 //APIError Message error code
@@ -62,6 +64,7 @@ type Status struct {
 	Leds    []dl.Led       `json:"leds"`
 	Sensors []ds.Sensor    `json:"sensors"`
 	Blind   []dblind.Blind `json:"blinds"`
+	Hvac    []dhvac.Hvac   `json:"hvacs"`
 }
 
 //DumpBlind
@@ -69,6 +72,13 @@ type DumpBlind struct {
 	Ifc    core.IfcInfo      `json:"ifc"`
 	Status dblind.Blind      `json:"status"`
 	Config dblind.BlindSetup `json:"config"`
+}
+
+//DumpHvac
+type DumpHvac struct {
+	Ifc    core.IfcInfo    `json:"ifc"`
+	Status dhvac.Hvac      `json:"status"`
+	Config dhvac.HvacSetup `json:"config"`
 }
 
 //DumpLed
@@ -97,6 +107,7 @@ type Dump struct {
 	Leds    []DumpLed    `json:"leds"`
 	Sensors []DumpSensor `json:"sensors"`
 	Blinds  []DumpBlind  `json:"blinds"`
+	Hvacs   []DumpHvac   `json:"hvacs"`
 	Switchs []DumpSwitch `json:"switchs"`
 }
 
@@ -184,6 +195,7 @@ func (api *API) getStatus(w http.ResponseWriter, req *http.Request) {
 	var leds []dl.Led
 	var sensors []ds.Sensor
 	var blinds []dblind.Blind
+	var hvacs []dhvac.Hvac
 	var grID *int
 	var isConfig *bool
 	driverType := req.FormValue("type")
@@ -240,10 +252,22 @@ func (api *API) getStatus(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
+	if driverType == FilterTypeAll || driverType == FilterTypeHvac {
+		drivers := database.GetHvacsStatus(api.db)
+		for _, driver := range drivers {
+			if grID == nil || *grID == driver.Group {
+				if isConfig == nil || *isConfig == driver.IsConfigured {
+					hvacs = append(hvacs, driver)
+				}
+			}
+		}
+	}
+
 	status := Status{
 		Leds:    leds,
 		Sensors: sensors,
 		Blind:   blinds,
+		Hvac:    hvacs,
 	}
 
 	inrec, _ := json.MarshalIndent(status, "", "  ")
@@ -256,6 +280,7 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 	var sensors []DumpSensor
 	var switchs []DumpSwitch
 	var blinds []DumpBlind
+	var hvacs []DumpHvac
 	macs := make(map[string]bool)
 	labels := make(map[string]bool)
 	filterByMac := false
@@ -284,6 +309,8 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 	cellsConfig := database.GetSensorsConfig(api.db)
 	blds := database.GetBlindsStatus(api.db)
 	bldsConfig := database.GetBlindsConfig(api.db)
+	hvcs := database.GetHvacsStatus(api.db)
+	hvcsConfig := database.GetHvacsConfig(api.db)
 	switchElts := database.GetSwitchsDump(api.db)
 	switchEltsConfig := database.GetSwitchsConfig(api.db)
 
@@ -338,6 +365,18 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 			}
 			dump.Ifc = ifc
 			blinds = append(blinds, dump)
+		case "hvac":
+			dump := DumpHvac{}
+			hvc, ok := hvcs[ifc.Mac]
+			if ok {
+				dump.Status = hvc
+			}
+			config, ok := hvcsConfig[ifc.Mac]
+			if ok {
+				dump.Config = config
+			}
+			dump.Ifc = ifc
+			hvacs = append(hvacs, dump)
 		case "switch":
 			dump := DumpSwitch{}
 			switchElt, ok := switchElts[ifc.Mac]
@@ -357,6 +396,7 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 		Leds:    leds,
 		Sensors: sensors,
 		Blinds:  blinds,
+		Hvacs:   hvacs,
 		Switchs: switchs,
 	}
 
@@ -411,6 +451,7 @@ type Conf struct {
 	Leds    []dl.LedConf        `json:"leds"`
 	Sensors []ds.SensorConf     `json:"sensors"`
 	Blinds  []dblind.BlindConf  `json:"blinds"`
+	Hvacs   []dhvac.HvacConf    `json:"hvacs"`
 	Groups  []gm.GroupConfig    `json:"groups"`
 	Switchs []core.SwitchConfig `json:"switchs"`
 }
@@ -444,6 +485,9 @@ func (api *API) setConfig(w http.ResponseWriter, req *http.Request) {
 	}
 	for _, sw := range config.Blinds {
 		event["blind"] = sw
+	}
+	for _, sw := range config.Hvacs {
+		event["hvac"] = sw
 	}
 	api.EventsToBackend <- event
 	w.Write([]byte("{}"))
@@ -525,13 +569,13 @@ func (api *API) getV1Functions(w http.ResponseWriter, req *http.Request) {
 	apiV1 := "/v1.0"
 	functions := []string{apiV1 + "/setup/sensor", apiV1 + "/setup/led",
 		apiV1 + "/setup/group", apiV1 + "/setup/switch", apiV1 + "/setup/installMode",
-		apiV1 + "/setup/service", apiV1 + "/setup/blind",
-		apiV1 + "/config/led", apiV1 + "/config/sensor", apiV1 + "/config/blind",
+		apiV1 + "/setup/service", apiV1 + "/setup/blind", apiV1 + "/setup/hvac",
+		apiV1 + "/config/led", apiV1 + "/config/sensor", apiV1 + "/config/blind", apiV1 + "/config/hvac",
 		apiV1 + "/config/group", apiV1 + "/config/switch", apiV1 + "/configs",
 		apiV1 + "/status", apiV1 + "/events", apiV1 + "/events/consumption", apiV1 + "/history",
-		apiV1 + "/command/led", apiV1 + "/command/blind", apiV1 + "/command/group", apiV1 + "/project/ifcInfo",
+		apiV1 + "/command/led", apiV1 + "/command/blind", apiV1 + "/command/hvac", apiV1 + "/command/group", apiV1 + "/project/ifcInfo",
 		apiV1 + "/project/model", apiV1 + "/project/bim", apiV1 + "/project", apiV1 + "/dump",
-		apiV1 + "/status/sensor", apiV1 + "/status/group", apiV1 + "/status/led", apiV1 + "/status/blind",
+		apiV1 + "/status/sensor", apiV1 + "/status/group", apiV1 + "/status/led", apiV1 + "/status/blind", apiV1 + "/status/hvac",
 		apiV1 + "/maintenance/driver", apiV1 + "/commissioning/install",
 	}
 	apiInfo := APIFunctions{
@@ -572,6 +616,9 @@ func (api *API) swagger() {
 	router.HandleFunc(apiV1+"/setup/blind/{mac}", api.getBlindSetup).Methods("GET")
 	router.HandleFunc(apiV1+"/setup/blind/{mac}", api.removeBlindSetup).Methods("DELETE")
 	router.HandleFunc(apiV1+"/setup/blind", api.setBlindSetup).Methods("POST")
+	router.HandleFunc(apiV1+"/setup/hvac/{mac}", api.getHvacSetup).Methods("GET")
+	router.HandleFunc(apiV1+"/setup/hvac/{mac}", api.removeHvacSetup).Methods("DELETE")
+	router.HandleFunc(apiV1+"/setup/hvac", api.setHvacSetup).Methods("POST")
 	router.HandleFunc(apiV1+"/setup/group/{groupID}", api.getGroupSetup).Methods("GET")
 	router.HandleFunc(apiV1+"/setup/group/{groupID}", api.removeGroupSetup).Methods("DELETE")
 	router.HandleFunc(apiV1+"/setup/group", api.setGroupSetup).Methods("POST")
@@ -588,6 +635,7 @@ func (api *API) swagger() {
 	router.HandleFunc(apiV1+"/config/led", api.setLedConfig).Methods("POST")
 	router.HandleFunc(apiV1+"/config/sensor", api.setSensorConfig).Methods("POST")
 	router.HandleFunc(apiV1+"/config/blind", api.setBlindConfig).Methods("POST")
+	router.HandleFunc(apiV1+"/config/hvac", api.setHvacConfig).Methods("POST")
 	router.HandleFunc(apiV1+"/config/group", api.setGroupConfig).Methods("POST")
 	router.HandleFunc(apiV1+"/config/switch", api.setSwitchConfig).Methods("POST")
 	router.HandleFunc(apiV1+"/configs", api.setConfig).Methods("POST")
@@ -595,6 +643,7 @@ func (api *API) swagger() {
 	//status API
 	router.HandleFunc(apiV1+"/status/sensor/{mac}", api.getSensorStatus).Methods("GET")
 	router.HandleFunc(apiV1+"/status/blind/{mac}", api.getBlindStatus).Methods("GET")
+	router.HandleFunc(apiV1+"/status/hvac/{mac}", api.getHvacStatus).Methods("GET")
 	router.HandleFunc(apiV1+"/status/led/{mac}", api.getLedStatus).Methods("GET")
 	router.HandleFunc(apiV1+"/status/group/{groupID}", api.getGroupStatus).Methods("GET")
 	router.HandleFunc(apiV1+"/status", api.getStatus).Methods("GET")
@@ -606,6 +655,7 @@ func (api *API) swagger() {
 	//command API
 	router.HandleFunc(apiV1+"/command/led", api.sendLedCommand).Methods("POST")
 	router.HandleFunc(apiV1+"/command/blind", api.sendBlindCommand).Methods("POST")
+	router.HandleFunc(apiV1+"/command/hvac", api.sendHvacCommand).Methods("POST")
 	router.HandleFunc(apiV1+"/command/group", api.sendGroupCommand).Methods("POST")
 
 	//project API

@@ -38,15 +38,6 @@ func ToSwitchDump(val interface{}) (*SwitchDump, error) {
 	return &sw, err
 }
 
-// ToJSON dump server config struct
-func (server ServerConfig) ToJSON() (string, error) {
-	inrec, err := json.Marshal(server)
-	if err != nil {
-		return "", err
-	}
-	return string(inrec[:]), err
-}
-
 //ToSwitchConfig convert map interface to SwitchConfig object
 func ToSwitchConfig(val interface{}) (*SwitchConfig, error) {
 	var sw SwitchConfig

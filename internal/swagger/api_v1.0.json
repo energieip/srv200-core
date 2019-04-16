@@ -303,6 +303,111 @@
                 }
             }
         },
+        "/setup/hvac/{mac}":{
+            "get":{
+                "tags":[
+                    "setup"
+                ],
+                "summary": "Return Hvac Setup configuration",
+                "description": "Return Hvac Setup configuration",
+                "operationId": "getHvacSetup",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "mac",
+                        "in": "path",
+                        "description": "Hvac Mac address",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "sucessful operation",
+                        "schema":{
+                            "$ref": "#/definitions/HvacSetup"
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "delete":{
+                "tags":[
+                    "setup"
+                ],
+                "summary": "Remove Hvac Setup configuration",
+                "description": "Remove Hvac Setup configuration. It means the driver Hvac will be blacklisted",
+                "operationId": "removeHvacSetup",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "mac",
+                        "in": "path",
+                        "description": "Hvac Mac address",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "sucessful operation"
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },        
+        "/setup/hvac":{
+            "post":{
+                "tags":[
+                    "setup"
+                ],
+                "summary": " Sensor Hvac configuration",
+                "description": "Sensor Hvac configuration",
+                "operationId": "setHvacSetup",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "hvac",
+                        "in": "body",
+                        "description": "Hvac config",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/HvacSetup"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "sucessful operation",
+                        "schema":{
+                            "$ref": "#/definitions/HvacSetup"
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
         "/setup/led/{mac}":{
             "get":{
                 "tags":[
@@ -822,6 +927,41 @@
                 }
             }
         },
+        "/config/hvac":{
+            "post":{
+                "tags":[
+                    "config"
+                ],
+                "summary": "Change Hvac runtime configuration",
+                "description": "Change Hvac runtime configuration",
+                "operationId": "setHvacConfig",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "hvac",
+                        "in": "body",
+                        "description": "Hvac runtime config",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/HvacConfig"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "sucessful operation, Configuration read from database"
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
         "/config/group":{
             "post":{
                 "tags":[
@@ -981,6 +1121,41 @@
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/BlindCommand"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "sucessful operation"
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/command/hvac":{
+            "post":{
+                "tags":[
+                    "command"
+                ],
+                "summary": "Send Hvac command",
+                "description": "Send Hvac command",
+                "operationId": "sendHvacCommand",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[
+                    {
+                        "name": "hvac",
+                        "in": "body",
+                        "description": "Hvac Command",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/HvacCommand"
                         }
                     }
                 ],
@@ -1643,6 +1818,40 @@
                 }
             }
         },
+        "/status/hvac/{mac}":{
+            "get":{
+                "tags":[
+                    "status"
+                ],
+                "summary": "Return Hvac Status",
+                "description": "Return the given Hvac status",
+                "operationId": "getHvacStatus",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[{
+                    "name": "mac",
+                    "in": "path",
+                    "description": "Hvac Mac address",
+                    "required": true,
+                    "type": "string"
+                }],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema":{
+                            "$ref": "#/definitions/HvacStatus"
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                      }
+                }
+            }
+        },
         "/status":{
             "get":{
                 "tags":[
@@ -1884,6 +2093,12 @@
                     "items": {
                         "$ref": "#/definitions/BlindConfig"
                     }
+                },
+                "hvacs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/HvacConfig"
+                    }
                 }
             }
         },
@@ -2120,6 +2335,70 @@
                 "slat2": {
                     "type": "integer",
                     "description": "Slat orientation"
+                }
+            }
+        },
+        "HvacSetup":{
+            "type": "object",
+            "required": [
+                "mac"
+            ],
+            "properties": {
+                "mac": {
+                    "type": "string",
+                    "description": "Hvac mac address"
+                },
+                "group": {
+                    "type": "integer",
+                    "description": "Associate group"
+                },
+                "friendlyName": {
+                    "type": "string",
+                    "description": "Sensor FriendlyName"
+                },
+                "dumpFrequency": {
+                    "type": "integer",
+                    "description": "Dump frequency by default: 1s"
+                }
+            }
+        },
+        "HvacConfig":{
+            "type": "object",
+            "required": [
+                "mac"
+            ],
+            "properties": {
+                "mac": {
+                    "type": "string",
+                    "description": "Hvac mac address"
+                },
+                "group": {
+                    "type": "integer",
+                    "description": "Associate group"
+                },
+                "friendlyName": {
+                    "type": "string",
+                    "description": "Sensor FriendlyName"
+                },
+                "dumpFrequency": {
+                    "type": "integer",
+                    "description": "Dump frequency by default: 1s"
+                },
+                "isConfigured": {
+                    "type": "boolean",
+                    "description": "Is the Hvac configured"
+                }
+            }
+        },
+        "HvacCommand":{
+            "type": "object",
+            "required": [
+                "mac"
+            ],
+            "properties": {
+                "mac": {
+                    "type": "string",
+                    "description": "Hvac mac address"
                 }
             }
         },
@@ -2446,6 +2725,7 @@
                         "led",
                         "sensor",
                         "blind",
+                        "hvac",
                         "switch"
                     ],
                     "default": "led",
@@ -2940,6 +3220,13 @@
                     },
                     "description": "List of blinds status"
                 },
+                "hvacs": {
+                    "type": "array",
+                    "items":{
+                        "$ref": "#/definitions/HvacStatus"
+                    },
+                    "description": "List of hvacs status"
+                },
                 "groups": {
                     "type": "array",
                     "items":{
@@ -3053,6 +3340,13 @@
                     },
                     "description": "List of blinds dump"
                 },
+                "hvacs": {
+                    "type": "array",
+                    "items":{
+                        "$ref": "#/definitions/HvacDump"
+                    },
+                    "description": "List of hvacs dump"
+                },
                 "switchs": {
                     "type": "array",
                     "items":{
@@ -3103,6 +3397,21 @@
                 },
                 "config": {
                     "$ref": "#/definitions/BlindSetup"
+                }
+
+            }
+        },
+        "HvacDump": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "$ref": "#/definitions/HvacStatus"
+                },
+                "ifc": {
+                    "$ref": "#/definitions/IfcInfo"
+                },
+                "config": {
+                    "$ref": "#/definitions/HvacSetup"
                 }
 
             }
@@ -3167,6 +3476,71 @@
                 "lastSystemUpgradeDate": {
                     "type": "string",
                     "description": "Last system upgrade date"
+                }
+            }
+        },
+        "HvacStatus": {
+            "type": "object",
+            "required": [
+                "mac"
+            ],
+            "properties": {
+                "mac": {
+                    "type": "string",
+                    "description": "Hvac mac address"
+                },
+                "ip": {
+                    "type": "string",
+                    "description": "Hvac IP address"
+                },
+                "group": {
+                    "type": "integer",
+                    "description": "Associate group"
+                },
+                "protocol": {
+                    "type": "string",
+                    "description": "Hvac communication protocol"
+                },
+                "switchMac": {
+                    "type": "string",
+                    "description": "Associate switch mac address"
+                },
+                "isConfigured": {
+                    "type": "boolean",
+                    "description": "Is the hvac configured"
+                },
+                "softwareVersion": {
+                    "type": "number",
+                    "format": "float32",
+                    "description": "hvac Software version"
+                },
+                "hardwareVersion": {
+                    "type": "string",
+                    "description": "hvac Hardware version"
+                },
+                "error": {
+                    "type": "integer",
+                    "description": "Error code value: 0 means no error"
+                },
+                "friendlyName": {
+                    "type": "string",
+                    "description": "Hvac FriendlyName"
+                },
+                "setpoint": {
+                    "type": "string",
+                    "description": "current setpoint"
+                },
+                "heat": {
+                    "type": "string",
+                    "description": "setpoint when the mode is heating"
+                },
+                "cool": {
+                    "type": "string",
+                    "description": "setpoint when the mode is cooling"
+                },
+                "damper": {
+                    "type": "string",
+                    "description": "damper"
                 }
             }
         },

@@ -15,7 +15,7 @@ func SaveBlindConfig(db Database, cfg dblind.BlindSetup) error {
 func UpdateBlindConfig(db Database, cfg dblind.BlindConf) error {
 	setup, dbID := GetBlindConfig(db, cfg.Mac)
 	if setup == nil || dbID == "" {
-		return NewError("Device " + cfg.Mac + "not found")
+		return NewError("Device " + cfg.Mac + " not found")
 	}
 
 	if cfg.FriendlyName != nil {
@@ -41,7 +41,7 @@ func UpdateBlindConfig(db Database, cfg dblind.BlindConf) error {
 func SwitchBlindConfig(db Database, old, oldFull, new, newFull string) error {
 	setup, dbID := GetBlindConfig(db, old)
 	if setup == nil || dbID == "" {
-		return NewError("Device " + old + "not found")
+		return NewError("Device " + old + " not found")
 	}
 	setup.FullMac = newFull
 	setup.Mac = new

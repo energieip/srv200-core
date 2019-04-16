@@ -121,46 +121,89 @@ func (s *CoreService) replaceDriver(driver interface{}) {
 					s.server.SendCommand(url, dump)
 				}
 			} else {
-				//sensor
-				oldDriver, _ := database.GetSensorConfig(s.db, oldMac)
-				if oldDriver == nil {
-					rlog.Error("Cannot find Blind " + oldMac + " in database")
-					return
-				}
-
-				err := database.SwitchSensorConfig(s.db, oldMac, replace.OldFullMac, *project.Mac, *project.FullMac)
-				if err != nil {
-					rlog.Error("Cannot update Blind database", err)
-					return
-				}
-
-				//send remove reset old driver configuration to the switch
-				switchConf := sd.SwitchConfig{}
-				switchConf.Mac = oldDriver.SwitchMac
-				switchConf.SensorsSetup[oldDriver.Mac] = *oldDriver
-				s.sendSwitchRemoveConfig(switchConf)
-
-				// update group configuration
-				// send update to all switch where this group is running
-				groupCfg, _ := database.GetGroupConfig(s.db, *oldDriver.Group)
-				newSensors := []string{}
-				for _, sensor := range groupCfg.Sensors {
-					if sensor != oldMac {
-						newSensors = append(newSensors, sensor)
+				if strings.HasPrefix(refModel, "hvac") {
+					oldDriver, _ := database.GetHvacConfig(s.db, oldMac)
+					if oldDriver == nil {
+						rlog.Error("Cannot find Hvac " + oldMac + " in database")
+						return
 					}
-				}
-				groupCfg.Sensors = newSensors
 
-				database.UpdateGroupConfig(s.db, *groupCfg)
-				newSwitch := database.GetGroupSwitchs(s.db, groupCfg.Group)
-				for sw := range newSwitch {
-					url := "/write/switch/" + sw + "/update/settings"
-					switchSetup := sd.SwitchConfig{}
-					switchSetup.Mac = sw
-					switchSetup.Groups = make(map[int]gm.GroupConfig)
-					switchSetup.Groups[groupCfg.Group] = *groupCfg
-					dump, _ := switchSetup.ToJSON()
-					s.server.SendCommand(url, dump)
+					err := database.SwitchHvacConfig(s.db, oldMac, replace.OldFullMac, *project.Mac, *project.FullMac)
+					if err != nil {
+						rlog.Error("Cannot update Hvac database", err)
+						return
+					}
+
+					//send remove reset old driver configuration to the switch
+					switchConf := sd.SwitchConfig{}
+					switchConf.Mac = oldDriver.SwitchMac
+					switchConf.HvacsSetup[oldDriver.Mac] = *oldDriver
+					s.sendSwitchRemoveConfig(switchConf)
+
+					// update group configuration
+					// send update to all switch where this group is running
+					groupCfg, _ := database.GetGroupConfig(s.db, *oldDriver.Group)
+					newHvacs := []string{}
+					for _, hvac := range groupCfg.Hvacs {
+						if hvac != oldMac {
+							newHvacs = append(newHvacs, hvac)
+						}
+					}
+					groupCfg.Hvacs = newHvacs
+
+					database.UpdateGroupConfig(s.db, *groupCfg)
+					newSwitch := database.GetGroupSwitchs(s.db, groupCfg.Group)
+					for sw := range newSwitch {
+						url := "/write/switch/" + sw + "/update/settings"
+						switchSetup := sd.SwitchConfig{}
+						switchSetup.Mac = sw
+						switchSetup.Groups = make(map[int]gm.GroupConfig)
+						switchSetup.Groups[groupCfg.Group] = *groupCfg
+						dump, _ := switchSetup.ToJSON()
+						s.server.SendCommand(url, dump)
+					}
+				} else {
+					//sensor
+					oldDriver, _ := database.GetSensorConfig(s.db, oldMac)
+					if oldDriver == nil {
+						rlog.Error("Cannot find Blind " + oldMac + " in database")
+						return
+					}
+
+					err := database.SwitchSensorConfig(s.db, oldMac, replace.OldFullMac, *project.Mac, *project.FullMac)
+					if err != nil {
+						rlog.Error("Cannot update Blind database", err)
+						return
+					}
+
+					//send remove reset old driver configuration to the switch
+					switchConf := sd.SwitchConfig{}
+					switchConf.Mac = oldDriver.SwitchMac
+					switchConf.SensorsSetup[oldDriver.Mac] = *oldDriver
+					s.sendSwitchRemoveConfig(switchConf)
+
+					// update group configuration
+					// send update to all switch where this group is running
+					groupCfg, _ := database.GetGroupConfig(s.db, *oldDriver.Group)
+					newSensors := []string{}
+					for _, sensor := range groupCfg.Sensors {
+						if sensor != oldMac {
+							newSensors = append(newSensors, sensor)
+						}
+					}
+					groupCfg.Sensors = newSensors
+
+					database.UpdateGroupConfig(s.db, *groupCfg)
+					newSwitch := database.GetGroupSwitchs(s.db, groupCfg.Group)
+					for sw := range newSwitch {
+						url := "/write/switch/" + sw + "/update/settings"
+						switchSetup := sd.SwitchConfig{}
+						switchSetup.Mac = sw
+						switchSetup.Groups = make(map[int]gm.GroupConfig)
+						switchSetup.Groups[groupCfg.Group] = *groupCfg
+						dump, _ := switchSetup.ToJSON()
+						s.server.SendCommand(url, dump)
+					}
 				}
 			}
 		}

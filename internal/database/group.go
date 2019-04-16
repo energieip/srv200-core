@@ -66,6 +66,13 @@ func GetGroupSwitchs(db Database, grID int) map[string]bool {
 		}
 		switchs[blind.SwitchMac] = true
 	}
+	for _, hvacMac := range gr.Hvacs {
+		hvac, _ := GetHvacConfig(db, hvacMac)
+		if hvac == nil {
+			continue
+		}
+		switchs[hvac.SwitchMac] = true
+	}
 	return switchs
 }
 
@@ -73,7 +80,7 @@ func GetGroupSwitchs(db Database, grID int) map[string]bool {
 func UpdateGroupConfig(db Database, config gm.GroupConfig) error {
 	setup, dbID := GetGroupConfig(db, config.Group)
 	if setup == nil || dbID == "" {
-		return NewError("Group " + string(config.Group) + "not found")
+		return NewError("Group " + string(config.Group) + " not found")
 	}
 
 	if config.Leds != nil {
@@ -86,6 +93,10 @@ func UpdateGroupConfig(db Database, config gm.GroupConfig) error {
 
 	if config.Blinds != nil {
 		setup.Blinds = config.Blinds
+	}
+
+	if config.Hvacs != nil {
+		setup.Hvacs = config.Hvacs
 	}
 
 	if config.FriendlyName != nil {
@@ -163,6 +174,14 @@ func GetGroupConfigs(db Database, driversMac map[string]bool) map[int]gm.GroupCo
 		}
 		if addGroup != true {
 			for _, mac := range gr.Blinds {
+				if _, ok := driversMac[mac]; ok {
+					addGroup = true
+					break
+				}
+			}
+		}
+		if addGroup != true {
+			for _, mac := range gr.Hvacs {
 				if _, ok := driversMac[mac]; ok {
 					addGroup = true
 					break

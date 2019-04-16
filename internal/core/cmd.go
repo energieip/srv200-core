@@ -16,12 +16,18 @@ type BlindCmd struct {
 	Slat2  int    `json:"slat2"`
 }
 
+type HvacCmd struct {
+	Mac string `json:"mac"`
+	//TODO
+}
+
 type GroupCmd struct {
 	Group          int   `json:"group"`
 	Auto           *bool `json:"auto"`
 	SetpointLeds   *int  `json:"setpointLeds"`
 	SetpointBlinds *int  `json:"setpointBlinds"`
 	SetpointSlats  *int  `json:"setpointSlats"`
+	//TODO temp?
 }
 
 // ToJSON dump BlindCmd struct
@@ -36,6 +42,26 @@ func (m BlindCmd) ToJSON() (string, error) {
 //ToBlindCmd convert map interface to ToBlindCmd object
 func ToBlindCmd(val interface{}) (*BlindCmd, error) {
 	var m BlindCmd
+	inrec, err := json.Marshal(val)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(inrec, &m)
+	return &m, err
+}
+
+// ToJSON dump HvacCmd struct
+func (m HvacCmd) ToJSON() (string, error) {
+	inrec, err := json.Marshal(m)
+	if err != nil {
+		return "", err
+	}
+	return string(inrec[:]), err
+}
+
+//ToHvacCmd convert map interface to HvacCmd object
+func ToHvacCmd(val interface{}) (*HvacCmd, error) {
+	var m HvacCmd
 	inrec, err := json.Marshal(val)
 	if err != nil {
 		return nil, err

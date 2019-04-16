@@ -30,12 +30,13 @@ func (s *CoreService) updateSensorCfg(config interface{}) {
 				rlog.Info("Update old group", *oldSensor.Group)
 				gr, _ := database.GetGroupConfig(s.db, *oldSensor.Group)
 				if gr != nil {
-					for i, v := range gr.Sensors {
-						if v == sensor.Mac {
-							gr.Sensors = append(gr.Sensors[:i], gr.Sensors[i+1:]...)
-							break
+					sensors := []string{}
+					for _, v := range gr.Sensors {
+						if v != sensor.Mac {
+							sensors = append(sensors, v)
 						}
 					}
+					gr.Sensors = sensors
 					rlog.Info("Old group will be ", gr.Sensors)
 					s.updateGroupCfg(gr)
 					// s.updateDriverGroup(gr.Group)

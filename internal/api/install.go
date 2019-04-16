@@ -61,6 +61,11 @@ func (api *API) installDriver(w http.ResponseWriter, req *http.Request) {
 				api.sendError(w, APIErrorDeviceNotFound, "Unexpected Driver, expected "+refModel)
 				return
 			}
+		case "HVAC":
+			if !strings.HasPrefix(refModel, "hvac") {
+				api.sendError(w, APIErrorDeviceNotFound, "Unexpected Driver, expected "+refModel)
+				return
+			}
 		default:
 			api.sendError(w, APIErrorDeviceNotFound, "Unexpected Driver type "+driver.ModelName)
 			return

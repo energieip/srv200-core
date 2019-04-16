@@ -3,6 +3,7 @@ package service
 import (
 	"github.com/energieip/common-components-go/pkg/dblind"
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
+	"github.com/energieip/common-components-go/pkg/dhvac"
 	dl "github.com/energieip/common-components-go/pkg/dled"
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
 	sd "github.com/energieip/common-components-go/pkg/dswitch"
@@ -75,6 +76,19 @@ func (s *CoreService) registerSwitchStatus(switchStatus sd.SwitchStatus) {
 	for _, blind := range oldBlinds {
 		database.RemoveBlindStatus(s.db, blind.Mac)
 		s.prepareAPIEvent(EventRemove, BlindElt, blind)
+	}
+
+	oldHvacs := database.GetHvacSwitchStatus(s.db, switchStatus.Mac)
+	for mac, hvac := range switchStatus.Hvacs {
+		database.SaveHvacStatus(s.db, hvac)
+		_, ok := oldHvacs[mac]
+		if ok {
+			delete(oldHvacs, mac)
+		}
+	}
+	for _, hvac := range oldHvacs {
+		database.RemoveHvacStatus(s.db, hvac.Mac)
+		s.prepareAPIEvent(EventRemove, HvacElt, hvac)
 	}
 
 	for _, group := range switchStatus.Groups {
@@ -215,6 +229,7 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 	setup.LedsSetup = make(map[string]dl.LedSetup)
 	setup.SensorsSetup = make(map[string]ds.SensorSetup)
 	setup.BlindsSetup = make(map[string]dblind.BlindSetup)
+	setup.HvacsSetup = make(map[string]dhvac.HvacSetup)
 
 	driversMac := make(map[string]bool)
 	for _, led := range switchStatus.Leds {
@@ -222,6 +237,9 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 	}
 	for _, blind := range switchStatus.Blinds {
 		driversMac[blind.Mac] = true
+	}
+	for _, hvac := range switchStatus.Hvacs {
+		driversMac[hvac.Mac] = true
 	}
 	newGroups := make(map[int]gm.GroupConfig)
 	groups := database.GetGroupConfigs(s.db, driversMac)
@@ -293,6 +311,32 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 			s.prepareAPIEvent(EventUpdate, BlindElt, blind)
 			history.SaveBlindHistory(s.historyDb, blind)
 			s.prepareAPIConsumption(BlindElt, blind.LinePower)
+		}
+	}
+
+	for mac, hvac := range switchStatus.Hvacs {
+		if !hvac.IsConfigured {
+			bsetup, _ := database.GetHvacConfig(s.db, mac)
+			if bsetup == nil && s.installMode {
+				confHvac := dhvac.HvacSetup{
+					Mac:           hvac.Mac,
+					Group:         &defaultGroup,
+					SwitchMac:     switchStatus.Mac,
+					DumpFrequency: dumpFreq,
+					FriendlyName:  &hvac.Mac,
+				}
+				bsetup = &confHvac
+				// saved default config
+				database.SaveHvacConfig(s.db, confHvac)
+			}
+			if bsetup != nil {
+				setup.HvacsSetup[mac] = *bsetup
+			}
+			s.prepareAPIEvent(EventAdd, HvacElt, hvac)
+		} else {
+			s.prepareAPIEvent(EventUpdate, HvacElt, hvac)
+			// history.SaveHvacHistory(s.historyDb, hvac)
+			// s.prepareAPIConsumption(HvacElt, hvac.LinePower)
 		}
 	}
 

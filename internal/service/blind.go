@@ -35,12 +35,13 @@ func (s *CoreService) updateBlindCfg(config interface{}) {
 				rlog.Info("Update old group", *oldBlind.Group)
 				gr, _ := database.GetGroupConfig(s.db, *oldBlind.Group)
 				if gr != nil {
-					for i, v := range gr.Blinds {
-						if v == blind.Mac {
-							gr.Blinds = append(gr.Blinds[:i], gr.Blinds[i+1:]...)
-							break
+					blinds := []string{}
+					for _, v := range gr.Blinds {
+						if v != blind.Mac {
+							blinds = append(blinds, v)
 						}
 					}
+					gr.Blinds = blinds
 					rlog.Info("Old group will be ", gr.Blinds)
 					s.updateGroupCfg(gr)
 					// s.updateDriverGroup(gr.Group)

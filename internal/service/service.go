@@ -114,6 +114,8 @@ func (s *CoreService) readAPIEvents() {
 					s.updateLedCfg(event)
 				case "blind":
 					s.updateBlindCfg(event)
+				case "hvac":
+					s.updateHvacCfg(event)
 				case "sensor":
 					s.updateSensorCfg(event)
 				case "group":
@@ -126,6 +128,8 @@ func (s *CoreService) readAPIEvents() {
 					s.sendLedCmd(event)
 				case "blindCmd":
 					s.sendBlindCmd(event)
+				case "hvacCmd":
+					s.sendHvacCmd(event)
 				case "replaceDriver":
 					s.replaceDriver(event)
 				}

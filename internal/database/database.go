@@ -4,6 +4,7 @@ import (
 	"github.com/energieip/common-components-go/pkg/database"
 	"github.com/energieip/common-components-go/pkg/dblind"
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
+	"github.com/energieip/common-components-go/pkg/dhvac"
 	dl "github.com/energieip/common-components-go/pkg/dled"
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
 	pkg "github.com/energieip/common-components-go/pkg/service"
@@ -17,6 +18,7 @@ const (
 
 	LedsTable     = "leds"
 	BlindsTable   = "blinds"
+	HvacsTable    = "hvacs"
 	SensorsTable  = "sensors"
 	GroupsTable   = "groups"
 	SwitchsTable  = "switchs"
@@ -68,6 +70,7 @@ func ConnectDatabase(ip, port string) (*Database, error) {
 		if dbName == ConfigDB {
 			tableCfg[LedsTable] = dl.LedSetup{}
 			tableCfg[SensorsTable] = ds.SensorSetup{}
+			tableCfg[HvacsTable] = dhvac.HvacSetup{}
 			tableCfg[GroupsTable] = gm.GroupConfig{}
 			tableCfg[SwitchsTable] = core.SwitchConfig{}
 			tableCfg[ServicesTable] = pkg.Service{}
@@ -77,6 +80,7 @@ func ConnectDatabase(ip, port string) (*Database, error) {
 		} else {
 			tableCfg[LedsTable] = dl.Led{}
 			tableCfg[SensorsTable] = ds.Sensor{}
+			tableCfg[HvacsTable] = dhvac.Hvac{}
 			tableCfg[GroupsTable] = gm.GroupStatus{}
 			tableCfg[SwitchsTable] = core.SwitchDump{}
 			tableCfg[ServicesTable] = pkg.ServiceStatus{}
