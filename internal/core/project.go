@@ -6,8 +6,9 @@ import "encoding/json"
 type Project struct {
 	Label     string  `json:"label"` //cable label
 	ModelName *string `json:"modelName"`
-	Mac       *string `json:"mac"`     //device Mac address (short version)
-	FullMac   *string `json:"fullMac"` //device Full Mac address
+	Mac       *string `json:"mac"`      //device Mac address (short version)
+	FullMac   *string `json:"fullMac"`  //device Full Mac address
+	ModbusID  int     `json:"modbusID"` //modbusID
 }
 
 // ToJSON dump Project struct

@@ -8,4 +8,5 @@ type IfcInfo struct {
 	Vendor     string `json:"vendor"`
 	URL        string `json:"url"`
 	DeviceType string `json:"deviceType"`
+	ModbusID   int    `json:"modbusID"`
 }

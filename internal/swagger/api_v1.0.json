@@ -2694,6 +2694,10 @@
                 "fullMac": {
                     "type": "string",
                     "description": "device mac address (long version)"
+                },
+                "modbusID": {
+                    "type": "integer",
+                    "description": "Modbus unique ID"
                 }
             }
         },
@@ -2734,6 +2738,10 @@
                 "url": {
                     "type": "string",
                     "description": "weblink to the technical description"
+                },
+                "modbusID": {
+                    "type": "integer",
+                    "description": "Modbus unique ID"
                 }
             }
         },
