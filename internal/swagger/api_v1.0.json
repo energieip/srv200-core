@@ -2827,6 +2827,10 @@
                     "type": "boolean",
                     "description": "is set to true if at least one sensor detect a movement"
                 },
+                "windowsOpened": {
+                    "type": "boolean",
+                    "description": "is set to true if at least one window is opened"
+                },
                 "timeToAuto": {
                     "type": "integer",
                     "description": "Remaining time before switching back to auto mode"
