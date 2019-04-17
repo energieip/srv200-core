@@ -576,7 +576,7 @@ func (api *API) getV1Functions(w http.ResponseWriter, req *http.Request) {
 		apiV1 + "/command/led", apiV1 + "/command/blind", apiV1 + "/command/hvac", apiV1 + "/command/group", apiV1 + "/project/ifcInfo",
 		apiV1 + "/project/model", apiV1 + "/project/bim", apiV1 + "/project", apiV1 + "/dump",
 		apiV1 + "/status/sensor", apiV1 + "/status/group", apiV1 + "/status/led", apiV1 + "/status/blind", apiV1 + "/status/hvac",
-		apiV1 + "/maintenance/driver", apiV1 + "/commissioning/install",
+		apiV1 + "/status/groups" + apiV1 + "/maintenance/driver", apiV1 + "/commissioning/install",
 	}
 	apiInfo := APIFunctions{
 		Functions: functions,
@@ -646,6 +646,7 @@ func (api *API) swagger() {
 	router.HandleFunc(apiV1+"/status/hvac/{mac}", api.getHvacStatus).Methods("GET")
 	router.HandleFunc(apiV1+"/status/led/{mac}", api.getLedStatus).Methods("GET")
 	router.HandleFunc(apiV1+"/status/group/{groupID}", api.getGroupStatus).Methods("GET")
+	router.HandleFunc(apiV1+"/status/groups", api.getGroupsStatus).Methods("GET")
 	router.HandleFunc(apiV1+"/status", api.getStatus).Methods("GET")
 
 	//events API

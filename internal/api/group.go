@@ -112,3 +112,14 @@ func (api *API) getGroupStatus(w http.ResponseWriter, req *http.Request) {
 	inrec, _ := json.MarshalIndent(res, "", "  ")
 	w.Write(inrec)
 }
+
+func (api *API) getGroupsStatus(w http.ResponseWriter, req *http.Request) {
+	api.setDefaultHeader(w)
+	res := database.GetGroupsStatus(api.db)
+	var groups []gm.GroupStatus
+	for _, g := range res {
+		groups = append(groups, g)
+	}
+	inrec, _ := json.MarshalIndent(groups, "", "  ")
+	w.Write(inrec)
+}

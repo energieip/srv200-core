@@ -216,3 +216,20 @@ func GetGroupStatus(db Database, grID int) *gm.GroupStatus {
 	}
 	return gr
 }
+
+//GetGroupsStatus get groups status
+func GetGroupsStatus(db Database) map[int]gm.GroupStatus {
+	groups := make(map[int]gm.GroupStatus)
+	stored, err := db.FetchAllRecords(StatusDB, GroupsTable)
+	if err != nil || stored == nil {
+		return groups
+	}
+	for _, val := range stored {
+		gr, err := gm.ToGroupStatus(val)
+		if err != nil || gr == nil {
+			continue
+		}
+		groups[gr.Group] = *gr
+	}
+	return groups
+}

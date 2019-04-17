@@ -1716,6 +1716,37 @@
                 }
             }
         },
+        "/status/groups": {
+            "get": {
+                "tags": [
+                    "status"
+                ],
+                "summary": "Return every Group Status",
+                "description": "Return all group status",
+                "operationId": "getGroupsStatus",
+                "produces":[
+                    "application/json"
+                ],
+                "parameters":[],
+                "responses": {
+                    "200": {
+                        "description": "sucessful operation",
+                        "schema":{
+                            "type": "array",
+                            "items":{
+                                "$ref": "#/definitions/GroupStatus"
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                          "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
         "/status/group/{groupID}": {
             "get": {
                 "tags": [
