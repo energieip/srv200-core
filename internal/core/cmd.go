@@ -10,10 +10,10 @@ type LedCmd struct {
 
 type BlindCmd struct {
 	Mac    string `json:"mac"`
-	Blind1 int    `json:"blind1"`
-	Blind2 int    `json:"blind2"`
-	Slat1  int    `json:"slat1"`
-	Slat2  int    `json:"slat2"`
+	Blind1 *int   `json:"blind1,omitempty"`
+	Blind2 *int   `json:"blind2,omitempty"`
+	Slat1  *int   `json:"slat1,omitempty"`
+	Slat2  *int   `json:"slat2,omitempty"`
 }
 
 type HvacCmd struct {
@@ -24,9 +24,9 @@ type HvacCmd struct {
 type GroupCmd struct {
 	Group          int   `json:"group"`
 	Auto           *bool `json:"auto"`
-	SetpointLeds   *int  `json:"setpointLeds"`
-	SetpointBlinds *int  `json:"setpointBlinds"`
-	SetpointSlats  *int  `json:"setpointSlats"`
+	SetpointLeds   *int  `json:"setpointLeds,omitempty"`
+	SetpointBlinds *int  `json:"setpointBlinds,omitempty"`
+	SetpointSlats  *int  `json:"setpointSlats,omitempty"`
 	//TODO temp?
 }
 

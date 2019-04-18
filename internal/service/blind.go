@@ -87,10 +87,10 @@ func (s *CoreService) sendBlindCmd(cmdBlind interface{}) {
 
 	cfg := dblind.BlindConf{
 		Mac:    cmd.Mac,
-		Blind1: &cmd.Blind1,
-		Blind2: &cmd.Blind2,
-		Slat1:  &cmd.Slat1,
-		Slat2:  &cmd.Slat2,
+		Blind1: cmd.Blind1,
+		Blind2: cmd.Blind2,
+		Slat1:  cmd.Slat1,
+		Slat2:  cmd.Slat2,
 	}
 	switchSetup.BlindsConfig[cmd.Mac] = cfg
 
