@@ -2858,6 +2858,18 @@
                     "type": "boolean",
                     "description": "is set to true if at least one sensor detect a movement"
                 },
+                "brightness": {
+                    "type": "integer",
+                    "description": "Compute Brightness in the group (Lux)"
+                },
+                "temperature": {
+                    "type": "integer",
+                    "description": "Compute Temperature in the group (1/10°C)"
+                },
+                "humidity": {
+                    "type": "integer",
+                    "description": "Compute Humidity in the group (1/10%)"
+                },
                 "windowsOpened": {
                     "type": "boolean",
                     "description": "is set to true if at least one window is opened"
