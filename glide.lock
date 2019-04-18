@@ -1,10 +1,10 @@
 hash: 7873f75061b03685fab1d37fa10ae2d9249507813e75d280fc0acfb9b629147f
-updated: 2019-04-18T11:29:23.479762389+02:00
+updated: 2019-04-18T18:19:47.961449686+02:00
 imports:
 - name: github.com/cenkalti/backoff
   version: 1e4cf3da559842a91afcb6ea6141451e6c30c618
 - name: github.com/eclipse/paho.mqtt.golang
-  version: 1c3a9d248e675495399d9d070b3708c53ef1068a
+  version: adca289fdcf8c883800aafa545bc263452290bae
   subpackages:
   - packets
 - name: github.com/energieip/common-components-go
@@ -37,12 +37,14 @@ imports:
   subpackages:
   - ext
   - log
+- name: github.com/orcaman/concurrent-map
+  version: 2693aad1ed7517c2bb5b3a42cb8fde88b941d89d
 - name: github.com/romana/rlog
   version: f018bc92e7d71f27c04e04cbf008860416c21d01
 - name: github.com/sirupsen/logrus
   version: 9b3cdde74fbe9443d704467498a7dcb61a79de9b
 - name: golang.org/x/crypto
-  version: f416ebab96af27ca70b6e5c23d6a0747530da626
+  version: b43e412143f90fca62516c457cae5a8dc1595586
   subpackages:
   - pbkdf2
 - name: golang.org/x/net
@@ -53,7 +55,7 @@ imports:
   - proxy
   - websocket
 - name: golang.org/x/sys
-  version: 12500544f89f9420afe9529ba8940bf72d294972
+  version: f0ce4c0180bef7e9c51babed693a6e47fdd8962f
   subpackages:
   - unix
 - name: gopkg.in/fatih/pool.v2

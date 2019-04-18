@@ -10,6 +10,7 @@ import (
 	"github.com/energieip/srv200-coreservice-go/internal/database"
 	"github.com/energieip/srv200-coreservice-go/internal/history"
 	"github.com/energieip/srv200-coreservice-go/internal/network"
+	cmap "github.com/orcaman/concurrent-map"
 	"github.com/romana/rlog"
 )
 
@@ -36,7 +37,7 @@ type CoreService struct {
 	eventsToBackend      chan map[string]interface{}
 	api                  *api.API
 	bufAPI               map[string]core.EventStatus
-	bufConsumption       map[string]int
+	bufConsumption       cmap.ConcurrentMap
 	eventsConsumptionAPI chan core.EventConsumption
 }
 
@@ -48,7 +49,7 @@ func (s *CoreService) Initialize(confFile string) error {
 	s.events = make(chan string)
 	s.eventsAPI = make(chan map[string]core.EventStatus)
 	s.bufAPI = make(map[string]core.EventStatus)
-	s.bufConsumption = make(map[string]int)
+	s.bufConsumption = cmap.New()
 	s.eventsConsumptionAPI = make(chan core.EventConsumption)
 
 	conf, err := pkg.ReadServiceConfig(confFile)

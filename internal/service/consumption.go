@@ -4,24 +4,29 @@ import (
 	"time"
 
 	"github.com/energieip/srv200-coreservice-go/internal/core"
+	cmap "github.com/orcaman/concurrent-map"
 
 	"github.com/romana/rlog"
 )
 
 func (s *CoreService) prepareAPIConsumption(evtObj string, power int) {
-	s.bufConsumption[evtObj] += power
+	old, _ := s.bufConsumption.Get(evtObj)
+	new := old.(int) + power
+	s.bufConsumption.Set(evtObj, new)
 }
 
 func (s *CoreService) pushConsumptionEvent() {
+	s.bufConsumption.Set(LedElt, 0)
+	s.bufConsumption.Set(BlindElt, 0)
 	timerDump := time.NewTicker(1 * time.Second)
 	for {
 		select {
 		case <-timerDump.C:
 			conso := core.EventConsumption{}
-			led, _ := s.bufConsumption[LedElt]
-			conso.Leds = led
-			blind, _ := s.bufConsumption[BlindElt]
-			conso.Blinds = blind
+			led, _ := s.bufConsumption.Get(LedElt)
+			conso.Leds = led.(int)
+			blind, _ := s.bufConsumption.Get(BlindElt)
+			conso.Blinds = blind.(int)
 			conso.Date = time.Now().Format(time.RFC3339)
 			select {
 			case s.eventsConsumptionAPI <- conso:
@@ -30,9 +35,9 @@ func (s *CoreService) pushConsumptionEvent() {
 				rlog.Debug("Consumption event Dropped", s.bufConsumption)
 			}
 
-			s.bufConsumption = make(map[string]int)
-			s.bufConsumption[LedElt] = 0
-			s.bufConsumption[BlindElt] = 0
+			s.bufConsumption = cmap.New()
+			s.bufConsumption.Set(LedElt, 0)
+			s.bufConsumption.Set(BlindElt, 0)
 		}
 	}
 }
