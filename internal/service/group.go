@@ -349,6 +349,7 @@ func (s *CoreService) updateGroupCfg(config interface{}) {
 			}
 		}
 
+		seen = nil
 		seen = make(map[string]bool)
 		for _, mac := range new.Blinds {
 			if !inArray(mac, old.Blinds) {

@@ -50,7 +50,7 @@ type API struct {
 	upgrader        websocket.Upgrader
 	db              database.Database
 	historydb       history.HistoryDb
-	eventsAPI       chan map[string]core.EventStatus
+	eventsAPI       chan map[string]interface{}
 	eventsConso     chan core.EventConsumption
 	EventsToBackend chan map[string]interface{}
 	apiMutex        sync.Mutex
@@ -112,7 +112,7 @@ type Dump struct {
 }
 
 //InitAPI start API connection
-func InitAPI(db database.Database, historydb history.HistoryDb, eventsAPI chan map[string]core.EventStatus,
+func InitAPI(db database.Database, historydb history.HistoryDb, eventsAPI chan map[string]interface{},
 	eventsConso chan core.EventConsumption, installMode *bool, conf pkg.ServiceConfig) *API {
 	api := API{
 		db:              db,

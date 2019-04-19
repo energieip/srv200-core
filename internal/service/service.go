@@ -3,6 +3,7 @@ package service
 import (
 	"os"
 
+	sd "github.com/energieip/common-components-go/pkg/dswitch"
 	pkg "github.com/energieip/common-components-go/pkg/service"
 	"github.com/energieip/common-components-go/pkg/tools"
 	"github.com/energieip/srv200-coreservice-go/internal/api"
@@ -33,10 +34,10 @@ type CoreService struct {
 	ip                   string
 	events               chan string
 	installMode          bool
-	eventsAPI            chan map[string]core.EventStatus
+	eventsAPI            chan map[string]interface{}
 	eventsToBackend      chan map[string]interface{}
 	api                  *api.API
-	bufAPI               map[string]core.EventStatus
+	bufAPI               cmap.ConcurrentMap
 	bufConsumption       cmap.ConcurrentMap
 	eventsConsumptionAPI chan core.EventConsumption
 }
@@ -47,8 +48,8 @@ func (s *CoreService) Initialize(confFile string) error {
 	s.installMode = false
 	s.mac, s.ip = tools.GetNetworkInfo()
 	s.events = make(chan string)
-	s.eventsAPI = make(chan map[string]core.EventStatus)
-	s.bufAPI = make(map[string]core.EventStatus)
+	s.eventsAPI = make(chan map[string]interface{})
+	s.bufAPI = cmap.New()
 	s.bufConsumption = cmap.New()
 	s.eventsConsumptionAPI = make(chan core.EventConsumption)
 
@@ -135,8 +136,22 @@ func (s *CoreService) readAPIEvents() {
 					s.replaceDriver(event)
 				}
 			}
+			apiEvents = nil
 		}
 	}
+}
+
+func (s *CoreService) manageMQTTEvent(eventType string, event sd.SwitchStatus) {
+
+	switch eventType {
+	case network.EventHello:
+		s.sendSwitchSetup(event)
+		s.registerSwitchStatus(event)
+	case network.EventDump:
+		s.sendSwitchUpdateConfig(event)
+		s.registerSwitchStatus(event)
+	}
+
 }
 
 //Run service mainloop
@@ -148,14 +163,7 @@ func (s *CoreService) Run() error {
 		select {
 		case serverEvents := <-s.server.Events:
 			for eventType, event := range serverEvents {
-				switch eventType {
-				case network.EventHello:
-					s.sendSwitchSetup(event)
-					s.registerSwitchStatus(event)
-				case network.EventDump:
-					s.sendSwitchUpdateConfig(event)
-					s.registerSwitchStatus(event)
-				}
+				go s.manageMQTTEvent(eventType, event)
 			}
 		}
 	}

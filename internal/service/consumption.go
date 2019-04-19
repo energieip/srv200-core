@@ -34,7 +34,6 @@ func (s *CoreService) pushConsumptionEvent() {
 			default:
 				rlog.Debug("Consumption event Dropped", s.bufConsumption)
 			}
-
 			s.bufConsumption = cmap.New()
 			s.bufConsumption.Set(LedElt, 0)
 			s.bufConsumption.Set(BlindElt, 0)
