@@ -142,7 +142,7 @@ func (api *API) setDefaultHeader(w http.ResponseWriter) {
 
 func (api *API) sendError(w http.ResponseWriter, errorCode int, message string) {
 	errCode := APIError{
-		Code:    APIErrorDeviceNotFound,
+		Code:    errorCode,
 		Message: message,
 	}
 
