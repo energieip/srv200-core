@@ -9,6 +9,7 @@ import (
 	"github.com/energieip/common-components-go/pkg/dhvac"
 	dl "github.com/energieip/common-components-go/pkg/dled"
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
+	"github.com/energieip/common-components-go/pkg/duser"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
 	"github.com/energieip/srv200-coreservice-go/internal/history"
@@ -42,8 +43,8 @@ type APIError struct {
 }
 
 type API struct {
-	clients         map[*websocket.Conn]bool
-	clientsConso    map[*websocket.Conn]bool
+	clients         map[*websocket.Conn]duser.UserAccess
+	clientsConso    map[*websocket.Conn]duser.UserAccess
 	upgrader        websocket.Upgrader
 	db              database.Database
 	historydb       history.HistoryDb

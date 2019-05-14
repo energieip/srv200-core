@@ -125,6 +125,7 @@ func (s *CoreService) prepareAPIEvent(evtType, evtObj string, event interface{})
 				Leds:    []core.EventLed{},
 				Sensors: []core.EventSensor{},
 				Groups:  []gm.GroupStatus{},
+				Blinds:  []core.EventBlind{},
 			})
 		}
 		value, ok := s.bufAPI.Get(evtType)

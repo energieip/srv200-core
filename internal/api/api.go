@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	gm "github.com/energieip/common-components-go/pkg/dgroup"
 	"github.com/energieip/common-components-go/pkg/duser"
 	"github.com/energieip/common-components-go/pkg/tools"
 	"github.com/mitchellh/mapstructure"
@@ -44,8 +45,8 @@ func InitAPI(db database.Database, historydb history.HistoryDb, eventsAPI chan m
 		eventsAPI:       eventsAPI,
 		eventsConso:     eventsConso,
 		EventsToBackend: make(chan map[string]interface{}),
-		clients:         make(map[*websocket.Conn]bool),
-		clientsConso:    make(map[*websocket.Conn]bool),
+		clients:         make(map[*websocket.Conn]duser.UserAccess),
+		clientsConso:    make(map[*websocket.Conn]duser.UserAccess),
 		upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
 				return true
@@ -112,8 +113,6 @@ func (api *API) verification(next http.HandlerFunc) http.HandlerFunc {
 			}
 			userAccess, _ := duser.ToUserAccess(user)
 			context.Set(r, "decoded", *userAccess)
-			rlog.Info("==== connexion from user", userAccess)
-
 			next(w, r)
 
 		case *jwt.ValidationError:
@@ -537,7 +536,10 @@ func (api *API) webEvents(w http.ResponseWriter, r *http.Request) {
 		rlog.Error("Error when switching in websocket " + err.Error())
 		return
 	}
-	api.clients[ws] = true
+	decoded := context.Get(r, "decoded")
+	var auth duser.UserAccess
+	mapstructure.Decode(decoded.(duser.UserAccess), &auth)
+	api.clients[ws] = auth
 
 }
 
@@ -547,7 +549,10 @@ func (api *API) consumptionEvents(w http.ResponseWriter, r *http.Request) {
 		rlog.Error("Error when switching in consumption websocket " + err.Error())
 		return
 	}
-	api.clientsConso[ws] = true
+	decoded := context.Get(r, "decoded")
+	var auth duser.UserAccess
+	mapstructure.Decode(decoded.(duser.UserAccess), &auth)
+	api.clientsConso[ws] = auth
 }
 
 func (api *API) websocketEvents() {
@@ -555,8 +560,57 @@ func (api *API) websocketEvents() {
 		select {
 		case event := <-api.eventsAPI:
 			api.apiMutex.Lock()
-			for client := range api.clients {
-				if err := client.WriteJSON(event); err != nil {
+			for client, auth := range api.clients {
+				var res map[string]interface{}
+				if auth.Priviledge == duser.PriviledgeUser {
+					res = make(map[string]interface{})
+					for evtType, e := range event {
+						evt, _ := core.ToEventStatus(e)
+						if evt == nil {
+							continue
+						}
+						newEvt := core.EventStatus{
+							Leds:    []core.EventLed{},
+							Sensors: []core.EventSensor{},
+							Groups:  []gm.GroupStatus{},
+							Blinds:  []core.EventBlind{},
+						}
+
+						for _, bld := range evt.Blinds {
+							if !tools.IntInSlice(bld.Blind.Group, auth.AccessGroups) {
+								continue
+							}
+							newEvt.Blinds = append(newEvt.Blinds, bld)
+						}
+
+						for _, led := range evt.Leds {
+							if !tools.IntInSlice(led.Led.Group, auth.AccessGroups) {
+								continue
+							}
+							newEvt.Leds = append(newEvt.Leds, led)
+						}
+
+						for _, sensor := range evt.Sensors {
+							if !tools.IntInSlice(sensor.Sensor.Group, auth.AccessGroups) {
+								continue
+							}
+							newEvt.Sensors = append(newEvt.Sensors, sensor)
+						}
+
+						for _, group := range evt.Groups {
+							if !tools.IntInSlice(group.Group, auth.AccessGroups) {
+								continue
+							}
+							newEvt.Groups = append(newEvt.Groups, group)
+						}
+
+						res[evtType] = newEvt
+					}
+				} else {
+					res = event
+				}
+
+				if err := client.WriteJSON(res); err != nil {
 					rlog.Error("Error writing in websocket" + err.Error())
 					client.Close()
 					delete(api.clients, client)
@@ -709,8 +763,8 @@ func (api *API) swagger() {
 	router.HandleFunc(apiV1+"/status", api.verification(api.getStatus)).Methods("GET")
 
 	//events API
-	router.HandleFunc(apiV1+"/events", api.webEvents)
-	router.HandleFunc(apiV1+"/events/consumption", api.consumptionEvents)
+	router.HandleFunc(apiV1+"/events", api.verification(api.webEvents))
+	router.HandleFunc(apiV1+"/events/consumption", api.verification(api.consumptionEvents))
 
 	//command API
 	router.HandleFunc(apiV1+"/command/led", api.verification(api.sendLedCommand)).Methods("POST")
