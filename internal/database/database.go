@@ -7,6 +7,7 @@ import (
 	"github.com/energieip/common-components-go/pkg/dhvac"
 	dl "github.com/energieip/common-components-go/pkg/dled"
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
+	"github.com/energieip/common-components-go/pkg/duser"
 	pkg "github.com/energieip/common-components-go/pkg/service"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/romana/rlog"
@@ -25,6 +26,7 @@ const (
 	ServicesTable = "services"
 	ModelsTable   = "models"
 	ProjectsTable = "projects"
+	AccessTable   = "access"
 )
 
 type databaseError struct {
@@ -77,6 +79,7 @@ func ConnectDatabase(ip, port string) (*Database, error) {
 			tableCfg[ModelsTable] = core.Model{}
 			tableCfg[ProjectsTable] = core.Project{}
 			tableCfg[BlindsTable] = dblind.BlindSetup{}
+			tableCfg[AccessTable] = duser.UserAccess{}
 		} else {
 			tableCfg[LedsTable] = dl.Led{}
 			tableCfg[SensorsTable] = ds.Sensor{}

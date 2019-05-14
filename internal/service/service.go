@@ -3,6 +3,8 @@ package service
 import (
 	"os"
 
+	"github.com/energieip/common-components-go/pkg/duser"
+
 	sd "github.com/energieip/common-components-go/pkg/dswitch"
 	pkg "github.com/energieip/common-components-go/pkg/service"
 	"github.com/energieip/common-components-go/pkg/tools"
@@ -27,15 +29,14 @@ const (
 
 //CoreService content
 type CoreService struct {
-	server               network.ServerNetwork //Remote server
+	server               network.ServerNetwork //Local server
+	authServer           network.AuthNetwork   //Authentication server
 	db                   database.Database
 	historyDb            history.HistoryDb
 	mac                  string
 	ip                   string
 	events               chan string
-	installMode          bool
 	eventsAPI            chan map[string]interface{}
-	eventsToBackend      chan map[string]interface{}
 	api                  *api.API
 	bufAPI               cmap.ConcurrentMap
 	bufConsumption       cmap.ConcurrentMap
@@ -44,8 +45,7 @@ type CoreService struct {
 
 //Initialize service
 func (s *CoreService) Initialize(confFile string) error {
-	clientID := "Server"
-	s.installMode = false
+	clientID := "GtbServer"
 	s.mac, s.ip = tools.GetNetworkInfo()
 	s.events = make(chan string)
 	s.eventsAPI = make(chan map[string]interface{})
@@ -89,7 +89,21 @@ func (s *CoreService) Initialize(confFile string) error {
 		rlog.Error("Cannot connect to drivers broker " + conf.NetworkBroker.IP + " error: " + err.Error())
 		return err
 	}
-	web := api.InitAPI(s.db, s.historyDb, s.eventsAPI, s.eventsConsumptionAPI, &s.installMode, *conf)
+
+	authNet, err := network.CreateAuthNetwork()
+	if err != nil {
+		rlog.Error("Cannot connect to broker " + conf.AuthBroker.IP + " error: " + err.Error())
+		return err
+	}
+	s.authServer = *authNet
+
+	err = s.authServer.LocalConnection(*conf, clientID)
+	if err != nil {
+		rlog.Error("Cannot connect to drivers broker " + conf.AuthBroker.IP + " error: " + err.Error())
+		return err
+	}
+
+	web := api.InitAPI(s.db, s.historyDb, s.eventsAPI, s.eventsConsumptionAPI, *conf)
 	s.api = web
 
 	rlog.Info("ServerCore service started")
@@ -100,6 +114,7 @@ func (s *CoreService) Initialize(confFile string) error {
 func (s *CoreService) Stop() {
 	rlog.Info("Stopping ServerCore service")
 	s.server.Disconnect()
+	s.authServer.Disconnect()
 	s.db.Close()
 	s.historyDb.Close()
 	rlog.Info("ServerCore service stopped")
@@ -142,7 +157,6 @@ func (s *CoreService) readAPIEvents() {
 }
 
 func (s *CoreService) manageMQTTEvent(eventType string, event sd.SwitchStatus) {
-
 	switch eventType {
 	case network.EventHello:
 		s.sendSwitchSetup(event)
@@ -151,7 +165,13 @@ func (s *CoreService) manageMQTTEvent(eventType string, event sd.SwitchStatus) {
 		s.sendSwitchUpdateConfig(event)
 		s.registerSwitchStatus(event)
 	}
+}
 
+func (s *CoreService) manageAuthMQTTEvent(eventType string, event duser.UserAccess) {
+	switch eventType {
+	case network.EventNewUser:
+		s.addNewUser(event)
+	}
 }
 
 //Run service mainloop
@@ -164,6 +184,10 @@ func (s *CoreService) Run() error {
 		case serverEvents := <-s.server.Events:
 			for eventType, event := range serverEvents {
 				go s.manageMQTTEvent(eventType, event)
+			}
+		case authEvents := <-s.authServer.Events:
+			for eventType, event := range authEvents {
+				go s.manageAuthMQTTEvent(eventType, event)
 			}
 		}
 	}

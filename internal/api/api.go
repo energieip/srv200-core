@@ -2,145 +2,153 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
-	"sync"
 
+	"github.com/energieip/common-components-go/pkg/duser"
+	"github.com/energieip/common-components-go/pkg/tools"
+	"github.com/mitchellh/mapstructure"
+
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/energieip/srv200-coreservice-go/internal/history"
 
 	"github.com/energieip/common-components-go/pkg/dblind"
 	"github.com/energieip/common-components-go/pkg/dhvac"
 
-	gm "github.com/energieip/common-components-go/pkg/dgroup"
 	dl "github.com/energieip/common-components-go/pkg/dled"
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
 	pkg "github.com/energieip/common-components-go/pkg/service"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
+	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
+	cmap "github.com/orcaman/concurrent-map"
 	"github.com/romana/rlog"
 )
 
-const (
-	APIErrorDeviceNotFound = 1
-	APIErrorBodyParsing    = 2
-	APIErrorDatabase       = 3
-	APIErrorInvalidValue   = 4
-
-	FilterTypeAll    = "all"
-	FilterTypeSensor = "sensor"
-	FilterTypeLed    = "led"
-	FilterTypeBlind  = "blind"
-	FilterTypeHvac   = "hvac"
-)
-
-//APIError Message error code
-type APIError struct {
-	Code    int    `json:"code"` //errorCode
-	Message string `json:"message"`
-}
-
-type API struct {
-	clients         map[*websocket.Conn]bool
-	clientsConso    map[*websocket.Conn]bool
-	upgrader        websocket.Upgrader
-	db              database.Database
-	historydb       history.HistoryDb
-	eventsAPI       chan map[string]interface{}
-	eventsConso     chan core.EventConsumption
-	EventsToBackend chan map[string]interface{}
-	apiMutex        sync.Mutex
-	installMode     *bool
-	certificate     string
-	keyfile         string
-}
-
-//Status
-type Status struct {
-	Leds    []dl.Led       `json:"leds"`
-	Sensors []ds.Sensor    `json:"sensors"`
-	Blind   []dblind.Blind `json:"blinds"`
-	Hvac    []dhvac.Hvac   `json:"hvacs"`
-}
-
-//DumpBlind
-type DumpBlind struct {
-	Ifc    core.IfcInfo      `json:"ifc"`
-	Status dblind.Blind      `json:"status"`
-	Config dblind.BlindSetup `json:"config"`
-}
-
-//DumpHvac
-type DumpHvac struct {
-	Ifc    core.IfcInfo    `json:"ifc"`
-	Status dhvac.Hvac      `json:"status"`
-	Config dhvac.HvacSetup `json:"config"`
-}
-
-//DumpLed
-type DumpLed struct {
-	Ifc    core.IfcInfo `json:"ifc"`
-	Status dl.Led       `json:"status"`
-	Config dl.LedSetup  `json:"config"`
-}
-
-//DumpSensor
-type DumpSensor struct {
-	Ifc    core.IfcInfo   `json:"ifc"`
-	Status ds.Sensor      `json:"status"`
-	Config ds.SensorSetup `json:"config"`
-}
-
-//DumpSwitch
-type DumpSwitch struct {
-	Ifc    core.IfcInfo      `json:"ifc"`
-	Status core.SwitchDump   `json:"status"`
-	Config core.SwitchConfig `json:"config"`
-}
-
-//Dump
-type Dump struct {
-	Leds    []DumpLed    `json:"leds"`
-	Sensors []DumpSensor `json:"sensors"`
-	Blinds  []DumpBlind  `json:"blinds"`
-	Hvacs   []DumpHvac   `json:"hvacs"`
-	Switchs []DumpSwitch `json:"switchs"`
-}
-
 //InitAPI start API connection
 func InitAPI(db database.Database, historydb history.HistoryDb, eventsAPI chan map[string]interface{},
-	eventsConso chan core.EventConsumption, installMode *bool, conf pkg.ServiceConfig) *API {
+	eventsConso chan core.EventConsumption, conf pkg.ServiceConfig) *API {
 	api := API{
 		db:              db,
+		apiIP:           conf.ExternalAPI.IP,
+		apiPort:         conf.ExternalAPI.Port,
+		apiPassword:     conf.ExternalAPI.Password,
+		access:          cmap.New(),
 		historydb:       historydb,
 		eventsAPI:       eventsAPI,
 		eventsConso:     eventsConso,
 		EventsToBackend: make(chan map[string]interface{}),
 		clients:         make(map[*websocket.Conn]bool),
 		clientsConso:    make(map[*websocket.Conn]bool),
-		installMode:     installMode,
 		upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
 				return true
 			},
 		},
-		certificate: conf.Certificate,
-		keyfile:     conf.Key,
+		certificate: conf.ExternalAPI.CertPath,
+		keyfile:     conf.ExternalAPI.KeyPath,
 	}
 	go api.swagger()
 	return &api
 }
 
-func (api *API) setDefaultHeader(w http.ResponseWriter) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+func (api *API) verification(next http.HandlerFunc) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		tokenValue := ""
+		tokenCookie, err := r.Cookie(TokenName)
+
+		if err != nil || tokenCookie == nil {
+			//Check header
+			authorizationHeader := r.Header.Get("Authorization")
+			if authorizationHeader != "" {
+				bearerToken := strings.Split(authorizationHeader, " ")
+				if len(bearerToken) > 1 {
+					tokenValue = bearerToken[1]
+				} else {
+					tokenValue = authorizationHeader
+				}
+			}
+		} else {
+			tokenValue = tokenCookie.Value
+		}
+		api.setDefaultHeader(w, r)
+
+		if tokenValue == "" {
+			api.sendError(w, APIErrorUnauthorized, "Unauthorized access", http.StatusUnauthorized)
+			return
+		}
+
+		token, err := jwt.Parse(tokenValue, func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("There was an error")
+			}
+			return []byte(api.apiPassword), nil
+		})
+
+		switch err.(type) {
+		case nil:
+			_, ok := token.Claims.(jwt.MapClaims)
+			if !ok || !token.Valid {
+				if ok {
+					_, ok = api.access.Get(tokenValue)
+					// case token deprecated cleanup needed
+					api.access.Remove(tokenValue)
+				}
+				api.sendError(w, APIErrorUnauthorized, "Unauthorized access", http.StatusUnauthorized)
+				return
+			}
+
+			//check in map
+			user, ok := api.access.Get(tokenValue)
+			if !ok || user == nil {
+				api.sendError(w, APIErrorExpiredToken, "Invalid Token", http.StatusUnauthorized)
+				return
+			}
+			userAccess, _ := duser.ToUserAccess(user)
+			context.Set(r, "decoded", *userAccess)
+			rlog.Info("==== connexion from user", userAccess)
+
+			next(w, r)
+
+		case *jwt.ValidationError:
+			vErr := err.(*jwt.ValidationError)
+
+			switch vErr.Errors {
+			case jwt.ValidationErrorExpired:
+				api.sendError(w, APIErrorExpiredToken, "Expired Token", http.StatusUnauthorized)
+				return
+
+			default:
+				api.sendError(w, APIErrorBodyParsing, "Error reading request body", http.StatusInternalServerError)
+				return
+			}
+
+		default:
+			api.sendError(w, APIErrorBodyParsing, "Error reading request body", http.StatusInternalServerError)
+			return
+		}
+	})
+}
+
+func (api *API) setDefaultHeader(w http.ResponseWriter, req *http.Request) {
+	header := "*"
+	if req.Header.Get("Origin") != "null" {
+		header = req.Header.Get("Origin")
+	}
+	w.Header().Set("Access-Control-Allow-Origin", header)
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, *")
 	w.Header().Set("Content-Type", "application/json")
 }
 
-func (api *API) sendError(w http.ResponseWriter, errorCode int, message string) {
+func (api *API) sendError(w http.ResponseWriter, errorCode int, message string, httpStatus int) {
 	errCode := APIError{
 		Code:    errorCode,
 		Message: message,
@@ -148,50 +156,14 @@ func (api *API) sendError(w http.ResponseWriter, errorCode int, message string) 
 
 	inrec, _ := json.MarshalIndent(errCode, "", "  ")
 	rlog.Error(errCode.Message)
-	http.Error(w, string(inrec),
-		http.StatusInternalServerError)
-}
-
-type InstallModeStruct struct {
-	InstallMode bool `json:"installMode"`
-}
-
-func (api *API) setInstallMode(w http.ResponseWriter, req *http.Request) {
-	api.setDefaultHeader(w)
-	body, err := ioutil.ReadAll(req.Body)
-	if err != nil {
-		api.sendError(w, APIErrorBodyParsing, "Error reading request body")
-		return
-	}
-
-	inputMode := InstallModeStruct{}
-	err = json.Unmarshal(body, &inputMode)
-	if err != nil {
-		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error())
-		return
-	}
-	*api.installMode = inputMode.InstallMode
-
-	status := InstallModeStruct{
-		InstallMode: *api.installMode,
-	}
-
-	inrec, _ := json.MarshalIndent(status, "", "  ")
-	w.Write(inrec)
-}
-
-func (api *API) getInstallMode(w http.ResponseWriter, req *http.Request) {
-	api.setDefaultHeader(w)
-	status := InstallModeStruct{
-		InstallMode: *api.installMode,
-	}
-
-	inrec, _ := json.MarshalIndent(status, "", "  ")
-	w.Write(inrec)
+	http.Error(w, string(inrec), httpStatus)
 }
 
 func (api *API) getStatus(w http.ResponseWriter, req *http.Request) {
-	api.setDefaultHeader(w)
+	decoded := context.Get(req, "decoded")
+	var auth duser.UserAccess
+	mapstructure.Decode(decoded.(duser.UserAccess), &auth)
+
 	var leds []dl.Led
 	var sensors []ds.Sensor
 	var blinds []dblind.Blind
@@ -224,6 +196,11 @@ func (api *API) getStatus(w http.ResponseWriter, req *http.Request) {
 		for _, led := range lights {
 			if grID == nil || *grID == led.Group {
 				if isConfig == nil || *isConfig == led.IsConfigured {
+					if auth.Priviledge == duser.PriviledgeUser {
+						if !tools.IntInSlice(led.Group, auth.AccessGroups) {
+							continue
+						}
+					}
 					leds = append(leds, led)
 				}
 			}
@@ -235,6 +212,11 @@ func (api *API) getStatus(w http.ResponseWriter, req *http.Request) {
 		for _, sensor := range cells {
 			if grID == nil || *grID == sensor.Group {
 				if isConfig == nil || *isConfig == sensor.IsConfigured {
+					if auth.Priviledge == duser.PriviledgeUser {
+						if !tools.IntInSlice(sensor.Group, auth.AccessGroups) {
+							continue
+						}
+					}
 					sensors = append(sensors, sensor)
 				}
 			}
@@ -246,6 +228,11 @@ func (api *API) getStatus(w http.ResponseWriter, req *http.Request) {
 		for _, driver := range drivers {
 			if grID == nil || *grID == driver.Group {
 				if isConfig == nil || *isConfig == driver.IsConfigured {
+					if auth.Priviledge == duser.PriviledgeUser {
+						if !tools.IntInSlice(driver.Group, auth.AccessGroups) {
+							continue
+						}
+					}
 					blinds = append(blinds, driver)
 				}
 			}
@@ -257,6 +244,11 @@ func (api *API) getStatus(w http.ResponseWriter, req *http.Request) {
 		for _, driver := range drivers {
 			if grID == nil || *grID == driver.Group {
 				if isConfig == nil || *isConfig == driver.IsConfigured {
+					if auth.Priviledge == duser.PriviledgeUser {
+						if !tools.IntInSlice(driver.Group, auth.AccessGroups) {
+							continue
+						}
+					}
 					hvacs = append(hvacs, driver)
 				}
 			}
@@ -275,13 +267,18 @@ func (api *API) getStatus(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
-	api.setDefaultHeader(w)
+	decoded := context.Get(req, "decoded")
+	var auth duser.UserAccess
+	mapstructure.Decode(decoded.(duser.UserAccess), &auth)
+
 	var leds []DumpLed
 	var sensors []DumpSensor
 	var switchs []DumpSwitch
 	var blinds []DumpBlind
 	var hvacs []DumpHvac
+	var groups []DumpGroup
 	macs := make(map[string]bool)
+	driversMac := make(map[string]bool)
 	labels := make(map[string]bool)
 	filterByMac := false
 	MacsParam := req.FormValue("macs")
@@ -326,54 +323,95 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 				continue
 			}
 		}
+		driversMac[ifc.Mac] = true
 
 		switch ifc.DeviceType {
 		case "led":
 			dump := DumpLed{}
 			led, ok := lights[ifc.Mac]
+			gr := 0
 			if ok {
 				dump.Status = led
+				gr = led.Group
 			}
 			config, ok := lightsConfig[ifc.Mac]
 			if ok {
 				dump.Config = config
+				if gr == 0 && config.Group != nil {
+					gr = *config.Group
+				}
+			}
+			if auth.Priviledge == duser.PriviledgeUser {
+				if !tools.IntInSlice(gr, auth.AccessGroups) {
+					continue
+				}
 			}
 			dump.Ifc = ifc
 
 			leds = append(leds, dump)
 		case "sensor":
 			dump := DumpSensor{}
+			gr := 0
 			sensor, ok := cells[ifc.Mac]
 			if ok {
 				dump.Status = sensor
+				gr = sensor.Group
 			}
 			config, ok := cellsConfig[ifc.Mac]
 			if ok {
 				dump.Config = config
+				if gr == 0 && config.Group != nil {
+					gr = *config.Group
+				}
+			}
+			if auth.Priviledge == duser.PriviledgeUser {
+				if !tools.IntInSlice(gr, auth.AccessGroups) {
+					continue
+				}
 			}
 			dump.Ifc = ifc
 			sensors = append(sensors, dump)
 		case "blind":
 			dump := DumpBlind{}
+			gr := 0
 			bld, ok := blds[ifc.Mac]
 			if ok {
 				dump.Status = bld
+				gr = bld.Group
 			}
 			config, ok := bldsConfig[ifc.Mac]
 			if ok {
 				dump.Config = config
+				if gr == 0 && config.Group != nil {
+					gr = *config.Group
+				}
+			}
+			if auth.Priviledge == duser.PriviledgeUser {
+				if !tools.IntInSlice(gr, auth.AccessGroups) {
+					continue
+				}
 			}
 			dump.Ifc = ifc
 			blinds = append(blinds, dump)
 		case "hvac":
 			dump := DumpHvac{}
-			hvc, ok := hvcs[ifc.Mac]
+			gr := 0
+			hvac, ok := hvcs[ifc.Mac]
 			if ok {
-				dump.Status = hvc
+				dump.Status = hvac
+				gr = hvac.Group
 			}
 			config, ok := hvcsConfig[ifc.Mac]
 			if ok {
 				dump.Config = config
+				if gr == 0 && config.Group != nil {
+					gr = *config.Group
+				}
+			}
+			if auth.Priviledge == duser.PriviledgeUser {
+				if !tools.IntInSlice(gr, auth.AccessGroups) {
+					continue
+				}
 			}
 			dump.Ifc = ifc
 			hvacs = append(hvacs, dump)
@@ -392,33 +430,39 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
+	groupsStatus := database.GetGroupsStatus(api.db)
+	groupsConfig := database.GetGroupConfigs(api.db, driversMac)
+
+	for _, gr := range groupsConfig {
+		dump := DumpGroup{}
+		grStatus, ok := groupsStatus[gr.Group]
+		if ok {
+			dump.Status = grStatus
+		}
+		dump.Config = gr
+		groups = append(groups, dump)
+	}
+
 	dump := Dump{
 		Leds:    leds,
 		Sensors: sensors,
 		Blinds:  blinds,
 		Hvacs:   hvacs,
 		Switchs: switchs,
+		Groups:  groups,
 	}
 
 	inrec, _ := json.MarshalIndent(dump, "", "  ")
 	w.Write(inrec)
 }
 
-type LedHist struct {
-	Energy float64 `json:"energy"`
-	Power  int     `json:"power"`
-	Date   string  `json:"date"`
-}
-
-type GlobalHistory struct {
-	Leds []LedHist `json:"leds"`
-}
-
 func (api *API) getHistory(w http.ResponseWriter, req *http.Request) {
-	api.setDefaultHeader(w)
+	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin, duser.PriviledgeMaintainer}) != nil {
+		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
+		return
+	}
 
 	var leds []LedHist
-
 	ledHistories := make(map[string]LedHist)
 	ledDrivers := history.GetLedsHistory(api.historydb)
 	for _, l := range ledDrivers {
@@ -447,27 +491,21 @@ func (api *API) getHistory(w http.ResponseWriter, req *http.Request) {
 	w.Write(inrec)
 }
 
-type Conf struct {
-	Leds    []dl.LedConf        `json:"leds"`
-	Sensors []ds.SensorConf     `json:"sensors"`
-	Blinds  []dblind.BlindConf  `json:"blinds"`
-	Hvacs   []dhvac.HvacConf    `json:"hvacs"`
-	Groups  []gm.GroupConfig    `json:"groups"`
-	Switchs []core.SwitchConfig `json:"switchs"`
-}
-
 func (api *API) setConfig(w http.ResponseWriter, req *http.Request) {
-	api.setDefaultHeader(w)
+	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin, duser.PriviledgeMaintainer}) != nil {
+		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
+		return
+	}
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
-		api.sendError(w, APIErrorBodyParsing, "Error reading request body")
+		api.sendError(w, APIErrorBodyParsing, "Error reading request body", http.StatusInternalServerError)
 		return
 	}
 
 	config := Conf{}
 	err = json.Unmarshal([]byte(body), &config)
 	if err != nil {
-		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error())
+		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	event := make(map[string]interface{})
@@ -546,16 +584,8 @@ func (api *API) websocketConsumptions() {
 	}
 }
 
-type APIInfo struct {
-	Versions []string `json:"versions"`
-}
-
-type APIFunctions struct {
-	Functions []string `json:"functions"`
-}
-
 func (api *API) getAPIs(w http.ResponseWriter, req *http.Request) {
-	api.setDefaultHeader(w)
+	api.setDefaultHeader(w, req)
 	versions := []string{"v1.0"}
 	apiInfo := APIInfo{
 		Versions: versions,
@@ -565,7 +595,7 @@ func (api *API) getAPIs(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) getV1Functions(w http.ResponseWriter, req *http.Request) {
-	api.setDefaultHeader(w)
+	api.setDefaultHeader(w, req)
 	apiV1 := "/v1.0"
 	functions := []string{apiV1 + "/setup/sensor", apiV1 + "/setup/led",
 		apiV1 + "/setup/group", apiV1 + "/setup/switch", apiV1 + "/setup/installMode",
@@ -577,6 +607,7 @@ func (api *API) getV1Functions(w http.ResponseWriter, req *http.Request) {
 		apiV1 + "/project/model", apiV1 + "/project/bim", apiV1 + "/project", apiV1 + "/dump",
 		apiV1 + "/status/sensor", apiV1 + "/status/group", apiV1 + "/status/led", apiV1 + "/status/blind", apiV1 + "/status/hvac",
 		apiV1 + "/status/groups" + apiV1 + "/maintenance/driver", apiV1 + "/commissioning/install",
+		apiV1 + "/user/info", apiV1 + "/user/login",
 	}
 	apiInfo := APIFunctions{
 		Functions: functions,
@@ -586,13 +617,39 @@ func (api *API) getV1Functions(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) getFunctions(w http.ResponseWriter, req *http.Request) {
-	api.setDefaultHeader(w)
+	api.setDefaultHeader(w, req)
 	functions := []string{"/versions"}
 	apiInfo := APIFunctions{
 		Functions: functions,
 	}
 	inrec, _ := json.MarshalIndent(apiInfo, "", "  ")
 	w.Write(inrec)
+}
+
+func (api *API) hasAccessMode(w http.ResponseWriter, req *http.Request, modes []string) error {
+	decoded := context.Get(req, "decoded")
+	var auth duser.UserAccess
+	mapstructure.Decode(decoded.(duser.UserAccess), &auth)
+	if !tools.StringInSlice(auth.Priviledge, modes) {
+		return NewError("Unauthorized Access")
+	}
+	return nil
+}
+
+func (api *API) hasEnoughRight(w http.ResponseWriter, req *http.Request, group int) error {
+	decoded := context.Get(req, "decoded")
+	var auth duser.UserAccess
+	mapstructure.Decode(decoded.(duser.UserAccess), &auth)
+	if auth.Priviledge == duser.PriviledgeUser {
+		if !tools.IntInSlice(group, auth.AccessGroups) {
+			return NewError("Unauthorized Access")
+		}
+		return nil
+	}
+	if !tools.StringInSlice(auth.Priviledge, []string{duser.PriviledgeAdmin, duser.PriviledgeMaintainer}) {
+		return NewError("Unauthorized Access")
+	}
+	return nil
 }
 
 func (api *API) swagger() {
@@ -606,86 +663,88 @@ func (api *API) swagger() {
 	apiV1 := "/v1.0"
 	router.HandleFunc(apiV1+"/functions", api.getV1Functions).Methods("GET")
 
+	// Auth
+	router.HandleFunc(apiV1+"/user/login", api.createToken).Methods("POST")
+	router.HandleFunc(apiV1+"/user/info", api.verification(api.getUserInfo)).Methods("GET")
+
 	//setup API
-	router.HandleFunc(apiV1+"/setup/sensor/{mac}", api.getSensorSetup).Methods("GET")
-	router.HandleFunc(apiV1+"/setup/sensor/{mac}", api.removeSensorSetup).Methods("DELETE")
-	router.HandleFunc(apiV1+"/setup/sensor", api.setSensorSetup).Methods("POST")
-	router.HandleFunc(apiV1+"/setup/led/{mac}", api.getLedSetup).Methods("GET")
-	router.HandleFunc(apiV1+"/setup/led/{mac}", api.removeLedSetup).Methods("DELETE")
-	router.HandleFunc(apiV1+"/setup/led", api.setLedSetup).Methods("POST")
-	router.HandleFunc(apiV1+"/setup/blind/{mac}", api.getBlindSetup).Methods("GET")
-	router.HandleFunc(apiV1+"/setup/blind/{mac}", api.removeBlindSetup).Methods("DELETE")
-	router.HandleFunc(apiV1+"/setup/blind", api.setBlindSetup).Methods("POST")
-	router.HandleFunc(apiV1+"/setup/hvac/{mac}", api.getHvacSetup).Methods("GET")
-	router.HandleFunc(apiV1+"/setup/hvac/{mac}", api.removeHvacSetup).Methods("DELETE")
-	router.HandleFunc(apiV1+"/setup/hvac", api.setHvacSetup).Methods("POST")
-	router.HandleFunc(apiV1+"/setup/group/{groupID}", api.getGroupSetup).Methods("GET")
-	router.HandleFunc(apiV1+"/setup/group/{groupID}", api.removeGroupSetup).Methods("DELETE")
-	router.HandleFunc(apiV1+"/setup/group", api.setGroupSetup).Methods("POST")
-	router.HandleFunc(apiV1+"/setup/switch/{mac}", api.getSwitchSetup).Methods("GET")
-	router.HandleFunc(apiV1+"/setup/switch/{mac}", api.removeSwitchSetup).Methods("DELETE")
-	router.HandleFunc(apiV1+"/setup/switch", api.setSwitchSetup).Methods("POST")
-	router.HandleFunc(apiV1+"/setup/installMode", api.getInstallMode).Methods("GET")
-	router.HandleFunc(apiV1+"/setup/installMode", api.setInstallMode).Methods("POST")
-	router.HandleFunc(apiV1+"/setup/service/{name}", api.getServiceSetup).Methods("GET")
-	router.HandleFunc(apiV1+"/setup/service/{name}", api.removeServiceSetup).Methods("DELETE")
-	router.HandleFunc(apiV1+"/setup/service", api.setServiceSetup).Methods("POST")
+	router.HandleFunc(apiV1+"/setup/sensor/{mac}", api.verification(api.getSensorSetup)).Methods("GET")
+	router.HandleFunc(apiV1+"/setup/sensor/{mac}", api.verification(api.removeSensorSetup)).Methods("DELETE")
+	router.HandleFunc(apiV1+"/setup/sensor", api.verification(api.setSensorSetup)).Methods("POST")
+	router.HandleFunc(apiV1+"/setup/led/{mac}", api.verification(api.getLedSetup)).Methods("GET")
+	router.HandleFunc(apiV1+"/setup/led/{mac}", api.verification(api.removeLedSetup)).Methods("DELETE")
+	router.HandleFunc(apiV1+"/setup/led", api.verification(api.setLedSetup)).Methods("POST")
+	router.HandleFunc(apiV1+"/setup/blind/{mac}", api.verification(api.getBlindSetup)).Methods("GET")
+	router.HandleFunc(apiV1+"/setup/blind/{mac}", api.verification(api.removeBlindSetup)).Methods("DELETE")
+	router.HandleFunc(apiV1+"/setup/blind", api.verification(api.setBlindSetup)).Methods("POST")
+	router.HandleFunc(apiV1+"/setup/hvac/{mac}", api.verification(api.getHvacSetup)).Methods("GET")
+	router.HandleFunc(apiV1+"/setup/hvac/{mac}", api.verification(api.removeHvacSetup)).Methods("DELETE")
+	router.HandleFunc(apiV1+"/setup/hvac", api.verification(api.setHvacSetup)).Methods("POST")
+	router.HandleFunc(apiV1+"/setup/group/{groupID}", api.verification(api.getGroupSetup)).Methods("GET")
+	router.HandleFunc(apiV1+"/setup/group/{groupID}", api.verification(api.removeGroupSetup)).Methods("DELETE")
+	router.HandleFunc(apiV1+"/setup/group", api.verification(api.setGroupSetup)).Methods("POST")
+	router.HandleFunc(apiV1+"/setup/switch/{mac}", api.verification(api.getSwitchSetup)).Methods("GET")
+	router.HandleFunc(apiV1+"/setup/switch/{mac}", api.verification(api.removeSwitchSetup)).Methods("DELETE")
+	router.HandleFunc(apiV1+"/setup/switch", api.verification(api.setSwitchSetup)).Methods("POST")
+	router.HandleFunc(apiV1+"/setup/service/{name}", api.verification(api.getServiceSetup)).Methods("GET")
+	router.HandleFunc(apiV1+"/setup/service/{name}", api.verification(api.removeServiceSetup)).Methods("DELETE")
+	router.HandleFunc(apiV1+"/setup/service", api.verification(api.setServiceSetup)).Methods("POST")
 
 	//config API
-	router.HandleFunc(apiV1+"/config/led", api.setLedConfig).Methods("POST")
-	router.HandleFunc(apiV1+"/config/sensor", api.setSensorConfig).Methods("POST")
-	router.HandleFunc(apiV1+"/config/blind", api.setBlindConfig).Methods("POST")
-	router.HandleFunc(apiV1+"/config/hvac", api.setHvacConfig).Methods("POST")
-	router.HandleFunc(apiV1+"/config/group", api.setGroupConfig).Methods("POST")
-	router.HandleFunc(apiV1+"/config/switch", api.setSwitchConfig).Methods("POST")
-	router.HandleFunc(apiV1+"/configs", api.setConfig).Methods("POST")
+	router.HandleFunc(apiV1+"/config/led", api.verification(api.setLedConfig)).Methods("POST")
+	router.HandleFunc(apiV1+"/config/sensor", api.verification(api.setSensorConfig)).Methods("POST")
+	router.HandleFunc(apiV1+"/config/blind", api.verification(api.setBlindConfig)).Methods("POST")
+	router.HandleFunc(apiV1+"/config/hvac", api.verification(api.setHvacConfig)).Methods("POST")
+	router.HandleFunc(apiV1+"/config/group", api.verification(api.setGroupConfig)).Methods("POST")
+	router.HandleFunc(apiV1+"/config/switch", api.verification(api.setSwitchConfig)).Methods("POST")
+	router.HandleFunc(apiV1+"/configs", api.verification(api.setConfig)).Methods("POST")
 
 	//status API
-	router.HandleFunc(apiV1+"/status/sensor/{mac}", api.getSensorStatus).Methods("GET")
-	router.HandleFunc(apiV1+"/status/blind/{mac}", api.getBlindStatus).Methods("GET")
-	router.HandleFunc(apiV1+"/status/hvac/{mac}", api.getHvacStatus).Methods("GET")
-	router.HandleFunc(apiV1+"/status/led/{mac}", api.getLedStatus).Methods("GET")
-	router.HandleFunc(apiV1+"/status/group/{groupID}", api.getGroupStatus).Methods("GET")
-	router.HandleFunc(apiV1+"/status/groups", api.getGroupsStatus).Methods("GET")
-	router.HandleFunc(apiV1+"/status", api.getStatus).Methods("GET")
+	router.HandleFunc(apiV1+"/status/sensor/{mac}", api.verification(api.getSensorStatus)).Methods("GET")
+	router.HandleFunc(apiV1+"/status/blind/{mac}", api.verification(api.getBlindStatus)).Methods("GET")
+	router.HandleFunc(apiV1+"/status/hvac/{mac}", api.verification(api.getHvacStatus)).Methods("GET")
+	router.HandleFunc(apiV1+"/status/led/{mac}", api.verification(api.getLedStatus)).Methods("GET")
+	router.HandleFunc(apiV1+"/status/group/{groupID}", api.verification(api.getGroupStatus)).Methods("GET")
+	router.HandleFunc(apiV1+"/status/groups", api.verification(api.getGroupsStatus)).Methods("GET")
+	router.HandleFunc(apiV1+"/status", api.verification(api.getStatus)).Methods("GET")
 
 	//events API
 	router.HandleFunc(apiV1+"/events", api.webEvents)
 	router.HandleFunc(apiV1+"/events/consumption", api.consumptionEvents)
 
 	//command API
-	router.HandleFunc(apiV1+"/command/led", api.sendLedCommand).Methods("POST")
-	router.HandleFunc(apiV1+"/command/blind", api.sendBlindCommand).Methods("POST")
-	router.HandleFunc(apiV1+"/command/hvac", api.sendHvacCommand).Methods("POST")
-	router.HandleFunc(apiV1+"/command/group", api.sendGroupCommand).Methods("POST")
+	router.HandleFunc(apiV1+"/command/led", api.verification(api.sendLedCommand)).Methods("POST")
+	router.HandleFunc(apiV1+"/command/blind", api.verification(api.sendBlindCommand)).Methods("POST")
+	router.HandleFunc(apiV1+"/command/hvac", api.verification(api.sendHvacCommand)).Methods("POST")
+	router.HandleFunc(apiV1+"/command/group", api.verification(api.sendGroupCommand)).Methods("POST")
 
 	//project API
-	router.HandleFunc(apiV1+"/project/ifcInfo/{label}", api.getIfcInfo).Methods("GET")
-	router.HandleFunc(apiV1+"/project/ifcInfo/{label}", api.removeIfcInfo).Methods("DELETE")
-	router.HandleFunc(apiV1+"/project/ifcInfo", api.setIfcInfo).Methods("POST")
-	router.HandleFunc(apiV1+"/project/model/{modelName}", api.getModelInfo).Methods("GET")
-	router.HandleFunc(apiV1+"/project/model/{modelName}", api.removeModelInfo).Methods("DELETE")
-	router.HandleFunc(apiV1+"/project/model", api.setModelInfo).Methods("POST")
-	router.HandleFunc(apiV1+"/project/bim/{label}", api.getBim).Methods("GET")
-	router.HandleFunc(apiV1+"/project/bim/{label}", api.removeBim).Methods("DELETE")
-	router.HandleFunc(apiV1+"/project/bim", api.setBim).Methods("POST")
-	router.HandleFunc(apiV1+"/project", api.getIfc).Methods("GET")
+	router.HandleFunc(apiV1+"/project/ifcInfo/{label}", api.verification(api.getIfcInfo)).Methods("GET")
+	router.HandleFunc(apiV1+"/project/ifcInfo/{label}", api.verification(api.removeIfcInfo)).Methods("DELETE")
+	router.HandleFunc(apiV1+"/project/ifcInfo", api.verification(api.setIfcInfo)).Methods("POST")
+	router.HandleFunc(apiV1+"/project/model/{modelName}", api.verification(api.getModelInfo)).Methods("GET")
+	router.HandleFunc(apiV1+"/project/model/{modelName}", api.verification(api.removeModelInfo)).Methods("DELETE")
+	router.HandleFunc(apiV1+"/project/model", api.verification(api.setModelInfo)).Methods("POST")
+	router.HandleFunc(apiV1+"/project/bim/{label}", api.verification(api.getBim)).Methods("GET")
+	router.HandleFunc(apiV1+"/project/bim/{label}", api.verification(api.removeBim)).Methods("DELETE")
+	router.HandleFunc(apiV1+"/project/bim", api.verification(api.setBim)).Methods("POST")
+	router.HandleFunc(apiV1+"/project", api.verification(api.getIfc)).Methods("GET")
 
 	//Maintenance API
-	router.HandleFunc(apiV1+"/maintenance/driver", api.replaceDriver).Methods("POST")
+	router.HandleFunc(apiV1+"/maintenance/driver", api.verification(api.replaceDriver)).Methods("POST")
 
 	//Install API
-	router.HandleFunc(apiV1+"/commissioning/install", api.installDriver).Methods("POST")
+	router.HandleFunc(apiV1+"/commissioning/install", api.verification(api.installDriver)).Methods("POST")
 
 	//dump API
-	router.HandleFunc(apiV1+"/dump", api.getDump).Methods("GET")
+	router.HandleFunc(apiV1+"/dump", api.verification(api.getDump)).Methods("GET")
 
 	//History API
-	router.HandleFunc(apiV1+"/history", api.getHistory).Methods("GET")
+	router.HandleFunc(apiV1+"/history", api.verification(api.getHistory)).Methods("GET")
 
 	//unversionned API
 	router.HandleFunc("/versions", api.getAPIs).Methods("GET")
 	router.HandleFunc("/functions", api.getFunctions).Methods("GET")
 
-	log.Fatal(http.ListenAndServeTLS(":8888", api.certificate, api.keyfile, router))
+	log.Fatal(http.ListenAndServeTLS(api.apiIP+":"+api.apiPort, api.certificate, api.keyfile, router))
 }

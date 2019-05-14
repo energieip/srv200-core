@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/energieip/common-components-go/pkg/duser"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
 	"github.com/gorilla/mux"
@@ -16,45 +17,53 @@ func (api *API) readBim(w http.ResponseWriter, label string) {
 	label = strings.Replace(label, "-", "_", -1)
 	project, _ := database.GetProject(api.db, label)
 	if project == nil {
-		api.sendError(w, APIErrorDeviceNotFound, "Could not found information on device "+label)
+		api.sendError(w, APIErrorDeviceNotFound, "Could not found information on device "+label, http.StatusInternalServerError)
 		return
 	}
-	inrec, _ := json.MarshalIndent(*project, "", "  ")
-	w.Write(inrec)
+	json.NewEncoder(w).Encode(*project)
 }
 
 func (api *API) getBim(w http.ResponseWriter, req *http.Request) {
-	api.setDefaultHeader(w)
+	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
+		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
+		return
+	}
 	params := mux.Vars(req)
 	label := params["label"]
 	api.readBim(w, label)
 }
 
 func (api *API) removeBim(w http.ResponseWriter, req *http.Request) {
-	api.setDefaultHeader(w)
+	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
+		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
+		return
+	}
 	params := mux.Vars(req)
 	label := params["label"]
 	label = strings.Replace(label, "-", "_", -1)
 	res := database.RemoveProject(api.db, label)
 	if res != nil {
-		api.sendError(w, APIErrorDeviceNotFound, "Device "+label+" not found")
+		api.sendError(w, APIErrorDeviceNotFound, "Device "+label+" not found", http.StatusInternalServerError)
 		return
 	}
 	w.Write([]byte("{}"))
 }
 
 func (api *API) setBim(w http.ResponseWriter, req *http.Request) {
-	api.setDefaultHeader(w)
+	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
+		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
+		return
+	}
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
-		api.sendError(w, APIErrorBodyParsing, "Error reading request body")
+		api.sendError(w, APIErrorBodyParsing, "Error reading request body", http.StatusInternalServerError)
 		return
 	}
 
 	proj := core.Project{}
 	err = json.Unmarshal(body, &proj)
 	if err != nil {
-		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error())
+		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	proj.Label = strings.Replace(proj.Label, "-", "_", -1)
@@ -65,7 +74,7 @@ func (api *API) setBim(w http.ResponseWriter, req *http.Request) {
 	}
 	err = database.SaveProject(api.db, proj)
 	if err != nil {
-		api.sendError(w, APIErrorDatabase, "Ifc information "+proj.Label+" cannot be added in database")
+		api.sendError(w, APIErrorDatabase, "Ifc information "+proj.Label+" cannot be added in database", http.StatusInternalServerError)
 		return
 	}
 
@@ -77,7 +86,7 @@ func (api *API) readIfcInfo(w http.ResponseWriter, label string) {
 	label = strings.Replace(label, "-", "_", -1)
 	project, _ := database.GetProject(api.db, label)
 	if project == nil {
-		api.sendError(w, APIErrorDeviceNotFound, "Could not found information on device "+label)
+		api.sendError(w, APIErrorDeviceNotFound, "Could not found information on device "+label, http.StatusInternalServerError)
 		return
 	}
 	info := core.IfcInfo{
@@ -93,13 +102,14 @@ func (api *API) readIfcInfo(w http.ResponseWriter, label string) {
 	if project.Mac != nil {
 		info.Mac = *project.Mac
 	}
-
-	inrec, _ := json.MarshalIndent(info, "", "  ")
-	w.Write(inrec)
+	json.NewEncoder(w).Encode(info)
 }
 
 func (api *API) getIfcInfo(w http.ResponseWriter, req *http.Request) {
-	api.setDefaultHeader(w)
+	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
+		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
+		return
+	}
 	params := mux.Vars(req)
 	label := params["label"]
 	label = strings.Replace(label, "-", "_", -1)
@@ -107,30 +117,36 @@ func (api *API) getIfcInfo(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) removeIfcInfo(w http.ResponseWriter, req *http.Request) {
-	api.setDefaultHeader(w)
+	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
+		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
+		return
+	}
 	params := mux.Vars(req)
 	label := params["label"]
 	label = strings.Replace(label, "-", "_", -1)
 	res := database.RemoveProject(api.db, label)
 	if res != nil {
-		api.sendError(w, APIErrorDeviceNotFound, "Device "+label+" not found")
+		api.sendError(w, APIErrorDeviceNotFound, "Device "+label+" not found", http.StatusInternalServerError)
 		return
 	}
 	w.Write([]byte("{}"))
 }
 
 func (api *API) setIfcInfo(w http.ResponseWriter, req *http.Request) {
-	api.setDefaultHeader(w)
+	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
+		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
+		return
+	}
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
-		api.sendError(w, APIErrorBodyParsing, "Error reading request body")
+		api.sendError(w, APIErrorBodyParsing, "Error reading request body", http.StatusInternalServerError)
 		return
 	}
 
 	ifcInfo := core.IfcInfo{}
 	err = json.Unmarshal(body, &ifcInfo)
 	if err != nil {
-		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error())
+		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -142,7 +158,7 @@ func (api *API) setIfcInfo(w http.ResponseWriter, req *http.Request) {
 	}
 	err = database.SaveModel(api.db, model)
 	if err != nil {
-		api.sendError(w, APIErrorDatabase, "Ifc information "+ifcInfo.Label+" cannot be added in database")
+		api.sendError(w, APIErrorDatabase, "Ifc information "+ifcInfo.Label+" cannot be added in database", http.StatusInternalServerError)
 		return
 	}
 
@@ -153,7 +169,7 @@ func (api *API) setIfcInfo(w http.ResponseWriter, req *http.Request) {
 	}
 	err = database.SaveProject(api.db, proj)
 	if err != nil {
-		api.sendError(w, APIErrorDatabase, "Ifc information "+ifcInfo.Label+" cannot be added in database")
+		api.sendError(w, APIErrorDatabase, "Ifc information "+ifcInfo.Label+" cannot be added in database", http.StatusInternalServerError)
 		return
 	}
 	rlog.Info("IfcInfo for " + proj.Label + " saved")
@@ -161,7 +177,10 @@ func (api *API) setIfcInfo(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) getIfc(w http.ResponseWriter, req *http.Request) {
-	api.setDefaultHeader(w)
+	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
+		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
+		return
+	}
 	var infos []core.IfcInfo
 
 	ifcs := database.GetIfcs(api.db)

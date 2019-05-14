@@ -1,104 +1,125 @@
 {
-    "swagger": "2.0",
+    "openapi": "3.0.0",
     "info": {
-        "description": "GTB server API unversioned",
-        "version": "0.0",
-        "title": "GTB Swagger",
-        "termsOfService": "http://swagger.io/terms/",
-        "contact": {
-            "email": "developer@energie-ip.com"
-        },
-        "license": {
-            "name": "Apache 2.0",
-            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
-        }
+      "title": "GTB Swagger",
+      "description": "GTB server API unversioned",
+      "contact": {
+        "email": "developer@energie-ip.com"
+      },
+      "version": "0.0"
     },
-    "schemes":[
-        "https"
-    ],
-    "paths":{
-        "/versions":{
-            "get":{
-                "summary": "Return Supported API Versions",
-                "description": "Return Supported API Versions",
-                "operationId": "getAPIs",
-                "produces":[
-                    "application/json"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "sucessful operation",
-                        "schema":{
-                            "type": "object",
-                            "properties": {
-                                "versions": {
-                                    "description": "list of available APIs",
-                                    "type": "array",
-                                    "items": {
-                                        "type": "string"
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "default": {
-                        "description": "unexpected error",
-                        "schema": {
-                          "$ref": "#/definitions/Error"
-                        }
-                    }
+    "paths": {
+      "/versions": {
+        "get": {
+          "summary": "getAPIs",
+          "description": "Return Supported API Versions",
+          "operationId": "GetAPIs",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "sucessful operation",
+              "headers": {},
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/getAPIsResponse"
+                  }
                 }
-            }
-        },
-        "/functions":{
-            "get":{
-                "summary": "Return the list of available API functions",
-                "description": "Return the list of available API functions",
-                "operationId": "getFunctions",
-                "produces":[
-                    "application/json"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "sucessful operation",
-                        "schema":{
-                            "type": "object",
-                            "properties": {
-                                "functions": {
-                                    "description": "list of available functions",
-                                    "type": "array",
-                                    "items": {
-                                        "type": "string"
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "default": {
-                        "description": "unexpected error",
-                        "schema": {
-                          "$ref": "#/definitions/Error"
-                        }
-                    }
+              }
+            },
+            "default": {
+              "description": "unexpected error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
                 }
-            }
-        }
-    },
-    "definitions": {
-        "Error": {
-            "required": [
-              "code",
-              "message"
-            ],
-            "properties": {
-              "code": {
-                "type": "integer",
-                "format": "int32"
-              },
-              "message": {
-                "type": "string"
               }
             }
+          },
+          "deprecated": false
         }
-    }
-}
+      },
+      "/functions": {
+        "get": {
+          "summary": "getFunctions",
+          "description": "Return the list of available API functions",
+          "operationId": "GetFunctions",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "sucessful operation",
+              "headers": {},
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/getFunctionsResponse"
+                  }
+                }
+              }
+            },
+            "default": {
+              "description": "unexpected error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "deprecated": false
+        }
+      }
+    },
+    "components": {
+      "schemas": {
+        "Error": {
+          "title": "Error",
+          "required": [
+            "code",
+            "message"
+          ],
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "message": {
+              "type": "string"
+            }
+          }
+        },
+        "getAPIsResponse": {
+          "title": "getAPIsResponse",
+          "type": "object",
+          "properties": {
+            "versions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "list of available APIs"
+            }
+          }
+        },
+        "getFunctionsResponse": {
+          "title": "getFunctionsResponse",
+          "type": "object",
+          "properties": {
+            "functions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "list of available functions"
+            }
+          }
+        }
+      }
+    },
+    "tags": []
+  }

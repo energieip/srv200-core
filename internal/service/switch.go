@@ -142,7 +142,7 @@ func (s *CoreService) sendSwitchUpdateConfig(sw sd.SwitchStatus) {
 
 func (s *CoreService) prepareSetupSwitchConfig(switchStatus sd.SwitchStatus) *sd.SwitchConfig {
 	config := database.GetSwitchConfig(s.db, switchStatus.Mac)
-	if config == nil && !s.installMode {
+	if config == nil {
 		return nil
 	}
 
@@ -162,15 +162,6 @@ func (s *CoreService) prepareSetupSwitchConfig(switchStatus sd.SwitchStatus) *sd
 	}
 
 	setup.Services = services
-	if s.installMode && config == nil {
-		switchSetup := core.SwitchConfig{}
-		switchSetup.Mac = setup.Mac
-		switchSetup.IP = switchStatus.IP
-		switchSetup.Cluster = 0
-		config.Cluster = 0
-		switchSetup.FriendlyName = switchStatus.FriendlyName
-		database.SaveSwitchConfig(s.db, switchSetup)
-	}
 	if config.IP == "" {
 		config.IP = switchStatus.IP
 		database.SaveSwitchConfig(s.db, *config)
@@ -197,18 +188,9 @@ func (s *CoreService) prepareSetupSwitchConfig(switchStatus sd.SwitchStatus) *sd
 
 func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.SwitchConfig {
 	config := database.GetSwitchConfig(s.db, switchStatus.Mac)
-	if config == nil && !s.installMode {
+	if config == nil {
 		rlog.Warn("Cannot find configuration for switch", switchStatus.Mac)
 		return nil
-	}
-	if s.installMode && config == nil {
-		switchSetup := core.SwitchConfig{}
-		switchSetup.Mac = switchStatus.Mac
-		switchSetup.IP = switchStatus.IP
-		switchSetup.Cluster = 0
-		config.Cluster = 0
-		switchSetup.FriendlyName = switchStatus.FriendlyName
-		database.SaveSwitchConfig(s.db, switchSetup)
 	}
 	if config.IP == "" {
 		config.IP = switchStatus.IP
@@ -222,14 +204,11 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 	setup.FriendlyName = config.FriendlyName
 	setup.IsConfigured = &isConfigured
 
-	defaultGroup := 0
-	dumpFreq := 1
-	defaultWatchdog := 600
-
 	setup.LedsSetup = make(map[string]dl.LedSetup)
 	setup.SensorsSetup = make(map[string]ds.SensorSetup)
 	setup.BlindsSetup = make(map[string]dblind.BlindSetup)
 	setup.HvacsSetup = make(map[string]dhvac.HvacSetup)
+	grList := make(map[int]bool)
 
 	driversMac := make(map[string]bool)
 	for _, led := range switchStatus.Leds {
@@ -249,32 +228,14 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 			continue
 		}
 		newGroups[gr.Group] = gr
+		grList[gr.Group] = true
 	}
 	setup.Groups = newGroups
+	setup.Users = database.GetUserConfigs(s.db, grList)
 
 	for mac, led := range switchStatus.Leds {
 		if !led.IsConfigured {
 			lsetup, _ := database.GetLedConfig(s.db, mac)
-			if lsetup == nil && s.installMode {
-				enableBle := false
-				low := 0
-				high := 100
-				dled := dl.LedSetup{
-					Mac:           led.Mac,
-					IMax:          100,
-					Group:         &defaultGroup,
-					Watchdog:      &defaultWatchdog,
-					IsBleEnabled:  &enableBle,
-					ThresholdHigh: &high,
-					ThresholdLow:  &low,
-					SwitchMac:     switchStatus.Mac,
-					DumpFrequency: dumpFreq,
-					FriendlyName:  &led.Mac,
-				}
-				lsetup = &dled
-				// saved default config
-				database.SaveLedConfig(s.db, dled)
-			}
 			if lsetup != nil {
 				setup.LedsSetup[mac] = *lsetup
 			}
@@ -289,20 +250,6 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 	for mac, blind := range switchStatus.Blinds {
 		if !blind.IsConfigured {
 			bsetup, _ := database.GetBlindConfig(s.db, mac)
-			if bsetup == nil && s.installMode {
-				enableBle := false
-				confBlind := dblind.BlindSetup{
-					Mac:           blind.Mac,
-					Group:         &defaultGroup,
-					IsBleEnabled:  &enableBle,
-					SwitchMac:     switchStatus.Mac,
-					DumpFrequency: dumpFreq,
-					FriendlyName:  &blind.Mac,
-				}
-				bsetup = &confBlind
-				// saved default config
-				database.SaveBlindConfig(s.db, confBlind)
-			}
 			if bsetup != nil {
 				setup.BlindsSetup[mac] = *bsetup
 			}
@@ -317,18 +264,6 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 	for mac, hvac := range switchStatus.Hvacs {
 		if !hvac.IsConfigured {
 			bsetup, _ := database.GetHvacConfig(s.db, mac)
-			if bsetup == nil && s.installMode {
-				confHvac := dhvac.HvacSetup{
-					Mac:           hvac.Mac,
-					Group:         &defaultGroup,
-					SwitchMac:     switchStatus.Mac,
-					DumpFrequency: dumpFreq,
-					FriendlyName:  &hvac.Mac,
-				}
-				bsetup = &confHvac
-				// saved default config
-				database.SaveHvacConfig(s.db, confHvac)
-			}
 			if bsetup != nil {
 				setup.HvacsSetup[mac] = *bsetup
 			}
@@ -343,26 +278,6 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 	for mac, sensor := range switchStatus.Sensors {
 		if !sensor.IsConfigured {
 			ssetup, _ := database.GetSensorConfig(s.db, mac)
-			if ssetup == nil && s.installMode {
-				enableBle := true
-				brightnessCorrection := 1
-				thresholdPresence := 10
-				temperatureOffset := 0
-				dsensor := ds.SensorSetup{
-					Mac:                        sensor.Mac,
-					Group:                      &defaultGroup,
-					IsBleEnabled:               &enableBle,
-					BrightnessCorrectionFactor: &brightnessCorrection,
-					ThresholdPresence:          &thresholdPresence,
-					TemperatureOffset:          &temperatureOffset,
-					SwitchMac:                  switchStatus.Mac,
-					DumpFrequency:              dumpFreq,
-					FriendlyName:               &sensor.Mac,
-				}
-				ssetup = &dsensor
-				// saved default config
-				database.SaveSensorConfig(s.db, dsensor)
-			}
 			if ssetup != nil {
 				setup.SensorsSetup[mac] = *ssetup
 			}

@@ -1,0 +1,179 @@
+package api
+
+import (
+	"sync"
+
+	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/energieip/common-components-go/pkg/dblind"
+	gm "github.com/energieip/common-components-go/pkg/dgroup"
+	"github.com/energieip/common-components-go/pkg/dhvac"
+	dl "github.com/energieip/common-components-go/pkg/dled"
+	ds "github.com/energieip/common-components-go/pkg/dsensor"
+	"github.com/energieip/srv200-coreservice-go/internal/core"
+	"github.com/energieip/srv200-coreservice-go/internal/database"
+	"github.com/energieip/srv200-coreservice-go/internal/history"
+	"github.com/gorilla/websocket"
+	cmap "github.com/orcaman/concurrent-map"
+)
+
+const (
+	APIErrorDeviceNotFound = 1
+	APIErrorBodyParsing    = 2
+	APIErrorDatabase       = 3
+	APIErrorInvalidValue   = 4
+	APIErrorUnauthorized   = 5
+	APIErrorExpiredToken   = 6
+
+	TokenName = "EiPAccessToken"
+
+	TokenExpirationTime = 500
+
+	FilterTypeAll    = "all"
+	FilterTypeSensor = "sensor"
+	FilterTypeLed    = "led"
+	FilterTypeBlind  = "blind"
+	FilterTypeHvac   = "hvac"
+)
+
+//APIError Message error code
+type APIError struct {
+	Code    int    `json:"code"` //errorCode
+	Message string `json:"message"`
+}
+
+type API struct {
+	clients         map[*websocket.Conn]bool
+	clientsConso    map[*websocket.Conn]bool
+	upgrader        websocket.Upgrader
+	db              database.Database
+	historydb       history.HistoryDb
+	eventsAPI       chan map[string]interface{}
+	eventsConso     chan core.EventConsumption
+	EventsToBackend chan map[string]interface{}
+	access          cmap.ConcurrentMap
+	apiMutex        sync.Mutex
+	certificate     string
+	keyfile         string
+	apiIP           string
+	apiPort         string
+	apiPassword     string
+}
+
+type JwtToken struct {
+	Token     string `json:"accessToken"`
+	TokenType string `json:"tokenType"`
+	ExpireIn  int    `json:"expireIn"`
+}
+
+type Claims struct {
+	jwt.StandardClaims
+}
+
+type Credentials struct {
+	UserKey string `json:"userKey"`
+}
+
+//Status
+type Status struct {
+	Leds    []dl.Led       `json:"leds"`
+	Sensors []ds.Sensor    `json:"sensors"`
+	Blind   []dblind.Blind `json:"blinds"`
+	Hvac    []dhvac.Hvac   `json:"hvacs"`
+}
+
+//DumpBlind
+type DumpBlind struct {
+	Ifc    core.IfcInfo      `json:"ifc"`
+	Status dblind.Blind      `json:"status"`
+	Config dblind.BlindSetup `json:"config"`
+}
+
+//DumpHvac
+type DumpHvac struct {
+	Ifc    core.IfcInfo    `json:"ifc"`
+	Status dhvac.Hvac      `json:"status"`
+	Config dhvac.HvacSetup `json:"config"`
+}
+
+//DumpLed
+type DumpLed struct {
+	Ifc    core.IfcInfo `json:"ifc"`
+	Status dl.Led       `json:"status"`
+	Config dl.LedSetup  `json:"config"`
+}
+
+//DumpSensor
+type DumpSensor struct {
+	Ifc    core.IfcInfo   `json:"ifc"`
+	Status ds.Sensor      `json:"status"`
+	Config ds.SensorSetup `json:"config"`
+}
+
+//DumpSwitch
+type DumpSwitch struct {
+	Ifc    core.IfcInfo      `json:"ifc"`
+	Status core.SwitchDump   `json:"status"`
+	Config core.SwitchConfig `json:"config"`
+}
+
+//DumpSwitch
+type DumpGroup struct {
+	Status gm.GroupStatus `json:"status"`
+	Config gm.GroupConfig `json:"config"`
+}
+
+//Dump
+type Dump struct {
+	Leds    []DumpLed    `json:"leds"`
+	Sensors []DumpSensor `json:"sensors"`
+	Blinds  []DumpBlind  `json:"blinds"`
+	Hvacs   []DumpHvac   `json:"hvacs"`
+	Switchs []DumpSwitch `json:"switchs"`
+	Groups  []DumpGroup  `json:"groups"`
+}
+
+//UserAuthorization
+type UserAuthorization struct {
+	Priviledges []string `json:"priviledges"`
+	AccessGroup []int    `json:"accessGroups"`
+}
+
+type LedHist struct {
+	Energy float64 `json:"energy"`
+	Power  int     `json:"power"`
+	Date   string  `json:"date"`
+}
+
+type GlobalHistory struct {
+	Leds []LedHist `json:"leds"`
+}
+
+type APIInfo struct {
+	Versions []string `json:"versions"`
+}
+
+type APIFunctions struct {
+	Functions []string `json:"functions"`
+}
+
+type Conf struct {
+	Leds    []dl.LedConf        `json:"leds"`
+	Sensors []ds.SensorConf     `json:"sensors"`
+	Blinds  []dblind.BlindConf  `json:"blinds"`
+	Hvacs   []dhvac.HvacConf    `json:"hvacs"`
+	Groups  []gm.GroupConfig    `json:"groups"`
+	Switchs []core.SwitchConfig `json:"switchs"`
+}
+
+type networkError struct {
+	s string
+}
+
+func (e *networkError) Error() string {
+	return e.s
+}
+
+// NewError raise an error
+func NewError(text string) error {
+	return &networkError{text}
+}

@@ -44,15 +44,14 @@ func (net ServerNetwork) LocalConnection(conf pkg.ServiceConfig, clientID string
 	cbkServer["/read/switch/+/status/dump"] = net.onDump
 
 	confServer := genericNetwork.NetworkConfig{
-		IP:               conf.NetworkBroker.IP,
-		Port:             conf.NetworkBroker.Port,
-		ClientName:       clientID,
-		Callbacks:        cbkServer,
-		LogLevel:         conf.LogLevel,
-		User:             conf.NetworkBroker.Login,
-		Password:         conf.NetworkBroker.Password,
-		ClientKey:        conf.NetworkBroker.KeyPath,
-		ServerCertificat: conf.NetworkBroker.CaPath,
+		IP:         conf.NetworkBroker.IP,
+		Port:       conf.NetworkBroker.Port,
+		ClientName: clientID,
+		Callbacks:  cbkServer,
+		LogLevel:   conf.LogLevel,
+		User:       conf.NetworkBroker.Login,
+		Password:   conf.NetworkBroker.Password,
+		CaPath:     conf.NetworkBroker.CaPath,
 	}
 
 	for {

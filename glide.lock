@@ -1,14 +1,16 @@
 hash: 7873f75061b03685fab1d37fa10ae2d9249507813e75d280fc0acfb9b629147f
-updated: 2019-04-27T10:36:00.697580624+02:00
+updated: 2019-05-14T11:21:28.498026353+02:00
 imports:
 - name: github.com/cenkalti/backoff
-  version: 1e4cf3da559842a91afcb6ea6141451e6c30c618
+  version: 2146c93394225c3732078705043ce9f26584d334
+- name: github.com/dgrijalva/jwt-go
+  version: 3af4c746e1c248ee8491a3e0c6f7a9cd831e95f8
 - name: github.com/eclipse/paho.mqtt.golang
   version: adca289fdcf8c883800aafa545bc263452290bae
   subpackages:
   - packets
 - name: github.com/energieip/common-components-go
-  version: 09dc100c85b3ea7bdb52655b03b7c00b90b78d7f
+  version: 1885acf4f20cc0d8ff6bb1c0a06e28fddf199576
   subpackages:
   - pkg/database
   - pkg/dblind
@@ -17,6 +19,7 @@ imports:
   - pkg/dled
   - pkg/dsensor
   - pkg/dswitch
+  - pkg/duser
   - pkg/network
   - pkg/service
   - pkg/tools
@@ -24,6 +27,8 @@ imports:
   version: e91709a02e0e8ff8b86b7aa913fdc9ae9498e825
   subpackages:
   - proto
+- name: github.com/gorilla/context
+  version: 51ce91d2eaddeca0ef29a71d766bb3634dadf729
 - name: github.com/gorilla/mux
   version: c5c6c98bc25355028a63748a498942a6398ccd22
 - name: github.com/gorilla/websocket
@@ -32,6 +37,8 @@ imports:
   version: e80d13ce29ede4452c43dea11e79b9bc8a15b478
 - name: github.com/konsorten/go-windows-terminal-sequences
   version: f55edac94c9bbba5d6182a4be46d86a2c9b5b50e
+- name: github.com/mitchellh/mapstructure
+  version: 3536a929edddb9a5b34bd6861dc4a9647cb459fe
 - name: github.com/opentracing/opentracing-go
   version: 659c90643e714681897ec2521c60567dd21da733
   subpackages:
@@ -42,20 +49,20 @@ imports:
 - name: github.com/romana/rlog
   version: f018bc92e7d71f27c04e04cbf008860416c21d01
 - name: github.com/sirupsen/logrus
-  version: 9b3cdde74fbe9443d704467498a7dcb61a79de9b
+  version: f0375eb5b588893ff556c71dee32d98e57a9b777
 - name: golang.org/x/crypto
-  version: a29dc8fdc73485234dbef99ebedb95d2eced08de
+  version: 22d7a77e9e5f409e934ed268692e56707cd169e5
   subpackages:
   - pbkdf2
 - name: golang.org/x/net
-  version: 4829fb13d2c62012c17688fa7f629f371014946d
+  version: a4d6f7feada510cc50e69a37b484cb0fdc6b7876
   subpackages:
   - context
   - internal/socks
   - proxy
   - websocket
 - name: golang.org/x/sys
-  version: a129542de9ae0895210abff9c95d67a1f33cb93d
+  version: a5b02f93d862f065920dd6a40dddc66b60d0dec4
   subpackages:
   - unix
 - name: gopkg.in/fatih/pool.v2
