@@ -52,8 +52,9 @@ func InitAPI(db database.Database, historydb history.HistoryDb, eventsAPI chan m
 				return true
 			},
 		},
-		certificate: conf.ExternalAPI.CertPath,
-		keyfile:     conf.ExternalAPI.KeyPath,
+		certificate:    conf.ExternalAPI.CertPath,
+		keyfile:        conf.ExternalAPI.KeyPath,
+		browsingFolder: conf.ExternalAPI.BrowsingFolder,
 	}
 	go api.swagger()
 	return &api
@@ -136,10 +137,7 @@ func (api *API) verification(next http.HandlerFunc) http.HandlerFunc {
 }
 
 func (api *API) setDefaultHeader(w http.ResponseWriter, req *http.Request) {
-	header := "*"
-	if req.Header.Get("Origin") != "null" {
-		header = req.Header.Get("Origin")
-	}
+	header := "https://" + req.Host
 	w.Header().Set("Access-Control-Allow-Origin", header)
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE")
@@ -799,6 +797,11 @@ func (api *API) swagger() {
 	//unversionned API
 	router.HandleFunc("/versions", api.getAPIs).Methods("GET")
 	router.HandleFunc("/functions", api.getFunctions).Methods("GET")
+
+	if api.browsingFolder != "" {
+		sh2 := http.StripPrefix("/", http.FileServer(http.Dir(api.browsingFolder)))
+		router.PathPrefix("/").Handler(sh2)
+	}
 
 	log.Fatal(http.ListenAndServeTLS(api.apiIP+":"+api.apiPort, api.certificate, api.keyfile, router))
 }

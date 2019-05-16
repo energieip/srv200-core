@@ -58,6 +58,7 @@ type API struct {
 	apiIP           string
 	apiPort         string
 	apiPassword     string
+	browsingFolder  string
 }
 
 type JwtToken struct {
