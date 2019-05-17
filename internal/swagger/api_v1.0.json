@@ -5262,19 +5262,33 @@
               "type": "string",
               "description": "user key"
             },
-            "priviledges": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "description": "user access"
+            "priviledge": {
+              "type": "string",
+              "enum": [
+                "admin",
+                "user",
+                "maintainer"
+              ],
+              "example": "user",
+              "description": "user priviledge"
             },
             "accessGroups": {
               "type": "array",
               "items": {
                 "type": "string"
               },
-              "description": "user group access"
+              "description": "user access group"
+            },
+            "services": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "remote"
+                ],
+                "example": "remote"
+              },
+              "description": "user services"
             }
           }
         },

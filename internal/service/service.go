@@ -171,6 +171,8 @@ func (s *CoreService) manageAuthMQTTEvent(eventType string, event duser.UserAcce
 	switch eventType {
 	case network.EventNewUser:
 		s.addNewUser(event)
+	case network.EventRemoveUser:
+		s.removeUser(event)
 	}
 }
 

@@ -11,7 +11,8 @@ import (
 )
 
 const (
-	EventNewUser = "newUser"
+	EventNewUser    = "addUser"
+	EventRemoveUser = "removeUser"
 )
 
 //AuthNetwork network object
@@ -36,7 +37,8 @@ func CreateAuthNetwork() (*AuthNetwork, error) {
 //LocalConnection connect service to server broker
 func (net AuthNetwork) LocalConnection(conf pkg.ServiceConfig, clientID string) error {
 	cbkServer := make(map[string]func(genericNetwork.Client, genericNetwork.Message))
-	cbkServer["newUser"] = net.onNewUser
+	cbkServer[EventNewUser] = net.onNewUser
+	cbkServer[EventRemoveUser] = net.onRemoveUser
 
 	confServer := genericNetwork.NetworkConfig{
 		IP:         conf.AuthBroker.IP,
@@ -79,6 +81,21 @@ func (net AuthNetwork) onNewUser(client genericNetwork.Client, msg genericNetwor
 
 	event := make(map[string]duser.UserAccess)
 	event[EventNewUser] = user
+	net.Events <- event
+}
+
+func (net AuthNetwork) onRemoveUser(client genericNetwork.Client, msg genericNetwork.Message) {
+	payload := msg.Payload()
+	rlog.Info(msg.Topic() + " : " + string(payload))
+	var user duser.UserAccess
+	err := json.Unmarshal(payload, &user)
+	if err != nil {
+		rlog.Error("Cannot parse config ", err.Error())
+		return
+	}
+
+	event := make(map[string]duser.UserAccess)
+	event[EventRemoveUser] = user
 	net.Events <- event
 }
 
