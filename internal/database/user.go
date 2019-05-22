@@ -59,3 +59,24 @@ func GetUserConfigs(db Database, groups map[int]bool) map[string]duser.UserAcces
 	}
 	return users
 }
+
+//SetUsersDump drop table before adding users
+func SetUsersDump(db Database, users map[string]duser.UserAccess) error {
+	err := db.DropTable(ConfigDB, AccessTable)
+	if err != nil {
+		return err
+	}
+	err = db.CreateTable(ConfigDB, AccessTable, &users)
+	if err != nil {
+		return err
+	}
+	var res error
+	for _, user := range users {
+		_, err = db.InsertRecord(ConfigDB, AccessTable, user)
+		if err != nil {
+			//best effort
+			res = err
+		}
+	}
+	return res
+}

@@ -17,8 +17,9 @@ const (
 
 //AuthNetwork network object
 type AuthNetwork struct {
-	Iface  genericNetwork.NetworkInterface
-	Events chan map[string]duser.UserAccess
+	Iface     genericNetwork.NetworkInterface
+	Events    chan map[string]duser.UserAccess
+	EventDump chan map[string]duser.UserAccess
 }
 
 //CreateAuthNetwork create network server object
@@ -28,8 +29,9 @@ func CreateAuthNetwork() (*AuthNetwork, error) {
 		return nil, err
 	}
 	serverNet := AuthNetwork{
-		Iface:  serverBroker,
-		Events: make(chan map[string]duser.UserAccess),
+		Iface:     serverBroker,
+		Events:    make(chan map[string]duser.UserAccess),
+		EventDump: make(chan map[string]duser.UserAccess),
 	}
 	return &serverNet, nil
 }
@@ -39,6 +41,7 @@ func (net AuthNetwork) LocalConnection(conf pkg.ServiceConfig, clientID string) 
 	cbkServer := make(map[string]func(genericNetwork.Client, genericNetwork.Message))
 	cbkServer[EventNewUser] = net.onNewUser
 	cbkServer[EventRemoveUser] = net.onRemoveUser
+	cbkServer["/write/server/+/users"] = net.onDumpUser
 
 	confServer := genericNetwork.NetworkConfig{
 		IP:         conf.AuthBroker.IP,
@@ -82,6 +85,18 @@ func (net AuthNetwork) onNewUser(client genericNetwork.Client, msg genericNetwor
 	event := make(map[string]duser.UserAccess)
 	event[EventNewUser] = user
 	net.Events <- event
+}
+
+func (net AuthNetwork) onDumpUser(client genericNetwork.Client, msg genericNetwork.Message) {
+	payload := msg.Payload()
+	rlog.Info(msg.Topic() + " : " + string(payload))
+	var users map[string]duser.UserAccess
+	err := json.Unmarshal(payload, &users)
+	if err != nil {
+		rlog.Error("Cannot parse config ", err.Error())
+		return
+	}
+	net.EventDump <- users
 }
 
 func (net AuthNetwork) onRemoveUser(client genericNetwork.Client, msg genericNetwork.Message) {

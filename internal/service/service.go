@@ -3,6 +3,7 @@ package service
 import (
 	"os"
 
+	"github.com/energieip/common-components-go/pkg/dserver"
 	"github.com/energieip/common-components-go/pkg/duser"
 
 	sd "github.com/energieip/common-components-go/pkg/dswitch"
@@ -106,6 +107,14 @@ func (s *CoreService) Initialize(confFile string) error {
 	web := api.InitAPI(s.db, s.historyDb, s.eventsAPI, s.eventsConsumptionAPI, *conf)
 	s.api = web
 
+	serv := dserver.ServerConfig{}
+	serv.Mac = s.mac
+	serv.IP = s.ip
+	serv.Protocol = "MQTTS"
+	dump, _ := serv.ToJSON()
+	topic := "/read/server/" + s.mac + "/setup/hello"
+	s.authServer.SendCommand(topic, dump)
+
 	rlog.Info("ServerCore service started")
 	return nil
 }
@@ -176,6 +185,10 @@ func (s *CoreService) manageAuthMQTTEvent(eventType string, event duser.UserAcce
 	}
 }
 
+func (s *CoreService) manageAuthMQTTDumpEvent(users map[string]duser.UserAccess) {
+	database.SetUsersDump(s.db, users)
+}
+
 //Run service mainloop
 func (s *CoreService) Run() error {
 	go s.pushAPIEvent()
@@ -191,6 +204,8 @@ func (s *CoreService) Run() error {
 			for eventType, event := range authEvents {
 				go s.manageAuthMQTTEvent(eventType, event)
 			}
+		case authEvents := <-s.authServer.EventDump:
+			go s.manageAuthMQTTDumpEvent(authEvents)
 		}
 	}
 }
