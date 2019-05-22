@@ -114,6 +114,7 @@ func (api *API) verification(next http.HandlerFunc) http.HandlerFunc {
 			}
 			userAccess, _ := duser.ToUserAccess(user)
 			context.Set(r, "decoded", *userAccess)
+			context.Set(r, "token", tokenValue)
 			next(w, r)
 
 		case *jwt.ValidationError:
@@ -718,6 +719,7 @@ func (api *API) swagger() {
 	// Auth
 	router.HandleFunc(apiV1+"/user/login", api.createToken).Methods("POST")
 	router.HandleFunc(apiV1+"/user/info", api.verification(api.getUserInfo)).Methods("GET")
+	router.HandleFunc(apiV1+"/user/logout", api.verification(api.logout)).Methods("POST")
 
 	//setup API
 	router.HandleFunc(apiV1+"/setup/sensor/{mac}", api.verification(api.getSensorSetup)).Methods("GET")

@@ -125,6 +125,48 @@
           ]
         }
       },
+      "/user/logout": {
+        "post": {
+          "tags": [
+            "authentication"
+          ],
+          "summary": "delete Token",
+          "description": "User logout",
+          "operationId": "RemoveToken",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "sucessful operation"
+            },
+            "401": {
+              "description": "Unauthorized Access",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "default": {
+              "description": "unexpected error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "deprecated": false,
+          "security": [
+            {
+              "Authorization": []
+            }
+          ]
+        }
+      },
       "/setup/sensor/{mac}": {
         "get": {
           "tags": [
