@@ -27,7 +27,7 @@ const (
 
 	TokenName = "EiPAccessToken"
 
-	TokenExpirationTime = 500
+	TokenExpirationTime = 86400 // in seconds: 1day
 
 	FilterTypeAll    = "all"
 	FilterTypeSensor = "sensor"
