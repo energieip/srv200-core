@@ -52,6 +52,7 @@ func (net ServerNetwork) LocalConnection(conf pkg.ServiceConfig, clientID string
 		User:       conf.NetworkBroker.Login,
 		Password:   conf.NetworkBroker.Password,
 		CaPath:     conf.NetworkBroker.CaPath,
+		Secure:     conf.AuthBroker.Secure,
 	}
 
 	for {

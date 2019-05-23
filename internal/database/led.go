@@ -191,6 +191,25 @@ func GetLedSwitchStatus(db Database, swMac string) map[string]dl.Led {
 	return res
 }
 
+//GetLedSwitchConfig get led Config list
+func GetLedSwitchSetup(db Database, swMac string) map[string]dl.LedSetup {
+	res := map[string]dl.LedSetup{}
+	criteria := make(map[string]interface{})
+	criteria["SwitchMac"] = swMac
+	stored, err := db.GetRecords(StatusDB, LedsTable, criteria)
+	if err != nil || stored == nil {
+		return res
+	}
+	for _, elt := range stored {
+		driver, err := dl.ToLedSetup(elt)
+		if err != nil || driver == nil {
+			continue
+		}
+		res[driver.Mac] = *driver
+	}
+	return res
+}
+
 //GetLedStatus return the led status
 func GetLedStatus(db Database, mac string) *dl.Led {
 	criteria := make(map[string]interface{})

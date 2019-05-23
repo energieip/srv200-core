@@ -77,6 +77,25 @@ func GetHvacSwitchStatus(db Database, swMac string) map[string]dhvac.Hvac {
 	return res
 }
 
+//GetHvacSwitchSetup get hvac Config list
+func GetHvacSwitchSetup(db Database, swMac string) map[string]dhvac.HvacSetup {
+	res := map[string]dhvac.HvacSetup{}
+	criteria := make(map[string]interface{})
+	criteria["SwitchMac"] = swMac
+	stored, err := db.GetRecords(StatusDB, HvacsTable, criteria)
+	if err != nil || stored == nil {
+		return res
+	}
+	for _, elt := range stored {
+		driver, err := dhvac.ToHvacSetup(elt)
+		if err != nil || driver == nil {
+			continue
+		}
+		res[driver.Mac] = *driver
+	}
+	return res
+}
+
 //GetHvacConfig return the sensor configuration
 func GetHvacConfig(db Database, mac string) (*dhvac.HvacSetup, string) {
 	var dbID string

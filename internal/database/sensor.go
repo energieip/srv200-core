@@ -82,6 +82,25 @@ func GetSensorSwitchStatus(db Database, swMac string) map[string]ds.Sensor {
 	return res
 }
 
+//GetSensorSwitchSetup get sensor Config list
+func GetSensorSwitchSetup(db Database, swMac string) map[string]ds.SensorSetup {
+	res := map[string]ds.SensorSetup{}
+	criteria := make(map[string]interface{})
+	criteria["SwitchMac"] = swMac
+	stored, err := db.GetRecords(StatusDB, SensorsTable, criteria)
+	if err != nil || stored == nil {
+		return res
+	}
+	for _, elt := range stored {
+		driver, err := ds.ToSensorSetup(elt)
+		if err != nil || driver == nil {
+			continue
+		}
+		res[driver.Mac] = *driver
+	}
+	return res
+}
+
 //GetSensorConfig return the sensor configuration
 func GetSensorConfig(db Database, mac string) (*ds.SensorSetup, string) {
 	var dbID string

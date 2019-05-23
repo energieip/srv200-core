@@ -52,6 +52,7 @@ func (net AuthNetwork) LocalConnection(conf pkg.ServiceConfig, clientID string) 
 		User:       conf.AuthBroker.Login,
 		Password:   conf.AuthBroker.Password,
 		CaPath:     conf.AuthBroker.CaPath,
+		Secure:     conf.AuthBroker.Secure,
 	}
 
 	for {

@@ -7,6 +7,7 @@ import (
 	dl "github.com/energieip/common-components-go/pkg/dled"
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
 	sd "github.com/energieip/common-components-go/pkg/dswitch"
+	"github.com/energieip/common-components-go/pkg/duser"
 	pkg "github.com/energieip/common-components-go/pkg/service"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
@@ -151,6 +152,32 @@ func (s *CoreService) prepareSetupSwitchConfig(switchStatus sd.SwitchStatus) *sd
 	setup.Mac = switchStatus.Mac
 	setup.FriendlyName = config.FriendlyName
 	setup.IsConfigured = &isConfigured
+	setup.LedsSetup = database.GetLedSwitchSetup(s.db, switchStatus.Mac)
+	setup.SensorsSetup = database.GetSensorSwitchSetup(s.db, switchStatus.Mac)
+	setup.BlindsSetup = database.GetBlindSwitchSetup(s.db, switchStatus.Mac)
+	setup.HvacsSetup = database.GetHvacSwitchSetup(s.db, switchStatus.Mac)
+	setup.Users = make(map[string]duser.UserAccess)
+	newGroups := make(map[int]bool)
+
+	driversMac := make(map[string]bool)
+	for mac := range setup.LedsSetup {
+		driversMac[mac] = true
+	}
+	for mac := range setup.SensorsSetup {
+		driversMac[mac] = true
+	}
+	for mac := range setup.BlindsSetup {
+		driversMac[mac] = true
+	}
+	for mac := range setup.HvacsSetup {
+		driversMac[mac] = true
+	}
+
+	setup.Groups = database.GetGroupConfigs(s.db, driversMac)
+	for _, gr := range setup.Groups {
+		newGroups[gr.Group] = true
+	}
+	setup.Users = database.GetUserConfigs(s.db, newGroups)
 
 	services := make(map[string]pkg.Service)
 	srv := database.GetServiceConfigs(s.db)

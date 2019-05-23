@@ -81,6 +81,25 @@ func GetBlindSwitchStatus(db Database, swMac string) map[string]dblind.Blind {
 	return res
 }
 
+//GetBlindSwitchSetup get blind Config list
+func GetBlindSwitchSetup(db Database, swMac string) map[string]dblind.BlindSetup {
+	res := map[string]dblind.BlindSetup{}
+	criteria := make(map[string]interface{})
+	criteria["SwitchMac"] = swMac
+	stored, err := db.GetRecords(StatusDB, BlindsTable, criteria)
+	if err != nil || stored == nil {
+		return res
+	}
+	for _, elt := range stored {
+		driver, err := dblind.ToBlindSetup(elt)
+		if err != nil || driver == nil {
+			continue
+		}
+		res[driver.Mac] = *driver
+	}
+	return res
+}
+
 //GetBlindConfig return the sensor configuration
 func GetBlindConfig(db Database, mac string) (*dblind.BlindSetup, string) {
 	var dbID string
