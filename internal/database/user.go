@@ -34,7 +34,7 @@ func GetUser(db Database, userHash string) *duser.UserAccess {
 }
 
 //GetUserConfigs get user Config for a given group list
-func GetUserConfigs(db Database, groups map[int]bool) map[string]duser.UserAccess {
+func GetUserConfigs(db Database, groups map[int]bool, withPriviledge bool) map[string]duser.UserAccess {
 	users := make(map[string]duser.UserAccess)
 	stored, err := db.FetchAllRecords(ConfigDB, AccessTable)
 	if err != nil || stored == nil {
@@ -45,12 +45,16 @@ func GetUserConfigs(db Database, groups map[int]bool) map[string]duser.UserAcces
 		if err != nil || usr == nil {
 			continue
 		}
-		addUser := false
-		//TODO manage priviledges
-		for _, gr := range usr.AccessGroups {
-			if _, ok := groups[gr]; ok {
-				addUser = true
-				break
+		var addUser bool
+		if withPriviledge && usr.Priviledge != "user" {
+			addUser = true
+		} else {
+			addUser = false
+			for _, gr := range usr.AccessGroups {
+				if _, ok := groups[gr]; ok {
+					addUser = true
+					break
+				}
 			}
 		}
 		if addUser {

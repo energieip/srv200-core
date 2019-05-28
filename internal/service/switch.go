@@ -7,7 +7,6 @@ import (
 	dl "github.com/energieip/common-components-go/pkg/dled"
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
 	sd "github.com/energieip/common-components-go/pkg/dswitch"
-	"github.com/energieip/common-components-go/pkg/duser"
 	pkg "github.com/energieip/common-components-go/pkg/service"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
@@ -156,7 +155,6 @@ func (s *CoreService) prepareSetupSwitchConfig(switchStatus sd.SwitchStatus) *sd
 	setup.SensorsSetup = database.GetSensorSwitchSetup(s.db, switchStatus.Mac)
 	setup.BlindsSetup = database.GetBlindSwitchSetup(s.db, switchStatus.Mac)
 	setup.HvacsSetup = database.GetHvacSwitchSetup(s.db, switchStatus.Mac)
-	setup.Users = make(map[string]duser.UserAccess)
 	newGroups := make(map[int]bool)
 
 	driversMac := make(map[string]bool)
@@ -177,7 +175,7 @@ func (s *CoreService) prepareSetupSwitchConfig(switchStatus sd.SwitchStatus) *sd
 	for _, gr := range setup.Groups {
 		newGroups[gr.Group] = true
 	}
-	setup.Users = database.GetUserConfigs(s.db, newGroups)
+	setup.Users = database.GetUserConfigs(s.db, newGroups, true)
 
 	services := make(map[string]pkg.Service)
 	srv := database.GetServiceConfigs(s.db)
@@ -258,7 +256,7 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 		grList[gr.Group] = true
 	}
 	setup.Groups = newGroups
-	setup.Users = database.GetUserConfigs(s.db, grList)
+	setup.Users = database.GetUserConfigs(s.db, grList, true)
 
 	for mac, led := range switchStatus.Leds {
 		if !led.IsConfigured {
