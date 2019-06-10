@@ -14,7 +14,6 @@ if [ ! -f "$src" ]; then
 fi
 
 dae="${src%.ifc}.dae"
-optimized="${dst%.gltf}.optimized.gltf"
 
 IfcConvert --use-element-names $src $dae
 res=$?

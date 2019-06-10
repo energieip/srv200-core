@@ -45,9 +45,6 @@ def parseIfc(filepath):
             instance_properties = {}
             prop_sets = element.IsDefinedBy
             instance['Label'] = element.Name
-            instance['ModbusID'] = element.Tag
-            # TODO parse group
-            instance['group'] = 0
 
             for prop_set in prop_sets:
                 if not prop_set.is_a('IfcRelDefinesByProperties'):
@@ -90,11 +87,8 @@ def parseIfc(filepath):
             if "mobilier" in product:
                 continue
             modelName = instance['properties'].get("SKU (BO_prodsku)", product)
-            try:
-                modbusID = int(instance.get("ModbusID", "0"))
-            except:
-                modbusID = 0
-            # label = label.replace("_", "-")
+            modbusID = instance['properties'].get("modbusID", 0)
+            group = instance['properties'].get("Group", 0)
 
             projects[label] = {
                 "label": label,
@@ -102,9 +96,9 @@ def parseIfc(filepath):
                 "modelName": modelName
             }
 
-            if instance['group'] not in groups:
-                groups[instance['group']] = {
-                    "group": instance['group']
+            if group not in groups:
+                groups[group] = {
+                    "group": group
                 }
 
             deviceType = ""
@@ -126,13 +120,11 @@ def parseIfc(filepath):
 
             drivers[deviceType][label] = {
                 "label": label,
-                "group": instance["group"],
+                "group": group,
             }
 
             if deviceType == "led":
-                pmax = product.replace("led", "")
-                pmax = pmax.replace("w", "")
-                drivers[deviceType][label]["pMax"] = int(pmax)
+                drivers[deviceType][label]["pMax"] = instance['properties'].get("Power", 0)
 
             if modelName in models:
                 continue
@@ -161,11 +153,11 @@ def parseIfc(filepath):
 
     dump = {
         "groups": groups,
-        "leds": drivers["led"],
-        "sensors": drivers["sensor"],
-        "hvacs": drivers["hvac"],
+        "leds": drivers.get("led", {}),
+        "sensors": drivers.get("sensor", {}),
+        "hvacs": drivers.get("hvac", {}),
         "models": models,
-        "switchs": drivers["switch"],
+        "switchs": drivers.get("switch", {}),
         "projects": projects
     }
 
