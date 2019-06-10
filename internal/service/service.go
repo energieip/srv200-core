@@ -138,12 +138,20 @@ func (s *CoreService) readAPIEvents() {
 				switch eventType {
 				case "led":
 					s.updateLedCfg(event)
+				case "ledSetup":
+					s.updateLedSetup(event)
 				case "blind":
 					s.updateBlindCfg(event)
+				case "blindSetup":
+					s.updateBlindSetup(event)
 				case "hvac":
 					s.updateHvacCfg(event)
+				case "hvacSetup":
+					s.updateHvacSetup(event)
 				case "sensor":
 					s.updateSensorCfg(event)
+				case "sensorSetup":
+					s.updateSensorSetup(event)
 				case "group":
 					s.updateGroupCfg(event)
 				case "switch":
@@ -158,6 +166,8 @@ func (s *CoreService) readAPIEvents() {
 					s.sendHvacCmd(event)
 				case "replaceDriver":
 					s.replaceDriver(event)
+				case "map":
+					s.updateMapInfo(event)
 				}
 			}
 			apiEvents = nil

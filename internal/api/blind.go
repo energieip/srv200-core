@@ -50,9 +50,10 @@ func (api *API) setBlindSetup(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	database.SaveBlindConfig(api.db, setup)
-	rlog.Info("Blind config" + setup.Mac + " saved")
-	api.readBlindConfig(w, setup.Mac)
+	event := make(map[string]interface{})
+	event["blindSetup"] = setup
+	api.EventsToBackend <- event
+	w.Write([]byte("{}"))
 }
 
 func (api *API) setBlindConfig(w http.ResponseWriter, req *http.Request) {

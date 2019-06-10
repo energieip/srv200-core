@@ -10,7 +10,6 @@ import (
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
 	"github.com/gorilla/mux"
-	"github.com/romana/rlog"
 )
 
 func (api *API) readSensorConfig(w http.ResponseWriter, req *http.Request, mac string) {
@@ -55,9 +54,10 @@ func (api *API) setSensorSetup(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	database.SaveSensorConfig(api.db, sensor)
-	rlog.Info("Save sensor configuration ", sensor.Mac)
-	api.readSensorConfig(w, req, sensor.Mac)
+	event := make(map[string]interface{})
+	event["sensorSetup"] = sensor
+	api.EventsToBackend <- event
+	w.Write([]byte("{}"))
 }
 
 func (api *API) setSensorConfig(w http.ResponseWriter, req *http.Request) {

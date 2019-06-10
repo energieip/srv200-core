@@ -50,9 +50,10 @@ func (api *API) setHvacSetup(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	database.SaveHvacConfig(api.db, setup)
-	rlog.Info("Hvac config" + setup.Mac + " saved")
-	api.readHvacConfig(w, setup.Mac)
+	event := make(map[string]interface{})
+	event["hvacSetup"] = setup
+	api.EventsToBackend <- event
+	w.Write([]byte("{}"))
 }
 
 func (api *API) setHvacConfig(w http.ResponseWriter, req *http.Request) {

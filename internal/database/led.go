@@ -120,6 +120,88 @@ func UpdateLedConfig(db Database, config dl.LedConf) error {
 	return db.UpdateRecord(ConfigDB, LedsTable, dbID, setup)
 }
 
+//UpdateLedSetup update led setup in database
+func UpdateLedSetup(db Database, config dl.LedSetup) error {
+	setup, dbID := GetLedConfig(db, config.Mac)
+	if setup == nil || dbID == "" {
+		return SaveLedConfig(db, config)
+	}
+
+	if config.ThresholdHigh != nil {
+		setup.ThresholdHigh = config.ThresholdHigh
+	}
+
+	if config.ThresholdLow != nil {
+		setup.ThresholdLow = config.ThresholdLow
+	}
+
+	if config.FriendlyName != nil {
+		setup.FriendlyName = config.FriendlyName
+	}
+
+	if config.Group != nil {
+		setup.Group = config.Group
+	}
+
+	if config.IsBleEnabled != nil {
+		setup.IsBleEnabled = config.IsBleEnabled
+	}
+
+	if config.SlopeStartAuto != nil {
+		setup.SlopeStartAuto = config.SlopeStartAuto
+	}
+
+	if config.SlopeStartManual != nil {
+		setup.SlopeStartManual = config.SlopeStartManual
+	}
+
+	if config.SlopeStopAuto != nil {
+		setup.SlopeStopAuto = config.SlopeStopAuto
+	}
+
+	if config.SlopeStopManual != nil {
+		setup.SlopeStopManual = config.SlopeStopManual
+	}
+
+	if config.BleMode != nil {
+		setup.BleMode = config.BleMode
+	}
+
+	if config.IBeaconMajor != nil {
+		setup.IBeaconMajor = config.IBeaconMajor
+	}
+
+	if config.IBeaconMinor != nil {
+		setup.IBeaconMinor = config.IBeaconMinor
+	}
+
+	if config.IBeaconTxPower != nil {
+		setup.IBeaconTxPower = config.IBeaconTxPower
+	}
+
+	if config.IBeaconUUID != nil {
+		setup.IBeaconUUID = config.IBeaconUUID
+	}
+
+	if config.DumpFrequency != 0 {
+		setup.DumpFrequency = config.DumpFrequency
+	}
+
+	if config.Watchdog != nil {
+		setup.Watchdog = config.Watchdog
+	}
+
+	if config.PMax != 0 {
+		setup.PMax = config.PMax
+	}
+
+	if config.Label != nil {
+		setup.Label = config.Label
+	}
+
+	return db.UpdateRecord(ConfigDB, LedsTable, dbID, setup)
+}
+
 //SwitchLedConfig update led config in database
 func SwitchLedConfig(db Database, old, oldFull, new, newFull string) error {
 	setup, dbID := GetLedConfig(db, old)

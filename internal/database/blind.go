@@ -37,6 +37,36 @@ func UpdateBlindConfig(db Database, cfg dblind.BlindConf) error {
 	return db.UpdateRecord(ConfigDB, BlindsTable, dbID, setup)
 }
 
+//UpdateBlindSetup update blind config in database
+func UpdateBlindSetup(db Database, cfg dblind.BlindSetup) error {
+	setup, dbID := GetBlindConfig(db, cfg.Mac)
+	if setup == nil || dbID == "" {
+		return SaveBlindConfig(db, cfg)
+	}
+
+	if cfg.FriendlyName != nil {
+		setup.FriendlyName = cfg.FriendlyName
+	}
+
+	if cfg.Group != nil {
+		setup.Group = cfg.Group
+	}
+
+	if cfg.IsBleEnabled != nil {
+		setup.IsBleEnabled = cfg.IsBleEnabled
+	}
+
+	if cfg.DumpFrequency != 0 {
+		setup.DumpFrequency = cfg.DumpFrequency
+	}
+
+	if cfg.Label != nil {
+		setup.Label = cfg.Label
+	}
+
+	return db.UpdateRecord(ConfigDB, BlindsTable, dbID, setup)
+}
+
 //SwitchBlindConfig update blind config in database
 func SwitchBlindConfig(db Database, old, oldFull, new, newFull string) error {
 	setup, dbID := GetBlindConfig(db, old)

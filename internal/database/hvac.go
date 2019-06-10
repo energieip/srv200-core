@@ -33,6 +33,32 @@ func UpdateHvacConfig(db Database, cfg dhvac.HvacConf) error {
 	return db.UpdateRecord(ConfigDB, HvacsTable, dbID, setup)
 }
 
+//UpdateHvacSetup update hvac config in database
+func UpdateHvacSetup(db Database, cfg dhvac.HvacSetup) error {
+	setup, dbID := GetHvacConfig(db, cfg.Mac)
+	if setup == nil || dbID == "" {
+		return SaveHvacConfig(db, cfg)
+	}
+
+	if cfg.FriendlyName != nil {
+		setup.FriendlyName = cfg.FriendlyName
+	}
+
+	if cfg.Group != nil {
+		setup.Group = cfg.Group
+	}
+
+	if cfg.DumpFrequency != 0 {
+		setup.DumpFrequency = cfg.DumpFrequency
+	}
+
+	if cfg.Label != nil {
+		setup.Label = cfg.Label
+	}
+
+	return db.UpdateRecord(ConfigDB, HvacsTable, dbID, setup)
+}
+
 //SwitchHvacConfig update hvac config in database
 func SwitchHvacConfig(db Database, old, oldFull, new, newFull string) error {
 	setup, dbID := GetHvacConfig(db, old)

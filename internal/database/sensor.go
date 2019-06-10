@@ -49,6 +49,48 @@ func UpdateSensorConfig(db Database, cfg ds.SensorConf) error {
 	return db.UpdateRecord(ConfigDB, SensorsTable, dbID, setup)
 }
 
+//UpdateSensorSetup update sensor config in database
+func UpdateSensorSetup(db Database, cfg ds.SensorSetup) error {
+	setup, dbID := GetSensorConfig(db, cfg.Mac)
+	if setup == nil || dbID == "" {
+		return SaveSensorConfig(db, cfg)
+	}
+
+	if cfg.BrightnessCorrectionFactor != nil {
+		setup.BrightnessCorrectionFactor = cfg.BrightnessCorrectionFactor
+	}
+
+	if cfg.FriendlyName != nil {
+		setup.FriendlyName = cfg.FriendlyName
+	}
+
+	if cfg.Group != nil {
+		setup.Group = cfg.Group
+	}
+
+	if cfg.IsBleEnabled != nil {
+		setup.IsBleEnabled = cfg.IsBleEnabled
+	}
+
+	if cfg.TemperatureOffset != nil {
+		setup.TemperatureOffset = cfg.TemperatureOffset
+	}
+
+	if cfg.ThresholdPresence != nil {
+		setup.ThresholdPresence = cfg.ThresholdPresence
+	}
+
+	if cfg.DumpFrequency != 0 {
+		setup.DumpFrequency = cfg.DumpFrequency
+	}
+
+	if cfg.Label != nil {
+		setup.Label = cfg.Label
+	}
+
+	return db.UpdateRecord(ConfigDB, SensorsTable, dbID, setup)
+}
+
 //RemoveSensorConfig remove sensor config in database
 func RemoveSensorConfig(db Database, mac string) error {
 	criteria := make(map[string]interface{})

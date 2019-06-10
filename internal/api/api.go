@@ -784,6 +784,9 @@ func (api *API) swagger() {
 	router.HandleFunc(apiV1+"/project/bim", api.verification(api.setBim)).Methods("POST")
 	router.HandleFunc(apiV1+"/project", api.verification(api.getIfc)).Methods("GET")
 
+	//map API
+	router.HandleFunc(apiV1+"/map/upload", api.verification(api.uploadHandler)).Methods("POST")
+
 	//Maintenance API
 	router.HandleFunc(apiV1+"/maintenance/driver", api.verification(api.replaceDriver)).Methods("POST")
 

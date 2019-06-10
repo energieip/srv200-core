@@ -51,10 +51,10 @@ func (api *API) setLedSetup(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	database.SaveLedConfig(api.db, led)
-	rlog.Info("Led configuration " + led.Mac + " saved")
-
-	api.readLedConfig(w, req, led.Mac)
+	event := make(map[string]interface{})
+	event["ledSetup"] = led
+	api.EventsToBackend <- event
+	w.Write([]byte("{}"))
 }
 
 func (api *API) setLedConfig(w http.ResponseWriter, req *http.Request) {

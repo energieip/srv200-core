@@ -24,7 +24,7 @@ func SaveProject(db Database, cfg core.Project) error {
 	if cfg.ModelName != nil {
 		proj.ModelName = cfg.ModelName
 	}
-	if cfg.ModbusID != 0 {
+	if cfg.ModbusID != nil {
 		proj.ModbusID = cfg.ModbusID
 	}
 	err := db.UpdateRecord(ConfigDB, ProjectsTable, dbID, proj)

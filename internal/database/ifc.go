@@ -21,9 +21,13 @@ func GetIfcs(db Database) []core.IfcInfo {
 		if project.Mac != nil {
 			mac = *project.Mac
 		}
+		modbusID := 0
+		if project.ModbusID != nil {
+			modbusID = *project.ModbusID
+		}
 		res = append(res, core.IfcInfo{
 			Label:      project.Label,
-			ModbusID:   project.ModbusID,
+			ModbusID:   modbusID,
 			ModelName:  model.Name,
 			Mac:        mac,
 			Vendor:     model.Vendor,

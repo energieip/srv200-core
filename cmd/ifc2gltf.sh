@@ -16,7 +16,7 @@ fi
 dae="${src%.ifc}.dae"
 optimized="${dst%.gltf}.optimized.gltf"
 
-IfcConvert $src $dae
+IfcConvert --use-element-names $src $dae
 res=$?
 if [ "$res" != "0" ]; then
     echo "Ifc convert failed with status $res"

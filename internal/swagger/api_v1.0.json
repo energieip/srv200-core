@@ -823,14 +823,7 @@
           "responses": {
             "200": {
               "description": "sucessful operation",
-              "headers": {},
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/LedSetup"
-                  }
-                }
-              }
+              "headers": {}
             },
             "401": {
               "description": "Unauthorized Access",
@@ -1718,6 +1711,66 @@
               }
             },
             "required": false
+          },
+          "responses": {
+            "200": {
+              "description": "sucessful operation",
+              "headers": {}
+            },
+            "401": {
+              "description": "Unauthorized Access",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "default": {
+              "description": "unexpected error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "deprecated": false,
+          "security": [
+            {
+              "Authorization": []
+            }
+          ]
+        }
+      },
+      "/map/upload": {
+        "post": {
+          "tags": [
+            "map"
+          ],
+          "summary": "upload Map",
+          "description": "upload map",
+          "operationId": "uploadHandler",
+          "parameters": [],
+          "requestBody": {
+            "description": "IFC file to upload",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "file": {
+                      "type": "file",
+                      "description": "file to upload"
+                    }
+                  }
+                }
+              }
+            },
+            "required": true
           },
           "responses": {
             "200": {
@@ -5383,6 +5436,10 @@
       {
         "name": "project",
         "description": "GTB configuration: project config"
+      },
+      {
+        "name": "map",
+        "description": "GTB map"
       },
       {
         "name": "event",
