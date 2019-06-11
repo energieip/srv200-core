@@ -70,6 +70,11 @@ func (api *API) installDriver(w http.ResponseWriter, req *http.Request) {
 				api.sendError(w, APIErrorDeviceNotFound, "Unexpected Driver, expected "+refModel, http.StatusInternalServerError)
 				return
 			}
+		case "SWITCH":
+			if !strings.HasPrefix(refModel, "swh") {
+				api.sendError(w, APIErrorDeviceNotFound, "Unexpected Driver, expected "+refModel, http.StatusInternalServerError)
+				return
+			}
 		default:
 			api.sendError(w, APIErrorDeviceNotFound, "Unexpected Driver type "+driver.ModelName, http.StatusInternalServerError)
 			return
