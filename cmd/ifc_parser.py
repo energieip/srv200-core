@@ -26,6 +26,7 @@ def parseIfc(filepath):
     drivers = {}
     groups = {}
     dump = {}
+    storey = []
 
     if not os.path.lexists(filepath):
         print("Filepath " + filepath + " not found")
@@ -40,7 +41,11 @@ def parseIfc(filepath):
         #Define a dictionary for storing current element
         for element in elements:
             instance = {}
-            if element.is_a() not in filters:
+            eltType = element.is_a()
+            if eltType == "IfcBuildingStorey":
+                storey.append(element.Name)
+                continue
+            if eltType not in filters:
                 continue
             instance_properties = {}
             prop_sets = element.IsDefinedBy
@@ -158,7 +163,8 @@ def parseIfc(filepath):
         "hvacs": drivers.get("hvac", {}),
         "models": models,
         "switchs": drivers.get("switch", {}),
-        "projects": projects
+        "projects": projects,
+        "storey": storey
     }
 
     print(json.dumps(dump, indent=4, sort_keys=True))
