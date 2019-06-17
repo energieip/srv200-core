@@ -17,7 +17,7 @@ func SaveLedLabelConfig(db Database, cfg dl.LedSetup) error {
 	if cfg.Label == nil {
 		return NewError("Device " + cfg.Mac + "not found")
 	}
-	criteria["Label"] = cfg.Label
+	criteria["Label"] = *cfg.Label
 	return SaveOnUpdateObject(db, cfg, ConfigDB, LedsTable, criteria)
 }
 
@@ -199,6 +199,10 @@ func UpdateLedLabelSetup(db Database, config dl.LedSetup) error {
 		}
 		if config.PMax == 0 {
 			config.PMax = 5
+		}
+		if config.FriendlyName == nil {
+			name := *config.Label
+			config.FriendlyName = &name
 		}
 		return SaveLedLabelConfig(db, config)
 	}

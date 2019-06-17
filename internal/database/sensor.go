@@ -11,6 +11,16 @@ func SaveSensorConfig(db Database, cfg ds.SensorSetup) error {
 	return SaveOnUpdateObject(db, cfg, ConfigDB, SensorsTable, criteria)
 }
 
+//SaveSensorLabelConfig dump sensor config in database
+func SaveSensorLabelConfig(db Database, cfg ds.SensorSetup) error {
+	criteria := make(map[string]interface{})
+	if cfg.Label == nil {
+		return NewError("Device " + cfg.Mac + "not found")
+	}
+	criteria["Label"] = *cfg.Label
+	return SaveOnUpdateObject(db, cfg, ConfigDB, SensorsTable, criteria)
+}
+
 //UpdateSensorConfig update sensor config in database
 func UpdateSensorConfig(db Database, cfg ds.SensorConf) error {
 	setup, dbID := GetSensorConfig(db, cfg.Mac)
@@ -46,14 +56,65 @@ func UpdateSensorConfig(db Database, cfg ds.SensorConf) error {
 		setup.DumpFrequency = *cfg.DumpFrequency
 	}
 
+	if cfg.IBeaconMajor != nil {
+		setup.IBeaconMajor = cfg.IBeaconMajor
+	}
+
+	if cfg.IBeaconMinor != nil {
+		setup.IBeaconMinor = cfg.IBeaconMinor
+	}
+
+	if cfg.IBeaconTxPower != nil {
+		setup.IBeaconTxPower = cfg.IBeaconTxPower
+	}
+
+	if cfg.IBeaconUUID != nil {
+		setup.IBeaconUUID = cfg.IBeaconUUID
+	}
+
+	if cfg.BleMode != nil {
+		setup.BleMode = cfg.BleMode
+	}
+
 	return db.UpdateRecord(ConfigDB, SensorsTable, dbID, setup)
 }
 
-//UpdateSensorSetup update sensor config in database
-func UpdateSensorSetup(db Database, cfg ds.SensorSetup) error {
-	setup, dbID := GetSensorConfig(db, cfg.Mac)
+//UpdateSensorLabelSetup update sensor config in database
+func UpdateSensorLabelSetup(db Database, cfg ds.SensorSetup) error {
+	setup, dbID := GetSensorLabelConfig(db, cfg.Mac)
 	if setup == nil || dbID == "" {
-		return SaveSensorConfig(db, cfg)
+		if cfg.BleMode == nil {
+			ble := "service"
+			cfg.BleMode = &ble
+		}
+		if cfg.IsBleEnabled == nil {
+			bleEnable := false
+			cfg.IsBleEnabled = &bleEnable
+		}
+		if cfg.Group == nil {
+			group := 0
+			cfg.Group = &group
+		}
+		if cfg.FriendlyName == nil {
+			name := *cfg.Label
+			cfg.FriendlyName = &name
+		}
+		defaultValue := 0
+		if cfg.BrightnessCorrectionFactor == nil {
+			cfg.BrightnessCorrectionFactor = &defaultValue
+		}
+		if cfg.DumpFrequency == 0 {
+			cfg.DumpFrequency = 1000
+		}
+		if cfg.TemperatureOffset == nil {
+			cfg.TemperatureOffset = &defaultValue
+		}
+		if cfg.ThresholdPresence == nil {
+			presence := 10
+			cfg.ThresholdPresence = &presence
+		}
+
+		return SaveSensorLabelConfig(db, cfg)
 	}
 
 	if cfg.BrightnessCorrectionFactor != nil {
@@ -88,6 +149,25 @@ func UpdateSensorSetup(db Database, cfg ds.SensorSetup) error {
 		setup.Label = cfg.Label
 	}
 
+	if cfg.IBeaconMajor != nil {
+		setup.IBeaconMajor = cfg.IBeaconMajor
+	}
+
+	if cfg.IBeaconMinor != nil {
+		setup.IBeaconMinor = cfg.IBeaconMinor
+	}
+
+	if cfg.IBeaconTxPower != nil {
+		setup.IBeaconTxPower = cfg.IBeaconTxPower
+	}
+
+	if cfg.IBeaconUUID != nil {
+		setup.IBeaconUUID = cfg.IBeaconUUID
+	}
+
+	if cfg.BleMode != nil {
+		setup.BleMode = cfg.BleMode
+	}
 	return db.UpdateRecord(ConfigDB, SensorsTable, dbID, setup)
 }
 
@@ -148,6 +228,27 @@ func GetSensorConfig(db Database, mac string) (*ds.SensorSetup, string) {
 	var dbID string
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = mac
+	stored, err := db.GetRecord(ConfigDB, SensorsTable, criteria)
+	if err != nil || stored == nil {
+		return nil, dbID
+	}
+	m := stored.(map[string]interface{})
+	id, ok := m["id"]
+	if ok {
+		dbID = id.(string)
+	}
+	driver, err := ds.ToSensorSetup(stored)
+	if err != nil {
+		return nil, dbID
+	}
+	return driver, dbID
+}
+
+//GetSensorLabelConfig return the sensor configuration
+func GetSensorLabelConfig(db Database, label string) (*ds.SensorSetup, string) {
+	var dbID string
+	criteria := make(map[string]interface{})
+	criteria["Label"] = label
 	stored, err := db.GetRecord(ConfigDB, SensorsTable, criteria)
 	if err != nil || stored == nil {
 		return nil, dbID

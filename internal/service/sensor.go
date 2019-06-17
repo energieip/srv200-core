@@ -68,39 +68,36 @@ func (s *CoreService) updateSensorSetup(config interface{}) {
 	cfg, _ := ds.ToSensorSetup(config)
 
 	oldSensor, _ := database.GetSensorConfig(s.db, cfg.Mac)
-	if oldSensor == nil {
-		rlog.Error("Cannot find config for " + cfg.Mac)
-		return
-	}
-
-	if cfg.Group != nil {
-		if oldSensor.Group != cfg.Group {
-			if oldSensor.Group != nil {
-				rlog.Info("Update old group", *oldSensor.Group)
-				gr, _ := database.GetGroupConfig(s.db, *oldSensor.Group)
-				if gr != nil {
-					sensors := []string{}
-					for _, v := range gr.Sensors {
-						if v != cfg.Mac {
-							sensors = append(sensors, v)
+	if oldSensor != nil {
+		if cfg.Group != nil {
+			if oldSensor.Group != cfg.Group {
+				if oldSensor.Group != nil {
+					rlog.Info("Update old group", *oldSensor.Group)
+					gr, _ := database.GetGroupConfig(s.db, *oldSensor.Group)
+					if gr != nil {
+						sensors := []string{}
+						for _, v := range gr.Sensors {
+							if v != cfg.Mac {
+								sensors = append(sensors, v)
+							}
 						}
+						gr.Sensors = sensors
+						rlog.Info("Old group will be ", gr.Sensors)
+						s.updateGroupCfg(gr)
 					}
-					gr.Sensors = sensors
-					rlog.Info("Old group will be ", gr.Sensors)
-					s.updateGroupCfg(gr)
 				}
-			}
-			rlog.Info("Update new group", *cfg.Group)
-			grNew, _ := database.GetGroupConfig(s.db, *cfg.Group)
-			if grNew != nil {
-				grNew.Sensors = append(grNew.Sensors, cfg.Mac)
-				rlog.Info("new group will be", grNew.Sensors)
-				s.updateGroupCfg(grNew)
+				rlog.Info("Update new group", *cfg.Group)
+				grNew, _ := database.GetGroupConfig(s.db, *cfg.Group)
+				if grNew != nil {
+					grNew.Sensors = append(grNew.Sensors, cfg.Mac)
+					rlog.Info("new group will be", grNew.Sensors)
+					s.updateGroupCfg(grNew)
+				}
 			}
 		}
 	}
 
-	database.UpdateSensorSetup(s.db, *cfg)
+	database.UpdateSensorLabelSetup(s.db, *cfg)
 	//Get correspnding switchMac
 	sensor, _ := database.GetSensorConfig(s.db, cfg.Mac)
 	if sensor == nil {
