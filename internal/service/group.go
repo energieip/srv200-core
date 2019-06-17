@@ -2,6 +2,7 @@ package service
 
 import (
 	"reflect"
+	"strconv"
 
 	"github.com/energieip/common-components-go/pkg/dblind"
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
@@ -314,6 +315,52 @@ func (s *CoreService) updateBlindGroup(mac string, grID int) {
 	}
 }
 
+func (s *CoreService) createGroup(cfg *gm.GroupConfig) {
+	//Force default value
+	if cfg.CorrectionInterval == nil {
+		correction := 10
+		cfg.CorrectionInterval = &correction
+	}
+	if cfg.FriendlyName == nil {
+		name := "Group " + strconv.Itoa(cfg.Group)
+		cfg.FriendlyName = &name
+	}
+	if cfg.RuleBrightness == nil {
+		brigthness := 400
+		cfg.RuleBrightness = &brigthness
+	}
+	if cfg.RulePresence == nil {
+		presence := 1200
+		cfg.RulePresence = &presence
+	}
+	if cfg.Watchdog == nil {
+		watchdog := 600
+		cfg.Watchdog = &watchdog
+	}
+	if cfg.SensorRule == nil {
+		rule := "average"
+		cfg.SensorRule = &rule
+	}
+	if cfg.FirstDayOffset == nil {
+		offset := 20
+		cfg.FirstDayOffset = &offset
+	}
+	slope := 10000
+	if cfg.SlopeStartAuto == nil {
+		cfg.SlopeStartAuto = &slope
+	}
+	if cfg.SlopeStopAuto == nil {
+		cfg.SlopeStopAuto = &slope
+	}
+	if cfg.SlopeStartManual == nil {
+		cfg.SlopeStartManual = &slope
+	}
+	if cfg.SlopeStopManual == nil {
+		cfg.SlopeStopManual = &slope
+	}
+	database.SaveGroupConfig(s.db, *cfg)
+}
+
 func (s *CoreService) updateGroupCfg(config interface{}) {
 	cfg, _ := gm.ToGroupConfig(config)
 
@@ -365,7 +412,7 @@ func (s *CoreService) updateGroupCfg(config interface{}) {
 		}
 
 	} else {
-		database.SaveGroupConfig(s.db, *cfg)
+		s.createGroup(cfg)
 		for _, led := range cfg.Leds {
 			s.updateLedGroup(led, cfg.Group)
 		}
