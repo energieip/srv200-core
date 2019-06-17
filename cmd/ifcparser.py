@@ -154,6 +154,7 @@ def parseIfc(filepath):
     dump = {
         "groups": groups,
         "leds": drivers.get("led", {}),
+        "blinds": drivers.get("blind", {}),
         "sensors": drivers.get("sensor", {}),
         "hvacs": drivers.get("hvac", {}),
         "models": models,
