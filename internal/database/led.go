@@ -11,6 +11,16 @@ func SaveLedConfig(db Database, cfg dl.LedSetup) error {
 	return SaveOnUpdateObject(db, cfg, ConfigDB, LedsTable, criteria)
 }
 
+//SaveLedLabelConfig dump led config in database
+func SaveLedLabelConfig(db Database, cfg dl.LedSetup) error {
+	criteria := make(map[string]interface{})
+	if cfg.Label == nil {
+		return NewError("Device " + cfg.Mac + "not found")
+	}
+	criteria["Label"] = cfg.Label
+	return SaveOnUpdateObject(db, cfg, ConfigDB, LedsTable, criteria)
+}
+
 //RemoveLedConfig remove led config in database
 func RemoveLedConfig(db Database, mac string) error {
 	criteria := make(map[string]interface{})
@@ -30,6 +40,27 @@ func GetLedConfig(db Database, mac string) (*dl.LedSetup, string) {
 	var dbID string
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = mac
+	stored, err := db.GetRecord(ConfigDB, LedsTable, criteria)
+	if err != nil || stored == nil {
+		return nil, dbID
+	}
+	m := stored.(map[string]interface{})
+	id, ok := m["id"]
+	if ok {
+		dbID = id.(string)
+	}
+	driver, err := dl.ToLedSetup(stored)
+	if err != nil {
+		return nil, dbID
+	}
+	return driver, dbID
+}
+
+//GetLedLabelConfig return the led configuration
+func GetLedLabelConfig(db Database, label string) (*dl.LedSetup, string) {
+	var dbID string
+	criteria := make(map[string]interface{})
+	criteria["Label"] = label
 	stored, err := db.GetRecord(ConfigDB, LedsTable, criteria)
 	if err != nil || stored == nil {
 		return nil, dbID
@@ -120,11 +151,11 @@ func UpdateLedConfig(db Database, config dl.LedConf) error {
 	return db.UpdateRecord(ConfigDB, LedsTable, dbID, setup)
 }
 
-//UpdateLedSetup update led setup in database
-func UpdateLedSetup(db Database, config dl.LedSetup) error {
-	setup, dbID := GetLedConfig(db, config.Mac)
+//UpdateLedLabelSetup update led setup in database
+func UpdateLedLabelSetup(db Database, config dl.LedSetup) error {
+	setup, dbID := GetLedLabelConfig(db, *config.Label)
 	if setup == nil || dbID == "" {
-		return SaveLedConfig(db, config)
+		return SaveLedLabelConfig(db, config)
 	}
 
 	if config.ThresholdHigh != nil {

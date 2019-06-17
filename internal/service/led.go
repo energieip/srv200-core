@@ -137,7 +137,7 @@ func (s *CoreService) updateLedSetup(config interface{}) {
 		}
 	}
 
-	database.UpdateLedSetup(s.db, *cfg)
+	database.UpdateLedLabelSetup(s.db, *cfg)
 	//Get corresponding switchMac
 	led, _ := database.GetLedConfig(s.db, cfg.Mac)
 	if led == nil {
