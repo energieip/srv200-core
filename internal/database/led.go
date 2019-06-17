@@ -155,6 +155,51 @@ func UpdateLedConfig(db Database, config dl.LedConf) error {
 func UpdateLedLabelSetup(db Database, config dl.LedSetup) error {
 	setup, dbID := GetLedLabelConfig(db, *config.Label)
 	if setup == nil || dbID == "" {
+		if config.IsBleEnabled == nil {
+			enabled := false
+			config.IsBleEnabled = &enabled
+		}
+		if config.DumpFrequency == 0 {
+			config.DumpFrequency = 1000
+		}
+		if config.Auto == nil {
+			auto := true
+			config.Auto = &auto
+		}
+		if config.ThresholdHigh == nil {
+			high := 100
+			config.ThresholdHigh = &high
+		}
+		if config.ThresholdLow == nil {
+			low := 0
+			config.ThresholdLow = &low
+		}
+		if config.Group == nil {
+			group := 0
+			config.Group = &group
+		}
+		if config.Watchdog == nil {
+			watchdog := 600
+			config.Watchdog = &watchdog
+		}
+		slope := 10000
+		if config.SlopeStartManual == nil {
+			config.SlopeStartManual = &slope
+		}
+		if config.SlopeStopManual == nil {
+			config.SlopeStopManual = &slope
+		}
+		if config.DefaultSetpoint == nil {
+			defaultValue := 0
+			config.DefaultSetpoint = &defaultValue
+		}
+		if config.BleMode == nil {
+			defaultMode := "service"
+			config.BleMode = &defaultMode
+		}
+		if config.PMax == 0 {
+			config.PMax = 5
+		}
 		return SaveLedLabelConfig(db, config)
 	}
 
