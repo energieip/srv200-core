@@ -4652,6 +4652,28 @@
               "type": "boolean",
               "description": "Is the bluetooth activate"
             },
+            "bleMode": {
+              "$ref": "#/components/schemas/BleMode"
+            },
+            "iBeaconUUID": {
+              "type": "string",
+              "description": "ibeacon UUID"
+            },
+            "iBeaconMajor": {
+              "type": "integer",
+              "description": "ibeacon Major",
+              "format": "int32"
+            },
+            "iBeaconMinor": {
+              "type": "integer",
+              "description": "ibeacon Minor",
+              "format": "int32"
+            },
+            "iBeaconTxPower": {
+              "type": "integer",
+              "description": "ibeacon Tx power",
+              "format": "int32"
+            },
             "temperature": {
               "type": "integer",
               "description": "Temperature",
