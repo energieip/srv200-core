@@ -454,7 +454,7 @@
             "setup"
           ],
           "summary": "setBlindSetup",
-          "description": "Sensor Blind configuration",
+          "description": "Blind configuration",
           "operationId": "SetBlindSetup",
           "parameters": [],
           "requestBody": {
@@ -630,7 +630,7 @@
             "setup"
           ],
           "summary": "setHvacSetup",
-          "description": "Sensor Hvac configuration",
+          "description": "Hvac configuration",
           "operationId": "SetHvacSetup",
           "parameters": [],
           "requestBody": {
@@ -3461,6 +3461,28 @@
               "type": "boolean",
               "description": "bluetooth activation"
             },
+            "bleMode": {
+              "$ref": "#/components/schemas/BleMode"
+            },
+            "iBeaconUUID": {
+              "type": "string",
+              "description": "ibeacon UUID"
+            },
+            "iBeaconMajor": {
+              "type": "integer",
+              "description": "ibeacon Major",
+              "format": "int32"
+            },
+            "iBeaconMinor": {
+              "type": "integer",
+              "description": "ibeacon Minor",
+              "format": "int32"
+            },
+            "iBeaconTxPower": {
+              "type": "integer",
+              "description": "ibeacon Tx power",
+              "format": "int32"
+            },
             "brightnessCorrectionFactor": {
               "type": "integer",
               "description": "Brightness correction factor",
@@ -3510,6 +3532,28 @@
             "isBleEnabled": {
               "type": "boolean",
               "description": "bluetooth activation"
+            },
+            "bleMode": {
+              "$ref": "#/components/schemas/BleMode"
+            },
+            "iBeaconUUID": {
+              "type": "string",
+              "description": "ibeacon UUID"
+            },
+            "iBeaconMajor": {
+              "type": "integer",
+              "description": "ibeacon Major",
+              "format": "int32"
+            },
+            "iBeaconMinor": {
+              "type": "integer",
+              "description": "ibeacon Minor",
+              "format": "int32"
+            },
+            "iBeaconTxPower": {
+              "type": "integer",
+              "description": "ibeacon Tx power",
+              "format": "int32"
             },
             "brightnessCorrectionFactor": {
               "type": "integer",
@@ -3619,12 +3663,34 @@
               "type": "boolean",
               "description": "bluetooth activation"
             },
+            "bleMode": {
+              "$ref": "#/components/schemas/BleMode"
+            },
+            "iBeaconUUID": {
+              "type": "string",
+              "description": "ibeacon UUID"
+            },
+            "iBeaconMajor": {
+              "type": "integer",
+              "description": "ibeacon Major",
+              "format": "int32"
+            },
+            "iBeaconMinor": {
+              "type": "integer",
+              "description": "ibeacon Minor",
+              "format": "int32"
+            },
+            "iBeaconTxPower": {
+              "type": "integer",
+              "description": "ibeacon Tx power",
+              "format": "int32"
+            },
             "profile": {
               "$ref": "#/components/schemas/BlindProfile"
             },
             "friendlyName": {
               "type": "string",
-              "description": "Sensor FriendlyName"
+              "description": "BLIND FriendlyName"
             },
             "dumpFrequency": {
               "type": "integer",
@@ -3653,12 +3719,34 @@
               "type": "boolean",
               "description": "bluetooth activation"
             },
+            "bleMode": {
+              "$ref": "#/components/schemas/BleMode"
+            },
+            "iBeaconUUID": {
+              "type": "string",
+              "description": "ibeacon UUID"
+            },
+            "iBeaconMajor": {
+              "type": "integer",
+              "description": "ibeacon Major",
+              "format": "int32"
+            },
+            "iBeaconMinor": {
+              "type": "integer",
+              "description": "ibeacon Minor",
+              "format": "int32"
+            },
+            "iBeaconTxPower": {
+              "type": "integer",
+              "description": "ibeacon Tx power",
+              "format": "int32"
+            },
             "profile": {
               "$ref": "#/components/schemas/BlindProfile"
             },
             "friendlyName": {
               "type": "string",
-              "description": "Sensor FriendlyName"
+              "description": "BLIND FriendlyName"
             },
             "dumpFrequency": {
               "type": "integer",
@@ -3722,7 +3810,7 @@
             },
             "friendlyName": {
               "type": "string",
-              "description": "Sensor FriendlyName"
+              "description": "HVAC FriendlyName"
             },
             "dumpFrequency": {
               "type": "integer",
@@ -3749,7 +3837,7 @@
             },
             "friendlyName": {
               "type": "string",
-              "description": "Sensor FriendlyName"
+              "description": "HVAC FriendlyName"
             },
             "dumpFrequency": {
               "type": "integer",
@@ -3785,7 +3873,7 @@
           "properties": {
             "mac": {
               "type": "string",
-              "description": "Sensor mac address"
+              "description": "LED mac address"
             },
             "group": {
               "type": "integer",
@@ -3844,7 +3932,7 @@
             },
             "friendlyName": {
               "type": "string",
-              "description": "Sensor FriendlyName"
+              "description": "LED FriendlyName"
             },
             "dumpFrequency": {
               "type": "integer",
@@ -3920,7 +4008,7 @@
             },
             "friendlyName": {
               "type": "string",
-              "description": "Sensor FriendlyName"
+              "description": "LED FriendlyName"
             },
             "dumpFrequency": {
               "type": "integer",
@@ -3977,7 +4065,7 @@
             },
             "friendlyName": {
               "type": "string",
-              "description": "Sensor FriendlyName"
+              "description": "SWITCH FriendlyName"
             },
             "dumpFrequency": {
               "type": "integer",
@@ -4105,7 +4193,7 @@
               "description": "vendor name"
             },
             "deviceType": {
-              "$ref": "#/components/schemas/DeviceType1"
+              "$ref": "#/components/schemas/DeviceType"
             },
             "url": {
               "type": "string",
@@ -4332,7 +4420,7 @@
             },
             "friendlyName": {
               "type": "string",
-              "description": "Sensor FriendlyName"
+              "description": "Group FriendlyName"
             },
             "firstDay": {
               "type": "array",
@@ -4423,7 +4511,7 @@
             },
             "friendlyName": {
               "type": "string",
-              "description": "Sensor FriendlyName"
+              "description": "Group FriendlyName"
             },
             "firstDay": {
               "type": "array",
@@ -4916,15 +5004,15 @@
             },
             "protocol": {
               "type": "string",
-              "description": "Sensor communication protocol"
+              "description": "SWITCH communication protocol"
             },
             "topic": {
               "type": "string",
-              "description": "Sensor communication topic"
+              "description": "SWITCH communication topic"
             },
             "isConfigured": {
               "type": "boolean",
-              "description": "Is the sensor configured"
+              "description": "Is the SWITCH configured"
             },
             "error": {
               "type": "integer",
@@ -4933,7 +5021,7 @@
             },
             "friendlyName": {
               "type": "string",
-              "description": "Sensor FriendlyName"
+              "description": "SWITCH FriendlyName"
             },
             "dumpFrequency": {
               "type": "integer",
@@ -5022,11 +5110,11 @@
           "properties": {
             "mac": {
               "type": "string",
-              "description": "LED mac address"
+              "description": "BLIND mac address"
             },
             "ip": {
               "type": "string",
-              "description": "Led IP address"
+              "description": "BLIND IP address"
             },
             "group": {
               "type": "integer",
@@ -5035,7 +5123,7 @@
             },
             "protocol": {
               "type": "string",
-              "description": "Sensor communication protocol"
+              "description": "BLIND communication protocol"
             },
             "switchMac": {
               "type": "string",
@@ -5043,19 +5131,41 @@
             },
             "isConfigured": {
               "type": "boolean",
-              "description": "Is the sensor configured"
+              "description": "Is the blind configured"
             },
             "softwareVersion": {
               "type": "number",
-              "description": "Sensor Software version"
+              "description": "BLIND Software version"
             },
             "hardwareVersion": {
               "type": "string",
-              "description": "Sensor Hardware version"
+              "description": "BLIND Hardware version"
             },
             "isBleEnabled": {
               "type": "boolean",
-              "description": "Is the bluetooth activate"
+              "description": "Is the bluetooth activated"
+            },
+            "bleMode": {
+              "$ref": "#/components/schemas/BleMode"
+            },
+            "iBeaconUUID": {
+              "type": "string",
+              "description": "ibeacon UUID"
+            },
+            "iBeaconMajor": {
+              "type": "integer",
+              "description": "ibeacon Major",
+              "format": "int32"
+            },
+            "iBeaconMinor": {
+              "type": "integer",
+              "description": "ibeacon Minor",
+              "format": "int32"
+            },
+            "iBeaconTxPower": {
+              "type": "integer",
+              "description": "ibeacon Tx power",
+              "format": "int32"
             },
             "error": {
               "type": "integer",
@@ -5064,7 +5174,7 @@
             },
             "friendlyName": {
               "type": "string",
-              "description": "Sensor FriendlyName"
+              "description": "BLIND FriendlyName"
             },
             "daisyChainEnabled": {
               "type": "boolean",
@@ -5117,11 +5227,11 @@
             },
             "protocol": {
               "type": "string",
-              "description": "Sensor communication protocol"
+              "description": "LED communication protocol"
             },
             "topic": {
               "type": "string",
-              "description": "Sensor communication topic"
+              "description": "LED communication topic"
             },
             "switchMac": {
               "type": "string",
@@ -5129,19 +5239,41 @@
             },
             "isConfigured": {
               "type": "boolean",
-              "description": "Is the sensor configured"
+              "description": "Is the LED configured"
             },
             "softwareVersion": {
               "type": "number",
-              "description": "Sensor Software version"
+              "description": "LED Software version"
             },
             "hardwareVersion": {
               "type": "string",
-              "description": "Sensor Hardware version"
+              "description": "LED Hardware version"
             },
             "isBleEnabled": {
               "type": "boolean",
-              "description": "Is the bluetooth activate"
+              "description": "Is the bluetooth activated"
+            },
+            "bleMode": {
+              "$ref": "#/components/schemas/BleMode"
+            },
+            "iBeaconUUID": {
+              "type": "string",
+              "description": "ibeacon UUID"
+            },
+            "iBeaconMajor": {
+              "type": "integer",
+              "description": "ibeacon Major",
+              "format": "int32"
+            },
+            "iBeaconMinor": {
+              "type": "integer",
+              "description": "ibeacon Minor",
+              "format": "int32"
+            },
+            "iBeaconTxPower": {
+              "type": "integer",
+              "description": "ibeacon Tx power",
+              "format": "int32"
             },
             "error": {
               "type": "integer",
@@ -5150,7 +5282,7 @@
             },
             "friendlyName": {
               "type": "string",
-              "description": "Sensor FriendlyName"
+              "description": "KED FriendlyName"
             },
             "pMax": {
               "type": "integer",
@@ -5291,16 +5423,6 @@
         },
         "DeviceType": {
           "title": "DeviceType",
-          "enum": [
-            "led",
-            "sensor"
-          ],
-          "type": "string",
-          "description": "device category LED|Sensor|etc.",
-          "example": "led"
-        },
-        "DeviceType1": {
-          "title": "DeviceType1",
           "enum": [
             "led",
             "sensor",

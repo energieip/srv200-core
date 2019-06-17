@@ -11,6 +11,16 @@ func SaveHvacConfig(db Database, cfg dhvac.HvacSetup) error {
 	return SaveOnUpdateObject(db, cfg, ConfigDB, HvacsTable, criteria)
 }
 
+//SaveHvacLabelConfig dump hvac config in database
+func SaveHvacLabelConfig(db Database, cfg dhvac.HvacSetup) error {
+	criteria := make(map[string]interface{})
+	if cfg.Label == nil {
+		return NewError("Device " + cfg.Mac + "not found")
+	}
+	criteria["Label"] = *cfg.Label
+	return SaveOnUpdateObject(db, cfg, ConfigDB, HvacsTable, criteria)
+}
+
 //UpdateHvacConfig update hvac config in database
 func UpdateHvacConfig(db Database, cfg dhvac.HvacConf) error {
 	setup, dbID := GetHvacConfig(db, cfg.Mac)
@@ -30,14 +40,29 @@ func UpdateHvacConfig(db Database, cfg dhvac.HvacConf) error {
 		setup.DumpFrequency = *cfg.DumpFrequency
 	}
 
+	if cfg.Label != nil {
+		setup.Label = cfg.Label
+	}
+
 	return db.UpdateRecord(ConfigDB, HvacsTable, dbID, setup)
 }
 
-//UpdateHvacSetup update hvac config in database
-func UpdateHvacSetup(db Database, cfg dhvac.HvacSetup) error {
-	setup, dbID := GetHvacConfig(db, cfg.Mac)
+//UpdateHvacLabelSetup update hvac config in database
+func UpdateHvacLabelSetup(db Database, cfg dhvac.HvacSetup) error {
+	setup, dbID := GetHvacLabelConfig(db, cfg.Mac)
 	if setup == nil || dbID == "" {
-		return SaveHvacConfig(db, cfg)
+		if cfg.FriendlyName == nil {
+			name := *cfg.Label
+			cfg.FriendlyName = &name
+		}
+		if cfg.Group != nil {
+			group := 0
+			setup.Group = &group
+		}
+		if cfg.DumpFrequency == 0 {
+			setup.DumpFrequency = 1000
+		}
+		return SaveHvacLabelConfig(db, cfg)
 	}
 
 	if cfg.FriendlyName != nil {
@@ -127,6 +152,27 @@ func GetHvacConfig(db Database, mac string) (*dhvac.HvacSetup, string) {
 	var dbID string
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = mac
+	stored, err := db.GetRecord(ConfigDB, HvacsTable, criteria)
+	if err != nil || stored == nil {
+		return nil, dbID
+	}
+	m := stored.(map[string]interface{})
+	id, ok := m["id"]
+	if ok {
+		dbID = id.(string)
+	}
+	driver, err := dhvac.ToHvacSetup(stored)
+	if err != nil {
+		return nil, dbID
+	}
+	return driver, dbID
+}
+
+//GetHvacLabelConfig return the sensor configuration
+func GetHvacLabelConfig(db Database, label string) (*dhvac.HvacSetup, string) {
+	var dbID string
+	criteria := make(map[string]interface{})
+	criteria["Label"] = label
 	stored, err := db.GetRecord(ConfigDB, HvacsTable, criteria)
 	if err != nil || stored == nil {
 		return nil, dbID

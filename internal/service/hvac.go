@@ -103,39 +103,36 @@ func (s *CoreService) updateHvacSetup(config interface{}) {
 	}
 
 	oldHvac, _ := database.GetHvacConfig(s.db, cfg.Mac)
-	if oldHvac == nil {
-		rlog.Error("Cannot find config for " + cfg.Mac)
-		return
-	}
-
-	if cfg.Group != nil {
-		if oldHvac.Group != cfg.Group {
-			if oldHvac.Group != nil {
-				rlog.Info("Update old group", *oldHvac.Group)
-				gr, _ := database.GetGroupConfig(s.db, *oldHvac.Group)
-				if gr != nil {
-					hvacs := []string{}
-					for _, v := range gr.Hvacs {
-						if v != cfg.Mac {
-							hvacs = append(hvacs, v)
+	if oldHvac != nil {
+		if cfg.Group != nil {
+			if oldHvac.Group != cfg.Group {
+				if oldHvac.Group != nil {
+					rlog.Info("Update old group", *oldHvac.Group)
+					gr, _ := database.GetGroupConfig(s.db, *oldHvac.Group)
+					if gr != nil {
+						hvacs := []string{}
+						for _, v := range gr.Hvacs {
+							if v != cfg.Mac {
+								hvacs = append(hvacs, v)
+							}
 						}
+						gr.Hvacs = hvacs
+						rlog.Info("Old group will be ", gr.Hvacs)
+						s.updateGroupCfg(gr)
 					}
-					gr.Hvacs = hvacs
-					rlog.Info("Old group will be ", gr.Hvacs)
-					s.updateGroupCfg(gr)
 				}
-			}
-			rlog.Info("Update new group", *cfg.Group)
-			grNew, _ := database.GetGroupConfig(s.db, *cfg.Group)
-			if grNew != nil {
-				grNew.Hvacs = append(grNew.Hvacs, cfg.Mac)
-				rlog.Info("new group will be", grNew.Hvacs)
-				s.updateGroupCfg(grNew)
+				rlog.Info("Update new group", *cfg.Group)
+				grNew, _ := database.GetGroupConfig(s.db, *cfg.Group)
+				if grNew != nil {
+					grNew.Hvacs = append(grNew.Hvacs, cfg.Mac)
+					rlog.Info("new group will be", grNew.Hvacs)
+					s.updateGroupCfg(grNew)
+				}
 			}
 		}
 	}
 
-	database.UpdateHvacSetup(s.db, *cfg)
+	database.UpdateHvacLabelSetup(s.db, *cfg)
 
 	//Get corresponding switchMac
 	hvac, _ := database.GetHvacConfig(s.db, cfg.Mac)
