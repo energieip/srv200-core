@@ -19,18 +19,17 @@ def Ifc2gltf(filepath):
         print("Filepath " + filepath + " not found")
         return 1
 
+    folder = os.path.dirname(filepath)
     file = ifcopenshell.open(filepath)
 
     for ifc_type in ifc_types:
         #Get all elements for current type
         elements = file.by_type(ifc_type)
 
-        #Define a dictionary for storing current element
         for element in elements:
             eltType = element.is_a()
             if eltType != "IfcBuildingStorey":
                 continue
-            print("==== element info %r", element.Elevation)
             tmpStoreys[element.Elevation] = {
                 "name": element.Name
             }
@@ -52,7 +51,7 @@ def Ifc2gltf(filepath):
 
     for s in storeys:
         storey = storeys[s]
-        gltf = storey["filename"]
+        gltf = os.path.join(folder, storey["filename"])
         dae = gltf.replace("gltf", "dae")
         name = storey["name"]
         cmd = "IfcConvert "+ filepath + " "+ dae +" --use-element-names --include+=arg Name \""+ name +"\""
@@ -62,11 +61,17 @@ def Ifc2gltf(filepath):
         cmd = "COLLADA2GLTF-bin -i " + dae + " -o " + gltf
         print(cmd)
         res = os.system(cmd)
+        try:
+            os.remove(dae)
+        except:
+            pass
         if res != 0:
-            print("Finished with error " + res)
+            print("Finished with error " + str(res))
             return 1
-        os.remove(dae)
         print("File " + gltf + " created")
+
+    with open(os.path.join(folder, "maps.json"), "w") as f:
+        json.dump(storeys, f, sort_keys=True, ensure_ascii=False, indent=4)
 
 def main():
     parser = argparse.ArgumentParser()

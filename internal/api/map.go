@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"strings"
 
 	"github.com/energieip/common-components-go/pkg/duser"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
@@ -47,7 +46,6 @@ func (api *API) uploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	newFilename := ""
-	gltfFilename := ""
 
 	// continue looping through all parts, *multipart.Reader.NextPart() will
 	// return an End of File when all parts have been read.
@@ -58,7 +56,7 @@ func (api *API) uploadHandler(w http.ResponseWriter, r *http.Request) {
 			tempFile.Close()
 			rlog.Info("Hit last part of multipart upload / do post treatment")
 			go func(filename string) {
-				cmd := exec.Command("ifc_parser.py", "-i", filename)
+				cmd := exec.Command("ifcparser.py", "-i", filename)
 				out, err := cmd.CombinedOutput()
 				if err != nil {
 					rlog.Error("cmd.Run() failed with status " + err.Error() + " : " + string(out))
@@ -79,10 +77,10 @@ func (api *API) uploadHandler(w http.ResponseWriter, r *http.Request) {
 					os.Remove(tempFile.Name())
 					return
 				}
-				cmd = exec.Command("ifc2gltf.sh", newFilename, gltfFilename)
+				cmd = exec.Command("ifc2gltf.py", "-i", newFilename)
 				out, err = cmd.CombinedOutput()
 				if err != nil {
-					rlog.Error("ifc2gltf.sh failed with status " + err.Error() + " : " + string(out))
+					rlog.Error("ifc2gltf.py failed with status " + err.Error() + " : " + string(out))
 					return
 				}
 
@@ -104,7 +102,6 @@ func (api *API) uploadHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		newFilename = directory + "/" + p.FileName()
-		gltfFilename = strings.Replace(newFilename, "ifc", "gltf", -1)
 		rlog.Info("Uploaded filename: " + newFilename)
 		uploaded := false
 
