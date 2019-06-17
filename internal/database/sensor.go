@@ -81,7 +81,7 @@ func UpdateSensorConfig(db Database, cfg ds.SensorConf) error {
 
 //UpdateSensorLabelSetup update sensor config in database
 func UpdateSensorLabelSetup(db Database, cfg ds.SensorSetup) error {
-	setup, dbID := GetSensorLabelConfig(db, cfg.Mac)
+	setup, dbID := GetSensorLabelConfig(db, *cfg.Label)
 	if setup == nil || dbID == "" {
 		if cfg.BleMode == nil {
 			ble := "service"

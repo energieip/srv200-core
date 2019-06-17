@@ -11,6 +11,16 @@ func SaveBlindConfig(db Database, cfg dblind.BlindSetup) error {
 	return SaveOnUpdateObject(db, cfg, ConfigDB, BlindsTable, criteria)
 }
 
+//SaveBlindLabelConfig dump blind config in database
+func SaveBlindLabelConfig(db Database, cfg dblind.BlindSetup) error {
+	criteria := make(map[string]interface{})
+	if cfg.Label == nil {
+		return NewError("Device " + cfg.Mac + "not found")
+	}
+	criteria["Label"] = *cfg.Label
+	return SaveOnUpdateObject(db, cfg, ConfigDB, BlindsTable, criteria)
+}
+
 //UpdateBlindConfig update blind config in database
 func UpdateBlindConfig(db Database, cfg dblind.BlindConf) error {
 	setup, dbID := GetBlindConfig(db, cfg.Mac)
@@ -34,14 +44,59 @@ func UpdateBlindConfig(db Database, cfg dblind.BlindConf) error {
 		setup.DumpFrequency = *cfg.DumpFrequency
 	}
 
+	if cfg.IBeaconMajor != nil {
+		setup.IBeaconMajor = cfg.IBeaconMajor
+	}
+
+	if cfg.IBeaconMinor != nil {
+		setup.IBeaconMinor = cfg.IBeaconMinor
+	}
+
+	if cfg.IBeaconTxPower != nil {
+		setup.IBeaconTxPower = cfg.IBeaconTxPower
+	}
+
+	if cfg.IBeaconUUID != nil {
+		setup.IBeaconUUID = cfg.IBeaconUUID
+	}
+
+	if cfg.BleMode != nil {
+		setup.BleMode = cfg.BleMode
+	}
+	if cfg.Label != nil {
+		setup.Label = cfg.Label
+	}
 	return db.UpdateRecord(ConfigDB, BlindsTable, dbID, setup)
 }
 
-//UpdateBlindSetup update blind config in database
-func UpdateBlindSetup(db Database, cfg dblind.BlindSetup) error {
-	setup, dbID := GetBlindConfig(db, cfg.Mac)
+//UpdateBlindLabelSetup update blind config in database
+func UpdateBlindLabelSetup(db Database, cfg dblind.BlindSetup) error {
+	setup, dbID := GetBlindLabelConfig(db, *cfg.Label)
 	if setup == nil || dbID == "" {
-		return SaveBlindConfig(db, cfg)
+		if cfg.FriendlyName != nil {
+			name := *cfg.Label
+			setup.FriendlyName = &name
+		}
+		if cfg.DumpFrequency == 0 {
+			cfg.DumpFrequency = 1000
+		}
+		if cfg.BleMode == nil {
+			ble := "service"
+			cfg.BleMode = &ble
+		}
+		if cfg.IsBleEnabled == nil {
+			bleEnable := false
+			cfg.IsBleEnabled = &bleEnable
+		}
+		if cfg.Group == nil {
+			group := 0
+			cfg.Group = &group
+		}
+		if cfg.FriendlyName == nil {
+			name := *cfg.Label
+			cfg.FriendlyName = &name
+		}
+		return SaveBlindLabelConfig(db, cfg)
 	}
 
 	if cfg.FriendlyName != nil {
@@ -62,6 +117,26 @@ func UpdateBlindSetup(db Database, cfg dblind.BlindSetup) error {
 
 	if cfg.Label != nil {
 		setup.Label = cfg.Label
+	}
+
+	if cfg.IBeaconMajor != nil {
+		setup.IBeaconMajor = cfg.IBeaconMajor
+	}
+
+	if cfg.IBeaconMinor != nil {
+		setup.IBeaconMinor = cfg.IBeaconMinor
+	}
+
+	if cfg.IBeaconTxPower != nil {
+		setup.IBeaconTxPower = cfg.IBeaconTxPower
+	}
+
+	if cfg.IBeaconUUID != nil {
+		setup.IBeaconUUID = cfg.IBeaconUUID
+	}
+
+	if cfg.BleMode != nil {
+		setup.BleMode = cfg.BleMode
 	}
 
 	return db.UpdateRecord(ConfigDB, BlindsTable, dbID, setup)
@@ -135,6 +210,27 @@ func GetBlindConfig(db Database, mac string) (*dblind.BlindSetup, string) {
 	var dbID string
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = mac
+	stored, err := db.GetRecord(ConfigDB, BlindsTable, criteria)
+	if err != nil || stored == nil {
+		return nil, dbID
+	}
+	m := stored.(map[string]interface{})
+	id, ok := m["id"]
+	if ok {
+		dbID = id.(string)
+	}
+	driver, err := dblind.ToBlindSetup(stored)
+	if err != nil {
+		return nil, dbID
+	}
+	return driver, dbID
+}
+
+//GetBlindLabelConfig return the sensor configuration
+func GetBlindLabelConfig(db Database, label string) (*dblind.BlindSetup, string) {
+	var dbID string
+	criteria := make(map[string]interface{})
+	criteria["Label"] = label
 	stored, err := db.GetRecord(ConfigDB, BlindsTable, criteria)
 	if err != nil || stored == nil {
 		return nil, dbID

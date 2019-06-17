@@ -106,38 +106,35 @@ func (s *CoreService) updateBlindSetup(config interface{}) {
 	}
 
 	oldBlind, _ := database.GetBlindConfig(s.db, cfg.Mac)
-	if oldBlind == nil {
-		rlog.Error("Cannot find config for " + cfg.Mac)
-		return
-	}
-
-	if cfg.Group != nil {
-		if oldBlind.Group != cfg.Group {
-			if oldBlind.Group != nil {
-				rlog.Info("Update old group", *oldBlind.Group)
-				gr, _ := database.GetGroupConfig(s.db, *oldBlind.Group)
-				if gr != nil {
-					blinds := []string{}
-					for _, v := range gr.Blinds {
-						if v != cfg.Mac {
-							blinds = append(blinds, v)
+	if oldBlind != nil {
+		if cfg.Group != nil {
+			if oldBlind.Group != cfg.Group {
+				if oldBlind.Group != nil {
+					rlog.Info("Update old group", *oldBlind.Group)
+					gr, _ := database.GetGroupConfig(s.db, *oldBlind.Group)
+					if gr != nil {
+						blinds := []string{}
+						for _, v := range gr.Blinds {
+							if v != cfg.Mac {
+								blinds = append(blinds, v)
+							}
 						}
+						gr.Blinds = blinds
+						rlog.Info("Old group will be ", gr.Blinds)
+						s.updateGroupCfg(gr)
 					}
-					gr.Blinds = blinds
-					rlog.Info("Old group will be ", gr.Blinds)
-					s.updateGroupCfg(gr)
 				}
-			}
-			rlog.Info("Update new group", *cfg.Group)
-			grNew, _ := database.GetGroupConfig(s.db, *cfg.Group)
-			if grNew != nil {
-				grNew.Blinds = append(grNew.Blinds, cfg.Mac)
-				rlog.Info("new group will be", grNew.Blinds)
-				s.updateGroupCfg(grNew)
+				rlog.Info("Update new group", *cfg.Group)
+				grNew, _ := database.GetGroupConfig(s.db, *cfg.Group)
+				if grNew != nil {
+					grNew.Blinds = append(grNew.Blinds, cfg.Mac)
+					rlog.Info("new group will be", grNew.Blinds)
+					s.updateGroupCfg(grNew)
+				}
 			}
 		}
 	}
-	database.UpdateBlindSetup(s.db, *cfg)
+	database.UpdateBlindLabelSetup(s.db, *cfg)
 	//Get corresponding switchMac
 	blind, _ := database.GetBlindConfig(s.db, cfg.Mac)
 	if blind == nil {

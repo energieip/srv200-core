@@ -148,6 +148,10 @@ func UpdateLedConfig(db Database, config dl.LedConf) error {
 		setup.Watchdog = config.Watchdog
 	}
 
+	if config.Label != nil {
+		setup.Label = config.Label
+	}
+
 	return db.UpdateRecord(ConfigDB, LedsTable, dbID, setup)
 }
 
