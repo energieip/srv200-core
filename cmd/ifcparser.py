@@ -26,7 +26,6 @@ def parseIfc(filepath):
     drivers = {}
     groups = {}
     dump = {}
-    storey = []
 
     if not os.path.lexists(filepath):
         print("Filepath " + filepath + " not found")
@@ -42,9 +41,6 @@ def parseIfc(filepath):
         for element in elements:
             instance = {}
             eltType = element.is_a()
-            if eltType == "IfcBuildingStorey":
-                storey.append(element.Name)
-                continue
             if eltType not in filters:
                 continue
             instance_properties = {}
@@ -151,7 +147,6 @@ def parseIfc(filepath):
                 "url": url,
                 "deviceType": deviceType
             }
-
     except Exception as exc:
         print("exc", exc)
         return 1
@@ -163,8 +158,7 @@ def parseIfc(filepath):
         "hvacs": drivers.get("hvac", {}),
         "models": models,
         "switchs": drivers.get("switch", {}),
-        "projects": projects,
-        "storey": storey
+        "projects": projects
     }
 
     print(json.dumps(dump, indent=4, sort_keys=True))

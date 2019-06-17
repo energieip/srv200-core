@@ -41,10 +41,8 @@ deb:
 	sed -i "s/COMPONENT/$(COMPONENT)/g" $(BUILD_PATH)/DEBIAN/control
 	cp ./scripts/Makefile $(BUILD_PATH)/../
 	cp bin/$(COMPONENT)-$(ARCH) $(BUILD_PATH)/usr/local/bin/$(COMPONENT)
-	cp cmd/ifc_parser.py $(BUILD_PATH)/usr/local/bin/
-	chmod +x $(BUILD_PATH)/usr/local/bin/ifc_parser.py
-	cp cmd/ifc2gltf.sh $(BUILD_PATH)/usr/local/bin/
-	chmod +x $(BUILD_PATH)/usr/local/bin/ifc2gltf.sh
+	cp cmd/*.py $(BUILD_PATH)/usr/local/bin/
+	chmod +x $(BUILD_PATH)/usr/local/bin/*.py
 	cp -r internal/swaggerui $(BUILD_PATH)/media/userdata/www/
 	cp -r internal/swagger/*.json $(BUILD_PATH)/media/userdata/www/swaggerui/
 	make -C build DEB_PACKAGE=$(BUILD_NAME) deb
