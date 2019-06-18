@@ -23,62 +23,136 @@ func SaveSwitchStatus(db Database, status sd.SwitchStatus) error {
 
 //UpdateSwitchConfig update server config to database
 func UpdateSwitchConfig(db Database, config core.SwitchConfig) error {
+	if config.Label == nil {
+		return NewError("Switch Mac not found")
+	}
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = config.Mac
 	stored, err := db.GetRecord(ConfigDB, SwitchsTable, criteria)
 	if err != nil || stored == nil {
-		return NewError("Switch " + config.Mac + "not found")
+		return NewError("Switch " + *config.Mac + " not found")
 	}
 	m := stored.(map[string]interface{})
 	id, ok := m["id"]
 	if !ok {
-		return NewError("Switch " + config.Mac + "not found")
+		return NewError("Switch " + *config.Mac + " not found")
 	}
 	dbID := id.(string)
 
 	setup, err := core.ToSwitchConfig(stored)
 	if err != nil || stored == nil {
-		return NewError("Switch " + config.Mac + "not found")
+		return NewError("Switch " + *config.Mac + " not found")
 	}
 
-	setup.FriendlyName = config.FriendlyName
+	if config.FriendlyName == nil {
+		setup.FriendlyName = config.FriendlyName
+	}
+
 	if config.DumpFrequency != nil {
 		setup.DumpFrequency = config.DumpFrequency
 	}
 
-	setup.IP = config.IP
-	setup.Cluster = config.Cluster
+	if config.IP != nil {
+		setup.IP = config.IP
+	}
+	if config.Cluster != nil {
+		setup.Cluster = config.Cluster
+	}
+	if config.Label != nil {
+		setup.Label = config.Label
+	}
+
+	return db.UpdateRecord(ConfigDB, SwitchsTable, dbID, setup)
+}
+
+//UpdateSwitchLabelConfig update server config to database
+func UpdateSwitchLabelConfig(db Database, config core.SwitchConfig) error {
+	if config.Label == nil {
+		return NewError("Switch Mac not found")
+	}
+	criteria := make(map[string]interface{})
+	criteria["Label"] = config.Label
+	stored, err := db.GetRecord(ConfigDB, SwitchsTable, criteria)
+	if err != nil || stored == nil {
+		return NewError("Switch " + *config.Mac + " not found")
+	}
+	m := stored.(map[string]interface{})
+	id, ok := m["id"]
+	if !ok {
+		return NewError("Switch " + *config.Mac + " not found")
+	}
+	dbID := id.(string)
+
+	setup, err := core.ToSwitchConfig(stored)
+	if err != nil || stored == nil {
+		return NewError("Switch " + *config.Mac + " not found")
+	}
+
+	if config.FriendlyName == nil {
+		setup.FriendlyName = config.FriendlyName
+	}
+
+	if config.DumpFrequency != nil {
+		setup.DumpFrequency = config.DumpFrequency
+	}
+
+	if config.IP != nil {
+		setup.IP = config.IP
+	}
+	if config.Cluster != nil {
+		setup.Cluster = config.Cluster
+	}
+	if config.Label != nil {
+		setup.Label = config.Label
+	}
 
 	return db.UpdateRecord(ConfigDB, SwitchsTable, dbID, setup)
 }
 
 //SaveSwitchLabelConfig update server config to database
 func SaveSwitchLabelConfig(db Database, config core.SwitchConfig) error {
+	if config.Label == nil {
+		return NewError("Switch Label not found")
+	}
 	criteria := make(map[string]interface{})
 	criteria["Label"] = config.Label
 	stored, err := db.GetRecord(ConfigDB, SwitchsTable, criteria)
 	if err != nil || stored == nil {
-		return NewError("Switch " + config.Label + "not found")
+		return NewError("Switch " + *config.Label + " not found")
 	}
 	m := stored.(map[string]interface{})
 	id, ok := m["id"]
 	if !ok {
-		return NewError("Switch " + config.Label + "not found")
+		return NewError("Switch " + *config.Label + " not found")
 	}
 	dbID := id.(string)
 
 	setup, err := core.ToSwitchConfig(stored)
 	if err != nil || stored == nil {
-		return NewError("Switch " + config.Label + "not found")
+		return NewError("Switch " + *config.Label + " not found")
 	}
 
-	setup.FriendlyName = config.FriendlyName
+	if config.FriendlyName == nil {
+		setup.FriendlyName = config.FriendlyName
+	}
+
+	if config.Mac == nil {
+		setup.Mac = config.Mac
+	}
+
+	if config.FullMac == nil {
+		setup.FullMac = config.FullMac
+	}
+
 	if config.DumpFrequency != nil {
 		setup.DumpFrequency = config.DumpFrequency
 	}
-
-	setup.IP = config.IP
-	setup.Cluster = config.Cluster
+	if config.IP != nil {
+		setup.IP = config.IP
+	}
+	if config.Cluster != nil {
+		setup.Cluster = config.Cluster
+	}
 	setup.Label = config.Label
 
 	return db.UpdateRecord(ConfigDB, SwitchsTable, dbID, setup)
@@ -140,8 +214,8 @@ func ReplaceSwitchConfig(db Database, old, oldFull, new, newFull string) error {
 	if setup == nil || dbID == "" {
 		return NewError("Device " + old + "not found")
 	}
-	setup.FullMac = newFull
-	setup.Mac = new
+	setup.FullMac = &newFull
+	setup.Mac = &new
 	return db.UpdateRecord(ConfigDB, SwitchsTable, dbID, setup)
 }
 
@@ -157,7 +231,10 @@ func GetSwitchsConfig(db Database) map[string]core.SwitchConfig {
 		if err != nil || sw == nil {
 			continue
 		}
-		switchs[sw.Mac] = *sw
+		if sw.Mac == nil {
+			continue
+		}
+		switchs[*sw.Mac] = *sw
 	}
 	return switchs
 }
@@ -193,7 +270,10 @@ func GetCluster(db Database, cluster int) map[string]core.SwitchConfig {
 		if err != nil || sw == nil {
 			continue
 		}
-		res[sw.IP] = *sw
+		if sw.IP == nil {
+			continue
+		}
+		res[*sw.IP] = *sw
 	}
 	return res
 }

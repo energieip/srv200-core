@@ -16,20 +16,65 @@ import (
 
 func (s *CoreService) updateSwitchCfg(config interface{}) {
 	cfg, _ := core.ToSwitchConfig(config)
-	sw, _ := database.GetSwitchConfig(s.db, cfg.Mac)
+	if cfg.Mac == nil {
+		return
+	}
+	sw, _ := database.GetSwitchConfig(s.db, *cfg.Mac)
 	if sw != nil {
 		database.UpdateSwitchConfig(s.db, *cfg)
 	} else {
 		database.SaveSwitchConfig(s.db, *cfg)
 	}
 
-	url := "/write/switch/" + cfg.Mac + "/update/settings"
+	url := "/write/switch/" + *cfg.Mac + "/update/settings"
 	switchCfg := sd.SwitchConfig{}
-	switchCfg.Mac = cfg.Mac
+	switchCfg.Mac = *cfg.Mac
 	if cfg.DumpFrequency != nil {
 		switchCfg.DumpFrequency = *cfg.DumpFrequency
 	}
-	switchCfg.FriendlyName = cfg.FriendlyName
+	if cfg.FriendlyName != nil {
+		switchCfg.FriendlyName = *cfg.FriendlyName
+	}
+	if cfg.IsConfigured != nil {
+		switchCfg.IsConfigured = cfg.IsConfigured
+	}
+
+	dump, _ := switchCfg.ToJSON()
+	s.server.SendCommand(url, dump)
+}
+
+func (s *CoreService) updateSwitchLabelCfg(config interface{}) {
+	cfg, _ := core.ToSwitchConfig(config)
+	if cfg.Label == nil {
+		return
+	}
+	sw := database.GetSwitchLabelConfig(s.db, *cfg.Label)
+	if sw != nil {
+		database.UpdateSwitchLabelConfig(s.db, *cfg)
+	} else {
+		database.SaveSwitchLabelConfig(s.db, *cfg)
+	}
+
+	mac := ""
+	if cfg.Mac != nil {
+		mac = *cfg.Mac
+	} else {
+		if sw.Mac != nil {
+			mac = *sw.Mac
+		}
+	}
+	if mac == "" {
+		return
+	}
+	url := "/write/switch/" + mac + "/update/settings"
+	switchCfg := sd.SwitchConfig{}
+	switchCfg.Mac = mac
+	if cfg.DumpFrequency != nil {
+		switchCfg.DumpFrequency = *cfg.DumpFrequency
+	}
+	if cfg.FriendlyName != nil {
+		switchCfg.FriendlyName = *cfg.FriendlyName
+	}
 	if cfg.IsConfigured != nil {
 		switchCfg.IsConfigured = cfg.IsConfigured
 	}
@@ -149,7 +194,9 @@ func (s *CoreService) prepareSetupSwitchConfig(switchStatus sd.SwitchStatus) *sd
 	isConfigured := true
 	setup := sd.SwitchConfig{}
 	setup.Mac = switchStatus.Mac
-	setup.FriendlyName = config.FriendlyName
+	if config.FriendlyName != nil {
+		setup.FriendlyName = *config.FriendlyName
+	}
 	setup.IsConfigured = &isConfigured
 	setup.LedsSetup = database.GetLedSwitchSetup(s.db, switchStatus.Mac)
 	setup.SensorsSetup = database.GetSensorSwitchSetup(s.db, switchStatus.Mac)
@@ -187,24 +234,29 @@ func (s *CoreService) prepareSetupSwitchConfig(switchStatus sd.SwitchStatus) *sd
 	}
 
 	setup.Services = services
-	if config.IP == "" {
-		config.IP = switchStatus.IP
+	if config.IP == nil {
+		config.IP = &switchStatus.IP
 		database.SaveSwitchConfig(s.db, *config)
 	}
 
 	//Prepare Cluster
 	var clusters map[string]core.SwitchConfig
 	switchCluster := make(map[string]sd.SwitchCluster)
-	if config.Cluster != 0 {
-		clusters = database.GetCluster(s.db, config.Cluster)
+	if config.Cluster != nil {
+		clusters = database.GetCluster(s.db, *config.Cluster)
 	}
 	for _, cluster := range clusters {
-		if cluster.Mac != switchStatus.Mac {
+		if cluster.Mac == nil {
+			continue
+		}
+		if *cluster.Mac != switchStatus.Mac {
 			br := sd.SwitchCluster{
-				IP:  cluster.IP,
-				Mac: cluster.Mac,
+				Mac: *cluster.Mac,
 			}
-			switchCluster[cluster.Mac] = br
+			if cluster.IP != nil {
+				br.IP = *cluster.IP
+			}
+			switchCluster[*cluster.Mac] = br
 		}
 	}
 	setup.ClusterBroker = switchCluster
@@ -217,16 +269,18 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 		rlog.Warn("Cannot find configuration for switch", switchStatus.Mac)
 		return nil
 	}
-	if config.IP == "" {
-		config.IP = switchStatus.IP
+	if config.IP == nil {
+		config.IP = &switchStatus.IP
 		database.SaveSwitchConfig(s.db, *config)
 	}
 
 	isConfigured := true
 	setup := sd.SwitchConfig{}
 	setup.Mac = switchStatus.Mac
-	setup.IP = config.IP
-	setup.FriendlyName = config.FriendlyName
+	setup.IP = *config.IP
+	if config.FriendlyName != nil {
+		setup.FriendlyName = *config.FriendlyName
+	}
 	setup.IsConfigured = &isConfigured
 
 	setup.LedsSetup = make(map[string]dl.LedSetup)
@@ -315,18 +369,23 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 	//Prepare Cluster
 	var clusters map[string]core.SwitchConfig
 	switchCluster := make(map[string]sd.SwitchCluster)
-	if config.Cluster != 0 {
-		clusters = database.GetCluster(s.db, config.Cluster)
+	if config.Cluster != nil {
+		clusters = database.GetCluster(s.db, *config.Cluster)
 		for _, cluster := range clusters {
-			_, ok := switchStatus.ClusterBroker[cluster.Mac]
+			if cluster.Mac != nil {
+				continue
+			}
+			_, ok := switchStatus.ClusterBroker[*cluster.Mac]
 			if !ok {
 				//add only new cluster member only
-				if cluster.Mac != switchStatus.Mac {
+				if *cluster.Mac != switchStatus.Mac {
 					br := sd.SwitchCluster{
-						IP:  cluster.IP,
-						Mac: cluster.Mac,
+						Mac: *cluster.Mac,
 					}
-					switchCluster[cluster.Mac] = br
+					if cluster.IP != nil {
+						br.IP = *cluster.IP
+					}
+					switchCluster[*cluster.Mac] = br
 				}
 			}
 		}

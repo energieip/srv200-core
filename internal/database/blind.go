@@ -71,6 +71,9 @@ func UpdateBlindConfig(db Database, cfg dblind.BlindConf) error {
 
 //UpdateBlindLabelSetup update blind config in database
 func UpdateBlindLabelSetup(db Database, cfg dblind.BlindSetup) error {
+	if cfg.Label == nil {
+		return NewError("Device label not found")
+	}
 	setup, dbID := GetBlindLabelConfig(db, *cfg.Label)
 	if setup == nil || dbID == "" {
 		if cfg.FriendlyName != nil {
@@ -97,6 +100,82 @@ func UpdateBlindLabelSetup(db Database, cfg dblind.BlindSetup) error {
 			cfg.FriendlyName = &name
 		}
 		return SaveBlindLabelConfig(db, cfg)
+	}
+
+	if cfg.FriendlyName != nil {
+		setup.FriendlyName = cfg.FriendlyName
+	}
+
+	if cfg.Group != nil {
+		setup.Group = cfg.Group
+	}
+
+	if cfg.IsBleEnabled != nil {
+		setup.IsBleEnabled = cfg.IsBleEnabled
+	}
+
+	if cfg.DumpFrequency != 0 {
+		setup.DumpFrequency = cfg.DumpFrequency
+	}
+
+	if cfg.Label != nil {
+		setup.Label = cfg.Label
+	}
+
+	if cfg.IBeaconMajor != nil {
+		setup.IBeaconMajor = cfg.IBeaconMajor
+	}
+
+	if cfg.IBeaconMinor != nil {
+		setup.IBeaconMinor = cfg.IBeaconMinor
+	}
+
+	if cfg.IBeaconTxPower != nil {
+		setup.IBeaconTxPower = cfg.IBeaconTxPower
+	}
+
+	if cfg.IBeaconUUID != nil {
+		setup.IBeaconUUID = cfg.IBeaconUUID
+	}
+
+	if cfg.BleMode != nil {
+		setup.BleMode = cfg.BleMode
+	}
+
+	return db.UpdateRecord(ConfigDB, BlindsTable, dbID, setup)
+}
+
+//UpdateBlindSetup update blind config in database
+func UpdateBlindSetup(db Database, cfg dblind.BlindSetup) error {
+	if cfg.Label == nil {
+		return NewError("Device label not found")
+	}
+	setup, dbID := GetBlindConfig(db, cfg.Mac)
+	if setup == nil || dbID == "" {
+		if cfg.FriendlyName != nil {
+			name := *cfg.Label
+			setup.FriendlyName = &name
+		}
+		if cfg.DumpFrequency == 0 {
+			cfg.DumpFrequency = 1000
+		}
+		if cfg.BleMode == nil {
+			ble := "service"
+			cfg.BleMode = &ble
+		}
+		if cfg.IsBleEnabled == nil {
+			bleEnable := false
+			cfg.IsBleEnabled = &bleEnable
+		}
+		if cfg.Group == nil {
+			group := 0
+			cfg.Group = &group
+		}
+		if cfg.FriendlyName == nil {
+			name := *cfg.Label
+			cfg.FriendlyName = &name
+		}
+		return SaveBlindConfig(db, cfg)
 	}
 
 	if cfg.FriendlyName != nil {

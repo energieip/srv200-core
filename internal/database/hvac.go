@@ -49,7 +49,10 @@ func UpdateHvacConfig(db Database, cfg dhvac.HvacConf) error {
 
 //UpdateHvacLabelSetup update hvac config in database
 func UpdateHvacLabelSetup(db Database, cfg dhvac.HvacSetup) error {
-	setup, dbID := GetHvacLabelConfig(db, cfg.Mac)
+	if cfg.Label == nil {
+		return NewError("Device label not found")
+	}
+	setup, dbID := GetHvacLabelConfig(db, *cfg.Label)
 	if setup == nil || dbID == "" {
 		if cfg.FriendlyName == nil {
 			name := *cfg.Label
@@ -63,6 +66,43 @@ func UpdateHvacLabelSetup(db Database, cfg dhvac.HvacSetup) error {
 			setup.DumpFrequency = 1000
 		}
 		return SaveHvacLabelConfig(db, cfg)
+	}
+
+	if cfg.FriendlyName != nil {
+		setup.FriendlyName = cfg.FriendlyName
+	}
+
+	if cfg.Group != nil {
+		setup.Group = cfg.Group
+	}
+
+	if cfg.DumpFrequency != 0 {
+		setup.DumpFrequency = cfg.DumpFrequency
+	}
+
+	if cfg.Label != nil {
+		setup.Label = cfg.Label
+	}
+
+	return db.UpdateRecord(ConfigDB, HvacsTable, dbID, setup)
+}
+
+//UpdateHvacSetup update hvac config in database
+func UpdateHvacSetup(db Database, cfg dhvac.HvacSetup) error {
+	setup, dbID := GetHvacConfig(db, cfg.Mac)
+	if setup == nil || dbID == "" {
+		if cfg.FriendlyName == nil {
+			name := *cfg.Label
+			cfg.FriendlyName = &name
+		}
+		if cfg.Group != nil {
+			group := 0
+			setup.Group = &group
+		}
+		if cfg.DumpFrequency == 0 {
+			setup.DumpFrequency = 1000
+		}
+		return SaveHvacConfig(db, cfg)
 	}
 
 	if cfg.FriendlyName != nil {

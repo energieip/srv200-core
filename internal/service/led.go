@@ -137,6 +137,74 @@ func (s *CoreService) updateLedSetup(config interface{}) {
 		}
 	}
 
+	database.UpdateLedSetup(s.db, *cfg)
+	//Get corresponding switchMac
+	led, _ := database.GetLedConfig(s.db, cfg.Mac)
+	if led == nil {
+		rlog.Error("Cannot find config for " + cfg.Mac)
+		return
+	}
+	rlog.Info("Led configuration " + led.Mac + " saved")
+
+	if led.SwitchMac == "" {
+		return
+	}
+
+	url := "/write/switch/" + led.SwitchMac + "/update/settings"
+	switchSetup := sd.SwitchConfig{}
+	switchSetup.Mac = led.SwitchMac
+	switchSetup.LedsSetup = make(map[string]dl.LedSetup)
+
+	switchSetup.LedsSetup[cfg.Mac] = *cfg
+
+	dump, _ := switchSetup.ToJSON()
+	s.server.SendCommand(url, dump)
+}
+
+func (s *CoreService) updateLedLabelSetup(config interface{}) {
+	cfg, _ := dl.ToLedSetup(config)
+	if cfg == nil || cfg.Label == nil {
+		rlog.Error("Cannot parse ")
+		return
+	}
+
+	oldLed, _ := database.GetLedLabelConfig(s.db, *cfg.Label)
+	if oldLed != nil {
+		if cfg.Group != nil {
+			if oldLed.Group != cfg.Group {
+				if oldLed.Group != nil {
+					rlog.Info("Update old group", *oldLed.Group)
+					gr, _ := database.GetGroupConfig(s.db, *oldLed.Group)
+					if gr != nil {
+						leds := []string{}
+						for _, v := range gr.Leds {
+							if v != cfg.Mac {
+								leds = append(leds, v)
+							}
+						}
+						gr.Leds = leds
+						firstDay := []string{}
+						for _, v := range gr.FirstDay {
+							if v != cfg.Mac {
+								firstDay = append(firstDay, v)
+							}
+						}
+						gr.FirstDay = firstDay
+						rlog.Info("Old group will be ", gr.Leds)
+						s.updateGroupCfg(gr)
+					}
+				}
+				rlog.Info("Update new group", *cfg.Group)
+				grNew, _ := database.GetGroupConfig(s.db, *cfg.Group)
+				if grNew != nil {
+					grNew.Leds = append(grNew.Leds, cfg.Mac)
+					rlog.Info("new group will be", grNew.Leds)
+					s.updateGroupCfg(grNew)
+				}
+			}
+		}
+	}
+
 	database.UpdateLedLabelSetup(s.db, *cfg)
 	//Get corresponding switchMac
 	led, _ := database.GetLedConfig(s.db, cfg.Mac)

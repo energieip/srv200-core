@@ -3,7 +3,11 @@ package service
 import (
 	"strings"
 
+	db "github.com/energieip/common-components-go/pkg/dblind"
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
+	dh "github.com/energieip/common-components-go/pkg/dhvac"
+	dl "github.com/energieip/common-components-go/pkg/dled"
+	ds "github.com/energieip/common-components-go/pkg/dsensor"
 	sd "github.com/energieip/common-components-go/pkg/dswitch"
 	"github.com/energieip/common-components-go/pkg/tools"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
@@ -55,6 +59,7 @@ func (s *CoreService) replaceDriver(driver interface{}) {
 			//send remove reset old driver configuration to the switch
 			switchConf := sd.SwitchConfig{}
 			switchConf.Mac = oldDriver.SwitchMac
+			switchConf.LedsSetup = make(map[string]dl.LedSetup)
 			switchConf.LedsSetup[oldDriver.Mac] = *oldDriver
 			s.sendSwitchRemoveConfig(switchConf)
 
@@ -97,6 +102,7 @@ func (s *CoreService) replaceDriver(driver interface{}) {
 			//send remove reset old driver configuration to the switch
 			switchConf := sd.SwitchConfig{}
 			switchConf.Mac = oldDriver.SwitchMac
+			switchConf.BlindsSetup = make(map[string]db.BlindSetup)
 			switchConf.BlindsSetup[oldDriver.Mac] = *oldDriver
 			s.sendSwitchRemoveConfig(switchConf)
 
@@ -138,6 +144,7 @@ func (s *CoreService) replaceDriver(driver interface{}) {
 			//send remove reset old driver configuration to the switch
 			switchConf := sd.SwitchConfig{}
 			switchConf.Mac = oldDriver.SwitchMac
+			switchConf.HvacsSetup = make(map[string]dh.HvacSetup)
 			switchConf.HvacsSetup[oldDriver.Mac] = *oldDriver
 			s.sendSwitchRemoveConfig(switchConf)
 
@@ -179,6 +186,7 @@ func (s *CoreService) replaceDriver(driver interface{}) {
 			//send remove reset old driver configuration to the switch
 			switchConf := sd.SwitchConfig{}
 			switchConf.Mac = oldDriver.SwitchMac
+			switchConf.SensorsSetup = make(map[string]ds.SensorSetup)
 			switchConf.SensorsSetup[oldDriver.Mac] = *oldDriver
 			s.sendSwitchRemoveConfig(switchConf)
 

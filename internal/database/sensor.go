@@ -79,8 +79,103 @@ func UpdateSensorConfig(db Database, cfg ds.SensorConf) error {
 	return db.UpdateRecord(ConfigDB, SensorsTable, dbID, setup)
 }
 
+//UpdateSensorSetup update sensor config in database
+func UpdateSensorSetup(db Database, cfg ds.SensorSetup) error {
+	setup, dbID := GetSensorConfig(db, cfg.Mac)
+	if setup == nil || dbID == "" {
+		if cfg.BleMode == nil {
+			ble := "service"
+			cfg.BleMode = &ble
+		}
+		if cfg.IsBleEnabled == nil {
+			bleEnable := false
+			cfg.IsBleEnabled = &bleEnable
+		}
+		if cfg.Group == nil {
+			group := 0
+			cfg.Group = &group
+		}
+		if cfg.FriendlyName == nil {
+			name := *cfg.Label
+			cfg.FriendlyName = &name
+		}
+		defaultValue := 0
+		if cfg.BrightnessCorrectionFactor == nil {
+			cfg.BrightnessCorrectionFactor = &defaultValue
+		}
+		if cfg.DumpFrequency == 0 {
+			cfg.DumpFrequency = 1000
+		}
+		if cfg.TemperatureOffset == nil {
+			cfg.TemperatureOffset = &defaultValue
+		}
+		if cfg.ThresholdPresence == nil {
+			presence := 10
+			cfg.ThresholdPresence = &presence
+		}
+
+		return SaveSensorConfig(db, cfg)
+	}
+
+	if cfg.BrightnessCorrectionFactor != nil {
+		setup.BrightnessCorrectionFactor = cfg.BrightnessCorrectionFactor
+	}
+
+	if cfg.FriendlyName != nil {
+		setup.FriendlyName = cfg.FriendlyName
+	}
+
+	if cfg.Group != nil {
+		setup.Group = cfg.Group
+	}
+
+	if cfg.IsBleEnabled != nil {
+		setup.IsBleEnabled = cfg.IsBleEnabled
+	}
+
+	if cfg.TemperatureOffset != nil {
+		setup.TemperatureOffset = cfg.TemperatureOffset
+	}
+
+	if cfg.ThresholdPresence != nil {
+		setup.ThresholdPresence = cfg.ThresholdPresence
+	}
+
+	if cfg.DumpFrequency != 0 {
+		setup.DumpFrequency = cfg.DumpFrequency
+	}
+
+	if cfg.Label != nil {
+		setup.Label = cfg.Label
+	}
+
+	if cfg.IBeaconMajor != nil {
+		setup.IBeaconMajor = cfg.IBeaconMajor
+	}
+
+	if cfg.IBeaconMinor != nil {
+		setup.IBeaconMinor = cfg.IBeaconMinor
+	}
+
+	if cfg.IBeaconTxPower != nil {
+		setup.IBeaconTxPower = cfg.IBeaconTxPower
+	}
+
+	if cfg.IBeaconUUID != nil {
+		setup.IBeaconUUID = cfg.IBeaconUUID
+	}
+
+	if cfg.BleMode != nil {
+		setup.BleMode = cfg.BleMode
+	}
+	return db.UpdateRecord(ConfigDB, SensorsTable, dbID, setup)
+}
+
 //UpdateSensorLabelSetup update sensor config in database
 func UpdateSensorLabelSetup(db Database, cfg ds.SensorSetup) error {
+	if cfg.Label == nil {
+		return NewError("Device " + cfg.Mac + "not found")
+	}
 	setup, dbID := GetSensorLabelConfig(db, *cfg.Label)
 	if setup == nil || dbID == "" {
 		if cfg.BleMode == nil {

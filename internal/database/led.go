@@ -155,8 +155,142 @@ func UpdateLedConfig(db Database, config dl.LedConf) error {
 	return db.UpdateRecord(ConfigDB, LedsTable, dbID, setup)
 }
 
+//UpdateLedSetup update led setup in database
+func UpdateLedSetup(db Database, config dl.LedSetup) error {
+	setup, dbID := GetLedConfig(db, config.Mac)
+	if setup == nil || dbID == "" {
+		if config.IsBleEnabled == nil {
+			enabled := false
+			config.IsBleEnabled = &enabled
+		}
+		if config.DumpFrequency == 0 {
+			config.DumpFrequency = 1000
+		}
+		if config.Auto == nil {
+			auto := true
+			config.Auto = &auto
+		}
+		if config.ThresholdHigh == nil {
+			high := 100
+			config.ThresholdHigh = &high
+		}
+		if config.ThresholdLow == nil {
+			low := 0
+			config.ThresholdLow = &low
+		}
+		if config.Group == nil {
+			group := 0
+			config.Group = &group
+		}
+		if config.Watchdog == nil {
+			watchdog := 600
+			config.Watchdog = &watchdog
+		}
+		slope := 10000
+		if config.SlopeStartManual == nil {
+			config.SlopeStartManual = &slope
+		}
+		if config.SlopeStopManual == nil {
+			config.SlopeStopManual = &slope
+		}
+		if config.DefaultSetpoint == nil {
+			defaultValue := 0
+			config.DefaultSetpoint = &defaultValue
+		}
+		if config.BleMode == nil {
+			defaultMode := "service"
+			config.BleMode = &defaultMode
+		}
+		if config.PMax == 0 {
+			config.PMax = 5
+		}
+		if config.FriendlyName == nil {
+			name := *config.Label
+			config.FriendlyName = &name
+		}
+		return SaveLedLabelConfig(db, config)
+	}
+
+	if config.ThresholdHigh != nil {
+		setup.ThresholdHigh = config.ThresholdHigh
+	}
+
+	if config.ThresholdLow != nil {
+		setup.ThresholdLow = config.ThresholdLow
+	}
+
+	if config.FriendlyName != nil {
+		setup.FriendlyName = config.FriendlyName
+	}
+
+	if config.Group != nil {
+		setup.Group = config.Group
+	}
+
+	if config.IsBleEnabled != nil {
+		setup.IsBleEnabled = config.IsBleEnabled
+	}
+
+	if config.SlopeStartAuto != nil {
+		setup.SlopeStartAuto = config.SlopeStartAuto
+	}
+
+	if config.SlopeStartManual != nil {
+		setup.SlopeStartManual = config.SlopeStartManual
+	}
+
+	if config.SlopeStopAuto != nil {
+		setup.SlopeStopAuto = config.SlopeStopAuto
+	}
+
+	if config.SlopeStopManual != nil {
+		setup.SlopeStopManual = config.SlopeStopManual
+	}
+
+	if config.BleMode != nil {
+		setup.BleMode = config.BleMode
+	}
+
+	if config.IBeaconMajor != nil {
+		setup.IBeaconMajor = config.IBeaconMajor
+	}
+
+	if config.IBeaconMinor != nil {
+		setup.IBeaconMinor = config.IBeaconMinor
+	}
+
+	if config.IBeaconTxPower != nil {
+		setup.IBeaconTxPower = config.IBeaconTxPower
+	}
+
+	if config.IBeaconUUID != nil {
+		setup.IBeaconUUID = config.IBeaconUUID
+	}
+
+	if config.DumpFrequency != 0 {
+		setup.DumpFrequency = config.DumpFrequency
+	}
+
+	if config.Watchdog != nil {
+		setup.Watchdog = config.Watchdog
+	}
+
+	if config.PMax != 0 {
+		setup.PMax = config.PMax
+	}
+
+	if config.Label != nil {
+		setup.Label = config.Label
+	}
+
+	return db.UpdateRecord(ConfigDB, LedsTable, dbID, setup)
+}
+
 //UpdateLedLabelSetup update led setup in database
 func UpdateLedLabelSetup(db Database, config dl.LedSetup) error {
+	if config.Label == nil {
+		return NewError("Device label not found")
+	}
 	setup, dbID := GetLedLabelConfig(db, *config.Label)
 	if setup == nil || dbID == "" {
 		if config.IsBleEnabled == nil {

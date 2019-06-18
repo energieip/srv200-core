@@ -12,7 +12,7 @@ func (s *CoreService) updateMapInfo(config interface{}) {
 	}
 
 	for _, sw := range cfg.Switchs {
-		s.updateSwitchCfg(sw)
+		s.updateSwitchLabelCfg(sw)
 	}
 
 	for _, gr := range cfg.Groups {
@@ -20,19 +20,19 @@ func (s *CoreService) updateMapInfo(config interface{}) {
 	}
 
 	for _, dr := range cfg.Leds {
-		s.updateLedSetup(dr)
+		s.updateLedLabelSetup(dr)
 	}
 
 	for _, dr := range cfg.Sensors {
-		s.updateSensorSetup(dr)
+		s.updateSensorLabelSetup(dr)
 	}
 
 	for _, dr := range cfg.Hvacs {
-		s.updateHvacSetup(dr)
+		s.updateHvacLabelSetup(dr)
 	}
 
 	for _, dr := range cfg.Blinds {
-		s.updateBlindSetup(dr)
+		s.updateBlindLabelSetup(dr)
 	}
 
 	for _, proj := range cfg.Project {

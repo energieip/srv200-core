@@ -8,14 +8,14 @@ import (
 
 //SwitchConfig content
 type SwitchConfig struct {
-	Mac           string `json:"mac"`
-	FullMac       string `json:"fullMac"`
-	FriendlyName  string `json:"friendlyName"`
-	IP            string `json:"ip"`
-	Cluster       int    `json:"cluster"`
-	IsConfigured  *bool  `json:"isConfigured"`
-	DumpFrequency *int   `json:"dumpFrequency"`
-	Label         string `json:"label"`
+	Mac           *string `json:"mac,omitempty"`
+	FullMac       *string `json:"fullMac,omitempty"`
+	FriendlyName  *string `json:"friendlyName,omitempty"`
+	IP            *string `json:"ip,omitempty"`
+	Cluster       *int    `json:"cluster,omitempty"`
+	IsConfigured  *bool   `json:"isConfigured,omitempty"`
+	DumpFrequency *int    `json:"dumpFrequency,omitempty"`
+	Label         *string `json:"label,omitempty"`
 }
 
 //SwitchCmd content
