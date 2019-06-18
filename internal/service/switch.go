@@ -16,7 +16,7 @@ import (
 
 func (s *CoreService) updateSwitchCfg(config interface{}) {
 	cfg, _ := core.ToSwitchConfig(config)
-	sw := database.GetSwitchConfig(s.db, cfg.Mac)
+	sw, _ := database.GetSwitchConfig(s.db, cfg.Mac)
 	if sw != nil {
 		database.UpdateSwitchConfig(s.db, *cfg)
 	} else {
@@ -141,7 +141,7 @@ func (s *CoreService) sendSwitchUpdateConfig(sw sd.SwitchStatus) {
 }
 
 func (s *CoreService) prepareSetupSwitchConfig(switchStatus sd.SwitchStatus) *sd.SwitchConfig {
-	config := database.GetSwitchConfig(s.db, switchStatus.Mac)
+	config, _ := database.GetSwitchConfig(s.db, switchStatus.Mac)
 	if config == nil {
 		return nil
 	}
@@ -212,7 +212,7 @@ func (s *CoreService) prepareSetupSwitchConfig(switchStatus sd.SwitchStatus) *sd
 }
 
 func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.SwitchConfig {
-	config := database.GetSwitchConfig(s.db, switchStatus.Mac)
+	config, _ := database.GetSwitchConfig(s.db, switchStatus.Mac)
 	if config == nil {
 		rlog.Warn("Cannot find configuration for switch", switchStatus.Mac)
 		return nil

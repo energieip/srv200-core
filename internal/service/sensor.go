@@ -105,6 +105,10 @@ func (s *CoreService) updateSensorSetup(config interface{}) {
 		return
 	}
 
+	if sensor.SwitchMac == "" {
+		return
+	}
+
 	url := "/write/switch/" + sensor.SwitchMac + "/update/settings"
 	switchSetup := sd.SwitchConfig{}
 	switchSetup.Mac = sensor.SwitchMac

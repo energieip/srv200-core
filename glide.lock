@@ -1,5 +1,5 @@
 hash: 7873f75061b03685fab1d37fa10ae2d9249507813e75d280fc0acfb9b629147f
-updated: 2019-06-17T14:39:49.550685776+02:00
+updated: 2019-06-18T15:25:09.668673072+02:00
 imports:
 - name: github.com/cenkalti/backoff
   version: 2146c93394225c3732078705043ce9f26584d334
@@ -10,7 +10,7 @@ imports:
   subpackages:
   - packets
 - name: github.com/energieip/common-components-go
-  version: 1dd6bca243a250ae9027fafc8200d3b12edb4e64
+  version: 996e7e47f2d31c285cc9f11307443d2214d0acc7
   subpackages:
   - pkg/database
   - pkg/dblind
@@ -52,7 +52,7 @@ imports:
 - name: github.com/sirupsen/logrus
   version: 2a22dbedbad1fd454910cd1f44f210ef90c28464
 - name: golang.org/x/crypto
-  version: 5c40567a22f818bd14a1ea7245dad9f8ef0691aa
+  version: 57b3e21c3d5606066a87e63cfe07ec6b9f0db000
   subpackages:
   - pbkdf2
 - name: golang.org/x/net

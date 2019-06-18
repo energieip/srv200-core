@@ -142,6 +142,10 @@ func (s *CoreService) updateBlindSetup(config interface{}) {
 		return
 	}
 
+	if blind.SwitchMac == "" {
+		return
+	}
+
 	url := "/write/switch/" + blind.SwitchMac + "/update/settings"
 	switchSetup := sd.SwitchConfig{}
 	switchSetup.Mac = blind.SwitchMac

@@ -12,7 +12,7 @@ import (
 )
 
 func (api *API) readSwitchConfig(w http.ResponseWriter, mac string) {
-	device := database.GetSwitchConfig(api.db, mac)
+	device, _ := database.GetSwitchConfig(api.db, mac)
 	if device == nil {
 		api.sendError(w, APIErrorDeviceNotFound, "Switch "+mac+" not found", http.StatusInternalServerError)
 		return

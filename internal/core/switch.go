@@ -9,16 +9,19 @@ import (
 //SwitchConfig content
 type SwitchConfig struct {
 	Mac           string `json:"mac"`
+	FullMac       string `json:"fullMac"`
 	FriendlyName  string `json:"friendlyName"`
 	IP            string `json:"ip"`
 	Cluster       int    `json:"cluster"`
 	IsConfigured  *bool  `json:"isConfigured"`
 	DumpFrequency *int   `json:"dumpFrequency"`
+	Label         string `json:"label"`
 }
 
 //SwitchCmd content
 type SwitchCmd struct {
 	Mac          string `json:"mac"`
+	FullMac      string `json:"fullMac"`
 	IsConfigured *bool  `json:"isConfigured"`
 }
 

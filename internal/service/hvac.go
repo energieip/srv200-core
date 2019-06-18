@@ -141,6 +141,10 @@ func (s *CoreService) updateHvacSetup(config interface{}) {
 		return
 	}
 
+	if hvac.SwitchMac == "" {
+		return
+	}
+
 	url := "/write/switch/" + hvac.SwitchMac + "/update/settings"
 	switchSetup := sd.SwitchConfig{}
 	switchSetup.Mac = hvac.SwitchMac

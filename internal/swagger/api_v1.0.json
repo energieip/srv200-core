@@ -3265,14 +3265,7 @@
           "responses": {
             "200": {
               "description": "sucessful operation",
-              "headers": {},
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/BimInfo"
-                  }
-                }
-              }
+              "headers": {}
             },
             "401": {
               "description": "Unauthorized Access",

@@ -52,6 +52,38 @@ func UpdateSwitchConfig(db Database, config core.SwitchConfig) error {
 	return db.UpdateRecord(ConfigDB, SwitchsTable, dbID, setup)
 }
 
+//SaveSwitchLabelConfig update server config to database
+func SaveSwitchLabelConfig(db Database, config core.SwitchConfig) error {
+	criteria := make(map[string]interface{})
+	criteria["Label"] = config.Label
+	stored, err := db.GetRecord(ConfigDB, SwitchsTable, criteria)
+	if err != nil || stored == nil {
+		return NewError("Switch " + config.Label + "not found")
+	}
+	m := stored.(map[string]interface{})
+	id, ok := m["id"]
+	if !ok {
+		return NewError("Switch " + config.Label + "not found")
+	}
+	dbID := id.(string)
+
+	setup, err := core.ToSwitchConfig(stored)
+	if err != nil || stored == nil {
+		return NewError("Switch " + config.Label + "not found")
+	}
+
+	setup.FriendlyName = config.FriendlyName
+	if config.DumpFrequency != nil {
+		setup.DumpFrequency = config.DumpFrequency
+	}
+
+	setup.IP = config.IP
+	setup.Cluster = config.Cluster
+	setup.Label = config.Label
+
+	return db.UpdateRecord(ConfigDB, SwitchsTable, dbID, setup)
+}
+
 //RemoveSwitchConfig remove led config in database
 func RemoveSwitchConfig(db Database, mac string) error {
 	criteria := make(map[string]interface{})
@@ -67,9 +99,30 @@ func SaveSwitchConfig(db Database, sw core.SwitchConfig) error {
 }
 
 //GetSwitchConfig get switch Config
-func GetSwitchConfig(db Database, mac string) *core.SwitchConfig {
+func GetSwitchConfig(db Database, mac string) (*core.SwitchConfig, string) {
+	dbID := ""
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = mac
+	swStored, err := db.GetRecord(ConfigDB, SwitchsTable, criteria)
+	if err != nil || swStored == nil {
+		return nil, dbID
+	}
+	m := swStored.(map[string]interface{})
+	id, ok := m["id"]
+	if ok {
+		dbID = id.(string)
+	}
+	sw, err := core.ToSwitchConfig(swStored)
+	if err != nil || sw == nil {
+		return nil, ""
+	}
+	return sw, dbID
+}
+
+//GetSwitchLabelConfig return the switch configuration
+func GetSwitchLabelConfig(db Database, label string) *core.SwitchConfig {
+	criteria := make(map[string]interface{})
+	criteria["Label"] = label
 	swStored, err := db.GetRecord(ConfigDB, SwitchsTable, criteria)
 	if err != nil || swStored == nil {
 		return nil
@@ -79,6 +132,17 @@ func GetSwitchConfig(db Database, mac string) *core.SwitchConfig {
 		return nil
 	}
 	return sw
+}
+
+//ReplaceSwitchConfig update sensor config in database
+func ReplaceSwitchConfig(db Database, old, oldFull, new, newFull string) error {
+	setup, dbID := GetSwitchConfig(db, old)
+	if setup == nil || dbID == "" {
+		return NewError("Device " + old + "not found")
+	}
+	setup.FullMac = newFull
+	setup.Mac = new
+	return db.UpdateRecord(ConfigDB, SwitchsTable, dbID, setup)
 }
 
 //GetSwitchsConfig return the switch config list

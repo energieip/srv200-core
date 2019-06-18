@@ -146,6 +146,10 @@ func (s *CoreService) updateLedSetup(config interface{}) {
 	}
 	rlog.Info("Led configuration " + led.Mac + " saved")
 
+	if led.SwitchMac == "" {
+		return
+	}
+
 	url := "/write/switch/" + led.SwitchMac + "/update/settings"
 	switchSetup := sd.SwitchConfig{}
 	switchSetup.Mac = led.SwitchMac

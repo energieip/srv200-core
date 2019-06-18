@@ -166,6 +166,8 @@ func (s *CoreService) readAPIEvents() {
 					s.sendHvacCmd(event)
 				case "replaceDriver":
 					s.replaceDriver(event)
+				case "installDriver":
+					s.installDriver(event)
 				case "map":
 					s.updateMapInfo(event)
 				}
