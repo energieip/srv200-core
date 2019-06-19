@@ -34,6 +34,7 @@ type CoreService struct {
 	authServer           network.AuthNetwork   //Authentication server
 	db                   database.Database
 	historyDb            history.HistoryDb
+	dataPath             string
 	mac                  string
 	ip                   string
 	events               chan string
@@ -59,6 +60,7 @@ func (s *CoreService) Initialize(confFile string) error {
 		rlog.Error("Cannot parse configuration file " + err.Error())
 		return err
 	}
+	s.dataPath = conf.DataPath
 	os.Setenv("RLOG_LOG_LEVEL", conf.LogLevel)
 	os.Setenv("RLOG_LOG_NOTIME", "yes")
 	rlog.UpdateEnv()

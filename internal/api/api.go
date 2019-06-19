@@ -55,6 +55,7 @@ func InitAPI(db database.Database, historydb history.HistoryDb, eventsAPI chan m
 		certificate:    conf.ExternalAPI.CertPath,
 		keyfile:        conf.ExternalAPI.KeyPath,
 		browsingFolder: conf.ExternalAPI.BrowsingFolder,
+		dataPath:       conf.DataPath,
 	}
 	go api.swagger()
 	return &api

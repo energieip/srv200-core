@@ -31,8 +31,7 @@ func (api *API) uploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	chunk := make([]byte, 4096) // 4k size byte slice
-	directory := "/media/userdata/www/webui/maps"
-	tempFile, err := ioutil.TempFile(directory, "temp-file")
+	tempFile, err := ioutil.TempFile(api.dataPath, "temp-file")
 	if err != nil {
 		rlog.Error("Hit error while creating temp file: ", err.Error())
 		api.sendError(w, APIErrorBodyParsing, "Error while fetching file", http.StatusInternalServerError)
@@ -101,7 +100,7 @@ func (api *API) uploadHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		newFilename = directory + "/" + p.FileName()
+		newFilename = api.dataPath + "/" + p.FileName()
 		rlog.Info("Uploaded filename: " + newFilename)
 		uploaded := false
 
