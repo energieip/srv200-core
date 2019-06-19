@@ -9,6 +9,22 @@ import (
 	"github.com/romana/rlog"
 )
 
+func (s *CoreService) sendSwitchLedSetup(led dl.LedSetup) {
+	if led.SwitchMac == "" {
+		return
+	}
+
+	url := "/write/switch/" + led.SwitchMac + "/update/settings"
+	switchSetup := sd.SwitchConfig{}
+	switchSetup.Mac = led.SwitchMac
+	switchSetup.LedsSetup = make(map[string]dl.LedSetup)
+
+	switchSetup.LedsSetup[led.Mac] = led
+
+	dump, _ := switchSetup.ToJSON()
+	s.server.SendCommand(url, dump)
+}
+
 func (s *CoreService) updateDriverGroup(grID int) {
 	gr, _ := database.GetGroupConfig(s.db, grID)
 	if gr == nil {
@@ -145,20 +161,7 @@ func (s *CoreService) updateLedSetup(config interface{}) {
 		return
 	}
 	rlog.Info("Led configuration " + led.Mac + " saved")
-
-	if led.SwitchMac == "" {
-		return
-	}
-
-	url := "/write/switch/" + led.SwitchMac + "/update/settings"
-	switchSetup := sd.SwitchConfig{}
-	switchSetup.Mac = led.SwitchMac
-	switchSetup.LedsSetup = make(map[string]dl.LedSetup)
-
-	switchSetup.LedsSetup[cfg.Mac] = *cfg
-
-	dump, _ := switchSetup.ToJSON()
-	s.server.SendCommand(url, dump)
+	s.sendSwitchLedSetup(*cfg)
 }
 
 func (s *CoreService) updateLedLabelSetup(config interface{}) {
@@ -212,21 +215,8 @@ func (s *CoreService) updateLedLabelSetup(config interface{}) {
 		rlog.Error("Cannot find config for " + cfg.Mac)
 		return
 	}
-	rlog.Info("Led configuration " + led.Mac + " saved")
-
-	if led.SwitchMac == "" {
-		return
-	}
-
-	url := "/write/switch/" + led.SwitchMac + "/update/settings"
-	switchSetup := sd.SwitchConfig{}
-	switchSetup.Mac = led.SwitchMac
-	switchSetup.LedsSetup = make(map[string]dl.LedSetup)
-
-	switchSetup.LedsSetup[cfg.Mac] = *cfg
-
-	dump, _ := switchSetup.ToJSON()
-	s.server.SendCommand(url, dump)
+	rlog.Info("Led configuration " + *cfg.Label + " saved")
+	s.sendSwitchLedSetup(*cfg)
 }
 
 func (s *CoreService) sendLedCmd(cmd interface{}) {
