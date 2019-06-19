@@ -1,6 +1,7 @@
 package database
 
 import (
+	"github.com/energieip/common-components-go/pkg/pconst"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 )
 
@@ -11,7 +12,7 @@ func SaveProject(db Database, cfg core.Project) error {
 
 	proj, dbID := GetProject(db, cfg.Label)
 	if proj == nil || dbID == "" {
-		_, err := db.InsertRecord(ConfigDB, ProjectsTable, cfg)
+		_, err := db.InsertRecord(pconst.DbConfig, pconst.TbProjects, cfg)
 		return err
 	}
 
@@ -27,7 +28,7 @@ func SaveProject(db Database, cfg core.Project) error {
 	if cfg.ModbusID != nil {
 		proj.ModbusID = cfg.ModbusID
 	}
-	err := db.UpdateRecord(ConfigDB, ProjectsTable, dbID, proj)
+	err := db.UpdateRecord(pconst.DbConfig, pconst.TbProjects, dbID, proj)
 	return err
 
 }
@@ -36,14 +37,14 @@ func SaveProject(db Database, cfg core.Project) error {
 func RemoveProject(db Database, label string) error {
 	criteria := make(map[string]interface{})
 	criteria["Label"] = label
-	return db.DeleteRecord(ConfigDB, ProjectsTable, criteria)
+	return db.DeleteRecord(pconst.DbConfig, pconst.TbProjects, criteria)
 }
 
 //GetProject return the project configuration
 func GetProject(db Database, label string) (*core.Project, string) {
 	criteria := make(map[string]interface{})
 	criteria["Label"] = label
-	stored, err := db.GetRecord(ConfigDB, ProjectsTable, criteria)
+	stored, err := db.GetRecord(pconst.DbConfig, pconst.TbProjects, criteria)
 	if err != nil || stored == nil {
 		return nil, ""
 	}
@@ -64,7 +65,7 @@ func GetProject(db Database, label string) (*core.Project, string) {
 func GetProjectByMac(db Database, mac string) *core.Project {
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = mac
-	stored, err := db.GetRecord(ConfigDB, ProjectsTable, criteria)
+	stored, err := db.GetRecord(pconst.DbConfig, pconst.TbProjects, criteria)
 	if err != nil || stored == nil {
 		return nil
 	}
@@ -79,7 +80,7 @@ func GetProjectByMac(db Database, mac string) *core.Project {
 func GetProjectByFullMac(db Database, mac string) *core.Project {
 	criteria := make(map[string]interface{})
 	criteria["FullMac"] = mac
-	stored, err := db.GetRecord(ConfigDB, ProjectsTable, criteria)
+	stored, err := db.GetRecord(pconst.DbConfig, pconst.TbProjects, criteria)
 	if err != nil || stored == nil {
 		return nil
 	}
@@ -93,7 +94,7 @@ func GetProjectByFullMac(db Database, mac string) *core.Project {
 //GetProjects return the project configuration
 func GetProjects(db Database) []core.Project {
 	var projects []core.Project
-	stored, err := db.FetchAllRecords(ConfigDB, ProjectsTable)
+	stored, err := db.FetchAllRecords(pconst.DbConfig, pconst.TbProjects)
 	if err != nil || stored == nil {
 		return nil
 	}

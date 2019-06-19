@@ -8,25 +8,10 @@ import (
 	dl "github.com/energieip/common-components-go/pkg/dled"
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
 	"github.com/energieip/common-components-go/pkg/duser"
+	"github.com/energieip/common-components-go/pkg/pconst"
 	pkg "github.com/energieip/common-components-go/pkg/service"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/romana/rlog"
-)
-
-const (
-	ConfigDB = "config"
-	StatusDB = "status"
-
-	LedsTable     = "leds"
-	BlindsTable   = "blinds"
-	HvacsTable    = "hvacs"
-	SensorsTable  = "sensors"
-	GroupsTable   = "groups"
-	SwitchsTable  = "switchs"
-	ServicesTable = "services"
-	ModelsTable   = "models"
-	ProjectsTable = "projects"
-	AccessTable   = "access"
 )
 
 type databaseError struct {
@@ -62,32 +47,32 @@ func ConnectDatabase(ip, port string) (*Database, error) {
 		return nil, err
 	}
 
-	for _, dbName := range []string{ConfigDB, StatusDB} {
+	for _, dbName := range []string{pconst.DbConfig, pconst.DbStatus} {
 		err = db.CreateDB(dbName)
 		if err != nil {
 			rlog.Warn("Create DB ", err.Error())
 		}
 
 		tableCfg := make(map[string]interface{})
-		if dbName == ConfigDB {
-			tableCfg[LedsTable] = dl.LedSetup{}
-			tableCfg[SensorsTable] = ds.SensorSetup{}
-			tableCfg[HvacsTable] = dhvac.HvacSetup{}
-			tableCfg[GroupsTable] = gm.GroupConfig{}
-			tableCfg[SwitchsTable] = core.SwitchConfig{}
-			tableCfg[ServicesTable] = pkg.Service{}
-			tableCfg[ModelsTable] = core.Model{}
-			tableCfg[ProjectsTable] = core.Project{}
-			tableCfg[BlindsTable] = dblind.BlindSetup{}
-			tableCfg[AccessTable] = duser.UserAccess{}
+		if dbName == pconst.DbConfig {
+			tableCfg[pconst.TbLeds] = dl.LedSetup{}
+			tableCfg[pconst.TbSensors] = ds.SensorSetup{}
+			tableCfg[pconst.TbHvacs] = dhvac.HvacSetup{}
+			tableCfg[pconst.TbGroups] = gm.GroupConfig{}
+			tableCfg[pconst.TbSwitchs] = core.SwitchConfig{}
+			tableCfg[pconst.TbServices] = pkg.Service{}
+			tableCfg[pconst.TbModels] = core.Model{}
+			tableCfg[pconst.TbProjects] = core.Project{}
+			tableCfg[pconst.TbBlinds] = dblind.BlindSetup{}
+			tableCfg[pconst.TbAccess] = duser.UserAccess{}
 		} else {
-			tableCfg[LedsTable] = dl.Led{}
-			tableCfg[SensorsTable] = ds.Sensor{}
-			tableCfg[HvacsTable] = dhvac.Hvac{}
-			tableCfg[GroupsTable] = gm.GroupStatus{}
-			tableCfg[SwitchsTable] = core.SwitchDump{}
-			tableCfg[ServicesTable] = pkg.ServiceStatus{}
-			tableCfg[BlindsTable] = dblind.Blind{}
+			tableCfg[pconst.TbLeds] = dl.Led{}
+			tableCfg[pconst.TbSensors] = ds.Sensor{}
+			tableCfg[pconst.TbHvacs] = dhvac.Hvac{}
+			tableCfg[pconst.TbGroups] = gm.GroupStatus{}
+			tableCfg[pconst.TbSwitchs] = core.SwitchDump{}
+			tableCfg[pconst.TbServices] = pkg.ServiceStatus{}
+			tableCfg[pconst.TbBlinds] = dblind.Blind{}
 		}
 		for tableName, objs := range tableCfg {
 			err = db.CreateTable(dbName, tableName, &objs)

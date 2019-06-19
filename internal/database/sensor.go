@@ -2,13 +2,14 @@ package database
 
 import (
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
+	"github.com/energieip/common-components-go/pkg/pconst"
 )
 
 //SaveSensorConfig dump sensor config in database
 func SaveSensorConfig(db Database, cfg ds.SensorSetup) error {
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = cfg.Mac
-	return SaveOnUpdateObject(db, cfg, ConfigDB, SensorsTable, criteria)
+	return SaveOnUpdateObject(db, cfg, pconst.DbConfig, pconst.TbSensors, criteria)
 }
 
 //SaveSensorLabelConfig dump sensor config in database
@@ -18,7 +19,7 @@ func SaveSensorLabelConfig(db Database, cfg ds.SensorSetup) error {
 		return NewError("Device " + cfg.Mac + "not found")
 	}
 	criteria["Label"] = *cfg.Label
-	return SaveOnUpdateObject(db, cfg, ConfigDB, SensorsTable, criteria)
+	return SaveOnUpdateObject(db, cfg, pconst.DbConfig, pconst.TbSensors, criteria)
 }
 
 //UpdateSensorConfig update sensor config in database
@@ -28,147 +29,19 @@ func UpdateSensorConfig(db Database, cfg ds.SensorConf) error {
 		return NewError("Device " + cfg.Mac + "not found")
 	}
 
-	if cfg.BrightnessCorrectionFactor != nil {
-		setup.BrightnessCorrectionFactor = cfg.BrightnessCorrectionFactor
-	}
-
-	if cfg.FriendlyName != nil {
-		setup.FriendlyName = cfg.FriendlyName
-	}
-
-	if cfg.Group != nil {
-		setup.Group = cfg.Group
-	}
-
-	if cfg.IsBleEnabled != nil {
-		setup.IsBleEnabled = cfg.IsBleEnabled
-	}
-
-	if cfg.TemperatureOffset != nil {
-		setup.TemperatureOffset = cfg.TemperatureOffset
-	}
-
-	if cfg.ThresholdPresence != nil {
-		setup.ThresholdPresence = cfg.ThresholdPresence
-	}
-
-	if cfg.DumpFrequency != nil {
-		setup.DumpFrequency = *cfg.DumpFrequency
-	}
-
-	if cfg.IBeaconMajor != nil {
-		setup.IBeaconMajor = cfg.IBeaconMajor
-	}
-
-	if cfg.IBeaconMinor != nil {
-		setup.IBeaconMinor = cfg.IBeaconMinor
-	}
-
-	if cfg.IBeaconTxPower != nil {
-		setup.IBeaconTxPower = cfg.IBeaconTxPower
-	}
-
-	if cfg.IBeaconUUID != nil {
-		setup.IBeaconUUID = cfg.IBeaconUUID
-	}
-
-	if cfg.BleMode != nil {
-		setup.BleMode = cfg.BleMode
-	}
-
-	return db.UpdateRecord(ConfigDB, SensorsTable, dbID, setup)
+	new := ds.UpdateConfig(cfg, *setup)
+	return db.UpdateRecord(pconst.DbConfig, pconst.TbSensors, dbID, &new)
 }
 
 //UpdateSensorSetup update sensor config in database
 func UpdateSensorSetup(db Database, cfg ds.SensorSetup) error {
 	setup, dbID := GetSensorConfig(db, cfg.Mac)
 	if setup == nil || dbID == "" {
-		if cfg.BleMode == nil {
-			ble := "service"
-			cfg.BleMode = &ble
-		}
-		if cfg.IsBleEnabled == nil {
-			bleEnable := false
-			cfg.IsBleEnabled = &bleEnable
-		}
-		if cfg.Group == nil {
-			group := 0
-			cfg.Group = &group
-		}
-		if cfg.FriendlyName == nil && cfg.Label != nil {
-			name := *cfg.Label
-			cfg.FriendlyName = &name
-		}
-		defaultValue := 0
-		if cfg.BrightnessCorrectionFactor == nil {
-			cfg.BrightnessCorrectionFactor = &defaultValue
-		}
-		if cfg.DumpFrequency == 0 {
-			cfg.DumpFrequency = 1000
-		}
-		if cfg.TemperatureOffset == nil {
-			cfg.TemperatureOffset = &defaultValue
-		}
-		if cfg.ThresholdPresence == nil {
-			presence := 10
-			cfg.ThresholdPresence = &presence
-		}
-
+		cfg = ds.FillDefaultValue(cfg)
 		return SaveSensorConfig(db, cfg)
 	}
-
-	if cfg.BrightnessCorrectionFactor != nil {
-		setup.BrightnessCorrectionFactor = cfg.BrightnessCorrectionFactor
-	}
-
-	if cfg.FriendlyName != nil {
-		setup.FriendlyName = cfg.FriendlyName
-	}
-
-	if cfg.Group != nil {
-		setup.Group = cfg.Group
-	}
-
-	if cfg.IsBleEnabled != nil {
-		setup.IsBleEnabled = cfg.IsBleEnabled
-	}
-
-	if cfg.TemperatureOffset != nil {
-		setup.TemperatureOffset = cfg.TemperatureOffset
-	}
-
-	if cfg.ThresholdPresence != nil {
-		setup.ThresholdPresence = cfg.ThresholdPresence
-	}
-
-	if cfg.DumpFrequency != 0 {
-		setup.DumpFrequency = cfg.DumpFrequency
-	}
-
-	if cfg.Label != nil {
-		setup.Label = cfg.Label
-	}
-
-	if cfg.IBeaconMajor != nil {
-		setup.IBeaconMajor = cfg.IBeaconMajor
-	}
-
-	if cfg.IBeaconMinor != nil {
-		setup.IBeaconMinor = cfg.IBeaconMinor
-	}
-
-	if cfg.IBeaconTxPower != nil {
-		setup.IBeaconTxPower = cfg.IBeaconTxPower
-	}
-
-	if cfg.IBeaconUUID != nil {
-		setup.IBeaconUUID = cfg.IBeaconUUID
-	}
-
-	if cfg.BleMode != nil {
-		setup.BleMode = cfg.BleMode
-	}
-	return db.UpdateRecord(ConfigDB, SensorsTable, dbID, setup)
+	new := ds.UpdateSetup(cfg, *setup)
+	return db.UpdateRecord(pconst.DbConfig, pconst.TbSensors, dbID, &new)
 }
 
 //UpdateSensorLabelSetup update sensor config in database
@@ -178,106 +51,25 @@ func UpdateSensorLabelSetup(db Database, cfg ds.SensorSetup) error {
 	}
 	setup, dbID := GetSensorLabelConfig(db, *cfg.Label)
 	if setup == nil || dbID == "" {
-		if cfg.BleMode == nil {
-			ble := "service"
-			cfg.BleMode = &ble
-		}
-		if cfg.IsBleEnabled == nil {
-			bleEnable := false
-			cfg.IsBleEnabled = &bleEnable
-		}
-		if cfg.Group == nil {
-			group := 0
-			cfg.Group = &group
-		}
-		if cfg.FriendlyName == nil && cfg.Label != nil {
-			name := *cfg.Label
-			cfg.FriendlyName = &name
-		}
-		defaultValue := 0
-		if cfg.BrightnessCorrectionFactor == nil {
-			cfg.BrightnessCorrectionFactor = &defaultValue
-		}
-		if cfg.DumpFrequency == 0 {
-			cfg.DumpFrequency = 1000
-		}
-		if cfg.TemperatureOffset == nil {
-			cfg.TemperatureOffset = &defaultValue
-		}
-		if cfg.ThresholdPresence == nil {
-			presence := 10
-			cfg.ThresholdPresence = &presence
-		}
-
+		cfg = ds.FillDefaultValue(cfg)
 		return SaveSensorLabelConfig(db, cfg)
 	}
-
-	if cfg.BrightnessCorrectionFactor != nil {
-		setup.BrightnessCorrectionFactor = cfg.BrightnessCorrectionFactor
-	}
-
-	if cfg.FriendlyName != nil {
-		setup.FriendlyName = cfg.FriendlyName
-	}
-
-	if cfg.Group != nil {
-		setup.Group = cfg.Group
-	}
-
-	if cfg.IsBleEnabled != nil {
-		setup.IsBleEnabled = cfg.IsBleEnabled
-	}
-
-	if cfg.TemperatureOffset != nil {
-		setup.TemperatureOffset = cfg.TemperatureOffset
-	}
-
-	if cfg.ThresholdPresence != nil {
-		setup.ThresholdPresence = cfg.ThresholdPresence
-	}
-
-	if cfg.DumpFrequency != 0 {
-		setup.DumpFrequency = cfg.DumpFrequency
-	}
-
-	if cfg.Label != nil {
-		setup.Label = cfg.Label
-	}
-
-	if cfg.IBeaconMajor != nil {
-		setup.IBeaconMajor = cfg.IBeaconMajor
-	}
-
-	if cfg.IBeaconMinor != nil {
-		setup.IBeaconMinor = cfg.IBeaconMinor
-	}
-
-	if cfg.IBeaconTxPower != nil {
-		setup.IBeaconTxPower = cfg.IBeaconTxPower
-	}
-
-	if cfg.IBeaconUUID != nil {
-		setup.IBeaconUUID = cfg.IBeaconUUID
-	}
-
-	if cfg.BleMode != nil {
-		setup.BleMode = cfg.BleMode
-	}
-	return db.UpdateRecord(ConfigDB, SensorsTable, dbID, setup)
+	new := ds.UpdateSetup(cfg, *setup)
+	return db.UpdateRecord(pconst.DbConfig, pconst.TbSensors, dbID, &new)
 }
 
 //RemoveSensorConfig remove sensor config in database
 func RemoveSensorConfig(db Database, mac string) error {
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = mac
-	return db.DeleteRecord(ConfigDB, SensorsTable, criteria)
+	return db.DeleteRecord(pconst.DbConfig, pconst.TbSensors, criteria)
 }
 
 //RemoveSensorStatus remove led status in database
 func RemoveSensorStatus(db Database, mac string) error {
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = mac
-	return db.DeleteRecord(StatusDB, SensorsTable, criteria)
+	return db.DeleteRecord(pconst.DbStatus, pconst.TbSensors, criteria)
 }
 
 //GetSensorSwitchStatus get cluster Config list
@@ -285,7 +77,7 @@ func GetSensorSwitchStatus(db Database, swMac string) map[string]ds.Sensor {
 	res := map[string]ds.Sensor{}
 	criteria := make(map[string]interface{})
 	criteria["SwitchMac"] = swMac
-	stored, err := db.GetRecords(StatusDB, SensorsTable, criteria)
+	stored, err := db.GetRecords(pconst.DbStatus, pconst.TbSensors, criteria)
 	if err != nil || stored == nil {
 		return res
 	}
@@ -304,7 +96,7 @@ func GetSensorSwitchSetup(db Database, swMac string) map[string]ds.SensorSetup {
 	res := map[string]ds.SensorSetup{}
 	criteria := make(map[string]interface{})
 	criteria["SwitchMac"] = swMac
-	stored, err := db.GetRecords(StatusDB, SensorsTable, criteria)
+	stored, err := db.GetRecords(pconst.DbStatus, pconst.TbSensors, criteria)
 	if err != nil || stored == nil {
 		return res
 	}
@@ -323,7 +115,7 @@ func GetSensorConfig(db Database, mac string) (*ds.SensorSetup, string) {
 	var dbID string
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = mac
-	stored, err := db.GetRecord(ConfigDB, SensorsTable, criteria)
+	stored, err := db.GetRecord(pconst.DbConfig, pconst.TbSensors, criteria)
 	if err != nil || stored == nil {
 		return nil, dbID
 	}
@@ -344,7 +136,7 @@ func GetSensorLabelConfig(db Database, label string) (*ds.SensorSetup, string) {
 	var dbID string
 	criteria := make(map[string]interface{})
 	criteria["Label"] = label
-	stored, err := db.GetRecord(ConfigDB, SensorsTable, criteria)
+	stored, err := db.GetRecord(pconst.DbConfig, pconst.TbSensors, criteria)
 	if err != nil || stored == nil {
 		return nil, dbID
 	}
@@ -368,13 +160,13 @@ func SwitchSensorConfig(db Database, old, oldFull, new, newFull string) error {
 	}
 	setup.FullMac = newFull
 	setup.Mac = new
-	return db.UpdateRecord(ConfigDB, SensorsTable, dbID, setup)
+	return db.UpdateRecord(pconst.DbConfig, pconst.TbSensors, dbID, setup)
 }
 
 //GetSensorsConfig return the sensor config list
 func GetSensorsConfig(db Database) map[string]ds.SensorSetup {
 	drivers := map[string]ds.SensorSetup{}
-	stored, err := db.FetchAllRecords(ConfigDB, SensorsTable)
+	stored, err := db.FetchAllRecords(pconst.DbConfig, pconst.TbSensors)
 	if err != nil || stored == nil {
 		return drivers
 	}
@@ -392,13 +184,13 @@ func GetSensorsConfig(db Database) map[string]ds.SensorSetup {
 func SaveSensorStatus(db Database, status ds.Sensor) error {
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = status.Mac
-	return SaveOnUpdateObject(db, status, StatusDB, SensorsTable, criteria)
+	return SaveOnUpdateObject(db, status, pconst.DbStatus, pconst.TbSensors, criteria)
 }
 
 //GetSensorsStatus return the led status list
 func GetSensorsStatus(db Database) map[string]ds.Sensor {
 	drivers := map[string]ds.Sensor{}
-	stored, err := db.FetchAllRecords(StatusDB, SensorsTable)
+	stored, err := db.FetchAllRecords(pconst.DbStatus, pconst.TbSensors)
 	if err != nil || stored == nil {
 		return drivers
 	}
@@ -416,7 +208,7 @@ func GetSensorsStatus(db Database) map[string]ds.Sensor {
 func GetSensorStatus(db Database, mac string) *ds.Sensor {
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = mac
-	stored, err := db.GetRecord(StatusDB, SensorsTable, criteria)
+	stored, err := db.GetRecord(pconst.DbStatus, pconst.TbSensors, criteria)
 	if err != nil || stored == nil {
 		return nil
 	}

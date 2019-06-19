@@ -1,6 +1,7 @@
 package database
 
 import (
+	"github.com/energieip/common-components-go/pkg/pconst"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 )
 
@@ -8,21 +9,21 @@ import (
 func SaveModel(db Database, cfg core.Model) error {
 	criteria := make(map[string]interface{})
 	criteria["Name"] = cfg.Name
-	return SaveOnUpdateObject(db, cfg, ConfigDB, ModelsTable, criteria)
+	return SaveOnUpdateObject(db, cfg, pconst.DbConfig, pconst.TbModels, criteria)
 }
 
 //RemoveModel remove ifc config in database
 func RemoveModel(db Database, name string) error {
 	criteria := make(map[string]interface{})
 	criteria["Name"] = name
-	return db.DeleteRecord(ConfigDB, ModelsTable, criteria)
+	return db.DeleteRecord(pconst.DbConfig, pconst.TbModels, criteria)
 }
 
 //GetModel return the model configuration
 func GetModel(db Database, name string) *core.Model {
 	criteria := make(map[string]interface{})
 	criteria["Name"] = name
-	stored, err := db.GetRecord(ConfigDB, ModelsTable, criteria)
+	stored, err := db.GetRecord(pconst.DbConfig, pconst.TbModels, criteria)
 	if err != nil || stored == nil {
 		return nil
 	}
@@ -36,7 +37,7 @@ func GetModel(db Database, name string) *core.Model {
 //GetModels return the models configuration
 func GetModels(db Database) map[string]core.Model {
 	models := map[string]core.Model{}
-	stored, err := db.FetchAllRecords(ConfigDB, ModelsTable)
+	stored, err := db.FetchAllRecords(pconst.DbConfig, pconst.TbModels)
 	if err != nil || stored == nil {
 		return models
 	}

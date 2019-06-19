@@ -2,20 +2,21 @@ package database
 
 import (
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
+	"github.com/energieip/common-components-go/pkg/pconst"
 )
 
 //SaveGroupConfig dump group config in database
 func SaveGroupConfig(db Database, cfg gm.GroupConfig) error {
 	criteria := make(map[string]interface{})
 	criteria["Group"] = cfg.Group
-	return SaveOnUpdateObject(db, cfg, ConfigDB, GroupsTable, criteria)
+	return SaveOnUpdateObject(db, cfg, pconst.DbConfig, pconst.TbGroups, criteria)
 }
 
 //RemoveGroupConfig remove group config in database
 func RemoveGroupConfig(db Database, grID int) error {
 	criteria := make(map[string]interface{})
 	criteria["Group"] = grID
-	return db.DeleteRecord(ConfigDB, GroupsTable, criteria)
+	return db.DeleteRecord(pconst.DbConfig, pconst.TbGroups, criteria)
 }
 
 //GetGroupConfig return the group configuration
@@ -23,7 +24,7 @@ func GetGroupConfig(db Database, grID int) (*gm.GroupConfig, string) {
 	var dbID string
 	criteria := make(map[string]interface{})
 	criteria["Group"] = grID
-	stored, err := db.GetRecord(ConfigDB, GroupsTable, criteria)
+	stored, err := db.GetRecord(pconst.DbConfig, pconst.TbGroups, criteria)
 	if err != nil || stored == nil {
 		return nil, dbID
 	}
@@ -44,7 +45,7 @@ func GetGroupSwitchs(db Database, grID int) map[string]bool {
 	switchs := make(map[string]bool)
 	criteria := make(map[string]interface{})
 	criteria["Group"] = grID
-	stored, err := db.GetRecord(ConfigDB, GroupsTable, criteria)
+	stored, err := db.GetRecord(pconst.DbConfig, pconst.TbGroups, criteria)
 	if err != nil || stored == nil {
 		return nil
 	}
@@ -150,13 +151,13 @@ func UpdateGroupConfig(db Database, config gm.GroupConfig) error {
 	if config.FirstDayOffset != nil {
 		setup.FirstDayOffset = config.FirstDayOffset
 	}
-	return db.UpdateRecord(ConfigDB, GroupsTable, dbID, setup)
+	return db.UpdateRecord(pconst.DbConfig, pconst.TbGroups, dbID, setup)
 }
 
 //GetGroupConfigs get group Config
 func GetGroupConfigs(db Database, driversMac map[string]bool) map[int]gm.GroupConfig {
 	groups := make(map[int]gm.GroupConfig)
-	stored, err := db.FetchAllRecords(ConfigDB, GroupsTable)
+	stored, err := db.FetchAllRecords(pconst.DbConfig, pconst.TbGroups)
 	if err != nil || stored == nil {
 		return groups
 	}
@@ -199,14 +200,14 @@ func GetGroupConfigs(db Database, driversMac map[string]bool) map[int]gm.GroupCo
 func SaveGroupStatus(db Database, status gm.GroupStatus) error {
 	criteria := make(map[string]interface{})
 	criteria["Group"] = status.Group
-	return SaveOnUpdateObject(db, status, StatusDB, GroupsTable, criteria)
+	return SaveOnUpdateObject(db, status, pconst.DbStatus, pconst.TbGroups, criteria)
 }
 
 //GetGroupStatus return the group status
 func GetGroupStatus(db Database, grID int) *gm.GroupStatus {
 	criteria := make(map[string]interface{})
 	criteria["Group"] = grID
-	stored, err := db.GetRecord(StatusDB, GroupsTable, criteria)
+	stored, err := db.GetRecord(pconst.DbStatus, pconst.TbGroups, criteria)
 	if err != nil || stored == nil {
 		return nil
 	}
@@ -220,7 +221,7 @@ func GetGroupStatus(db Database, grID int) *gm.GroupStatus {
 //GetGroupsStatus get groups status
 func GetGroupsStatus(db Database) map[int]gm.GroupStatus {
 	groups := make(map[int]gm.GroupStatus)
-	stored, err := db.FetchAllRecords(StatusDB, GroupsTable)
+	stored, err := db.FetchAllRecords(pconst.DbStatus, pconst.TbGroups)
 	if err != nil || stored == nil {
 		return groups
 	}
