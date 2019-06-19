@@ -204,7 +204,7 @@ func UpdateLedSetup(db Database, config dl.LedSetup) error {
 		if config.PMax == 0 {
 			config.PMax = 5
 		}
-		if config.FriendlyName == nil {
+		if config.FriendlyName == nil && config.Label != nil {
 			name := *config.Label
 			config.FriendlyName = &name
 		}
@@ -338,7 +338,7 @@ func UpdateLedLabelSetup(db Database, config dl.LedSetup) error {
 		if config.PMax == 0 {
 			config.PMax = 5
 		}
-		if config.FriendlyName == nil {
+		if config.FriendlyName == nil && config.Label != nil {
 			name := *config.Label
 			config.FriendlyName = &name
 		}

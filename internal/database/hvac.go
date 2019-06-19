@@ -54,7 +54,7 @@ func UpdateHvacLabelSetup(db Database, cfg dhvac.HvacSetup) error {
 	}
 	setup, dbID := GetHvacLabelConfig(db, *cfg.Label)
 	if setup == nil || dbID == "" {
-		if cfg.FriendlyName == nil {
+		if cfg.FriendlyName == nil && cfg.Label != nil {
 			name := *cfg.Label
 			cfg.FriendlyName = &name
 		}
@@ -91,7 +91,7 @@ func UpdateHvacLabelSetup(db Database, cfg dhvac.HvacSetup) error {
 func UpdateHvacSetup(db Database, cfg dhvac.HvacSetup) error {
 	setup, dbID := GetHvacConfig(db, cfg.Mac)
 	if setup == nil || dbID == "" {
-		if cfg.FriendlyName == nil {
+		if cfg.FriendlyName == nil && cfg.Label != nil {
 			name := *cfg.Label
 			cfg.FriendlyName = &name
 		}

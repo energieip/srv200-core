@@ -76,7 +76,7 @@ func UpdateBlindLabelSetup(db Database, cfg dblind.BlindSetup) error {
 	}
 	setup, dbID := GetBlindLabelConfig(db, *cfg.Label)
 	if setup == nil || dbID == "" {
-		if cfg.FriendlyName != nil {
+		if cfg.FriendlyName != nil && cfg.Label != nil {
 			name := *cfg.Label
 			setup.FriendlyName = &name
 		}
@@ -94,10 +94,6 @@ func UpdateBlindLabelSetup(db Database, cfg dblind.BlindSetup) error {
 		if cfg.Group == nil {
 			group := 0
 			cfg.Group = &group
-		}
-		if cfg.FriendlyName == nil {
-			name := *cfg.Label
-			cfg.FriendlyName = &name
 		}
 		return SaveBlindLabelConfig(db, cfg)
 	}
@@ -152,7 +148,7 @@ func UpdateBlindSetup(db Database, cfg dblind.BlindSetup) error {
 	}
 	setup, dbID := GetBlindConfig(db, cfg.Mac)
 	if setup == nil || dbID == "" {
-		if cfg.FriendlyName != nil {
+		if cfg.FriendlyName == nil && cfg.Label != nil {
 			name := *cfg.Label
 			setup.FriendlyName = &name
 		}
@@ -170,10 +166,6 @@ func UpdateBlindSetup(db Database, cfg dblind.BlindSetup) error {
 		if cfg.Group == nil {
 			group := 0
 			cfg.Group = &group
-		}
-		if cfg.FriendlyName == nil {
-			name := *cfg.Label
-			cfg.FriendlyName = &name
 		}
 		return SaveBlindConfig(db, cfg)
 	}

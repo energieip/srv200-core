@@ -95,7 +95,7 @@ func UpdateSensorSetup(db Database, cfg ds.SensorSetup) error {
 			group := 0
 			cfg.Group = &group
 		}
-		if cfg.FriendlyName == nil {
+		if cfg.FriendlyName == nil && cfg.Label != nil {
 			name := *cfg.Label
 			cfg.FriendlyName = &name
 		}
@@ -190,7 +190,7 @@ func UpdateSensorLabelSetup(db Database, cfg ds.SensorSetup) error {
 			group := 0
 			cfg.Group = &group
 		}
-		if cfg.FriendlyName == nil {
+		if cfg.FriendlyName == nil && cfg.Label != nil {
 			name := *cfg.Label
 			cfg.FriendlyName = &name
 		}

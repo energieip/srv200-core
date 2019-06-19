@@ -3499,6 +3499,10 @@
               "type": "integer",
               "description": "Dump frequency by default: 1s",
               "format": "int32"
+            },
+            "label": {
+              "type": "string",
+              "description": "IFC cable label"
             }
           }
         },
@@ -3571,6 +3575,10 @@
               "type": "integer",
               "description": "Dump frequency by default: 1s",
               "format": "int32"
+            },
+            "label": {
+              "type": "string",
+              "description": "IFC cable label"
             }
           }
         },
@@ -3689,6 +3697,10 @@
               "type": "integer",
               "description": "Dump frequency by default: 1s",
               "format": "int32"
+            },
+            "label": {
+              "type": "string",
+              "description": "IFC cable label"
             }
           }
         },
@@ -3749,6 +3761,10 @@
             "isConfigured": {
               "type": "boolean",
               "description": "Is the Blind configured"
+            },
+            "label": {
+              "type": "string",
+              "description": "IFC cable label"
             }
           }
         },
@@ -3809,6 +3825,10 @@
               "type": "integer",
               "description": "Dump frequency by default: 1s",
               "format": "int32"
+            },
+            "label": {
+              "type": "string",
+              "description": "IFC cable label"
             }
           }
         },
@@ -3840,6 +3860,10 @@
             "isConfigured": {
               "type": "boolean",
               "description": "Is the Hvac configured"
+            },
+            "label": {
+              "type": "string",
+              "description": "IFC cable label"
             }
           }
         },
@@ -3927,6 +3951,10 @@
               "type": "string",
               "description": "LED FriendlyName"
             },
+            "label": {
+              "type": "string",
+              "description": "IFC cable label"
+            },
             "dumpFrequency": {
               "type": "integer",
               "description": "Dump frequency by default: 1s",
@@ -4007,6 +4035,10 @@
               "type": "integer",
               "description": "Dump frequency by default: 1s",
               "format": "int32"
+            },
+            "label": {
+              "type": "string",
+              "description": "IFC cable label"
             }
           }
         },
@@ -4064,6 +4096,10 @@
               "type": "integer",
               "description": "Dump frequency by default: 1s",
               "format": "int32"
+            },
+            "label": {
+              "type": "string",
+              "description": "IFC cable label"
             }
           }
         },
@@ -4734,6 +4770,10 @@
               "type": "integer",
               "description": "Dump frequency by default: 1s",
               "format": "int32"
+            },
+            "label": {
+              "type": "string",
+              "description": "IFC cable label"
             }
           }
         },
@@ -5113,6 +5153,10 @@
             "damper": {
               "type": "string",
               "description": "damper"
+            },
+            "label": {
+              "type": "string",
+              "description": "IFC cable label"
             }
           }
         },
@@ -5217,6 +5261,10 @@
             "windowStatus2": {
               "type": "boolean",
               "description": "Is the window 2 open"
+            },
+            "label": {
+              "type": "string",
+              "description": "IFC cable label"
             }
           }
         },
@@ -5374,6 +5422,10 @@
               "type": "integer",
               "description": "Dump frequency by default: 1s",
               "format": "int32"
+            },
+            "label": {
+              "type": "string",
+              "description": "IFC cable label"
             }
           }
         },
