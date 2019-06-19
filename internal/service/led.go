@@ -18,7 +18,6 @@ func (s *CoreService) sendSwitchLedSetup(led dl.LedSetup) {
 	switchSetup := sd.SwitchConfig{}
 	switchSetup.Mac = led.SwitchMac
 	switchSetup.LedsSetup = make(map[string]dl.LedSetup)
-
 	switchSetup.LedsSetup[led.Mac] = led
 
 	dump, _ := switchSetup.ToJSON()
@@ -144,6 +143,7 @@ func (s *CoreService) updateGroupLed(oldLed dl.LedSetup, cfg dl.LedSetup) {
 }
 
 func (s *CoreService) updateLedSetup(config interface{}) {
+	byLbl := false
 	cfg, _ := dl.ToLedSetup(config)
 	if cfg == nil {
 		rlog.Error("Cannot parse ")
@@ -151,11 +151,22 @@ func (s *CoreService) updateLedSetup(config interface{}) {
 	}
 
 	oldLed, _ := database.GetLedConfig(s.db, cfg.Mac)
+	if oldLed == nil && cfg.Label != nil {
+		oldLed, _ = database.GetLedLabelConfig(s.db, *cfg.Label)
+		if oldLed != nil {
+			//it means that the IFC has been uploaded but the MAC is unknown
+			byLbl = true
+		}
+	}
 	if oldLed != nil {
 		s.updateGroupLed(*oldLed, *cfg)
 	}
 
-	database.UpdateLedSetup(s.db, *cfg)
+	if byLbl {
+		database.UpdateLedLabelSetup(s.db, *cfg)
+	} else {
+		database.UpdateLedSetup(s.db, *cfg)
+	}
 	//Get corresponding switchMac
 	led, _ := database.GetLedConfig(s.db, cfg.Mac)
 	if led == nil {

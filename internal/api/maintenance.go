@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/energieip/common-components-go/pkg/duser"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
@@ -29,6 +30,12 @@ func (api *API) replaceDriver(w http.ResponseWriter, req *http.Request) {
 	}
 
 	savedProject := database.GetProjectByFullMac(api.db, driver.OldFullMac)
+	if savedProject == nil {
+		oldSubmac := strings.SplitN(driver.OldFullMac, ":", 4)
+		oldMac := oldSubmac[len(oldSubmac)-1]
+		savedProject = database.GetProjectByMac(api.db, oldMac)
+	}
+
 	if savedProject == nil {
 		api.sendError(w, APIErrorDeviceNotFound, "Unknow old driver "+driver.OldFullMac, http.StatusInternalServerError)
 		return

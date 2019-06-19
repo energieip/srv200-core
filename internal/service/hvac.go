@@ -8,6 +8,50 @@ import (
 	"github.com/romana/rlog"
 )
 
+func (s *CoreService) updateGroupHvac(oldHvac dhvac.HvacSetup, hvac dhvac.HvacSetup) {
+	if hvac.Group != nil {
+		if oldHvac.Group != hvac.Group {
+			if oldHvac.Group != nil {
+				rlog.Info("Update old group", *oldHvac.Group)
+				gr, _ := database.GetGroupConfig(s.db, *oldHvac.Group)
+				if gr != nil {
+					hvacs := []string{}
+					for _, v := range gr.Hvacs {
+						if v != hvac.Mac {
+							hvacs = append(hvacs, v)
+						}
+					}
+					gr.Hvacs = hvacs
+					rlog.Info("Old group will be ", gr.Hvacs)
+					s.updateGroupCfg(gr)
+				}
+			}
+			rlog.Info("Update new group", *hvac.Group)
+			grNew, _ := database.GetGroupConfig(s.db, *hvac.Group)
+			if grNew != nil {
+				grNew.Hvacs = append(grNew.Hvacs, hvac.Mac)
+				rlog.Info("new group will be", grNew.Hvacs)
+				s.updateGroupCfg(grNew)
+			}
+		}
+	}
+}
+
+func (s *CoreService) sendSwitchHvacSetup(elt dhvac.HvacSetup) {
+	if elt.SwitchMac == "" {
+		return
+	}
+
+	url := "/write/switch/" + elt.SwitchMac + "/update/settings"
+	switchSetup := sd.SwitchConfig{}
+	switchSetup.Mac = elt.SwitchMac
+	switchSetup.HvacsSetup = make(map[string]dhvac.HvacSetup)
+	switchSetup.HvacsSetup[elt.Mac] = elt
+
+	dump, _ := switchSetup.ToJSON()
+	s.server.SendCommand(url, dump)
+}
+
 func (s *CoreService) updateHvacCfg(config interface{}) {
 	cfg, _ := dhvac.ToHvacConf(config)
 	if cfg == nil {
@@ -28,35 +72,8 @@ func (s *CoreService) updateHvacCfg(config interface{}) {
 		rlog.Error("Cannot find config for " + cfg.Mac)
 		return
 	}
+	s.updateGroupHvac(*oldHvac, *hvac)
 
-	if hvac.Group != nil {
-		if oldHvac.Group != hvac.Group {
-			if oldHvac.Group != nil {
-				rlog.Info("Update old group", *oldHvac.Group)
-				gr, _ := database.GetGroupConfig(s.db, *oldHvac.Group)
-				if gr != nil {
-					hvacs := []string{}
-					for _, v := range gr.Hvacs {
-						if v != hvac.Mac {
-							hvacs = append(hvacs, v)
-						}
-					}
-					gr.Hvacs = hvacs
-					rlog.Info("Old group will be ", gr.Hvacs)
-					s.updateGroupCfg(gr)
-					// s.updateDriverGroup(gr.Group)
-				}
-			}
-			rlog.Info("Update new group", *hvac.Group)
-			grNew, _ := database.GetGroupConfig(s.db, *hvac.Group)
-			if grNew != nil {
-				grNew.Hvacs = append(grNew.Hvacs, cfg.Mac)
-				rlog.Info("new group will be", grNew.Hvacs)
-				s.updateGroupCfg(grNew)
-				// s.updateDriverGroup(grNew.Group)
-			}
-		}
-	}
 	url := "/write/switch/" + hvac.SwitchMac + "/update/settings"
 	switchSetup := sd.SwitchConfig{}
 	switchSetup.Mac = hvac.SwitchMac
@@ -104,32 +121,7 @@ func (s *CoreService) updateHvacLabelSetup(config interface{}) {
 
 	oldHvac, _ := database.GetHvacLabelConfig(s.db, *cfg.Label)
 	if oldHvac != nil {
-		if cfg.Group != nil {
-			if oldHvac.Group != cfg.Group {
-				if oldHvac.Group != nil {
-					rlog.Info("Update old group", *oldHvac.Group)
-					gr, _ := database.GetGroupConfig(s.db, *oldHvac.Group)
-					if gr != nil {
-						hvacs := []string{}
-						for _, v := range gr.Hvacs {
-							if v != cfg.Mac {
-								hvacs = append(hvacs, v)
-							}
-						}
-						gr.Hvacs = hvacs
-						rlog.Info("Old group will be ", gr.Hvacs)
-						s.updateGroupCfg(gr)
-					}
-				}
-				rlog.Info("Update new group", *cfg.Group)
-				grNew, _ := database.GetGroupConfig(s.db, *cfg.Group)
-				if grNew != nil {
-					grNew.Hvacs = append(grNew.Hvacs, cfg.Mac)
-					rlog.Info("new group will be", grNew.Hvacs)
-					s.updateGroupCfg(grNew)
-				}
-			}
-		}
+		s.updateGroupHvac(*oldHvac, *cfg)
 	}
 
 	database.UpdateHvacLabelSetup(s.db, *cfg)
@@ -140,60 +132,34 @@ func (s *CoreService) updateHvacLabelSetup(config interface{}) {
 		rlog.Error("Cannot find config for " + cfg.Mac)
 		return
 	}
-
-	if hvac.SwitchMac == "" {
-		return
-	}
-
-	url := "/write/switch/" + hvac.SwitchMac + "/update/settings"
-	switchSetup := sd.SwitchConfig{}
-	switchSetup.Mac = hvac.SwitchMac
-	switchSetup.HvacsSetup = make(map[string]dhvac.HvacSetup)
-
-	switchSetup.HvacsSetup[cfg.Mac] = *cfg
-
-	dump, _ := switchSetup.ToJSON()
-	s.server.SendCommand(url, dump)
+	s.sendSwitchHvacSetup(*hvac)
 }
 
 func (s *CoreService) updateHvacSetup(config interface{}) {
+	byLbl := false
 	cfg, _ := dhvac.ToHvacSetup(config)
-	if cfg == nil || cfg.Label == nil {
+	if cfg == nil {
 		rlog.Error("Cannot parse ")
 		return
 	}
 
 	oldHvac, _ := database.GetHvacConfig(s.db, cfg.Mac)
-	if oldHvac != nil {
-		if cfg.Group != nil {
-			if oldHvac.Group != cfg.Group {
-				if oldHvac.Group != nil {
-					rlog.Info("Update old group", *oldHvac.Group)
-					gr, _ := database.GetGroupConfig(s.db, *oldHvac.Group)
-					if gr != nil {
-						hvacs := []string{}
-						for _, v := range gr.Hvacs {
-							if v != cfg.Mac {
-								hvacs = append(hvacs, v)
-							}
-						}
-						gr.Hvacs = hvacs
-						rlog.Info("Old group will be ", gr.Hvacs)
-						s.updateGroupCfg(gr)
-					}
-				}
-				rlog.Info("Update new group", *cfg.Group)
-				grNew, _ := database.GetGroupConfig(s.db, *cfg.Group)
-				if grNew != nil {
-					grNew.Hvacs = append(grNew.Hvacs, cfg.Mac)
-					rlog.Info("new group will be", grNew.Hvacs)
-					s.updateGroupCfg(grNew)
-				}
-			}
+	if oldHvac == nil && cfg.Label != nil {
+		oldHvac, _ = database.GetHvacLabelConfig(s.db, *cfg.Label)
+		if oldHvac != nil {
+			//it means that the IFC has been uploaded but the MAC is unknown
+			byLbl = true
 		}
 	}
+	if oldHvac != nil {
+		s.updateGroupHvac(*oldHvac, *cfg)
+	}
 
-	database.UpdateHvacSetup(s.db, *cfg)
+	if byLbl {
+		database.UpdateHvacLabelSetup(s.db, *cfg)
+	} else {
+		database.UpdateHvacSetup(s.db, *cfg)
+	}
 
 	//Get corresponding switchMac
 	hvac, _ := database.GetHvacConfig(s.db, cfg.Mac)
@@ -201,18 +167,5 @@ func (s *CoreService) updateHvacSetup(config interface{}) {
 		rlog.Error("Cannot find config for " + cfg.Mac)
 		return
 	}
-
-	if hvac.SwitchMac == "" {
-		return
-	}
-
-	url := "/write/switch/" + hvac.SwitchMac + "/update/settings"
-	switchSetup := sd.SwitchConfig{}
-	switchSetup.Mac = hvac.SwitchMac
-	switchSetup.HvacsSetup = make(map[string]dhvac.HvacSetup)
-
-	switchSetup.HvacsSetup[cfg.Mac] = *cfg
-
-	dump, _ := switchSetup.ToJSON()
-	s.server.SendCommand(url, dump)
+	s.sendSwitchHvacSetup(*hvac)
 }

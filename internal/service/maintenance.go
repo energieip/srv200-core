@@ -24,21 +24,23 @@ func (s *CoreService) replaceDriver(driver interface{}) {
 		return
 	}
 
+	oldSubmac := strings.SplitN(replace.OldFullMac, ":", 4)
+	oldMac := oldSubmac[len(oldSubmac)-1]
+	newSubmac := strings.SplitN(replace.NewFullMac, ":", 4)
+	newMac := newSubmac[len(newSubmac)-1]
+
 	project := database.GetProjectByFullMac(s.db, replace.OldFullMac)
+	if project == nil {
+		project = database.GetProjectByMac(s.db, oldMac)
+	}
+
 	if project == nil {
 		rlog.Error("Unkown old driver")
 		return
 	}
 
 	project.FullMac = &replace.NewFullMac
-	oldMac := ""
-	if project.Mac != nil {
-		oldMac = *project.Mac
-	}
-
-	submac := strings.SplitN(replace.NewFullMac, ":", 4)
-	mac := submac[len(submac)-1]
-	project.Mac = &mac
+	project.Mac = &newMac
 
 	//update driver tables
 	if project.ModelName != nil {

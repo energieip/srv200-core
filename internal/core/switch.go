@@ -22,7 +22,7 @@ type SwitchConfig struct {
 type SwitchCmd struct {
 	Mac          string `json:"mac"`
 	FullMac      string `json:"fullMac"`
-	IsConfigured *bool  `json:"isConfigured"`
+	IsConfigured *bool  `json:"isConfigured,omitempty"`
 }
 
 type SwitchDump struct {

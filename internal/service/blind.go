@@ -8,6 +8,50 @@ import (
 	"github.com/romana/rlog"
 )
 
+func (s *CoreService) updateGroupBlind(oldBlind dblind.BlindSetup, blind dblind.BlindSetup) {
+	if blind.Group != nil {
+		if oldBlind.Group != blind.Group {
+			if oldBlind.Group != nil {
+				rlog.Info("Update old group", *oldBlind.Group)
+				gr, _ := database.GetGroupConfig(s.db, *oldBlind.Group)
+				if gr != nil {
+					blinds := []string{}
+					for _, v := range gr.Blinds {
+						if v != blind.Mac {
+							blinds = append(blinds, v)
+						}
+					}
+					gr.Blinds = blinds
+					rlog.Info("Old group will be ", gr.Blinds)
+					s.updateGroupCfg(gr)
+				}
+			}
+			rlog.Info("Update new group", *blind.Group)
+			grNew, _ := database.GetGroupConfig(s.db, *blind.Group)
+			if grNew != nil {
+				grNew.Blinds = append(grNew.Blinds, blind.Mac)
+				rlog.Info("new group will be", grNew.Blinds)
+				s.updateGroupCfg(grNew)
+			}
+		}
+	}
+}
+
+func (s *CoreService) sendSwitchBlindSetup(bld dblind.BlindSetup) {
+	if bld.SwitchMac == "" {
+		return
+	}
+
+	url := "/write/switch/" + bld.SwitchMac + "/update/settings"
+	switchSetup := sd.SwitchConfig{}
+	switchSetup.Mac = bld.SwitchMac
+	switchSetup.BlindsSetup = make(map[string]dblind.BlindSetup)
+	switchSetup.BlindsSetup[bld.Mac] = bld
+
+	dump, _ := switchSetup.ToJSON()
+	s.server.SendCommand(url, dump)
+}
+
 func (s *CoreService) updateBlindCfg(config interface{}) {
 	cfg, _ := dblind.ToBlindConf(config)
 	if cfg == nil {
@@ -28,35 +72,8 @@ func (s *CoreService) updateBlindCfg(config interface{}) {
 		rlog.Error("Cannot find config for " + cfg.Mac)
 		return
 	}
+	s.updateGroupBlind(*oldBlind, *blind)
 
-	if blind.Group != nil {
-		if oldBlind.Group != blind.Group {
-			if oldBlind.Group != nil {
-				rlog.Info("Update old group", *oldBlind.Group)
-				gr, _ := database.GetGroupConfig(s.db, *oldBlind.Group)
-				if gr != nil {
-					blinds := []string{}
-					for _, v := range gr.Blinds {
-						if v != blind.Mac {
-							blinds = append(blinds, v)
-						}
-					}
-					gr.Blinds = blinds
-					rlog.Info("Old group will be ", gr.Blinds)
-					s.updateGroupCfg(gr)
-					// s.updateDriverGroup(gr.Group)
-				}
-			}
-			rlog.Info("Update new group", *blind.Group)
-			grNew, _ := database.GetGroupConfig(s.db, *blind.Group)
-			if grNew != nil {
-				grNew.Blinds = append(grNew.Blinds, cfg.Mac)
-				rlog.Info("new group will be", grNew.Blinds)
-				s.updateGroupCfg(grNew)
-				// s.updateDriverGroup(grNew.Group)
-			}
-		}
-	}
 	url := "/write/switch/" + blind.SwitchMac + "/update/settings"
 	switchSetup := sd.SwitchConfig{}
 	switchSetup.Mac = blind.SwitchMac
@@ -99,6 +116,7 @@ func (s *CoreService) sendBlindCmd(cmdBlind interface{}) {
 }
 
 func (s *CoreService) updateBlindSetup(config interface{}) {
+	byLbl := false
 	cfg, _ := dblind.ToBlindSetup(config)
 	if cfg == nil {
 		rlog.Error("Cannot parse ")
@@ -106,35 +124,24 @@ func (s *CoreService) updateBlindSetup(config interface{}) {
 	}
 
 	oldBlind, _ := database.GetBlindConfig(s.db, cfg.Mac)
-	if oldBlind != nil {
-		if cfg.Group != nil {
-			if oldBlind.Group != cfg.Group {
-				if oldBlind.Group != nil {
-					rlog.Info("Update old group", *oldBlind.Group)
-					gr, _ := database.GetGroupConfig(s.db, *oldBlind.Group)
-					if gr != nil {
-						blinds := []string{}
-						for _, v := range gr.Blinds {
-							if v != cfg.Mac {
-								blinds = append(blinds, v)
-							}
-						}
-						gr.Blinds = blinds
-						rlog.Info("Old group will be ", gr.Blinds)
-						s.updateGroupCfg(gr)
-					}
-				}
-				rlog.Info("Update new group", *cfg.Group)
-				grNew, _ := database.GetGroupConfig(s.db, *cfg.Group)
-				if grNew != nil {
-					grNew.Blinds = append(grNew.Blinds, cfg.Mac)
-					rlog.Info("new group will be", grNew.Blinds)
-					s.updateGroupCfg(grNew)
-				}
-			}
+	if oldBlind == nil && cfg.Label != nil {
+		oldBlind, _ = database.GetBlindLabelConfig(s.db, *cfg.Label)
+		if oldBlind != nil {
+			//it means that the IFC has been uploaded but the MAC is unknown
+			byLbl = true
 		}
 	}
-	database.UpdateBlindSetup(s.db, *cfg)
+
+	if oldBlind != nil {
+		s.updateGroupBlind(*oldBlind, *cfg)
+	}
+
+	if byLbl {
+		database.UpdateBlindLabelSetup(s.db, *cfg)
+	} else {
+		database.UpdateBlindSetup(s.db, *cfg)
+	}
+
 	//Get corresponding switchMac
 	blind, _ := database.GetBlindConfig(s.db, cfg.Mac)
 	if blind == nil {
@@ -142,19 +149,7 @@ func (s *CoreService) updateBlindSetup(config interface{}) {
 		return
 	}
 
-	if blind.SwitchMac == "" {
-		return
-	}
-
-	url := "/write/switch/" + blind.SwitchMac + "/update/settings"
-	switchSetup := sd.SwitchConfig{}
-	switchSetup.Mac = blind.SwitchMac
-	switchSetup.BlindsSetup = make(map[string]dblind.BlindSetup)
-
-	switchSetup.BlindsSetup[cfg.Mac] = *cfg
-
-	dump, _ := switchSetup.ToJSON()
-	s.server.SendCommand(url, dump)
+	s.sendSwitchBlindSetup(*cfg)
 }
 
 func (s *CoreService) updateBlindLabelSetup(config interface{}) {
@@ -166,32 +161,7 @@ func (s *CoreService) updateBlindLabelSetup(config interface{}) {
 
 	oldBlind, _ := database.GetBlindLabelConfig(s.db, *cfg.Label)
 	if oldBlind != nil {
-		if cfg.Group != nil {
-			if oldBlind.Group != cfg.Group {
-				if oldBlind.Group != nil {
-					rlog.Info("Update old group", *oldBlind.Group)
-					gr, _ := database.GetGroupConfig(s.db, *oldBlind.Group)
-					if gr != nil {
-						blinds := []string{}
-						for _, v := range gr.Blinds {
-							if v != cfg.Mac {
-								blinds = append(blinds, v)
-							}
-						}
-						gr.Blinds = blinds
-						rlog.Info("Old group will be ", gr.Blinds)
-						s.updateGroupCfg(gr)
-					}
-				}
-				rlog.Info("Update new group", *cfg.Group)
-				grNew, _ := database.GetGroupConfig(s.db, *cfg.Group)
-				if grNew != nil {
-					grNew.Blinds = append(grNew.Blinds, cfg.Mac)
-					rlog.Info("new group will be", grNew.Blinds)
-					s.updateGroupCfg(grNew)
-				}
-			}
-		}
+		s.updateGroupBlind(*oldBlind, *cfg)
 	}
 	database.UpdateBlindLabelSetup(s.db, *cfg)
 	//Get corresponding switchMac
@@ -201,17 +171,5 @@ func (s *CoreService) updateBlindLabelSetup(config interface{}) {
 		return
 	}
 
-	if blind.SwitchMac == "" {
-		return
-	}
-
-	url := "/write/switch/" + blind.SwitchMac + "/update/settings"
-	switchSetup := sd.SwitchConfig{}
-	switchSetup.Mac = blind.SwitchMac
-	switchSetup.BlindsSetup = make(map[string]dblind.BlindSetup)
-
-	switchSetup.BlindsSetup[cfg.Mac] = *cfg
-
-	dump, _ := switchSetup.ToJSON()
-	s.server.SendCommand(url, dump)
+	s.sendSwitchBlindSetup(*cfg)
 }
