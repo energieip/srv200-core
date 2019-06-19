@@ -3,6 +3,8 @@ package service
 import (
 	"strings"
 
+	"github.com/energieip/common-components-go/pkg/pconst"
+
 	db "github.com/energieip/common-components-go/pkg/dblind"
 	dh "github.com/energieip/common-components-go/pkg/dhvac"
 	dl "github.com/energieip/common-components-go/pkg/dled"
@@ -38,13 +40,13 @@ func (s *CoreService) installDriver(dr interface{}) {
 	dType := tools.Model2Type(refModel)
 
 	switch dType {
-	case "LED":
+	case pconst.LED:
 		elt, _ := database.GetLedLabelConfig(s.db, proj.Label)
 		if elt == nil {
 			rlog.Error("Cannot find Led " + proj.Label + " in database")
 			return
 		}
-		elt.FullMac = driver.FullMac
+		elt.FullMac = &driver.FullMac
 		elt.Mac = mac
 		database.SaveLedLabelConfig(s.db, *elt)
 
@@ -55,13 +57,13 @@ func (s *CoreService) installDriver(dr interface{}) {
 		url := "/write/switch/" + elt.SwitchMac + "/update/settings"
 		dump, _ := switchConf.ToJSON()
 		s.server.SendCommand(url, dump)
-	case "BLIND":
+	case pconst.BLIND:
 		elt, _ := database.GetBlindLabelConfig(s.db, proj.Label)
 		if elt == nil {
 			rlog.Error("Cannot find Blind " + proj.Label + " in database")
 			return
 		}
-		elt.FullMac = driver.FullMac
+		elt.FullMac = &driver.FullMac
 		elt.Mac = mac
 		database.SaveBlindLabelConfig(s.db, *elt)
 
@@ -73,13 +75,13 @@ func (s *CoreService) installDriver(dr interface{}) {
 		url := "/write/switch/" + elt.SwitchMac + "/update/settings"
 		dump, _ := switchConf.ToJSON()
 		s.server.SendCommand(url, dump)
-	case "HVAC":
+	case pconst.HVAC:
 		elt, _ := database.GetHvacLabelConfig(s.db, proj.Label)
 		if elt == nil {
 			rlog.Error("Cannot find Hvac " + proj.Label + " in database")
 			return
 		}
-		elt.FullMac = driver.FullMac
+		elt.FullMac = &driver.FullMac
 		elt.Mac = mac
 		database.SaveHvacLabelConfig(s.db, *elt)
 
@@ -91,13 +93,13 @@ func (s *CoreService) installDriver(dr interface{}) {
 		url := "/write/switch/" + elt.SwitchMac + "/update/settings"
 		dump, _ := switchConf.ToJSON()
 		s.server.SendCommand(url, dump)
-	case "SENSOR":
+	case pconst.SENSOR:
 		elt, _ := database.GetSensorLabelConfig(s.db, proj.Label)
 		if elt == nil {
-			rlog.Error("Cannot find Hvac " + proj.Label + " in database")
+			rlog.Error("Cannot find Sensor " + proj.Label + " in database")
 			return
 		}
-		elt.FullMac = driver.FullMac
+		elt.FullMac = &driver.FullMac
 		elt.Mac = mac
 		database.SaveSensorLabelConfig(s.db, *elt)
 
@@ -109,7 +111,7 @@ func (s *CoreService) installDriver(dr interface{}) {
 		url := "/write/switch/" + elt.SwitchMac + "/update/settings"
 		dump, _ := switchConf.ToJSON()
 		s.server.SendCommand(url, dump)
-	case "SWITCH":
+	case pconst.SWITCH:
 		elt := database.GetSwitchLabelConfig(s.db, proj.Label)
 		if elt == nil {
 			rlog.Error("Cannot find SWITCH " + proj.Label + " in database")

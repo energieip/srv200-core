@@ -3,6 +3,8 @@ package service
 import (
 	"strings"
 
+	"github.com/energieip/common-components-go/pkg/pconst"
+
 	db "github.com/energieip/common-components-go/pkg/dblind"
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
 	dh "github.com/energieip/common-components-go/pkg/dhvac"
@@ -43,7 +45,7 @@ func (s *CoreService) replaceDriver(driver interface{}) {
 		refModel := *project.ModelName
 		dType := tools.Model2Type(refModel)
 		switch dType {
-		case "LED":
+		case pconst.LED:
 			oldDriver, _ := database.GetLedConfig(s.db, oldMac)
 			if oldDriver == nil {
 				rlog.Error("Cannot find Led " + oldMac + " in database")
@@ -86,7 +88,7 @@ func (s *CoreService) replaceDriver(driver interface{}) {
 				s.server.SendCommand(url, dump)
 			}
 
-		case "BLIND":
+		case pconst.BLIND:
 			oldDriver, _ := database.GetBlindConfig(s.db, oldMac)
 			if oldDriver == nil {
 				rlog.Error("Cannot find Blind " + oldMac + " in database")
@@ -128,7 +130,7 @@ func (s *CoreService) replaceDriver(driver interface{}) {
 				dump, _ := switchSetup.ToJSON()
 				s.server.SendCommand(url, dump)
 			}
-		case "HVAC":
+		case pconst.HVAC:
 			oldDriver, _ := database.GetHvacConfig(s.db, oldMac)
 			if oldDriver == nil {
 				rlog.Error("Cannot find Hvac " + oldMac + " in database")
@@ -170,16 +172,16 @@ func (s *CoreService) replaceDriver(driver interface{}) {
 				dump, _ := switchSetup.ToJSON()
 				s.server.SendCommand(url, dump)
 			}
-		case "SENSOR":
+		case pconst.SENSOR:
 			oldDriver, _ := database.GetSensorConfig(s.db, oldMac)
 			if oldDriver == nil {
-				rlog.Error("Cannot find Blind " + oldMac + " in database")
+				rlog.Error("Cannot find Sensor " + oldMac + " in database")
 				return
 			}
 
 			err := database.SwitchSensorConfig(s.db, oldMac, replace.OldFullMac, *project.Mac, *project.FullMac)
 			if err != nil {
-				rlog.Error("Cannot update Blind database", err)
+				rlog.Error("Cannot update Sensor database", err)
 				return
 			}
 
@@ -212,7 +214,7 @@ func (s *CoreService) replaceDriver(driver interface{}) {
 				dump, _ := switchSetup.ToJSON()
 				s.server.SendCommand(url, dump)
 			}
-		case "SWITCH":
+		case pconst.SWITCH:
 			device, _ := database.GetSwitchConfig(s.db, oldMac)
 			if device == nil {
 				rlog.Error("Cannot find Switch " + oldMac + " in database")

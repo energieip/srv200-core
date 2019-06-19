@@ -158,7 +158,7 @@ func SwitchSensorConfig(db Database, old, oldFull, new, newFull string) error {
 	if setup == nil || dbID == "" {
 		return NewError("Device " + old + "not found")
 	}
-	setup.FullMac = newFull
+	setup.FullMac = &newFull
 	setup.Mac = new
 	return db.UpdateRecord(pconst.DbConfig, pconst.TbSensors, dbID, setup)
 }
