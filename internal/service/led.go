@@ -85,7 +85,6 @@ func (s *CoreService) updateLedCfg(config interface{}) {
 					gr.FirstDay = firstDay
 					rlog.Info("Old group will be ", gr.Leds)
 					s.updateGroupCfg(gr)
-					//	s.updateDriverGroup(gr.Group)
 				}
 			}
 			rlog.Info("Update new group", *led.Group)
@@ -94,7 +93,6 @@ func (s *CoreService) updateLedCfg(config interface{}) {
 				grNew.Leds = append(grNew.Leds, cfg.Mac)
 				rlog.Info("new group will be", grNew.Leds)
 				s.updateGroupCfg(grNew)
-				//	s.updateDriverGroup(grNew.Group)
 			}
 		}
 	}
@@ -109,6 +107,42 @@ func (s *CoreService) updateLedCfg(config interface{}) {
 	s.server.SendCommand(url, dump)
 }
 
+func (s *CoreService) updateGroupLed(oldLed dl.LedSetup, cfg dl.LedSetup) {
+	if cfg.Group != nil {
+		if oldLed.Group != cfg.Group {
+			if oldLed.Group != nil {
+				rlog.Info("Update old group", *oldLed.Group)
+				gr, _ := database.GetGroupConfig(s.db, *oldLed.Group)
+				if gr != nil {
+					leds := []string{}
+					for _, v := range gr.Leds {
+						if v != cfg.Mac {
+							leds = append(leds, v)
+						}
+					}
+					gr.Leds = leds
+					firstDay := []string{}
+					for _, v := range gr.FirstDay {
+						if v != cfg.Mac {
+							firstDay = append(firstDay, v)
+						}
+					}
+					gr.FirstDay = firstDay
+					rlog.Info("Old group will be ", gr.Leds)
+					s.updateGroupCfg(gr)
+				}
+			}
+			rlog.Info("Update new group", *cfg.Group)
+			grNew, _ := database.GetGroupConfig(s.db, *cfg.Group)
+			if grNew != nil {
+				grNew.Leds = append(grNew.Leds, cfg.Mac)
+				rlog.Info("new group will be", grNew.Leds)
+				s.updateGroupCfg(grNew)
+			}
+		}
+	}
+}
+
 func (s *CoreService) updateLedSetup(config interface{}) {
 	cfg, _ := dl.ToLedSetup(config)
 	if cfg == nil {
@@ -118,39 +152,7 @@ func (s *CoreService) updateLedSetup(config interface{}) {
 
 	oldLed, _ := database.GetLedConfig(s.db, cfg.Mac)
 	if oldLed != nil {
-		if cfg.Group != nil {
-			if oldLed.Group != cfg.Group {
-				if oldLed.Group != nil {
-					rlog.Info("Update old group", *oldLed.Group)
-					gr, _ := database.GetGroupConfig(s.db, *oldLed.Group)
-					if gr != nil {
-						leds := []string{}
-						for _, v := range gr.Leds {
-							if v != cfg.Mac {
-								leds = append(leds, v)
-							}
-						}
-						gr.Leds = leds
-						firstDay := []string{}
-						for _, v := range gr.FirstDay {
-							if v != cfg.Mac {
-								firstDay = append(firstDay, v)
-							}
-						}
-						gr.FirstDay = firstDay
-						rlog.Info("Old group will be ", gr.Leds)
-						s.updateGroupCfg(gr)
-					}
-				}
-				rlog.Info("Update new group", *cfg.Group)
-				grNew, _ := database.GetGroupConfig(s.db, *cfg.Group)
-				if grNew != nil {
-					grNew.Leds = append(grNew.Leds, cfg.Mac)
-					rlog.Info("new group will be", grNew.Leds)
-					s.updateGroupCfg(grNew)
-				}
-			}
-		}
+		s.updateGroupLed(*oldLed, *cfg)
 	}
 
 	database.UpdateLedSetup(s.db, *cfg)
@@ -173,39 +175,7 @@ func (s *CoreService) updateLedLabelSetup(config interface{}) {
 
 	oldLed, _ := database.GetLedLabelConfig(s.db, *cfg.Label)
 	if oldLed != nil {
-		if cfg.Group != nil {
-			if oldLed.Group != cfg.Group {
-				if oldLed.Group != nil {
-					rlog.Info("Update old group", *oldLed.Group)
-					gr, _ := database.GetGroupConfig(s.db, *oldLed.Group)
-					if gr != nil {
-						leds := []string{}
-						for _, v := range gr.Leds {
-							if v != cfg.Mac {
-								leds = append(leds, v)
-							}
-						}
-						gr.Leds = leds
-						firstDay := []string{}
-						for _, v := range gr.FirstDay {
-							if v != cfg.Mac {
-								firstDay = append(firstDay, v)
-							}
-						}
-						gr.FirstDay = firstDay
-						rlog.Info("Old group will be ", gr.Leds)
-						s.updateGroupCfg(gr)
-					}
-				}
-				rlog.Info("Update new group", *cfg.Group)
-				grNew, _ := database.GetGroupConfig(s.db, *cfg.Group)
-				if grNew != nil {
-					grNew.Leds = append(grNew.Leds, cfg.Mac)
-					rlog.Info("new group will be", grNew.Leds)
-					s.updateGroupCfg(grNew)
-				}
-			}
-		}
+		s.updateGroupLed(*oldLed, *cfg)
 	}
 
 	database.UpdateLedLabelSetup(s.db, *cfg)
