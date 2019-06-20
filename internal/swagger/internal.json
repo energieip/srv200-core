@@ -1,0 +1,125 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+      "title": "Internal GTB Swagger",
+      "description": "Internal GTB server API unversioned",
+      "contact": {
+        "email": "developer@energie-ip.com"
+      },
+      "version": "0.0"
+    },
+    "paths": {
+      "/versions": {
+        "get": {
+          "summary": "getAPIs",
+          "description": "Return Supported API Versions",
+          "operationId": "GetAPIs",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "sucessful operation",
+              "headers": {},
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/getAPIsResponse"
+                  }
+                }
+              }
+            },
+            "default": {
+              "description": "unexpected error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "deprecated": false
+        }
+      },
+      "/functions": {
+        "get": {
+          "summary": "getFunctions",
+          "description": "Return the list of available API functions",
+          "operationId": "GetFunctions",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "sucessful operation",
+              "headers": {},
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/getFunctionsResponse"
+                  }
+                }
+              }
+            },
+            "default": {
+              "description": "unexpected error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "deprecated": false
+        }
+      }
+    },
+    "components": {
+      "schemas": {
+        "Error": {
+          "title": "Error",
+          "required": [
+            "code",
+            "message"
+          ],
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "message": {
+              "type": "string"
+            }
+          }
+        },
+        "getAPIsResponse": {
+          "title": "getAPIsResponse",
+          "type": "object",
+          "properties": {
+            "versions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "list of available APIs"
+            }
+          }
+        },
+        "getFunctionsResponse": {
+          "title": "getFunctionsResponse",
+          "type": "object",
+          "properties": {
+            "functions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "list of available functions"
+            }
+          }
+        }
+      }
+    },
+    "tags": []
+  }

@@ -40,6 +40,7 @@ type CoreService struct {
 	events               chan string
 	eventsAPI            chan map[string]interface{}
 	api                  *api.API
+	internalApi *api.InternalAPI
 	bufAPI               cmap.ConcurrentMap
 	bufConsumption       cmap.ConcurrentMap
 	eventsConsumptionAPI chan core.EventConsumption
@@ -105,6 +106,9 @@ func (s *CoreService) Initialize(confFile string) error {
 		rlog.Error("Cannot connect to drivers broker " + conf.AuthBroker.IP + " error: " + err.Error())
 		return err
 	}
+
+	internal := api.InitInternalAPI(s.db, *conf)
+	s.internalApi = internal
 
 	web := api.InitAPI(s.db, s.historyDb, s.eventsAPI, s.eventsConsumptionAPI, *conf)
 	s.api = web
@@ -175,6 +179,21 @@ func (s *CoreService) readAPIEvents() {
 				}
 			}
 			apiEvents = nil
+
+		case internalAPIEvents := <-s.internalApi.EventsToBackend:
+			for eventType, event := range internalAPIEvents {
+				rlog.Info("get internal API event", eventType, event)
+				switch eventType {
+				case "groupCmd":
+					s.sendGroupCmd(event)
+				case "ledCmd":
+					s.sendLedCmd(event)
+				case "blindCmd":
+					s.sendBlindCmd(event)
+				case "hvacCmd":
+					s.sendHvacCmd(event)
+				}
+			}
 		}
 	}
 }
