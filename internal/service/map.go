@@ -43,5 +43,5 @@ func (s *CoreService) updateMapInfo(config interface{}) {
 	for _, md := range cfg.Models {
 		database.SaveModel(s.db, md)
 	}
-	s.uploadValue = "succes"
+	s.uploadValue = "success"
 }

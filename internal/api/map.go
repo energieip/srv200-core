@@ -133,5 +133,11 @@ func (api *API) uploadStatus(w http.ResponseWriter, r *http.Request) {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
 	}
-	json.NewEncoder(w).Encode(api.uploadStatus)
+	m := make(map[string]string)
+	if api.uploadStatus != nil {
+		m["status"] = *api.uploadValue
+	} else {
+		m["status"] = "none"
+	}
+	json.NewEncoder(w).Encode(m)
 }

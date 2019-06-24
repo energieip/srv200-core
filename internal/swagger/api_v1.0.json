@@ -5550,15 +5550,20 @@
         },
         "UploadStatus": {
           "title": "UploadStatus",
-          "enum": [
-            "none",
-            "running",
-            "failure",
-            "success"
-          ],
-          "type": "string",
-          "description": "upload status",
-          "example": "none"
+          "type": "object",
+          "properties": {
+            "status": {
+            "enum": [
+              "none",
+              "running",
+              "failure",
+              "success"
+            ],
+            "type": "string",
+            "description": "upload status",
+            "example": "none"
+            }
+          }
         },
         "DeviceType": {
           "title": "DeviceType",
