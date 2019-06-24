@@ -117,46 +117,7 @@ func SaveSwitchLabelConfig(db Database, config core.SwitchConfig) error {
 	}
 	criteria := make(map[string]interface{})
 	criteria["Label"] = config.Label
-	stored, err := db.GetRecord(pconst.DbConfig, pconst.TbSwitchs, criteria)
-	if err != nil || stored == nil {
-		return NewError("Switch " + *config.Label + " not found")
-	}
-	m := stored.(map[string]interface{})
-	id, ok := m["id"]
-	if !ok {
-		return NewError("Switch " + *config.Label + " not found")
-	}
-	dbID := id.(string)
-
-	setup, err := core.ToSwitchConfig(stored)
-	if err != nil || stored == nil {
-		return NewError("Switch " + *config.Label + " not found")
-	}
-
-	if config.FriendlyName == nil {
-		setup.FriendlyName = config.FriendlyName
-	}
-
-	if config.Mac == nil {
-		setup.Mac = config.Mac
-	}
-
-	if config.FullMac == nil {
-		setup.FullMac = config.FullMac
-	}
-
-	if config.DumpFrequency != nil {
-		setup.DumpFrequency = config.DumpFrequency
-	}
-	if config.IP != nil {
-		setup.IP = config.IP
-	}
-	if config.Cluster != nil {
-		setup.Cluster = config.Cluster
-	}
-	setup.Label = config.Label
-
-	return db.UpdateRecord(pconst.DbConfig, pconst.TbSwitchs, dbID, setup)
+	return SaveOnUpdateObject(db, config, pconst.DbConfig, pconst.TbSwitchs, criteria)
 }
 
 //RemoveSwitchConfig remove led config in database
@@ -240,6 +201,26 @@ func GetSwitchsConfig(db Database) map[string]core.SwitchConfig {
 	return switchs
 }
 
+//GetSwitchsConfigByLabel return the switch config list
+func GetSwitchsConfigByLabel(db Database) map[string]core.SwitchConfig {
+	switchs := map[string]core.SwitchConfig{}
+	stored, err := db.FetchAllRecords(pconst.DbConfig, pconst.TbSwitchs)
+	if err != nil || stored == nil {
+		return switchs
+	}
+	for _, l := range stored {
+		sw, err := core.ToSwitchConfig(l)
+		if err != nil || sw == nil {
+			continue
+		}
+		if sw.Label == nil {
+			continue
+		}
+		switchs[*sw.Label] = *sw
+	}
+	return switchs
+}
+
 //GetSwitchsDump return the switch status list
 func GetSwitchsDump(db Database) map[string]core.SwitchDump {
 	switchs := map[string]core.SwitchDump{}
@@ -253,6 +234,23 @@ func GetSwitchsDump(db Database) map[string]core.SwitchDump {
 			continue
 		}
 		switchs[sw.Mac] = *sw
+	}
+	return switchs
+}
+
+//GetSwitchsDumpByLabel return the switch status list
+func GetSwitchsDumpByLabel(db Database) map[string]core.SwitchDump {
+	switchs := map[string]core.SwitchDump{}
+	stored, err := db.FetchAllRecords(pconst.DbStatus, pconst.TbSwitchs)
+	if err != nil || stored == nil {
+		return switchs
+	}
+	for _, l := range stored {
+		sw, err := core.ToSwitchDump(l)
+		if err != nil || sw == nil || sw.Label == nil {
+			continue
+		}
+		switchs[*sw.Label] = *sw
 	}
 	return switchs
 }

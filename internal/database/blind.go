@@ -181,6 +181,23 @@ func GetBlindsConfig(db Database) map[string]dblind.BlindSetup {
 	return drivers
 }
 
+//GetBlindsConfigByLabel return the blind config list
+func GetBlindsConfigByLabel(db Database) map[string]dblind.BlindSetup {
+	drivers := map[string]dblind.BlindSetup{}
+	stored, err := db.FetchAllRecords(pconst.DbConfig, pconst.TbBlinds)
+	if err != nil || stored == nil {
+		return drivers
+	}
+	for _, s := range stored {
+		driver, err := dblind.ToBlindSetup(s)
+		if err != nil || driver == nil || driver.Label == nil {
+			continue
+		}
+		drivers[*driver.Label] = *driver
+	}
+	return drivers
+}
+
 //SaveBlindStatus dump blind status in database
 func SaveBlindStatus(db Database, status dblind.Blind) error {
 	criteria := make(map[string]interface{})
@@ -201,6 +218,23 @@ func GetBlindsStatus(db Database) map[string]dblind.Blind {
 			continue
 		}
 		drivers[driver.Mac] = *driver
+	}
+	return drivers
+}
+
+//GetBlindsStatusByLabel return the blind status list
+func GetBlindsStatusByLabel(db Database) map[string]dblind.Blind {
+	drivers := map[string]dblind.Blind{}
+	stored, err := db.FetchAllRecords(pconst.DbStatus, pconst.TbBlinds)
+	if err != nil || stored == nil {
+		return drivers
+	}
+	for _, s := range stored {
+		driver, err := dblind.ToBlind(s)
+		if err != nil || driver == nil || driver.Label == nil {
+			continue
+		}
+		drivers[*driver.Label] = *driver
 	}
 	return drivers
 }

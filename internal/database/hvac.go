@@ -180,6 +180,23 @@ func GetHvacsConfig(db Database) map[string]dhvac.HvacSetup {
 	return drivers
 }
 
+//GetHvacsConfigByLabel return the hvac config list
+func GetHvacsConfigByLabel(db Database) map[string]dhvac.HvacSetup {
+	drivers := map[string]dhvac.HvacSetup{}
+	stored, err := db.FetchAllRecords(pconst.DbConfig, pconst.TbHvacs)
+	if err != nil || stored == nil {
+		return drivers
+	}
+	for _, s := range stored {
+		driver, err := dhvac.ToHvacSetup(s)
+		if err != nil || driver == nil || driver.Label == nil {
+			continue
+		}
+		drivers[*driver.Label] = *driver
+	}
+	return drivers
+}
+
 //SaveHvacStatus dump hvac status in database
 func SaveHvacStatus(db Database, status dhvac.Hvac) error {
 	criteria := make(map[string]interface{})
@@ -200,6 +217,23 @@ func GetHvacsStatus(db Database) map[string]dhvac.Hvac {
 			continue
 		}
 		drivers[driver.Mac] = *driver
+	}
+	return drivers
+}
+
+//GetHvacsStatusByLabel return the hvac status list
+func GetHvacsStatusByLabel(db Database) map[string]dhvac.Hvac {
+	drivers := map[string]dhvac.Hvac{}
+	stored, err := db.FetchAllRecords(pconst.DbStatus, pconst.TbHvacs)
+	if err != nil || stored == nil {
+		return drivers
+	}
+	for _, s := range stored {
+		driver, err := dhvac.ToHvac(s)
+		if err != nil || driver == nil || driver.Label == nil {
+			continue
+		}
+		drivers[*driver.Label] = *driver
 	}
 	return drivers
 }

@@ -5,12 +5,13 @@ import (
 	"log"
 	"net/http"
 
+	"io/ioutil"
+	"strings"
+
 	pkg "github.com/energieip/common-components-go/pkg/service"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
 	"github.com/gorilla/mux"
 	"github.com/romana/rlog"
-	"strings"
-	"io/ioutil"
 
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 )
@@ -29,17 +30,17 @@ type InternalAPI struct {
 
 //InitInternalAPI start API connection
 func InitInternalAPI(db database.Database,
- conf pkg.ServiceConfig) *InternalAPI {
+	conf pkg.ServiceConfig) *InternalAPI {
 	api := InternalAPI{
 		db:              db,
 		apiIP:           conf.InternalAPI.IP,
 		apiPort:         conf.InternalAPI.Port,
 		apiPassword:     conf.InternalAPI.Password,
 		EventsToBackend: make(chan map[string]interface{}),
-		certificate:    conf.InternalAPI.CertPath,
-		keyfile:        conf.InternalAPI.KeyPath,
-		browsingFolder: conf.InternalAPI.BrowsingFolder,
-		dataPath:       conf.DataPath,
+		certificate:     conf.InternalAPI.CertPath,
+		keyfile:         conf.InternalAPI.KeyPath,
+		browsingFolder:  conf.InternalAPI.BrowsingFolder,
+		dataPath:        conf.DataPath,
 	}
 	go api.swagger()
 	return &api
@@ -125,16 +126,16 @@ func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	lights := database.GetLedsStatus(api.db)
-	lightsConfig := database.GetLedsConfig(api.db)
-	cells := database.GetSensorsStatus(api.db)
-	cellsConfig := database.GetSensorsConfig(api.db)
-	blds := database.GetBlindsStatus(api.db)
-	bldsConfig := database.GetBlindsConfig(api.db)
-	hvcs := database.GetHvacsStatus(api.db)
-	hvcsConfig := database.GetHvacsConfig(api.db)
-	switchElts := database.GetSwitchsDump(api.db)
-	switchEltsConfig := database.GetSwitchsConfig(api.db)
+	lights := database.GetLedsStatusByLabel(api.db)
+	lightsConfig := database.GetLedsConfigByLabel(api.db)
+	cells := database.GetSensorsStatusByLabel(api.db)
+	cellsConfig := database.GetSensorsConfigByLabel(api.db)
+	blds := database.GetBlindsStatusByLabel(api.db)
+	bldsConfig := database.GetBlindsConfigByLabel(api.db)
+	hvcs := database.GetHvacsStatusByLabel(api.db)
+	hvcsConfig := database.GetHvacsConfigByLabel(api.db)
+	switchElts := database.GetSwitchsDumpByLabel(api.db)
+	switchEltsConfig := database.GetSwitchsConfigByLabel(api.db)
 
 	ifcs := database.GetIfcs(api.db)
 	for _, ifc := range ifcs {
@@ -153,13 +154,13 @@ func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
 		switch ifc.DeviceType {
 		case "led":
 			dump := DumpLed{}
-			led, ok := lights[ifc.Mac]
+			led, ok := lights[ifc.Label]
 			gr := 0
 			if ok {
 				dump.Status = led
 				gr = led.Group
 			}
-			config, ok := lightsConfig[ifc.Mac]
+			config, ok := lightsConfig[ifc.Label]
 			if ok {
 				dump.Config = config
 				if gr == 0 && config.Group != nil {
@@ -172,12 +173,12 @@ func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
 		case "sensor":
 			dump := DumpSensor{}
 			gr := 0
-			sensor, ok := cells[ifc.Mac]
+			sensor, ok := cells[ifc.Label]
 			if ok {
 				dump.Status = sensor
 				gr = sensor.Group
 			}
-			config, ok := cellsConfig[ifc.Mac]
+			config, ok := cellsConfig[ifc.Label]
 			if ok {
 				dump.Config = config
 				if gr == 0 && config.Group != nil {
@@ -189,12 +190,12 @@ func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
 		case "blind":
 			dump := DumpBlind{}
 			gr := 0
-			bld, ok := blds[ifc.Mac]
+			bld, ok := blds[ifc.Label]
 			if ok {
 				dump.Status = bld
 				gr = bld.Group
 			}
-			config, ok := bldsConfig[ifc.Mac]
+			config, ok := bldsConfig[ifc.Label]
 			if ok {
 				dump.Config = config
 				if gr == 0 && config.Group != nil {
@@ -206,12 +207,12 @@ func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
 		case "hvac":
 			dump := DumpHvac{}
 			gr := 0
-			hvac, ok := hvcs[ifc.Mac]
+			hvac, ok := hvcs[ifc.Label]
 			if ok {
 				dump.Status = hvac
 				gr = hvac.Group
 			}
-			config, ok := hvcsConfig[ifc.Mac]
+			config, ok := hvcsConfig[ifc.Label]
 			if ok {
 				dump.Config = config
 				if gr == 0 && config.Group != nil {
@@ -222,11 +223,11 @@ func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
 			hvacs = append(hvacs, dump)
 		case "switch":
 			dump := DumpSwitch{}
-			switchElt, ok := switchElts[ifc.Mac]
+			switchElt, ok := switchElts[ifc.Label]
 			if ok {
 				dump.Status = switchElt
 			}
-			config, ok := switchEltsConfig[ifc.Mac]
+			config, ok := switchEltsConfig[ifc.Label]
 			if ok {
 				dump.Config = config
 			}
@@ -313,7 +314,6 @@ func (api *InternalAPI) sendBlindCommand(w http.ResponseWriter, req *http.Reques
 	w.Write([]byte("{}"))
 }
 
-
 func (api *InternalAPI) sendHvacCommand(w http.ResponseWriter, req *http.Request) {
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
@@ -373,7 +373,7 @@ func (api *InternalAPI) swagger() {
 	router.HandleFunc(apiV1+"/dump", api.getDump).Methods("GET")
 
 	//command API
-	router.HandleFunc(apiV1+"/command/led",api.sendLedCommand).Methods("POST")
+	router.HandleFunc(apiV1+"/command/led", api.sendLedCommand).Methods("POST")
 	router.HandleFunc(apiV1+"/command/blind", api.sendBlindCommand).Methods("POST")
 	router.HandleFunc(apiV1+"/command/hvac", api.sendHvacCommand).Methods("POST")
 	router.HandleFunc(apiV1+"/command/group", api.sendGroupCommand).Methods("POST")

@@ -180,6 +180,23 @@ func GetSensorsConfig(db Database) map[string]ds.SensorSetup {
 	return drivers
 }
 
+//GetSensorsConfigByLabel return the sensor config list
+func GetSensorsConfigByLabel(db Database) map[string]ds.SensorSetup {
+	drivers := map[string]ds.SensorSetup{}
+	stored, err := db.FetchAllRecords(pconst.DbConfig, pconst.TbSensors)
+	if err != nil || stored == nil {
+		return drivers
+	}
+	for _, l := range stored {
+		driver, err := ds.ToSensorSetup(l)
+		if err != nil || driver == nil || driver.Label == nil {
+			continue
+		}
+		drivers[*driver.Label] = *driver
+	}
+	return drivers
+}
+
 //SaveSensorStatus dump sensor status in database
 func SaveSensorStatus(db Database, status ds.Sensor) error {
 	criteria := make(map[string]interface{})
@@ -200,6 +217,23 @@ func GetSensorsStatus(db Database) map[string]ds.Sensor {
 			continue
 		}
 		drivers[driver.Mac] = *driver
+	}
+	return drivers
+}
+
+//GetSensorsStatusByLabel return the led status list
+func GetSensorsStatusByLabel(db Database) map[string]ds.Sensor {
+	drivers := map[string]ds.Sensor{}
+	stored, err := db.FetchAllRecords(pconst.DbStatus, pconst.TbSensors)
+	if err != nil || stored == nil {
+		return drivers
+	}
+	for _, l := range stored {
+		driver, err := ds.ToSensor(l)
+		if err != nil || driver == nil || driver.Label == nil {
+			continue
+		}
+		drivers[*driver.Label] = *driver
 	}
 	return drivers
 }

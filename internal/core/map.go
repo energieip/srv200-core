@@ -8,7 +8,6 @@ import (
 	"github.com/energieip/common-components-go/pkg/dhvac"
 	dl "github.com/energieip/common-components-go/pkg/dled"
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
-	sd "github.com/energieip/common-components-go/pkg/dswitch"
 )
 
 //MapInfo
@@ -20,7 +19,7 @@ type MapInfo struct {
 	Blinds  map[string]db.BlindSetup   `json:"blinds"`
 	Models  map[string]Model           `json:"models"`
 	Project map[string]Project         `json:"projects"`
-	Switchs map[string]sd.Switch       `json:"switchs"`
+	Switchs map[string]SwitchConfig    `json:"switchs"`
 }
 
 // ToJSON dump MapInfo struct

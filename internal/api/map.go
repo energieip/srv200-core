@@ -49,6 +49,7 @@ func (api *API) uploadHandler(w http.ResponseWriter, r *http.Request) {
 	// continue looping through all parts, *multipart.Reader.NextPart() will
 	// return an End of File when all parts have been read.
 	for {
+		*api.uploadValue = "running"
 		p, err = mr.NextPart()
 		if err == io.EOF {
 			// err is io.EOF, files upload completes.
@@ -93,6 +94,7 @@ func (api *API) uploadHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		if err != nil {
 			// A normal error occurred
+			*api.uploadValue = "failure"
 			tempFile.Close()
 			os.Remove(tempFile.Name())
 			rlog.Error("Hit error while fetching next part: ", err.Error())
@@ -109,6 +111,7 @@ func (api *API) uploadHandler(w http.ResponseWriter, r *http.Request) {
 			n, err := p.Read(chunk)
 			if err != nil {
 				if err != io.EOF {
+					*api.uploadValue = "failure"
 					rlog.Error("Hit error while writing chunk: ", err.Error())
 					api.sendError(w, APIErrorBodyParsing, "Error while fetching file", http.StatusInternalServerError)
 					return
@@ -116,10 +119,19 @@ func (api *API) uploadHandler(w http.ResponseWriter, r *http.Request) {
 				uploaded = true
 			}
 			if _, err = tempFile.Write(chunk[:n]); err != nil {
+				*api.uploadValue = "failure"
 				rlog.Error("Hit error while writing chunk: ", err.Error())
 				api.sendError(w, APIErrorBodyParsing, "Error while fetching file", http.StatusInternalServerError)
 				return
 			}
 		}
 	}
+}
+
+func (api *API) uploadStatus(w http.ResponseWriter, r *http.Request) {
+	if api.hasAccessMode(w, r, []string{duser.PriviledgeAdmin, duser.PriviledgeMaintainer}) != nil {
+		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
+		return
+	}
+	json.NewEncoder(w).Encode(api.uploadStatus)
 }

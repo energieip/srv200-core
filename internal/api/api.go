@@ -34,7 +34,7 @@ import (
 
 //InitAPI start API connection
 func InitAPI(db database.Database, historydb history.HistoryDb, eventsAPI chan map[string]interface{},
-	eventsConso chan core.EventConsumption, conf pkg.ServiceConfig) *API {
+	eventsConso chan core.EventConsumption, uploadValue *string, conf pkg.ServiceConfig) *API {
 	api := API{
 		db:              db,
 		apiIP:           conf.ExternalAPI.IP,
@@ -56,6 +56,7 @@ func InitAPI(db database.Database, historydb history.HistoryDb, eventsAPI chan m
 		keyfile:        conf.ExternalAPI.KeyPath,
 		browsingFolder: conf.ExternalAPI.BrowsingFolder,
 		dataPath:       conf.DataPath,
+		uploadValue:    uploadValue,
 	}
 	go api.swagger()
 	return &api
@@ -299,16 +300,16 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	lights := database.GetLedsStatus(api.db)
-	lightsConfig := database.GetLedsConfig(api.db)
-	cells := database.GetSensorsStatus(api.db)
-	cellsConfig := database.GetSensorsConfig(api.db)
-	blds := database.GetBlindsStatus(api.db)
-	bldsConfig := database.GetBlindsConfig(api.db)
-	hvcs := database.GetHvacsStatus(api.db)
-	hvcsConfig := database.GetHvacsConfig(api.db)
-	switchElts := database.GetSwitchsDump(api.db)
-	switchEltsConfig := database.GetSwitchsConfig(api.db)
+	lights := database.GetLedsStatusByLabel(api.db)
+	lightsConfig := database.GetLedsConfigByLabel(api.db)
+	cells := database.GetSensorsStatusByLabel(api.db)
+	cellsConfig := database.GetSensorsConfigByLabel(api.db)
+	blds := database.GetBlindsStatusByLabel(api.db)
+	bldsConfig := database.GetBlindsConfigByLabel(api.db)
+	hvcs := database.GetHvacsStatusByLabel(api.db)
+	hvcsConfig := database.GetHvacsConfigByLabel(api.db)
+	switchElts := database.GetSwitchsDumpByLabel(api.db)
+	switchEltsConfig := database.GetSwitchsConfigByLabel(api.db)
 
 	ifcs := database.GetIfcs(api.db)
 	for _, ifc := range ifcs {
@@ -327,13 +328,13 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 		switch ifc.DeviceType {
 		case "led":
 			dump := DumpLed{}
-			led, ok := lights[ifc.Mac]
+			led, ok := lights[ifc.Label]
 			gr := 0
 			if ok {
 				dump.Status = led
 				gr = led.Group
 			}
-			config, ok := lightsConfig[ifc.Mac]
+			config, ok := lightsConfig[ifc.Label]
 			if ok {
 				dump.Config = config
 				if gr == 0 && config.Group != nil {
@@ -351,12 +352,12 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 		case "sensor":
 			dump := DumpSensor{}
 			gr := 0
-			sensor, ok := cells[ifc.Mac]
+			sensor, ok := cells[ifc.Label]
 			if ok {
 				dump.Status = sensor
 				gr = sensor.Group
 			}
-			config, ok := cellsConfig[ifc.Mac]
+			config, ok := cellsConfig[ifc.Label]
 			if ok {
 				dump.Config = config
 				if gr == 0 && config.Group != nil {
@@ -373,12 +374,12 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 		case "blind":
 			dump := DumpBlind{}
 			gr := 0
-			bld, ok := blds[ifc.Mac]
+			bld, ok := blds[ifc.Label]
 			if ok {
 				dump.Status = bld
 				gr = bld.Group
 			}
-			config, ok := bldsConfig[ifc.Mac]
+			config, ok := bldsConfig[ifc.Label]
 			if ok {
 				dump.Config = config
 				if gr == 0 && config.Group != nil {
@@ -395,12 +396,12 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 		case "hvac":
 			dump := DumpHvac{}
 			gr := 0
-			hvac, ok := hvcs[ifc.Mac]
+			hvac, ok := hvcs[ifc.Label]
 			if ok {
 				dump.Status = hvac
 				gr = hvac.Group
 			}
-			config, ok := hvcsConfig[ifc.Mac]
+			config, ok := hvcsConfig[ifc.Label]
 			if ok {
 				dump.Config = config
 				if gr == 0 && config.Group != nil {
@@ -416,11 +417,11 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 			hvacs = append(hvacs, dump)
 		case "switch":
 			dump := DumpSwitch{}
-			switchElt, ok := switchElts[ifc.Mac]
+			switchElt, ok := switchElts[ifc.Label]
 			if ok {
 				dump.Status = switchElt
 			}
-			config, ok := switchEltsConfig[ifc.Mac]
+			config, ok := switchEltsConfig[ifc.Label]
 			if ok {
 				dump.Config = config
 			}
@@ -661,7 +662,7 @@ func (api *API) getV1Functions(w http.ResponseWriter, req *http.Request) {
 		apiV1 + "/project/model", apiV1 + "/project/bim", apiV1 + "/project", apiV1 + "/dump",
 		apiV1 + "/status/sensor", apiV1 + "/status/group", apiV1 + "/status/led", apiV1 + "/status/blind", apiV1 + "/status/hvac",
 		apiV1 + "/status/groups" + apiV1 + "/maintenance/driver", apiV1 + "/commissioning/install",
-		apiV1 + "/user/info", apiV1 + "/user/login",
+		apiV1 + "/user/info", apiV1 + "/user/login", apiV1 + "/map/upload", apiV1 + "/map/upload/status",
 	}
 	apiInfo := APIFunctions{
 		Functions: functions,
@@ -787,6 +788,7 @@ func (api *API) swagger() {
 
 	//map API
 	router.HandleFunc(apiV1+"/map/upload", api.verification(api.uploadHandler)).Methods("POST")
+	router.HandleFunc(apiV1+"/map/upload/status", api.verification(api.uploadStatus)).Methods("GET")
 
 	//Maintenance API
 	router.HandleFunc(apiV1+"/maintenance/driver", api.verification(api.replaceDriver)).Methods("POST")

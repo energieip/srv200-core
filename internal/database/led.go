@@ -144,6 +144,23 @@ func GetLedsConfig(db Database) map[string]dl.LedSetup {
 	return leds
 }
 
+//GetLedsConfigByLabel return the led config list
+func GetLedsConfigByLabel(db Database) map[string]dl.LedSetup {
+	leds := map[string]dl.LedSetup{}
+	stored, err := db.FetchAllRecords(pconst.DbConfig, pconst.TbLeds)
+	if err != nil || stored == nil {
+		return leds
+	}
+	for _, l := range stored {
+		light, err := dl.ToLedSetup(l)
+		if err != nil || light == nil || light.Label == nil {
+			continue
+		}
+		leds[*light.Label] = *light
+	}
+	return leds
+}
+
 //SaveLedStatus dump led status in database
 func SaveLedStatus(db Database, status dl.Led) error {
 	criteria := make(map[string]interface{})
@@ -164,6 +181,23 @@ func GetLedsStatus(db Database) map[string]dl.Led {
 			continue
 		}
 		leds[light.Mac] = *light
+	}
+	return leds
+}
+
+//GetLedsStatusByLabel return the led status list
+func GetLedsStatusByLabel(db Database) map[string]dl.Led {
+	leds := map[string]dl.Led{}
+	stored, err := db.FetchAllRecords(pconst.DbStatus, pconst.TbLeds)
+	if err != nil || stored == nil {
+		return leds
+	}
+	for _, l := range stored {
+		light, err := dl.ToLed(l)
+		if err != nil || light == nil || light.Label == nil {
+			continue
+		}
+		leds[*light.Label] = *light
 	}
 	return leds
 }

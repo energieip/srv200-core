@@ -45,7 +45,7 @@ func (s *CoreService) updateSwitchCfg(config interface{}) {
 
 func (s *CoreService) updateSwitchLabelCfg(config interface{}) {
 	cfg, _ := core.ToSwitchConfig(config)
-	if cfg.Label == nil {
+	if cfg == nil || cfg.Label == nil {
 		return
 	}
 	sw := database.GetSwitchLabelConfig(s.db, *cfg.Label)

@@ -60,6 +60,7 @@ type API struct {
 	apiPassword     string
 	browsingFolder  string
 	dataPath        string
+	uploadValue     *string
 }
 
 type JwtToken struct {

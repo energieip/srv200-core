@@ -1806,6 +1806,58 @@
           ]
         }
       },
+      "/map/upload/status": {
+        "get": {
+          "tags": [
+            "map"
+          ],
+          "summary": "upload Map status",
+          "description": "upload map status",
+          "operationId": "uploadStatus",
+          "parameters": [],
+          "requestBody": {
+            "description": "Get upload status"
+          },
+          "responses": {
+            "200": {
+              "description": "sucessful operation",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/UploadStatus"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Unauthorized Access",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "default": {
+              "description": "unexpected error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "deprecated": false,
+          "security": [
+            {
+              "Authorization": []
+            }
+          ]
+        }
+      },
       "/project/ifcInfo/{label}": {
         "get": {
           "tags": [
@@ -5487,6 +5539,18 @@
           "type": "string",
           "description": "bluetooth mode",
           "example": "service"
+        },
+        "UploadStatus": {
+          "title": "UploadStatus",
+          "enum": [
+            "none",
+            "running",
+            "failure",
+            "success"
+          ],
+          "type": "string",
+          "description": "upload status",
+          "example": "none"
         },
         "DeviceType": {
           "title": "DeviceType",

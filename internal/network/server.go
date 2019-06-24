@@ -38,28 +38,27 @@ func CreateServerNetwork() (*ServerNetwork, error) {
 }
 
 //LocalConnection connect service to server broker
-func (net ServerNetwork) LocalConnection(conf pkg.ServiceConfig, clientID string) error {
+func (net ServerNetwork) LocalConnection(conf pkg.ServiceConfig) error {
 	cbkServer := make(map[string]func(genericNetwork.Client, genericNetwork.Message))
 	cbkServer["/read/switch/+/setup/hello"] = net.onHello
 	cbkServer["/read/switch/+/status/dump"] = net.onDump
 
 	confServer := genericNetwork.NetworkConfig{
-		IP:         conf.NetworkBroker.IP,
-		Port:       conf.NetworkBroker.Port,
-		ClientName: clientID,
-		Callbacks:  cbkServer,
-		LogLevel:   conf.LogLevel,
-		User:       conf.NetworkBroker.Login,
-		Password:   conf.NetworkBroker.Password,
-		CaPath:     conf.NetworkBroker.CaPath,
-		Secure:     conf.AuthBroker.Secure,
+		IP:        conf.NetworkBroker.IP,
+		Port:      conf.NetworkBroker.Port,
+		Callbacks: cbkServer,
+		LogLevel:  conf.LogLevel,
+		User:      conf.NetworkBroker.Login,
+		Password:  conf.NetworkBroker.Password,
+		CaPath:    conf.NetworkBroker.CaPath,
+		Secure:    conf.AuthBroker.Secure,
 	}
 
 	for {
 		rlog.Info("Try to connect to " + conf.NetworkBroker.IP)
 		err := net.Iface.Initialize(confServer)
 		if err == nil {
-			rlog.Info(clientID + " connected to server broker " + conf.NetworkBroker.IP)
+			rlog.Info("Connected to server broker " + conf.NetworkBroker.IP)
 			return err
 		}
 		timer := time.NewTicker(time.Second)

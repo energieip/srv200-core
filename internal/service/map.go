@@ -8,6 +8,7 @@ import (
 func (s *CoreService) updateMapInfo(config interface{}) {
 	cfg, _ := core.ToMapInfo(config)
 	if cfg == nil {
+		s.uploadValue = "failure"
 		return
 	}
 
@@ -42,4 +43,5 @@ func (s *CoreService) updateMapInfo(config interface{}) {
 	for _, md := range cfg.Models {
 		database.SaveModel(s.db, md)
 	}
+	s.uploadValue = "succes"
 }

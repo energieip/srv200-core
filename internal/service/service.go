@@ -40,21 +40,22 @@ type CoreService struct {
 	events               chan string
 	eventsAPI            chan map[string]interface{}
 	api                  *api.API
-	internalApi *api.InternalAPI
+	internalApi          *api.InternalAPI
 	bufAPI               cmap.ConcurrentMap
 	bufConsumption       cmap.ConcurrentMap
 	eventsConsumptionAPI chan core.EventConsumption
+	uploadValue          string
 }
 
 //Initialize service
 func (s *CoreService) Initialize(confFile string) error {
-	clientID := "GtbServer"
 	s.mac, s.ip = tools.GetNetworkInfo()
 	s.events = make(chan string)
 	s.eventsAPI = make(chan map[string]interface{})
 	s.bufAPI = cmap.New()
 	s.bufConsumption = cmap.New()
 	s.eventsConsumptionAPI = make(chan core.EventConsumption)
+	s.uploadValue = "none"
 
 	conf, err := pkg.ReadServiceConfig(confFile)
 	if err != nil {
@@ -88,7 +89,7 @@ func (s *CoreService) Initialize(confFile string) error {
 	}
 	s.server = *serverNet
 
-	err = s.server.LocalConnection(*conf, clientID)
+	err = s.server.LocalConnection(*conf)
 	if err != nil {
 		rlog.Error("Cannot connect to drivers broker " + conf.NetworkBroker.IP + " error: " + err.Error())
 		return err
@@ -101,7 +102,7 @@ func (s *CoreService) Initialize(confFile string) error {
 	}
 	s.authServer = *authNet
 
-	err = s.authServer.LocalConnection(*conf, clientID)
+	err = s.authServer.LocalConnection(*conf)
 	if err != nil {
 		rlog.Error("Cannot connect to drivers broker " + conf.AuthBroker.IP + " error: " + err.Error())
 		return err
@@ -110,7 +111,7 @@ func (s *CoreService) Initialize(confFile string) error {
 	internal := api.InitInternalAPI(s.db, *conf)
 	s.internalApi = internal
 
-	web := api.InitAPI(s.db, s.historyDb, s.eventsAPI, s.eventsConsumptionAPI, *conf)
+	web := api.InitAPI(s.db, s.historyDb, s.eventsAPI, s.eventsConsumptionAPI, &s.uploadValue, *conf)
 	s.api = web
 
 	serv := dserver.ServerConfig{}

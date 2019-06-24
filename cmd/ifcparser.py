@@ -111,7 +111,7 @@ def parseIfc(filepath):
                 deviceType = "sensor"
             elif "hvac" in product:
                 deviceType = "hvac"
-            elif "swh" in product:
+            elif "swh" in product or "switch" in product:
                 deviceType = "switch"
             elif "fra" in product:
                 deviceType = "frame"
@@ -119,10 +119,17 @@ def parseIfc(filepath):
             if deviceType not in drivers:
                 drivers[deviceType] = {}
 
-            drivers[deviceType][label] = {
-                "label": label,
-                "group": group,
-            }
+            if deviceType not in ["switch", "frame"]:
+                drivers[deviceType][label] = {
+                    "label": label,
+                    "group": group,
+                }
+            else:
+                cluster = instance['properties'].get("Cluster", 0)
+                drivers[deviceType][label] = {
+                    "label": label,
+                    "cluster": cluster
+                }
 
             if deviceType == "led":
                 drivers[deviceType][label]["pMax"] = instance['properties'].get("Power", 0)

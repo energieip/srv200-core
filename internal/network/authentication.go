@@ -37,29 +37,28 @@ func CreateAuthNetwork() (*AuthNetwork, error) {
 }
 
 //LocalConnection connect service to server broker
-func (net AuthNetwork) LocalConnection(conf pkg.ServiceConfig, clientID string) error {
+func (net AuthNetwork) LocalConnection(conf pkg.ServiceConfig) error {
 	cbkServer := make(map[string]func(genericNetwork.Client, genericNetwork.Message))
 	cbkServer[EventNewUser] = net.onNewUser
 	cbkServer[EventRemoveUser] = net.onRemoveUser
 	cbkServer["/write/server/+/users"] = net.onDumpUser
 
 	confServer := genericNetwork.NetworkConfig{
-		IP:         conf.AuthBroker.IP,
-		Port:       conf.AuthBroker.Port,
-		ClientName: clientID + "2",
-		Callbacks:  cbkServer,
-		LogLevel:   conf.LogLevel,
-		User:       conf.AuthBroker.Login,
-		Password:   conf.AuthBroker.Password,
-		CaPath:     conf.AuthBroker.CaPath,
-		Secure:     conf.AuthBroker.Secure,
+		IP:        conf.AuthBroker.IP,
+		Port:      conf.AuthBroker.Port,
+		Callbacks: cbkServer,
+		LogLevel:  conf.LogLevel,
+		User:      conf.AuthBroker.Login,
+		Password:  conf.AuthBroker.Password,
+		CaPath:    conf.AuthBroker.CaPath,
+		Secure:    conf.AuthBroker.Secure,
 	}
 
 	for {
 		rlog.Info("Try to connect to " + conf.AuthBroker.IP)
 		err := net.Iface.Initialize(confServer)
 		if err == nil {
-			rlog.Info(clientID + " connected to server broker " + conf.AuthBroker.IP)
+			rlog.Info("Connected to server broker " + conf.AuthBroker.IP)
 			return err
 		}
 		timer := time.NewTicker(time.Second)
