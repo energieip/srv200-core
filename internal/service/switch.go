@@ -59,7 +59,7 @@ func (s *CoreService) updateSwitchLabelCfg(config interface{}) {
 	if cfg.Mac != nil {
 		mac = *cfg.Mac
 	} else {
-		if sw.Mac != nil {
+		if sw != nil && sw.Mac != nil {
 			mac = *sw.Mac
 		}
 	}
