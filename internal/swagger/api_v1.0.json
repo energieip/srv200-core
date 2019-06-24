@@ -4183,7 +4183,7 @@
           "title": "DriverInfo",
           "required": [
             "label",
-            "modelName",
+            "device",
             "fullMac"
           ],
           "type": "object",
@@ -4192,9 +4192,17 @@
               "type": "string",
               "description": "label name available in the IFC for identifying the element"
             },
-            "modelName": {
+            "device": {
               "type": "string",
-              "description": "Model name"
+              "enum": [
+                "LED",
+                "SENSOR",
+                "BLIND",
+                "HVAC",
+                "SWITCH"
+              ],
+              "example": "LED",
+              "description": "Device Type"
             },
             "fullMac": {
               "type": "string",

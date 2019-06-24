@@ -10,7 +10,6 @@ import (
 	dl "github.com/energieip/common-components-go/pkg/dled"
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
 	sd "github.com/energieip/common-components-go/pkg/dswitch"
-	"github.com/energieip/common-components-go/pkg/tools"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
 	"github.com/romana/rlog"
@@ -36,9 +35,7 @@ func (s *CoreService) installDriver(dr interface{}) {
 	//update project
 	database.SaveProject(s.db, *proj)
 
-	refModel := *proj.ModelName
-	dType := tools.Model2Type(refModel)
-
+	dType := *proj.ModelName
 	switch dType {
 	case pconst.LED:
 		elt, _ := database.GetLedLabelConfig(s.db, proj.Label)
