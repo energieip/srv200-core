@@ -33,6 +33,20 @@ func UpdateBlindConfig(db Database, cfg dblind.BlindConf) error {
 	return db.UpdateRecord(pconst.DbConfig, pconst.TbBlinds, dbID, &new)
 }
 
+//UpdateBlindLabelConfig update blind config in database
+func UpdateBlindLabelConfig(db Database, cfg dblind.BlindConf) error {
+	if cfg.Label == nil {
+		return NewError("Unknow Device")
+	}
+	setup, dbID := GetBlindLabelConfig(db, *cfg.Label)
+	if setup == nil || dbID == "" {
+		return NewError("Device " + *cfg.Label + " not found")
+	}
+
+	new := dblind.UpdateConfig(cfg, *setup)
+	return db.UpdateRecord(pconst.DbConfig, pconst.TbBlinds, dbID, &new)
+}
+
 //UpdateBlindLabelSetup update blind config in database
 func UpdateBlindLabelSetup(db Database, cfg dblind.BlindSetup) error {
 	if cfg.Label == nil {

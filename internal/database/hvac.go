@@ -33,6 +33,20 @@ func UpdateHvacConfig(db Database, cfg dhvac.HvacConf) error {
 	return db.UpdateRecord(pconst.DbConfig, pconst.TbHvacs, dbID, &new)
 }
 
+//UpdateHvacLabelConfig update hvac config in database
+func UpdateHvacLabelConfig(db Database, cfg dhvac.HvacConf) error {
+	if cfg.Label == nil {
+		return NewError("Unknow label")
+	}
+	setup, dbID := GetHvacLabelConfig(db, *cfg.Label)
+	if setup == nil || dbID == "" {
+		return NewError("Device " + *cfg.Label + " not found")
+	}
+
+	new := dhvac.UpdateConfig(cfg, *setup)
+	return db.UpdateRecord(pconst.DbConfig, pconst.TbHvacs, dbID, &new)
+}
+
 //UpdateHvacLabelSetup update hvac config in database
 func UpdateHvacLabelSetup(db Database, cfg dhvac.HvacSetup) error {
 	if cfg.Label == nil {

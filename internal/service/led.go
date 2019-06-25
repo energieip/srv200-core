@@ -48,18 +48,38 @@ func (s *CoreService) updateLedCfg(config interface{}) {
 		return
 	}
 
-	oldLed, _ := database.GetLedConfig(s.db, cfg.Mac)
-	if oldLed == nil {
-		rlog.Error("Cannot find config for " + cfg.Mac)
-		return
-	}
-
-	database.UpdateLedConfig(s.db, *cfg)
-	//Get corresponding switchMac
-	led, _ := database.GetLedConfig(s.db, cfg.Mac)
-	if led == nil {
-		rlog.Error("Cannot find config for " + cfg.Mac)
-		return
+	var oldLed *dl.LedSetup
+	var led *dl.LedSetup
+	if cfg.Mac != "" {
+		oldLed, _ = database.GetLedConfig(s.db, cfg.Mac)
+		if oldLed == nil {
+			rlog.Error("Cannot find config for " + cfg.Mac)
+			return
+		}
+		database.UpdateLedConfig(s.db, *cfg)
+		//Get corresponding switchMac
+		led, _ := database.GetLedConfig(s.db, cfg.Mac)
+		if led == nil {
+			rlog.Error("Cannot find config for " + cfg.Mac)
+			return
+		}
+	} else {
+		if cfg.Label == nil {
+			rlog.Error("Cannot find config for " + cfg.Mac)
+			return
+		}
+		oldLed, _ = database.GetLedLabelConfig(s.db, *cfg.Label)
+		if oldLed == nil {
+			rlog.Error("Cannot find config for " + *cfg.Label)
+			return
+		}
+		database.UpdateLedLabelConfig(s.db, *cfg)
+		//Get corresponding switchMac
+		led, _ = database.GetLedLabelConfig(s.db, *cfg.Label)
+		if led == nil {
+			rlog.Error("Cannot find config for " + *cfg.Label)
+			return
+		}
 	}
 
 	if led.Group != nil {

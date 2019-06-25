@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	gm "github.com/energieip/common-components-go/pkg/dgroup"
 	"github.com/energieip/common-components-go/pkg/dhvac"
 	"github.com/energieip/common-components-go/pkg/duser"
 
@@ -81,8 +82,18 @@ func (api *API) setHvacConfig(w http.ResponseWriter, req *http.Request) {
 		}
 		gr, _ := database.GetGroupConfig(api.db, *cfg.Group)
 		if gr == nil {
-			api.sendError(w, APIErrorDeviceNotFound, "Group "+strconv.Itoa(*cfg.Group)+" not found", http.StatusInternalServerError)
-			return
+			name := "Group " + strconv.Itoa(*cfg.Group)
+			group := gm.GroupConfig{
+				Group:        *cfg.Group,
+				FriendlyName: &name,
+			}
+			if cfg.Mac != "" {
+				hvacs := []string{cfg.Mac}
+				group.Hvacs = hvacs
+			}
+			eventGr := make(map[string]interface{})
+			eventGr["group"] = group
+			api.EventsToBackend <- eventGr
 		}
 	}
 	event := make(map[string]interface{})

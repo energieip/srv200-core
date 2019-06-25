@@ -59,18 +59,40 @@ func (s *CoreService) updateBlindCfg(config interface{}) {
 		return
 	}
 
-	oldBlind, _ := database.GetBlindConfig(s.db, cfg.Mac)
-	if oldBlind == nil {
-		rlog.Error("Cannot find config for " + cfg.Mac)
-		return
-	}
+	var oldBlind *dblind.BlindSetup
+	var blind *dblind.BlindSetup
+	if cfg.Mac != "" {
+		oldBlind, _ = database.GetBlindConfig(s.db, cfg.Mac)
+		if oldBlind == nil {
+			rlog.Error("Cannot find config for " + cfg.Mac)
+			return
+		}
 
-	database.UpdateBlindConfig(s.db, *cfg)
-	//Get corresponding switchMac
-	blind, _ := database.GetBlindConfig(s.db, cfg.Mac)
-	if blind == nil {
-		rlog.Error("Cannot find config for " + cfg.Mac)
-		return
+		database.UpdateBlindConfig(s.db, *cfg)
+		//Get corresponding switchMac
+		blind, _ = database.GetBlindConfig(s.db, cfg.Mac)
+		if blind == nil {
+			rlog.Error("Cannot find config for " + cfg.Mac)
+			return
+		}
+	} else {
+		if cfg.Label == nil {
+			rlog.Error("Cannot find config for " + cfg.Mac)
+			return
+		}
+		oldBlind, _ = database.GetBlindLabelConfig(s.db, *cfg.Label)
+		if oldBlind == nil {
+			rlog.Error("Cannot find config for " + *cfg.Label)
+			return
+		}
+
+		database.UpdateBlindLabelConfig(s.db, *cfg)
+		//Get corresponding switchMac
+		blind, _ = database.GetBlindLabelConfig(s.db, *cfg.Label)
+		if blind == nil {
+			rlog.Error("Cannot find config for " + *cfg.Label)
+			return
+		}
 	}
 	s.updateGroupBlind(*oldBlind, *blind)
 

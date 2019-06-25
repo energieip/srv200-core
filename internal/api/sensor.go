@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 
+	gm "github.com/energieip/common-components-go/pkg/dgroup"
 	"github.com/energieip/common-components-go/pkg/duser"
 
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
@@ -76,6 +78,27 @@ func (api *API) setSensorConfig(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)
 		return
+	}
+	if sensor.Group != nil {
+		if *sensor.Group < 0 {
+			api.sendError(w, APIErrorInvalidValue, "Invalid groupID "+strconv.Itoa(*sensor.Group), http.StatusInternalServerError)
+			return
+		}
+		gr, _ := database.GetGroupConfig(api.db, *sensor.Group)
+		if gr == nil {
+			name := "Group " + strconv.Itoa(*sensor.Group)
+			group := gm.GroupConfig{
+				Group:        *sensor.Group,
+				FriendlyName: &name,
+			}
+			if sensor.Mac != "" {
+				sensors := []string{sensor.Mac}
+				group.Sensors = sensors
+			}
+			eventGr := make(map[string]interface{})
+			eventGr["group"] = group
+			api.EventsToBackend <- eventGr
+		}
 	}
 	event := make(map[string]interface{})
 	event["sensor"] = sensor

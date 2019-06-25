@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/energieip/common-components-go/pkg/dblind"
+	gm "github.com/energieip/common-components-go/pkg/dgroup"
 	"github.com/energieip/common-components-go/pkg/duser"
 
 	"github.com/energieip/srv200-coreservice-go/internal/core"
@@ -81,8 +82,18 @@ func (api *API) setBlindConfig(w http.ResponseWriter, req *http.Request) {
 		}
 		gr, _ := database.GetGroupConfig(api.db, *cfg.Group)
 		if gr == nil {
-			api.sendError(w, APIErrorDeviceNotFound, "Group "+strconv.Itoa(*cfg.Group)+" not found", http.StatusInternalServerError)
-			return
+			name := "Group " + strconv.Itoa(*cfg.Group)
+			group := gm.GroupConfig{
+				Group:        *cfg.Group,
+				FriendlyName: &name,
+			}
+			if cfg.Mac != "" {
+				blinds := []string{cfg.Mac}
+				group.Blinds = blinds
+			}
+			eventGr := make(map[string]interface{})
+			eventGr["group"] = group
+			api.EventsToBackend <- eventGr
 		}
 	}
 	event := make(map[string]interface{})

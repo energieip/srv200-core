@@ -160,6 +160,9 @@ func (s *CoreService) sendSaveGroupCfg(cfg gm.GroupConfig) {
 }
 
 func (s *CoreService) updateLedGroup(mac string, grID int) {
+	if mac == "" {
+		return
+	}
 	oldLed, _ := database.GetLedConfig(s.db, mac)
 	if oldLed == nil {
 		return
@@ -218,6 +221,9 @@ func (s *CoreService) updateLedGroup(mac string, grID int) {
 }
 
 func (s *CoreService) updateSensorGroup(mac string, grID int) {
+	if mac == "" {
+		return
+	}
 	oldSensor, _ := database.GetSensorConfig(s.db, mac)
 	if oldSensor == nil {
 		return
@@ -267,6 +273,9 @@ func (s *CoreService) updateSensorGroup(mac string, grID int) {
 }
 
 func (s *CoreService) updateBlindGroup(mac string, grID int) {
+	if mac == "" {
+		return
+	}
 	oldBlind, _ := database.GetBlindConfig(s.db, mac)
 	if oldBlind == nil {
 		return
@@ -370,7 +379,7 @@ func (s *CoreService) updateGroupCfg(config interface{}) {
 		new, _ := database.GetGroupConfig(s.db, cfg.Group)
 		seen := make(map[string]bool)
 		for _, mac := range new.Leds {
-			if !inArray(mac, old.Leds) {
+			if mac != "" && !inArray(mac, old.Leds) {
 				s.updateLedGroup(mac, cfg.Group)
 			}
 			seen[mac] = true
@@ -384,7 +393,7 @@ func (s *CoreService) updateGroupCfg(config interface{}) {
 
 		seen = make(map[string]bool)
 		for _, sensor := range new.Sensors {
-			if !inArray(sensor, old.Sensors) {
+			if sensor != "" && !inArray(sensor, old.Sensors) {
 				s.updateSensorGroup(sensor, cfg.Group)
 			}
 			seen[sensor] = true
@@ -399,7 +408,7 @@ func (s *CoreService) updateGroupCfg(config interface{}) {
 		seen = nil
 		seen = make(map[string]bool)
 		for _, mac := range new.Blinds {
-			if !inArray(mac, old.Blinds) {
+			if mac != "" && !inArray(mac, old.Blinds) {
 				s.updateBlindGroup(mac, cfg.Group)
 			}
 			seen[mac] = true

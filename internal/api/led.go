@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	gm "github.com/energieip/common-components-go/pkg/dgroup"
 	dl "github.com/energieip/common-components-go/pkg/dled"
 	"github.com/energieip/common-components-go/pkg/duser"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
@@ -82,8 +83,18 @@ func (api *API) setLedConfig(w http.ResponseWriter, req *http.Request) {
 		}
 		gr, _ := database.GetGroupConfig(api.db, *led.Group)
 		if gr == nil {
-			api.sendError(w, APIErrorDeviceNotFound, "Group "+strconv.Itoa(*led.Group)+" not found", http.StatusInternalServerError)
-			return
+			name := "Group " + strconv.Itoa(*led.Group)
+			group := gm.GroupConfig{
+				Group:        *led.Group,
+				FriendlyName: &name,
+			}
+			if led.Mac != "" {
+				leds := []string{led.Mac}
+				group.Leds = leds
+			}
+			eventGr := make(map[string]interface{})
+			eventGr["group"] = group
+			api.EventsToBackend <- eventGr
 		}
 	}
 	event := make(map[string]interface{})

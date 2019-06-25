@@ -89,6 +89,20 @@ func UpdateLedConfig(db Database, config dl.LedConf) error {
 	return db.UpdateRecord(pconst.DbConfig, pconst.TbLeds, dbID, &new)
 }
 
+//UpdateLedLabelConfig update led config in database
+func UpdateLedLabelConfig(db Database, config dl.LedConf) error {
+	if config.Label == nil {
+		return NewError("Unknow Label")
+	}
+	setup, dbID := GetLedLabelConfig(db, *config.Label)
+	if setup == nil || dbID == "" {
+		return NewError("Device " + *config.Label + "not found")
+	}
+
+	new := dl.UpdateConfig(config, *setup)
+	return db.UpdateRecord(pconst.DbConfig, pconst.TbLeds, dbID, &new)
+}
+
 //UpdateLedSetup update led setup in database
 func UpdateLedSetup(db Database, config dl.LedSetup) error {
 	setup, dbID := GetLedConfig(db, config.Mac)

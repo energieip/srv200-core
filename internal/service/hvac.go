@@ -59,18 +59,40 @@ func (s *CoreService) updateHvacCfg(config interface{}) {
 		return
 	}
 
-	oldHvac, _ := database.GetHvacConfig(s.db, cfg.Mac)
-	if oldHvac == nil {
-		rlog.Error("Cannot find config for " + cfg.Mac)
-		return
-	}
+	var oldHvac *dhvac.HvacSetup
+	var hvac *dhvac.HvacSetup
+	if cfg.Mac != "" {
+		oldHvac, _ = database.GetHvacConfig(s.db, cfg.Mac)
+		if oldHvac == nil {
+			rlog.Error("Cannot find config for " + cfg.Mac)
+			return
+		}
 
-	database.UpdateHvacConfig(s.db, *cfg)
-	//Get corresponding switchMac
-	hvac, _ := database.GetHvacConfig(s.db, cfg.Mac)
-	if hvac == nil {
-		rlog.Error("Cannot find config for " + cfg.Mac)
-		return
+		database.UpdateHvacConfig(s.db, *cfg)
+		//Get corresponding switchMac
+		hvac, _ = database.GetHvacConfig(s.db, cfg.Mac)
+		if hvac == nil {
+			rlog.Error("Cannot find config for " + cfg.Mac)
+			return
+		}
+	} else {
+		if cfg.Label == nil {
+			rlog.Error("Cannot find config for " + cfg.Mac)
+			return
+		}
+		oldHvac, _ = database.GetHvacLabelConfig(s.db, *cfg.Label)
+		if oldHvac == nil {
+			rlog.Error("Cannot find config for " + *cfg.Label)
+			return
+		}
+
+		database.UpdateHvacLabelConfig(s.db, *cfg)
+		//Get corresponding switchMac
+		hvac, _ = database.GetHvacLabelConfig(s.db, *cfg.Label)
+		if hvac == nil {
+			rlog.Error("Cannot find config for " + *cfg.Label)
+			return
+		}
 	}
 	s.updateGroupHvac(*oldHvac, *hvac)
 
