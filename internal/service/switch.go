@@ -87,6 +87,32 @@ func (s *CoreService) registerSwitchStatus(switchStatus sd.SwitchStatus) {
 	oldLeds := database.GetLedSwitchStatus(s.db, switchStatus.Mac)
 	for mac, led := range switchStatus.Leds {
 		database.SaveLedStatus(s.db, led)
+		oldCfg, _ := database.GetLedConfig(s.db, led.Mac)
+		if oldCfg != nil {
+			oldCfg.SwitchMac = led.SwitchMac
+			database.SaveLedConfig(s.db, *oldCfg)
+			if oldCfg.Group != nil {
+				gr, _ := database.GetGroupConfig(s.db, *oldCfg.Group)
+				if gr != nil {
+					leds := []string{}
+					found := false
+					for _, v := range gr.Leds {
+						if v == led.Mac {
+							found = true
+							break
+						} else {
+							leds = append(leds, v)
+						}
+					}
+					if !found {
+						leds = append(leds, led.Mac)
+						gr.Leds = leds
+						database.SaveGroupConfig(s.db, *gr)
+						s.sendGroupConfigUpdate(*gr)
+					}
+				}
+			}
+		}
 		_, ok := oldLeds[mac]
 		if ok {
 			delete(oldLeds, mac)
@@ -100,6 +126,32 @@ func (s *CoreService) registerSwitchStatus(switchStatus sd.SwitchStatus) {
 	oldSensors := database.GetSensorSwitchStatus(s.db, switchStatus.Mac)
 	for mac, sensor := range switchStatus.Sensors {
 		database.SaveSensorStatus(s.db, sensor)
+		oldCfg, _ := database.GetSensorConfig(s.db, sensor.Mac)
+		if oldCfg != nil {
+			oldCfg.SwitchMac = sensor.SwitchMac
+			database.SaveSensorConfig(s.db, *oldCfg)
+			if oldCfg.Group != nil {
+				gr, _ := database.GetGroupConfig(s.db, *oldCfg.Group)
+				if gr != nil {
+					sensors := []string{}
+					found := false
+					for _, v := range gr.Sensors {
+						if v == sensor.Mac {
+							found = true
+							break
+						} else {
+							sensors = append(sensors, v)
+						}
+					}
+					if !found {
+						sensors = append(sensors, sensor.Mac)
+						gr.Sensors = sensors
+						database.SaveGroupConfig(s.db, *gr)
+						s.sendGroupConfigUpdate(*gr)
+					}
+				}
+			}
+		}
 		_, ok := oldSensors[mac]
 		if ok {
 			delete(oldSensors, mac)
@@ -113,6 +165,32 @@ func (s *CoreService) registerSwitchStatus(switchStatus sd.SwitchStatus) {
 	oldBlinds := database.GetBlindSwitchStatus(s.db, switchStatus.Mac)
 	for mac, blind := range switchStatus.Blinds {
 		database.SaveBlindStatus(s.db, blind)
+		oldCfg, _ := database.GetBlindConfig(s.db, blind.Mac)
+		if oldCfg != nil {
+			oldCfg.SwitchMac = blind.SwitchMac
+			database.SaveBlindConfig(s.db, *oldCfg)
+			if oldCfg.Group != nil {
+				gr, _ := database.GetGroupConfig(s.db, *oldCfg.Group)
+				if gr != nil {
+					blinds := []string{}
+					found := false
+					for _, v := range gr.Blinds {
+						if v == blind.Mac {
+							found = true
+							break
+						} else {
+							blinds = append(blinds, v)
+						}
+					}
+					if !found {
+						blinds = append(blinds, blind.Mac)
+						gr.Blinds = blinds
+						database.SaveGroupConfig(s.db, *gr)
+						s.sendGroupConfigUpdate(*gr)
+					}
+				}
+			}
+		}
 		_, ok := oldBlinds[mac]
 		if ok {
 			delete(oldBlinds, mac)
@@ -126,6 +204,32 @@ func (s *CoreService) registerSwitchStatus(switchStatus sd.SwitchStatus) {
 	oldHvacs := database.GetHvacSwitchStatus(s.db, switchStatus.Mac)
 	for mac, hvac := range switchStatus.Hvacs {
 		database.SaveHvacStatus(s.db, hvac)
+		oldCfg, _ := database.GetHvacConfig(s.db, hvac.Mac)
+		if oldCfg != nil {
+			oldCfg.SwitchMac = hvac.SwitchMac
+			database.SaveHvacConfig(s.db, *oldCfg)
+			if oldCfg.Group != nil {
+				gr, _ := database.GetGroupConfig(s.db, *oldCfg.Group)
+				if gr != nil {
+					hvacs := []string{}
+					found := false
+					for _, v := range gr.Hvacs {
+						if v == hvac.Mac {
+							found = true
+							break
+						} else {
+							hvacs = append(hvacs, v)
+						}
+					}
+					if !found {
+						hvacs = append(hvacs, hvac.Mac)
+						gr.Hvacs = hvacs
+						database.SaveGroupConfig(s.db, *gr)
+						s.sendGroupConfigUpdate(*gr)
+					}
+				}
+			}
+		}
 		_, ok := oldHvacs[mac]
 		if ok {
 			delete(oldHvacs, mac)

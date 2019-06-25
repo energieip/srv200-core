@@ -435,6 +435,18 @@ func (s *CoreService) updateGroupCfg(config interface{}) {
 	}
 }
 
+func (s *CoreService) sendGroupConfigUpdate(cfg gm.GroupConfig) {
+	for sw := range database.GetGroupSwitchs(s.db, cfg.Group) {
+		url := "/write/switch/" + sw + "/update/settings"
+		switchSetup := sd.SwitchConfig{}
+		switchSetup.Mac = sw
+		switchSetup.Groups = make(map[int]gm.GroupConfig)
+		switchSetup.Groups[cfg.Group] = cfg
+		dump, _ := switchSetup.ToJSON()
+		s.server.SendCommand(url, dump)
+	}
+}
+
 func (s *CoreService) sendGroupCmd(cmd interface{}) {
 	cmdGr, _ := core.ToGroupCmd(cmd)
 	if cmdGr == nil {
