@@ -39,7 +39,7 @@ func (api *API) installDriver(w http.ResponseWriter, req *http.Request) {
 
 	if savedProject.ModelName != nil {
 		refModel := tools.Model2Type(*savedProject.ModelName)
-		dType := tools.Model2Type(driver.ModelName)
+		dType := driver.Device
 		if refModel != dType {
 			api.sendError(w, APIErrorDeviceNotFound, "Unexpected Driver, expected "+refModel, http.StatusInternalServerError)
 			return

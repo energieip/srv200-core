@@ -35,7 +35,7 @@ func (s *CoreService) installDriver(dr interface{}) {
 	//update project
 	database.SaveProject(s.db, *proj)
 
-	dType := *proj.ModelName
+	dType := driver.Device
 	switch dType {
 	case pconst.LED:
 		elt, _ := database.GetLedLabelConfig(s.db, proj.Label)
