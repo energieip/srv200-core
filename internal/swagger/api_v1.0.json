@@ -4199,7 +4199,9 @@
                 "SENSOR",
                 "BLIND",
                 "HVAC",
-                "SWITCH"
+                "SWITCH",
+                "WAGO",
+                "FRAME"
               ],
               "example": "LED",
               "description": "Device Type"
@@ -5586,7 +5588,9 @@
             "sensor",
             "blind",
             "hvac",
-            "switch"
+            "switch",
+            "wago",
+            "frame"
           ],
           "type": "string",
           "description": "device category LED|Sensor|etc.",
