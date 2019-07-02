@@ -8,6 +8,7 @@ import (
 	"github.com/energieip/common-components-go/pkg/dhvac"
 	dl "github.com/energieip/common-components-go/pkg/dled"
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
+	"github.com/energieip/common-components-go/pkg/dwago"
 )
 
 //MapInfo
@@ -18,6 +19,8 @@ type MapInfo struct {
 	Hvacs   map[string]dhvac.HvacSetup `json:"hvacs"`
 	Blinds  map[string]db.BlindSetup   `json:"blinds"`
 	Models  map[string]Model           `json:"models"`
+	Wagos   map[string]dwago.WagoSetup `json:"wagos"`
+	Frames  map[string]Frame           `json:"frames"`
 	Project map[string]Project         `json:"projects"`
 	Switchs map[string]SwitchConfig    `json:"switchs"`
 }
@@ -28,7 +31,7 @@ func (p MapInfo) ToJSON() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return string(inrec[:]), err
+	return string(inrec), err
 }
 
 //ToMapInfo convert map interface to Project object

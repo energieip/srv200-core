@@ -28,6 +28,9 @@ func SaveProject(db Database, cfg core.Project) error {
 	if cfg.ModbusID != nil {
 		proj.ModbusID = cfg.ModbusID
 	}
+	if cfg.SlaveID != nil {
+		proj.SlaveID = cfg.SlaveID
+	}
 	err := db.UpdateRecord(pconst.DbConfig, pconst.TbProjects, dbID, proj)
 	return err
 

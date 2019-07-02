@@ -8,6 +8,7 @@ import (
 	dl "github.com/energieip/common-components-go/pkg/dled"
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
 	"github.com/energieip/common-components-go/pkg/duser"
+	"github.com/energieip/common-components-go/pkg/dwago"
 	"github.com/energieip/common-components-go/pkg/pconst"
 	pkg "github.com/energieip/common-components-go/pkg/service"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
@@ -65,6 +66,8 @@ func ConnectDatabase(ip, port string) (*Database, error) {
 			tableCfg[pconst.TbProjects] = core.Project{}
 			tableCfg[pconst.TbBlinds] = dblind.BlindSetup{}
 			tableCfg[pconst.TbAccess] = duser.UserAccess{}
+			tableCfg[pconst.TbFrames] = core.Frame{}
+			tableCfg[pconst.TbWagos] = dwago.WagoSetup{}
 		} else {
 			tableCfg[pconst.TbLeds] = dl.Led{}
 			tableCfg[pconst.TbSensors] = ds.Sensor{}
@@ -73,6 +76,7 @@ func ConnectDatabase(ip, port string) (*Database, error) {
 			tableCfg[pconst.TbSwitchs] = core.SwitchDump{}
 			tableCfg[pconst.TbServices] = pkg.ServiceStatus{}
 			tableCfg[pconst.TbBlinds] = dblind.Blind{}
+			tableCfg[pconst.TbWagos] = dwago.Wago{}
 		}
 		for tableName, objs := range tableCfg {
 			err = db.CreateTable(dbName, tableName, &objs)

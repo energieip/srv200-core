@@ -17,7 +17,7 @@ func (m Model) ToJSON() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return string(inrec[:]), err
+	return string(inrec), err
 }
 
 //ToModel convert map interface to Model object

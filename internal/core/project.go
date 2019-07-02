@@ -18,7 +18,7 @@ func (p Project) ToJSON() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return string(inrec[:]), err
+	return string(inrec), err
 }
 
 //ToProject convert map interface to Project object

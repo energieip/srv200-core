@@ -36,7 +36,7 @@ func (m BlindCmd) ToJSON() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return string(inrec[:]), err
+	return string(inrec), err
 }
 
 //ToBlindCmd convert map interface to ToBlindCmd object
@@ -56,7 +56,7 @@ func (m HvacCmd) ToJSON() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return string(inrec[:]), err
+	return string(inrec), err
 }
 
 //ToHvacCmd convert map interface to HvacCmd object
@@ -76,7 +76,7 @@ func (m LedCmd) ToJSON() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return string(inrec[:]), err
+	return string(inrec), err
 }
 
 //ToLedCmd convert map interface to ToLedCmd object
@@ -96,7 +96,7 @@ func (m GroupCmd) ToJSON() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return string(inrec[:]), err
+	return string(inrec), err
 }
 
 //ToGroupCmd convert map interface to ToGroupCmd object

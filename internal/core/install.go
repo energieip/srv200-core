@@ -15,7 +15,7 @@ func (p InstallDriver) ToJSON() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return string(inrec[:]), err
+	return string(inrec), err
 }
 
 //ToInstallDriver convert map interface to InstallDriver object
