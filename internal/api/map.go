@@ -61,6 +61,7 @@ func (api *API) uploadHandler(w http.ResponseWriter, r *http.Request) {
 				if err != nil {
 					rlog.Error("cmd.Run() failed with status " + err.Error() + " : " + string(out))
 					os.Remove(tempFile.Name())
+					*api.uploadValue = "failure"
 					return
 				}
 				mapInfo := core.MapInfo{}
@@ -68,6 +69,7 @@ func (api *API) uploadHandler(w http.ResponseWriter, r *http.Request) {
 				if err != nil {
 					rlog.Error("Cannot parse command ", err.Error())
 					os.Remove(tempFile.Name())
+					*api.uploadValue = "failure"
 					return
 				}
 				rlog.Info("Rename " + tempFile.Name() + " into " + newFilename)
@@ -75,12 +77,14 @@ func (api *API) uploadHandler(w http.ResponseWriter, r *http.Request) {
 				if err != nil {
 					rlog.Error("Cannot parse command ", err.Error())
 					os.Remove(tempFile.Name())
+					*api.uploadValue = "failure"
 					return
 				}
 				cmd = exec.Command("ifc2gltf.py", "-i", newFilename)
 				out, err = cmd.CombinedOutput()
 				if err != nil {
 					rlog.Error("ifc2gltf.py failed with status " + err.Error() + " : " + string(out))
+					*api.uploadValue = "failure"
 					return
 				}
 
