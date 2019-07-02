@@ -9,6 +9,7 @@ type Project struct {
 	Mac       *string `json:"mac,omitempty"`      //device Mac address (short version)
 	FullMac   *string `json:"fullMac,omitempty"`  //device Full Mac address
 	ModbusID  *int    `json:"modbusID,omitempty"` //modbusID
+	SlaveID   *int    `json:"slaveID,omitempty"`  //slavedID
 }
 
 // ToJSON dump Project struct

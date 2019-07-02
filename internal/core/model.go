@@ -4,10 +4,11 @@ import "encoding/json"
 
 //Model represent device object in the building map
 type Model struct {
-	Name       string `json:"name"`
-	DeviceType string `json:"deviceType"`
-	Vendor     string `json:"vendor"`
-	URL        string `json:"url"`
+	Name           string `json:"name"`
+	DeviceType     string `json:"deviceType"`
+	Vendor         string `json:"vendor"`
+	URL            string `json:"url"`
+	ProductionYear string `json:"productionYear"`
 }
 
 // ToJSON dump Model struct

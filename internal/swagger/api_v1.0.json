@@ -4255,6 +4255,11 @@
               "type": "integer",
               "description": "Modbus unique ID",
               "format": "int32"
+            },
+            "slaveID": {
+              "type": "integer",
+              "description": "Slave unique ID",
+              "format": "int32"
             }
           }
         },
@@ -4288,9 +4293,18 @@
               "type": "string",
               "description": "weblink to the technical description"
             },
+            "productionYear": {
+              "type": "string",
+              "description": "production Year"
+            },
             "modbusID": {
               "type": "integer",
               "description": "Modbus unique ID",
+              "format": "int32"
+            },
+            "slaveID": {
+              "type": "integer",
+              "description": "Slave unique ID",
               "format": "int32"
             }
           }
