@@ -16,6 +16,118 @@ ifc_types = ['IfcProduct']
 
 filters = ["IfcBuildingElementProxy", "IfcFurnishingElement"]
 
+
+def isDriver(deviceType):
+    if deviceType in ["led", "blind", "hvac", "sensor"]:
+        return True
+    return False
+
+def getDeviceType(driver):
+    return driver['properties'].get("Type", "").lower()
+
+def buildDriver(driver):
+    res = {}
+    deviceType = getDeviceType(driver)
+    if not isDriver(deviceType):
+        return res
+    label = driver["Label"]
+    group = driver['properties'].get("Group", 0)
+    friend = driver['properties'].get("FriendlyName", label)
+    freq = driver['properties'].get("DumpFrequency", 1000)
+    modbusID = driver['properties'].get("ModbusID", 0)
+
+    res = {
+        "label": label,
+        "group": group,
+        "friendlyName": friend,
+        "dumpFrequency": freq,
+        "modbusID": modbusID
+    }
+
+    if deviceType != "hvac":
+        res["isBleEnabled"] = driver['properties'].get("ActivateBluetooth", False)
+        res["bleMode"] = driver['properties'].get("BluetoothMode", "service")
+        res["iBeaconUUID"] = driver['properties'].get("IBeaconUUID", "")
+        res["iBeaconMajor"] = driver['properties'].get("IBeaconMajor", 0)
+        res["iBeaconMinor"] = driver['properties'].get("IBeaconMinor", 0)
+        res["iBeaconTxPower"] = driver['properties'].get("IBeaconTxPower", 0)
+
+    if deviceType == "led":
+        res.update(buildLed(driver))
+    elif deviceType == "sensor":
+        res.update(buildSensor(driver))
+    return res
+
+def buildLed(driver):
+    deviceType = getDeviceType(driver)
+    if deviceType != "led":
+        return {}
+    return {
+        "pMax": driver['properties'].get("Power", 0),
+        "defaultSetpoint": driver['properties'].get("DefaultSetpoint", 5),
+        "firstDay": driver['properties'].get("FirstDay", False)
+    }
+
+def buildSensor(driver):
+    res = {}
+    deviceType = getDeviceType(driver)
+    if deviceType != "sensor":
+        return res
+    return {
+        "thresoldPresence": driver['properties'].get("ThresoldPresence", 10)
+    }
+
+def buildSwitch(driver):
+    res = {}
+    deviceType = getDeviceType(driver)
+    if deviceType != "switch":
+        return res
+    label = driver["Label"]
+    friend = driver['properties'].get("FriendlyName", label)
+    freq = driver['properties'].get("DumpFrequency", 1000)
+    modbusID = driver['properties'].get("ModbusID", 0)
+    cluster = driver['properties'].get("Cluster", 0)
+    res =  {
+        "label": label,
+        "friendlyName": friend,
+        "dumpFrequency": freq,
+        "modbusID": modbusID,
+        "cluster": cluster
+    }
+    return res
+
+def buildWago(driver):
+    res = {}
+    deviceType = getDeviceType(driver)
+    if deviceType != "wago":
+        return res
+    label = driver["Label"]
+    friend = driver['properties'].get("FriendlyName", label)
+    slaveID = driver['properties'].get("SlaveID", 0)
+    res = {
+        "label": label,
+        "friendlyName": friend,
+        "slaveID": slaveID
+    }
+    return res
+
+def buildFrame(driver):
+    res = {}
+    deviceType = getDeviceType(driver)
+    if deviceType != "frame":
+        return res
+    label = driver["Label"]
+    friend = driver['properties'].get("FriendlyName", label)
+    cluster = driver['properties'].get("Cluster", 0)
+    modbusID = driver['properties'].get("ModbusID", 0)
+    res = {
+        "label": label,
+        "friendlyName": friend,
+        "modbusID": modbusID,
+        "cluster": cluster
+    }
+    return res
+
 def parseIfc(filepath):
     #Define lists for storing unique property names and unique type properties name
     prop_keys = []
@@ -80,80 +192,61 @@ def parseIfc(filepath):
 
     try:
         for instance in instances:
-            infos = instance["Label"].split("_", 1)
-            if len(infos) < 2:
+            label = instance["Label"]
+            if "mobilier" in label.lower():
                 continue
-            product = infos[0].lower()
-            label = infos[1]
-            if "mobilier" in product:
+            deviceType = instance['properties'].get("Type", "").lower()
+            if deviceType == "":
                 continue
-            modelName = instance['properties'].get("SKU (BO_prodsku)", product)
-            modbusID = instance['properties'].get("modbusID", 0)
+            modelName = instance['properties'].get("ModelLabel", deviceType)
             group = instance['properties'].get("Group", 0)
 
             projects[label] = {
                 "label": label,
-                "modbusID": modbusID,
                 "modelName": modelName
             }
 
             if group not in groups:
                 groups[group] = {
-                    "group": group
+                    "group": group,
+                    "modbusID": group
                 }
-
-            deviceType = ""
-            if "led" in product:
-                deviceType = "led"
-            elif "bld" in product:
-                deviceType = "blind"
-            elif "mca" in product:
-                deviceType = "sensor"
-            elif "hvac" in product:
-                deviceType = "hvac"
-            elif "swh" in product or "switch" in product:
-                deviceType = "switch"
-            elif "fra" in product:
-                deviceType = "frame"
 
             if deviceType not in drivers:
                 drivers[deviceType] = {}
 
-            if deviceType not in ["switch", "frame"]:
-                drivers[deviceType][label] = {
-                    "label": label,
-                    "group": group,
-                }
+            if deviceType not in ["switch", "frame", "wago"]:
+                modbusID = instance['properties'].get("ModbusID", 0)
+                projects[label]["modbusID"] = modbusID
+                drivers[deviceType][label] = buildDriver(instance)
+            elif deviceType == "switch":
+                modbusID = instance['properties'].get("ModbusID", 0)
+                projects[label]["modbusID"] = modbusID
+                drivers[deviceType][label] = buildSwitch(instance)
+            elif deviceType == "wago":
+                drivers[deviceType][label] = buildWago(instance)
+                slaveID = instance['properties'].get("SlaveID", 0)
+                projects[label]["slaveID"] = slaveID
+            elif deviceType == "frame":
+                modbusID = instance['properties'].get("ModbusID", 0)
+                projects[label]["modbusID"] = modbusID
+                drivers[deviceType][label] = buildFrame(instance)
             else:
-                cluster = instance['properties'].get("Cluster", 0)
                 drivers[deviceType][label] = {
-                    "label": label,
-                    "cluster": cluster
+                    "label": label
                 }
-
-            if deviceType == "led":
-                drivers[deviceType][label]["pMax"] = instance['properties'].get("Power", 0)
 
             if modelName in models:
                 continue
-            
-            vendor = ""
-            if "Manufacturer" in instance['properties']:
-                vendor = instance['properties']["Manufacturer"]
-            elif "ManufacturName (BO_Manufac)" in instance['properties']:
-                vendor = instance['properties']["ManufacturName (BO_Manufac)"]
-            url = ""
-            if "TechnicalDescription (BO_techcert)" in instance['properties']:
-                url = instance['properties']["TechnicalDescription (BO_techcert)"]
-            elif "ProductUrl (BO_producturl)" in instance['properties']:
-                url = instance['properties']["ProductUrl (BO_producturl)"]
 
             models[modelName] = {
-                "vendor": vendor,
+                "vendor": instance['properties'].get("Manufacturer", ""),
                 "name": modelName,
-                "url": url,
+                "url": instance['properties'].get("ModelReference", ""),
+                "productionYear": instance['properties'].get("ProductionYear", ""),
                 "deviceType": deviceType
             }
+
     except Exception as exc:
         print("exc", exc)
         return 1
@@ -164,8 +257,10 @@ def parseIfc(filepath):
         "blinds": drivers.get("blind", {}),
         "sensors": drivers.get("sensor", {}),
         "hvacs": drivers.get("hvac", {}),
+        "frames": drivers.get("frame", {}),
         "models": models,
         "switchs": drivers.get("switch", {}),
+        "wagos": drivers.get("wago", {}),
         "projects": projects
     }
 
