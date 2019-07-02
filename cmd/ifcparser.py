@@ -104,10 +104,12 @@ def buildWago(driver):
     label = driver["Label"]
     friend = driver['properties'].get("FriendlyName", label)
     slaveID = driver['properties'].get("SlaveID", 0)
+    cluster = driver['properties'].get("Cluster", 0)
     res = {
         "label": label,
         "friendlyName": friend,
-        "slaveID": slaveID
+        "slaveID": slaveID,
+        "cluster": cluster
     }
     return res
 
