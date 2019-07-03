@@ -685,6 +685,182 @@
           ]
         }
       },
+      "/setup/wago/{mac}": {
+        "get": {
+          "tags": [
+            "setup"
+          ],
+          "summary": "getWagoSetup",
+          "description": "Return Wago Setup configuration",
+          "operationId": "GetWagoSetup",
+          "parameters": [
+            {
+              "name": "mac",
+              "in": "path",
+              "description": "Wago Mac address",
+              "required": true,
+              "style": "simple",
+              "explode": false,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "sucessful operation",
+              "headers": {},
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/WagoSetup"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Unauthorized Access",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "default": {
+              "description": "unexpected error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "deprecated": false,
+          "security": [
+            {
+              "Authorization": []
+            }
+          ]
+        },
+        "delete": {
+          "tags": [
+            "setup"
+          ],
+          "summary": "removeWagoSetup",
+          "description": "Remove Wago Setup configuration. It means the driver Wago will be blacklisted",
+          "operationId": "RemoveWagoSetup",
+          "parameters": [
+            {
+              "name": "mac",
+              "in": "path",
+              "description": "Wago Mac address",
+              "required": true,
+              "style": "simple",
+              "explode": false,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "sucessful operation",
+              "headers": {}
+            },
+            "401": {
+              "description": "Unauthorized Access",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "default": {
+              "description": "unexpected error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "deprecated": false,
+          "security": [
+            {
+              "Authorization": []
+            }
+          ]
+        }
+      },
+      "/setup/wago": {
+        "post": {
+          "tags": [
+            "setup"
+          ],
+          "summary": "setWagoSetup",
+          "description": "Wago configuration",
+          "operationId": "SetWagoSetup",
+          "parameters": [],
+          "requestBody": {
+            "description": "Wago config",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WagoSetup"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "sucessful operation",
+              "headers": {},
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/WagoSetup"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Unauthorized Access",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "default": {
+              "description": "unexpected error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "deprecated": false,
+          "security": [
+            {
+              "Authorization": []
+            }
+          ]
+        }
+      },
       "/setup/led/{mac}": {
         "get": {
           "tags": [
@@ -1545,6 +1721,60 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HvacConfig"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "sucessful operation, Configuration read from database",
+              "headers": {}
+            },
+            "401": {
+              "description": "Unauthorized Access",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "default": {
+              "description": "unexpected error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "deprecated": false,
+          "security": [
+            {
+              "Authorization": []
+            }
+          ]
+        }
+      },
+      "/config/wago": {
+        "post": {
+          "tags": [
+            "config"
+          ],
+          "summary": "setWagoConfig",
+          "description": "Change Wago runtime configuration",
+          "operationId": "SetWagoConfig",
+          "parameters": [],
+          "requestBody": {
+            "description": "Wago runtime config",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WagoConfig"
                 }
               }
             },
@@ -3853,6 +4083,32 @@
             }
           }
         },
+        "WagoSetup": {
+          "title": "WagoSetup",
+          "required": [
+            "mac"
+          ],
+          "type": "object",
+          "properties": {
+            "mac": {
+              "type": "string",
+              "description": "Wago mac address"
+            },
+            "cluster": {
+              "type": "integer",
+              "description": "Associate cluster",
+              "format": "int32"
+            },
+            "friendlyName": {
+              "type": "string",
+              "description": "Wago FriendlyName"
+            },
+            "label": {
+              "type": "string",
+              "description": "IFC cable label"
+            }
+          }
+        },
         "HvacSetup": {
           "title": "HvacSetup",
           "required": [
@@ -3877,6 +4133,36 @@
               "type": "integer",
               "description": "Dump frequency by default: 1s",
               "format": "int32"
+            },
+            "label": {
+              "type": "string",
+              "description": "IFC cable label"
+            }
+          }
+        },
+        "WagoConfig": {
+          "title": "WagoConfig",
+          "required": [
+            "mac"
+          ],
+          "type": "object",
+          "properties": {
+            "mac": {
+              "type": "string",
+              "description": "Wago mac address"
+            },
+            "cluster": {
+              "type": "integer",
+              "description": "Associate cluster",
+              "format": "int32"
+            },
+            "friendlyName": {
+              "type": "string",
+              "description": "Wago FriendlyName"
+            },
+            "isConfigured": {
+              "type": "boolean",
+              "description": "Is the Wago configured"
             },
             "label": {
               "type": "string",
@@ -4878,6 +5164,13 @@
               },
               "description": "List of blinds status"
             },
+            "wagos": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/WagoStatus"
+              },
+              "description": "List of wago status"
+            },
             "hvacs": {
               "type": "array",
               "items": {
@@ -5010,6 +5303,13 @@
               },
               "description": "List of hvacs dump"
             },
+            "wagos": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/WagoDump"
+              },
+              "description": "List of wagos dump"
+            },
             "switchs": {
               "type": "array",
               "items": {
@@ -5038,6 +5338,21 @@
             },
             "config": {
               "$ref": "#/components/schemas/LedSetup"
+            }
+          }
+        },
+        "WagoDump": {
+          "title": "WagoDump",
+          "type": "object",
+          "properties": {
+            "status": {
+              "$ref": "#/components/schemas/WagoStatus"
+            },
+            "ifc": {
+              "$ref": "#/components/schemas/IfcInfo"
+            },
+            "config": {
+              "$ref": "#/components/schemas/WagoSetup"
             }
           }
         },
@@ -5162,6 +5477,53 @@
             "lastSystemUpgradeDate": {
               "type": "string",
               "description": "Last system upgrade date"
+            }
+          }
+        },
+        "WagoStatus": {
+          "title": "WagoStatus",
+          "required": [
+            "mac"
+          ],
+          "type": "object",
+          "properties": {
+            "mac": {
+              "type": "string",
+              "description": "Wago mac address"
+            },
+            "ip": {
+              "type": "string",
+              "description": "Wago IP address"
+            },
+            "cluster": {
+              "type": "integer",
+              "description": "Associate cluster",
+              "format": "int32"
+            },
+            "protocol": {
+              "type": "string",
+              "description": "Hvac communication protocol"
+            },
+            "isConfigured": {
+              "type": "boolean",
+              "description": "Is the hvac configured"
+            },
+            "softwareVersion": {
+              "type": "number",
+              "description": "hvac Software version"
+            },
+            "error": {
+              "type": "integer",
+              "description": "Error code value: 0 means no error",
+              "format": "int32"
+            },
+            "friendlyName": {
+              "type": "string",
+              "description": "Hvac FriendlyName"
+            },
+            "label": {
+              "type": "string",
+              "description": "IFC cable label"
             }
           }
         },

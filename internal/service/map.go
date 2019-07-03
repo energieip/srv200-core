@@ -36,6 +36,10 @@ func (s *CoreService) updateMapInfo(config interface{}) {
 		s.updateBlindLabelSetup(dr)
 	}
 
+	for _, dr := range cfg.Wagos {
+		s.updateWagoLabelSetup(dr)
+	}
+
 	for _, proj := range cfg.Project {
 		database.SaveProject(s.db, proj)
 	}

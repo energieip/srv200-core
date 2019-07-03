@@ -3,6 +3,8 @@ package api
 import (
 	"sync"
 
+	"github.com/energieip/common-components-go/pkg/dwago"
+
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/energieip/common-components-go/pkg/dblind"
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
@@ -34,6 +36,7 @@ const (
 	FilterTypeLed    = "led"
 	FilterTypeBlind  = "blind"
 	FilterTypeHvac   = "hvac"
+	FilterTypeWago   = "wago"
 )
 
 //APIError Message error code
@@ -81,8 +84,9 @@ type Credentials struct {
 type Status struct {
 	Leds    []dl.Led       `json:"leds"`
 	Sensors []ds.Sensor    `json:"sensors"`
-	Blind   []dblind.Blind `json:"blinds"`
-	Hvac    []dhvac.Hvac   `json:"hvacs"`
+	Blinds  []dblind.Blind `json:"blinds"`
+	Hvacs   []dhvac.Hvac   `json:"hvacs"`
+	Wagos   []dwago.Wago   `json:"wagos"`
 }
 
 //DumpBlind
@@ -120,6 +124,19 @@ type DumpSwitch struct {
 	Config core.SwitchConfig `json:"config"`
 }
 
+//DumpFrame
+type DumpFrame struct {
+	Ifc    core.IfcInfo `json:"ifc"`
+	Status core.Frame   `json:"status"`
+}
+
+//DumpWago
+type DumpWago struct {
+	Ifc    core.IfcInfo    `json:"ifc"`
+	Status dwago.Wago      `json:"status"`
+	Config dwago.WagoSetup `json:"config"`
+}
+
 //DumpSwitch
 type DumpGroup struct {
 	Status gm.GroupStatus `json:"status"`
@@ -132,8 +149,10 @@ type Dump struct {
 	Sensors []DumpSensor `json:"sensors"`
 	Blinds  []DumpBlind  `json:"blinds"`
 	Hvacs   []DumpHvac   `json:"hvacs"`
+	Wagos   []DumpWago   `json:"wagos"`
 	Switchs []DumpSwitch `json:"switchs"`
 	Groups  []DumpGroup  `json:"groups"`
+	Frames  []DumpFrame  `json:"frames"`
 }
 
 //UserAuthorization
@@ -165,6 +184,7 @@ type Conf struct {
 	Sensors []ds.SensorConf     `json:"sensors"`
 	Blinds  []dblind.BlindConf  `json:"blinds"`
 	Hvacs   []dhvac.HvacConf    `json:"hvacs"`
+	Wagos   []dwago.WagoConf    `json:"wagos"`
 	Groups  []gm.GroupConfig    `json:"groups"`
 	Switchs []core.SwitchConfig `json:"switchs"`
 }

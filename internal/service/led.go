@@ -115,6 +115,10 @@ func (s *CoreService) updateLedCfg(config interface{}) {
 			}
 		}
 	}
+	if led.SwitchMac == "" {
+		rlog.Info("No corresponding switch found for " + cfg.Mac)
+		return
+	}
 	url := "/write/switch/" + led.SwitchMac + "/update/settings"
 	switchSetup := sd.SwitchConfig{}
 	switchSetup.Mac = led.SwitchMac
@@ -182,18 +186,31 @@ func (s *CoreService) updateLedSetup(config interface{}) {
 		s.updateGroupLed(*oldLed, *cfg)
 	}
 
+	var led *dl.LedSetup
 	if byLbl {
 		database.UpdateLedLabelSetup(s.db, *cfg)
+
+		//Get corresponding switchMac
+		led, _ = database.GetLedLabelConfig(s.db, *cfg.Label)
+		if led == nil {
+			rlog.Error("Cannot find config for " + *cfg.Label)
+			return
+		}
+		rlog.Info("Led configuration " + *cfg.Label + " saved")
 	} else {
 		database.UpdateLedSetup(s.db, *cfg)
+		//Get corresponding switchMac
+		led, _ = database.GetLedConfig(s.db, cfg.Mac)
+		if led == nil {
+			rlog.Error("Cannot find config for " + cfg.Mac)
+			return
+		}
+		rlog.Info("Led configuration " + led.Mac + " saved")
 	}
-	//Get corresponding switchMac
-	led, _ := database.GetLedConfig(s.db, cfg.Mac)
-	if led == nil {
-		rlog.Error("Cannot find config for " + cfg.Mac)
-		return
+	if led.SwitchMac != "" {
+		cfg.SwitchMac = led.SwitchMac
 	}
-	rlog.Info("Led configuration " + led.Mac + " saved")
+
 	s.sendSwitchLedSetup(*cfg)
 }
 
@@ -211,10 +228,13 @@ func (s *CoreService) updateLedLabelSetup(config interface{}) {
 
 	database.UpdateLedLabelSetup(s.db, *cfg)
 	//Get corresponding switchMac
-	led, _ := database.GetLedConfig(s.db, cfg.Mac)
+	led, _ := database.GetLedLabelConfig(s.db, *cfg.Label)
 	if led == nil {
-		rlog.Error("Cannot find config for " + cfg.Mac)
+		rlog.Error("Cannot find config for " + *cfg.Label)
 		return
+	}
+	if led.SwitchMac != "" {
+		cfg.SwitchMac = led.SwitchMac
 	}
 	rlog.Info("Led configuration " + *cfg.Label + " saved")
 	s.sendSwitchLedSetup(*cfg)
@@ -230,6 +250,10 @@ func (s *CoreService) sendLedCmd(cmd interface{}) {
 	led, _ := database.GetLedConfig(s.db, cmdLed.Mac)
 	if led == nil {
 		rlog.Error("Cannot find config for " + cmdLed.Mac)
+		return
+	}
+	if led.SwitchMac == "" {
+		rlog.Error("Corresponding switch not found " + cmdLed.Mac)
 		return
 	}
 	url := "/write/switch/" + led.SwitchMac + "/update/settings"

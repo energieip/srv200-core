@@ -91,6 +91,10 @@ func (s *CoreService) updateSensorCfg(config interface{}) {
 	}
 
 	s.updateGroupSensor(*oldSensor, *sensor)
+	if sensor.SwitchMac == "" {
+		rlog.Info("No corresponding switch found for " + cfg.Mac)
+		return
+	}
 
 	url := "/write/switch/" + sensor.SwitchMac + "/update/settings"
 	switchSetup := sd.SwitchConfig{}
@@ -121,16 +125,28 @@ func (s *CoreService) updateSensorSetup(config interface{}) {
 	if oldSensor != nil {
 		s.updateGroupSensor(*oldSensor, *cfg)
 	}
+	var sensor *ds.SensorSetup
 	if byLbl {
 		database.UpdateSensorLabelSetup(s.db, *cfg)
+		//Get correspnding switchMac
+		sensor, _ = database.GetSensorLabelConfig(s.db, *cfg.Label)
+		if sensor == nil {
+			rlog.Error("Cannot find config for " + *cfg.Label)
+			return
+		}
+
 	} else {
 		database.UpdateSensorSetup(s.db, *cfg)
+		//Get correspnding switchMac
+		sensor, _ = database.GetSensorConfig(s.db, cfg.Mac)
+		if sensor == nil {
+			rlog.Error("Cannot find config for " + cfg.Mac)
+			return
+		}
 	}
-	//Get correspnding switchMac
-	sensor, _ := database.GetSensorConfig(s.db, cfg.Mac)
-	if sensor == nil {
-		rlog.Error("Cannot find config for " + cfg.Mac)
-		return
+
+	if sensor.SwitchMac != "" {
+		cfg.SwitchMac = sensor.SwitchMac
 	}
 	s.sendSwitchSensorSetup(*cfg)
 }
@@ -148,10 +164,13 @@ func (s *CoreService) updateSensorLabelSetup(config interface{}) {
 
 	database.UpdateSensorLabelSetup(s.db, *cfg)
 	//Get correspnding switchMac
-	sensor, _ := database.GetSensorConfig(s.db, cfg.Mac)
+	sensor, _ := database.GetSensorLabelConfig(s.db, *cfg.Label)
 	if sensor == nil {
-		rlog.Error("Cannot find config for " + cfg.Mac)
+		rlog.Error("Cannot find config for " + *cfg.Label)
 		return
+	}
+	if sensor.SwitchMac != "" {
+		cfg.SwitchMac = sensor.SwitchMac
 	}
 	s.sendSwitchSensorSetup(*cfg)
 }

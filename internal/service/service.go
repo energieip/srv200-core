@@ -159,6 +159,10 @@ func (s *CoreService) readAPIEvents() {
 					s.updateSensorCfg(event)
 				case "sensorSetup":
 					s.updateSensorSetup(event)
+				case "wago":
+					s.updateWagoCfg(event)
+				case "wagoSetup":
+					s.updateWagoSetup(event)
 				case "group":
 					s.updateGroupCfg(event)
 				case "switch":

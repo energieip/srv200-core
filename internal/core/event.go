@@ -3,6 +3,9 @@ package core
 import (
 	"encoding/json"
 
+	"github.com/energieip/common-components-go/pkg/dhvac"
+	"github.com/energieip/common-components-go/pkg/dwago"
+
 	"github.com/energieip/common-components-go/pkg/dblind"
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
 	dl "github.com/energieip/common-components-go/pkg/dled"
@@ -24,11 +27,23 @@ type EventBlind struct {
 	Label string       `json:"label"`
 }
 
+type EventHvac struct {
+	Hvac  dhvac.Hvac `json:"hvac"`
+	Label string     `json:"label"`
+}
+
+type EventWago struct {
+	Wago  dwago.Wago `json:"wago"`
+	Label string     `json:"label"`
+}
+
 //EventStatus
 type EventStatus struct {
 	Leds    []EventLed       `json:"leds"`
 	Blinds  []EventBlind     `json:"blinds"`
 	Sensors []EventSensor    `json:"sensors"`
+	Hvacs   []EventHvac      `json:"hvacs"`
+	Wagos   []EventWago      `json:"wagos"`
 	Groups  []gm.GroupStatus `json:"groups"`
 }
 

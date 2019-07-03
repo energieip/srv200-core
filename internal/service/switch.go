@@ -7,6 +7,7 @@ import (
 	dl "github.com/energieip/common-components-go/pkg/dled"
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
 	sd "github.com/energieip/common-components-go/pkg/dswitch"
+	"github.com/energieip/common-components-go/pkg/dwago"
 	pkg "github.com/energieip/common-components-go/pkg/service"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
@@ -240,6 +241,19 @@ func (s *CoreService) registerSwitchStatus(switchStatus sd.SwitchStatus) {
 		s.prepareAPIEvent(EventRemove, HvacElt, hvac)
 	}
 
+	oldWagos := database.GetWagoClusterStatus(s.db, switchStatus.Cluster)
+	for mac, wago := range switchStatus.Wagos {
+		database.SaveWagoStatus(s.db, wago)
+		_, ok := oldWagos[mac]
+		if ok {
+			delete(oldWagos, mac)
+		}
+	}
+	for _, wago := range oldWagos {
+		database.RemoveWagoStatus(s.db, wago.Mac)
+		s.prepareAPIEvent(EventRemove, WagoElt, wago)
+	}
+
 	for _, group := range switchStatus.Groups {
 		database.SaveGroupStatus(s.db, group)
 		s.prepareAPIEvent(EventUpdate, GroupElt, group)
@@ -348,6 +362,7 @@ func (s *CoreService) prepareSetupSwitchConfig(switchStatus sd.SwitchStatus) *sd
 	switchCluster := make(map[string]sd.SwitchCluster)
 	if config.Cluster != nil {
 		clusters = database.GetCluster(s.db, *config.Cluster)
+		setup.WagosSetup = database.GetWagoClusterSetup(s.db, *config.Cluster)
 	}
 	for _, cluster := range clusters {
 		if cluster.Mac == nil {
@@ -391,6 +406,7 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 	setup.SensorsSetup = make(map[string]ds.SensorSetup)
 	setup.BlindsSetup = make(map[string]dblind.BlindSetup)
 	setup.HvacsSetup = make(map[string]dhvac.HvacSetup)
+	setup.WagosSetup = make(map[string]dwago.WagoSetup)
 	grList := make(map[int]bool)
 
 	driversMac := make(map[string]bool)
@@ -467,6 +483,18 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 			s.prepareAPIEvent(EventAdd, SensorElt, sensor)
 		} else {
 			s.prepareAPIEvent(EventUpdate, SensorElt, sensor)
+		}
+	}
+
+	for mac, wago := range switchStatus.Wagos {
+		if !wago.IsConfigured {
+			ssetup, _ := database.GetWagoConfig(s.db, mac)
+			if ssetup != nil {
+				setup.WagosSetup[mac] = *ssetup
+			}
+			s.prepareAPIEvent(EventAdd, WagoElt, wago)
+		} else {
+			s.prepareAPIEvent(EventUpdate, WagoElt, wago)
 		}
 	}
 

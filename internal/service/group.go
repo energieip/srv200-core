@@ -140,6 +140,9 @@ func (s *CoreService) sendSaveGroupCfg(cfg gm.GroupConfig) {
 	database.UpdateGroupConfig(s.db, cfg)
 	newSwitch := database.GetGroupSwitchs(s.db, cfg.Group)
 	for sw := range oldSwitch {
+		if sw == "" {
+			continue
+		}
 		url := "/write/switch/" + sw + "/update/settings"
 		switchSetup := sd.SwitchConfig{}
 		switchSetup.Mac = sw
@@ -149,6 +152,9 @@ func (s *CoreService) sendSaveGroupCfg(cfg gm.GroupConfig) {
 		s.server.SendCommand(url, dump)
 	}
 	for sw := range newSwitch {
+		if sw == "" {
+			continue
+		}
 		url := "/write/switch/" + sw + "/update/settings"
 		switchSetup := sd.SwitchConfig{}
 		switchSetup.Mac = sw
@@ -175,15 +181,17 @@ func (s *CoreService) updateLedGroup(mac string, grID int) {
 	database.UpdateLedConfig(s.db, cfgLed)
 
 	led, _ := database.GetLedConfig(s.db, mac)
-	url := "/write/switch/" + led.SwitchMac + "/update/settings"
-	switchSetup := sd.SwitchConfig{}
-	switchSetup.Mac = led.SwitchMac
-	switchSetup.LedsConfig = make(map[string]dl.LedConf)
+	if led.SwitchMac != "" {
+		url := "/write/switch/" + led.SwitchMac + "/update/settings"
+		switchSetup := sd.SwitchConfig{}
+		switchSetup.Mac = led.SwitchMac
+		switchSetup.LedsConfig = make(map[string]dl.LedConf)
 
-	switchSetup.LedsConfig[led.Mac] = cfgLed
+		switchSetup.LedsConfig[led.Mac] = cfgLed
 
-	dump, _ := switchSetup.ToJSON()
-	s.server.SendCommand(url, dump)
+		dump, _ := switchSetup.ToJSON()
+		s.server.SendCommand(url, dump)
+	}
 	if grID == 0 {
 		//register led in group 0 == remove it from the current group
 		newGr, _ := database.GetGroupConfig(s.db, grID)
@@ -235,15 +243,17 @@ func (s *CoreService) updateSensorGroup(mac string, grID int) {
 	database.UpdateSensorConfig(s.db, cfgSensor)
 
 	sensor, _ := database.GetSensorConfig(s.db, mac)
-	url := "/write/switch/" + sensor.SwitchMac + "/update/settings"
-	switchSetup := sd.SwitchConfig{}
-	switchSetup.Mac = sensor.SwitchMac
-	switchSetup.SensorsConfig = make(map[string]ds.SensorConf)
+	if sensor.SwitchMac != "" {
+		url := "/write/switch/" + sensor.SwitchMac + "/update/settings"
+		switchSetup := sd.SwitchConfig{}
+		switchSetup.Mac = sensor.SwitchMac
+		switchSetup.SensorsConfig = make(map[string]ds.SensorConf)
 
-	switchSetup.SensorsConfig[sensor.Mac] = cfgSensor
+		switchSetup.SensorsConfig[sensor.Mac] = cfgSensor
 
-	dump, _ := switchSetup.ToJSON()
-	s.server.SendCommand(url, dump)
+		dump, _ := switchSetup.ToJSON()
+		s.server.SendCommand(url, dump)
+	}
 	if grID == 0 {
 		//register sensor in group 0
 		newGr, _ := database.GetGroupConfig(s.db, grID)
@@ -287,15 +297,17 @@ func (s *CoreService) updateBlindGroup(mac string, grID int) {
 	database.UpdateBlindConfig(s.db, cfgBlind)
 
 	blind, _ := database.GetBlindConfig(s.db, mac)
-	url := "/write/switch/" + blind.SwitchMac + "/update/settings"
-	switchSetup := sd.SwitchConfig{}
-	switchSetup.Mac = blind.SwitchMac
-	switchSetup.BlindsConfig = make(map[string]dblind.BlindConf)
+	if blind.SwitchMac != "" {
+		url := "/write/switch/" + blind.SwitchMac + "/update/settings"
+		switchSetup := sd.SwitchConfig{}
+		switchSetup.Mac = blind.SwitchMac
+		switchSetup.BlindsConfig = make(map[string]dblind.BlindConf)
 
-	switchSetup.BlindsConfig[blind.Mac] = cfgBlind
+		switchSetup.BlindsConfig[blind.Mac] = cfgBlind
 
-	dump, _ := switchSetup.ToJSON()
-	s.server.SendCommand(url, dump)
+		dump, _ := switchSetup.ToJSON()
+		s.server.SendCommand(url, dump)
+	}
 	if grID == 0 {
 		//register blind in group 0
 		newGr, _ := database.GetGroupConfig(s.db, grID)
@@ -372,6 +384,9 @@ func (s *CoreService) createGroup(cfg *gm.GroupConfig) {
 
 func (s *CoreService) updateGroupCfg(config interface{}) {
 	cfg, _ := gm.ToGroupConfig(config)
+	if cfg == nil {
+		return
+	}
 
 	old, _ := database.GetGroupConfig(s.db, cfg.Group)
 	if old != nil {
@@ -433,19 +448,14 @@ func (s *CoreService) updateGroupCfg(config interface{}) {
 		}
 	}
 
-	for sw := range database.GetGroupSwitchs(s.db, cfg.Group) {
-		url := "/write/switch/" + sw + "/update/settings"
-		switchSetup := sd.SwitchConfig{}
-		switchSetup.Mac = sw
-		switchSetup.Groups = make(map[int]gm.GroupConfig)
-		switchSetup.Groups[cfg.Group] = *cfg
-		dump, _ := switchSetup.ToJSON()
-		s.server.SendCommand(url, dump)
-	}
+	s.sendGroupConfigUpdate(*cfg)
 }
 
 func (s *CoreService) sendGroupConfigUpdate(cfg gm.GroupConfig) {
 	for sw := range database.GetGroupSwitchs(s.db, cfg.Group) {
+		if sw == "" {
+			continue
+		}
 		url := "/write/switch/" + sw + "/update/settings"
 		switchSetup := sd.SwitchConfig{}
 		switchSetup.Mac = sw
@@ -463,6 +473,9 @@ func (s *CoreService) sendGroupCmd(cmd interface{}) {
 		return
 	}
 	for sw := range database.GetGroupSwitchs(s.db, cmdGr.Group) {
+		if sw == "" {
+			continue
+		}
 		url := "/write/switch/" + sw + "/update/settings"
 		switchSetup := sd.SwitchConfig{}
 		switchSetup.Mac = sw

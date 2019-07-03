@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/energieip/common-components-go/pkg/dwago"
+
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
 	"github.com/energieip/common-components-go/pkg/duser"
 	"github.com/energieip/common-components-go/pkg/tools"
@@ -168,6 +170,7 @@ func (api *API) getStatus(w http.ResponseWriter, req *http.Request) {
 	var sensors []ds.Sensor
 	var blinds []dblind.Blind
 	var hvacs []dhvac.Hvac
+	var wagos []dwago.Wago
 	var grID *int
 	var isConfig *bool
 	driverType := req.FormValue("type")
@@ -255,11 +258,24 @@ func (api *API) getStatus(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
+	if driverType == FilterTypeAll || driverType == FilterTypeWago {
+		drivers := database.GetWagosStatus(api.db)
+		for _, driver := range drivers {
+			if isConfig == nil || *isConfig == driver.IsConfigured {
+				if auth.Priviledge != duser.PriviledgeUser {
+					continue
+				}
+				wagos = append(wagos, driver)
+			}
+		}
+	}
+
 	status := Status{
 		Leds:    leds,
 		Sensors: sensors,
-		Blind:   blinds,
-		Hvac:    hvacs,
+		Blinds:  blinds,
+		Hvacs:   hvacs,
+		Wagos:   wagos,
 	}
 
 	inrec, _ := json.MarshalIndent(status, "", "  ")
@@ -276,6 +292,7 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 	var switchs []DumpSwitch
 	var blinds []DumpBlind
 	var hvacs []DumpHvac
+	var wagos []DumpWago
 	var groups []DumpGroup
 	macs := make(map[string]bool)
 	driversMac := make(map[string]bool)
@@ -308,6 +325,8 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 	bldsConfig := database.GetBlindsConfigByLabel(api.db)
 	hvcs := database.GetHvacsStatusByLabel(api.db)
 	hvcsConfig := database.GetHvacsConfigByLabel(api.db)
+	wags := database.GetWagosStatusByLabel(api.db)
+	wagosConfig := database.GetWagosConfigByLabel(api.db)
 	switchElts := database.GetSwitchsDumpByLabel(api.db)
 	switchEltsConfig := database.GetSwitchsConfigByLabel(api.db)
 
@@ -415,6 +434,21 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 			}
 			dump.Ifc = ifc
 			hvacs = append(hvacs, dump)
+		case "wago":
+			dump := DumpWago{}
+			wago, ok := wags[ifc.Label]
+			if ok {
+				dump.Status = wago
+			}
+			config, ok := wagosConfig[ifc.Label]
+			if ok {
+				dump.Config = config
+			}
+			if auth.Priviledge == duser.PriviledgeUser {
+				continue
+			}
+			dump.Ifc = ifc
+			wagos = append(wagos, dump)
 		case "switch":
 			dump := DumpSwitch{}
 			switchElt, ok := switchElts[ifc.Label]
@@ -448,6 +482,7 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 		Sensors: sensors,
 		Blinds:  blinds,
 		Hvacs:   hvacs,
+		Wagos:   wagos,
 		Switchs: switchs,
 		Groups:  groups,
 	}
@@ -527,6 +562,9 @@ func (api *API) setConfig(w http.ResponseWriter, req *http.Request) {
 	for _, sw := range config.Hvacs {
 		event["hvac"] = sw
 	}
+	for _, sw := range config.Wagos {
+		event["wago"] = sw
+	}
 	api.EventsToBackend <- event
 	w.Write([]byte("{}"))
 }
@@ -575,6 +613,8 @@ func (api *API) websocketEvents() {
 							Sensors: []core.EventSensor{},
 							Groups:  []gm.GroupStatus{},
 							Blinds:  []core.EventBlind{},
+							Wagos:   []core.EventWago{},
+							Hvacs:   []core.EventHvac{},
 						}
 
 						for _, bld := range evt.Blinds {
@@ -596,6 +636,10 @@ func (api *API) websocketEvents() {
 								continue
 							}
 							newEvt.Sensors = append(newEvt.Sensors, sensor)
+						}
+
+						for _, wago := range evt.Wagos {
+							newEvt.Wagos = append(newEvt.Wagos, wago)
 						}
 
 						for _, group := range evt.Groups {
@@ -654,14 +698,14 @@ func (api *API) getV1Functions(w http.ResponseWriter, req *http.Request) {
 	apiV1 := "/v1.0"
 	functions := []string{apiV1 + "/setup/sensor", apiV1 + "/setup/led",
 		apiV1 + "/setup/group", apiV1 + "/setup/switch", apiV1 + "/setup/installMode",
-		apiV1 + "/setup/service", apiV1 + "/setup/blind", apiV1 + "/setup/hvac",
+		apiV1 + "/setup/service", apiV1 + "/setup/blind", apiV1 + "/setup/hvac", apiV1 + "/setup/wago",
 		apiV1 + "/config/led", apiV1 + "/config/sensor", apiV1 + "/config/blind", apiV1 + "/config/hvac",
-		apiV1 + "/config/group", apiV1 + "/config/switch", apiV1 + "/configs",
+		apiV1 + "/config/group", apiV1 + "/config/switch", apiV1 + "/config/wago", apiV1 + "/configs",
 		apiV1 + "/status", apiV1 + "/events", apiV1 + "/events/consumption", apiV1 + "/history",
 		apiV1 + "/command/led", apiV1 + "/command/blind", apiV1 + "/command/hvac", apiV1 + "/command/group", apiV1 + "/project/ifcInfo",
 		apiV1 + "/project/model", apiV1 + "/project/bim", apiV1 + "/project", apiV1 + "/dump",
 		apiV1 + "/status/sensor", apiV1 + "/status/group", apiV1 + "/status/led", apiV1 + "/status/blind", apiV1 + "/status/hvac",
-		apiV1 + "/status/groups" + apiV1 + "/maintenance/driver", apiV1 + "/commissioning/install",
+		apiV1 + "/status/groups", apiV1 + "/status/wago", apiV1 + "/maintenance/driver", apiV1 + "/commissioning/install",
 		apiV1 + "/user/info", apiV1 + "/user/login", apiV1 + "/map/upload", apiV1 + "/map/upload/status",
 	}
 	apiInfo := APIFunctions{
@@ -736,6 +780,9 @@ func (api *API) swagger() {
 	router.HandleFunc(apiV1+"/setup/hvac/{mac}", api.verification(api.getHvacSetup)).Methods("GET")
 	router.HandleFunc(apiV1+"/setup/hvac/{mac}", api.verification(api.removeHvacSetup)).Methods("DELETE")
 	router.HandleFunc(apiV1+"/setup/hvac", api.verification(api.setHvacSetup)).Methods("POST")
+	router.HandleFunc(apiV1+"/setup/wago/{mac}", api.verification(api.getWagoSetup)).Methods("GET")
+	router.HandleFunc(apiV1+"/setup/wago/{mac}", api.verification(api.removeWagoSetup)).Methods("DELETE")
+	router.HandleFunc(apiV1+"/setup/wago", api.verification(api.setWagoSetup)).Methods("POST")
 	router.HandleFunc(apiV1+"/setup/group/{groupID}", api.verification(api.getGroupSetup)).Methods("GET")
 	router.HandleFunc(apiV1+"/setup/group/{groupID}", api.verification(api.removeGroupSetup)).Methods("DELETE")
 	router.HandleFunc(apiV1+"/setup/group", api.verification(api.setGroupSetup)).Methods("POST")
@@ -751,6 +798,7 @@ func (api *API) swagger() {
 	router.HandleFunc(apiV1+"/config/sensor", api.verification(api.setSensorConfig)).Methods("POST")
 	router.HandleFunc(apiV1+"/config/blind", api.verification(api.setBlindConfig)).Methods("POST")
 	router.HandleFunc(apiV1+"/config/hvac", api.verification(api.setHvacConfig)).Methods("POST")
+	router.HandleFunc(apiV1+"/config/wago", api.verification(api.setWagoConfig)).Methods("POST")
 	router.HandleFunc(apiV1+"/config/group", api.verification(api.setGroupConfig)).Methods("POST")
 	router.HandleFunc(apiV1+"/config/switch", api.verification(api.setSwitchConfig)).Methods("POST")
 	router.HandleFunc(apiV1+"/configs", api.verification(api.setConfig)).Methods("POST")
@@ -760,6 +808,7 @@ func (api *API) swagger() {
 	router.HandleFunc(apiV1+"/status/blind/{mac}", api.verification(api.getBlindStatus)).Methods("GET")
 	router.HandleFunc(apiV1+"/status/hvac/{mac}", api.verification(api.getHvacStatus)).Methods("GET")
 	router.HandleFunc(apiV1+"/status/led/{mac}", api.verification(api.getLedStatus)).Methods("GET")
+	router.HandleFunc(apiV1+"/status/wago/{mac}", api.verification(api.getWagoStatus)).Methods("GET")
 	router.HandleFunc(apiV1+"/status/group/{groupID}", api.verification(api.getGroupStatus)).Methods("GET")
 	router.HandleFunc(apiV1+"/status/groups", api.verification(api.getGroupsStatus)).Methods("GET")
 	router.HandleFunc(apiV1+"/status", api.verification(api.getStatus)).Methods("GET")

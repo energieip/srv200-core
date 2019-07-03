@@ -96,6 +96,11 @@ func (s *CoreService) updateHvacCfg(config interface{}) {
 	}
 	s.updateGroupHvac(*oldHvac, *hvac)
 
+	if hvac.SwitchMac == "" {
+		rlog.Info("No corresponding switch found for " + cfg.Mac)
+		return
+	}
+
 	url := "/write/switch/" + hvac.SwitchMac + "/update/settings"
 	switchSetup := sd.SwitchConfig{}
 	switchSetup.Mac = hvac.SwitchMac
@@ -117,6 +122,10 @@ func (s *CoreService) sendHvacCmd(cmdHvac interface{}) {
 	driver, _ := database.GetHvacConfig(s.db, cmd.Mac)
 	if driver == nil {
 		rlog.Error("Cannot find config for " + cmd.Mac)
+		return
+	}
+	if driver.SwitchMac == "" {
+		rlog.Error("No corresponding switch found for " + cmd.Mac)
 		return
 	}
 	url := "/write/switch/" + driver.SwitchMac + "/update/settings"
@@ -149,9 +158,13 @@ func (s *CoreService) updateHvacLabelSetup(config interface{}) {
 	database.UpdateHvacLabelSetup(s.db, *cfg)
 
 	//Get corresponding switchMac
-	hvac, _ := database.GetHvacConfig(s.db, cfg.Mac)
+	hvac, _ := database.GetHvacLabelConfig(s.db, *cfg.Label)
 	if hvac == nil {
-		rlog.Error("Cannot find config for " + cfg.Mac)
+		rlog.Error("Cannot find config for " + *cfg.Label)
+		return
+	}
+	if hvac.SwitchMac == "" {
+		rlog.Info("No corresponding switch found for " + *cfg.Label)
 		return
 	}
 	s.sendSwitchHvacSetup(*hvac)
@@ -177,17 +190,26 @@ func (s *CoreService) updateHvacSetup(config interface{}) {
 		s.updateGroupHvac(*oldHvac, *cfg)
 	}
 
+	var hvac *dhvac.HvacSetup
 	if byLbl {
 		database.UpdateHvacLabelSetup(s.db, *cfg)
+
+		//Get corresponding switchMac
+		hvac, _ = database.GetHvacLabelConfig(s.db, *cfg.Label)
+		if hvac == nil {
+			rlog.Error("Cannot find config for " + *cfg.Label)
+			return
+		}
 	} else {
 		database.UpdateHvacSetup(s.db, *cfg)
+
+		//Get corresponding switchMac
+		hvac, _ = database.GetHvacConfig(s.db, cfg.Mac)
+		if hvac == nil {
+			rlog.Error("Cannot find config for " + cfg.Mac)
+			return
+		}
 	}
 
-	//Get corresponding switchMac
-	hvac, _ := database.GetHvacConfig(s.db, cfg.Mac)
-	if hvac == nil {
-		rlog.Error("Cannot find config for " + cfg.Mac)
-		return
-	}
 	s.sendSwitchHvacSetup(*hvac)
 }

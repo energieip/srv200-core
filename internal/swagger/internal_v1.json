@@ -1177,6 +1177,13 @@
               },
               "description": "List of hvacs dump"
             },
+            "wagos": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/WagoDump"
+              },
+              "description": "List of wagos dump"
+            },
             "switchs": {
               "type": "array",
               "items": {
@@ -1508,6 +1515,124 @@
             "label": {
               "type": "string",
               "description": "IFC cable label"
+            }
+          }
+        },
+        "WagoSetup": {
+          "title": "WagoSetup",
+          "required": [
+            "mac"
+          ],
+          "type": "object",
+          "properties": {
+            "mac": {
+              "type": "string",
+              "description": "Wago mac address"
+            },
+            "cluster": {
+              "type": "integer",
+              "description": "Associate cluster",
+              "format": "int32"
+            },
+            "friendlyName": {
+              "type": "string",
+              "description": "Wago FriendlyName"
+            },
+            "label": {
+              "type": "string",
+              "description": "IFC cable label"
+            }
+          }
+        },
+        "WagoConfig": {
+          "title": "WagoConfig",
+          "required": [
+            "mac"
+          ],
+          "type": "object",
+          "properties": {
+            "mac": {
+              "type": "string",
+              "description": "Wago mac address"
+            },
+            "cluster": {
+              "type": "integer",
+              "description": "Associate cluster",
+              "format": "int32"
+            },
+            "friendlyName": {
+              "type": "string",
+              "description": "Wago FriendlyName"
+            },
+            "isConfigured": {
+              "type": "boolean",
+              "description": "Is the Wago configured"
+            },
+            "label": {
+              "type": "string",
+              "description": "IFC cable label"
+            }
+          }
+        },
+        "WagoStatus": {
+          "title": "WagoStatus",
+          "required": [
+            "mac"
+          ],
+          "type": "object",
+          "properties": {
+            "mac": {
+              "type": "string",
+              "description": "Wago mac address"
+            },
+            "ip": {
+              "type": "string",
+              "description": "Wago IP address"
+            },
+            "cluster": {
+              "type": "integer",
+              "description": "Associate cluster",
+              "format": "int32"
+            },
+            "protocol": {
+              "type": "string",
+              "description": "Hvac communication protocol"
+            },
+            "isConfigured": {
+              "type": "boolean",
+              "description": "Is the hvac configured"
+            },
+            "softwareVersion": {
+              "type": "number",
+              "description": "hvac Software version"
+            },
+            "error": {
+              "type": "integer",
+              "description": "Error code value: 0 means no error",
+              "format": "int32"
+            },
+            "friendlyName": {
+              "type": "string",
+              "description": "Hvac FriendlyName"
+            },
+            "label": {
+              "type": "string",
+              "description": "IFC cable label"
+            }
+          }
+        },
+        "WagoDump": {
+          "title": "WagoDump",
+          "type": "object",
+          "properties": {
+            "status": {
+              "$ref": "#/components/schemas/WagoStatus"
+            },
+            "ifc": {
+              "$ref": "#/components/schemas/IfcInfo"
+            },
+            "config": {
+              "$ref": "#/components/schemas/WagoSetup"
             }
           }
         },

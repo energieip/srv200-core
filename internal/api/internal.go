@@ -102,6 +102,7 @@ func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
 	var switchs []DumpSwitch
 	var blinds []DumpBlind
 	var hvacs []DumpHvac
+	var wagos []DumpWago
 	var groups []DumpGroup
 	macs := make(map[string]bool)
 	driversMac := make(map[string]bool)
@@ -134,6 +135,8 @@ func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
 	bldsConfig := database.GetBlindsConfigByLabel(api.db)
 	hvcs := database.GetHvacsStatusByLabel(api.db)
 	hvcsConfig := database.GetHvacsConfigByLabel(api.db)
+	wags := database.GetWagosStatusByLabel(api.db)
+	wagosConfig := database.GetWagosConfigByLabel(api.db)
 	switchElts := database.GetSwitchsDumpByLabel(api.db)
 	switchEltsConfig := database.GetSwitchsConfigByLabel(api.db)
 
@@ -221,6 +224,18 @@ func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
 			}
 			dump.Ifc = ifc
 			hvacs = append(hvacs, dump)
+		case "wago":
+			dump := DumpWago{}
+			wago, ok := wags[ifc.Label]
+			if ok {
+				dump.Status = wago
+			}
+			config, ok := wagosConfig[ifc.Label]
+			if ok {
+				dump.Config = config
+			}
+			dump.Ifc = ifc
+			wagos = append(wagos, dump)
 		case "switch":
 			dump := DumpSwitch{}
 			switchElt, ok := switchElts[ifc.Label]
@@ -254,6 +269,7 @@ func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
 		Sensors: sensors,
 		Blinds:  blinds,
 		Hvacs:   hvacs,
+		Wagos:   wagos,
 		Switchs: switchs,
 		Groups:  groups,
 	}

@@ -96,6 +96,11 @@ func (s *CoreService) updateBlindCfg(config interface{}) {
 	}
 	s.updateGroupBlind(*oldBlind, *blind)
 
+	if blind.SwitchMac == "" {
+		rlog.Info("No corresponding switch present for " + cfg.Mac)
+		return
+	}
+
 	url := "/write/switch/" + blind.SwitchMac + "/update/settings"
 	switchSetup := sd.SwitchConfig{}
 	switchSetup.Mac = blind.SwitchMac
@@ -117,6 +122,10 @@ func (s *CoreService) sendBlindCmd(cmdBlind interface{}) {
 	driver, _ := database.GetBlindConfig(s.db, cmd.Mac)
 	if driver == nil {
 		rlog.Error("Cannot find config for " + cmd.Mac)
+		return
+	}
+	if driver.SwitchMac == "" {
+		rlog.Error("No corresponding switch present for " + cmd.Mac)
 		return
 	}
 	url := "/write/switch/" + driver.SwitchMac + "/update/settings"
@@ -158,17 +167,26 @@ func (s *CoreService) updateBlindSetup(config interface{}) {
 		s.updateGroupBlind(*oldBlind, *cfg)
 	}
 
+	var blind *dblind.BlindSetup
 	if byLbl {
 		database.UpdateBlindLabelSetup(s.db, *cfg)
+		//Get corresponding switchMac
+		blind, _ = database.GetBlindLabelConfig(s.db, *cfg.Label)
+		if blind == nil {
+			rlog.Error("Cannot find config for " + *cfg.Label)
+			return
+		}
 	} else {
 		database.UpdateBlindSetup(s.db, *cfg)
+		//Get corresponding switchMac
+		blind, _ = database.GetBlindConfig(s.db, cfg.Mac)
+		if blind == nil {
+			rlog.Error("Cannot find config for " + cfg.Mac)
+			return
+		}
 	}
-
-	//Get corresponding switchMac
-	blind, _ := database.GetBlindConfig(s.db, cfg.Mac)
-	if blind == nil {
-		rlog.Error("Cannot find config for " + cfg.Mac)
-		return
+	if blind.SwitchMac != "" {
+		cfg.SwitchMac = blind.SwitchMac
 	}
 
 	s.sendSwitchBlindSetup(*cfg)
@@ -187,11 +205,13 @@ func (s *CoreService) updateBlindLabelSetup(config interface{}) {
 	}
 	database.UpdateBlindLabelSetup(s.db, *cfg)
 	//Get corresponding switchMac
-	blind, _ := database.GetBlindConfig(s.db, cfg.Mac)
+	blind, _ := database.GetBlindLabelConfig(s.db, *cfg.Label)
 	if blind == nil {
-		rlog.Error("Cannot find config for " + cfg.Mac)
+		rlog.Error("Cannot find config for " + *cfg.Label)
 		return
 	}
-
+	if blind.SwitchMac != "" {
+		cfg.SwitchMac = blind.SwitchMac
+	}
 	s.sendSwitchBlindSetup(*cfg)
 }
