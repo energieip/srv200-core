@@ -8,6 +8,7 @@ import datetime
 import traceback
 import os
 import json
+import collections
 
 #To install ifcopenshell refers to https://github.com/IfcOpenShell/IfcOpenShell
 
@@ -36,13 +37,13 @@ def buildDriver(driver):
     freq = driver['properties'].get("DumpFrequency", 1000)
     modbusID = driver['properties'].get("ModbusID", 0)
 
-    res = {
+    res = collections.OrderedDict({
         "label": label,
         "group": group,
         "friendlyName": friend,
         "dumpFrequency": freq,
         "modbusID": modbusID
-    }
+    })
 
     if deviceType != "hvac":
         res["isBleEnabled"] = driver['properties'].get("ActivateBluetooth", False)
@@ -62,20 +63,20 @@ def buildLed(driver):
     deviceType = getDeviceType(driver)
     if deviceType != "led":
         return {}
-    return {
+    return collections.OrderedDict({
         "pMax": driver['properties'].get("Power", 0),
         "defaultSetpoint": driver['properties'].get("DefaultSetpoint", 5),
         "firstDay": driver['properties'].get("FirstDay", False)
-    }
+    })
 
 def buildSensor(driver):
     res = {}
     deviceType = getDeviceType(driver)
     if deviceType != "sensor":
         return res
-    return {
+    return collections.OrderedDict({
         "thresoldPresence": driver['properties'].get("ThresoldPresence", 10)
-    }
+    })
 
 def buildSwitch(driver):
     res = {}
@@ -87,13 +88,13 @@ def buildSwitch(driver):
     freq = driver['properties'].get("DumpFrequency", 1000)
     modbusID = driver['properties'].get("ModbusID", 0)
     cluster = driver['properties'].get("Cluster", 0)
-    res =  {
+    res = collections.OrderedDict({
         "label": label,
         "friendlyName": friend,
         "dumpFrequency": freq,
         "modbusID": modbusID,
         "cluster": cluster
-    }
+    })
     return res
 
 def buildWago(driver):
@@ -105,12 +106,15 @@ def buildWago(driver):
     friend = driver['properties'].get("FriendlyName", label)
     slaveID = driver['properties'].get("SlaveID", 0)
     cluster = driver['properties'].get("Cluster", 0)
-    res = {
+    apiType = driver['properties'].get("APIType", "modbus")
+    res = collections.OrderedDict({
         "label": label,
         "friendlyName": friend,
         "slaveID": slaveID,
-        "cluster": cluster
-    }
+        "cluster": cluster,
+        "apiType": apiType,
+        "api": driver['properties'].get("valeur de tableau", {})
+    })
     return res
 
 def buildFrame(driver):
@@ -131,15 +135,12 @@ def buildFrame(driver):
     return res
 
 def parseIfc(filepath):
-    #Define lists for storing unique property names and unique type properties name
-    prop_keys = []
     instances = []
 
-    projects = {}
-    models = {}
-    drivers = {}
-    groups = {}
-    dump = {}
+    projects = collections.OrderedDict()
+    models = collections.OrderedDict()
+    drivers = collections.OrderedDict()
+    groups = collections.OrderedDict()
 
     if not os.path.lexists(filepath):
         print("Filepath " + filepath + " not found")
@@ -153,11 +154,11 @@ def parseIfc(filepath):
 
         #Define a dictionary for storing current element
         for element in elements:
-            instance = {}
+            instance = collections.OrderedDict()
             eltType = element.is_a()
             if eltType not in filters:
                 continue
-            instance_properties = {}
+            instance_properties = collections.OrderedDict()
             prop_sets = element.IsDefinedBy
             instance['Label'] = element.Name
 
@@ -167,9 +168,20 @@ def parseIfc(filepath):
                 properties = prop_set.RelatingPropertyDefinition.HasProperties
                 for prop in properties:
                     try:
-                        instance_properties[prop.Name] = prop.NominalValue.wrappedValue
-                        if prop.Name not in prop_keys:
-                            prop_keys.append(prop.Name)
+                        if getattr(prop, "NominalValue", None):
+                            instance_properties[prop.Name] = prop.NominalValue.wrappedValue
+                        elif prop.is_a("IfcPropertyTableValue"):
+                            sub_dict = collections.OrderedDict()
+                            for k, v in enumerate(prop.DefiningValues):
+                                sub_dict[v.wrappedValue] = prop.DefinedValues[k].wrappedValue
+                            instance_properties[prop.Name] = sub_dict
+                        elif prop.is_a("IfcPropertyEnumeratedValue"):
+                            t = ()
+                            for v in prop.EnumerationValues:
+                                t = (*t, v.wrappedValue)
+                            instance_properties[prop.Name] = t
+                        else:
+                            instance_properties[prop.Name] = prop
                     except Exception as exc:
                         pass
 
@@ -184,10 +196,8 @@ def parseIfc(filepath):
                         for prop in properties:
                             try:
                                 instance_properties[prop.Name] = prop.NominalValue.wrappedValue
-                                if prop.Name not in prop_keys:
-                                    prop_keys.append(prop.Name)
                             except Exception as exc:
-                                    pass
+                                pass
 
             instance['properties'] = instance_properties
             instances.append(instance)
@@ -215,7 +225,7 @@ def parseIfc(filepath):
                 }
 
             if deviceType not in drivers:
-                drivers[deviceType] = {}
+                drivers[deviceType] = collections.OrderedDict()
 
             if deviceType not in ["switch", "frame", "wago"]:
                 modbusID = instance['properties'].get("ModbusID", 0)
@@ -253,7 +263,7 @@ def parseIfc(filepath):
         print("exc", exc)
         return 1
 
-    dump = {
+    dump = collections.OrderedDict({
         "groups": groups,
         "leds": drivers.get("led", {}),
         "blinds": drivers.get("blind", {}),
@@ -264,9 +274,8 @@ def parseIfc(filepath):
         "switchs": drivers.get("switch", {}),
         "wagos": drivers.get("wago", {}),
         "projects": projects
-    }
-
-    print(json.dumps(dump, indent=4, sort_keys=True))
+    })
+    print(json.dumps(dump, indent=4))
     return 0
 
 

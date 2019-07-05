@@ -1,16 +1,16 @@
 hash: 7873f75061b03685fab1d37fa10ae2d9249507813e75d280fc0acfb9b629147f
-updated: 2019-07-03T10:14:34.466515936+02:00
+updated: 2019-07-05T09:52:23.603360599+02:00
 imports:
 - name: github.com/cenkalti/backoff
   version: 2146c93394225c3732078705043ce9f26584d334
 - name: github.com/dgrijalva/jwt-go
   version: 5e25c22bd5d6de03265bbe5462dcd162f85046f6
 - name: github.com/eclipse/paho.mqtt.golang
-  version: 0d81c295c555691f527a3e6f5b5c0a889f198bc3
+  version: 696319167975029c23b2356d034b973d8e454c00
   subpackages:
   - packets
 - name: github.com/energieip/common-components-go
-  version: 42a8c6c8761a34cc9d3338c04085160fecc1e8eb
+  version: caa1530c29a85aa7c6b388b752bc3634791ca253
   subpackages:
   - pkg/database
   - pkg/dblind
@@ -43,7 +43,7 @@ imports:
 - name: github.com/mitchellh/mapstructure
   version: 3536a929edddb9a5b34bd6861dc4a9647cb459fe
 - name: github.com/opentracing/opentracing-go
-  version: 659c90643e714681897ec2521c60567dd21da733
+  version: 135aa78c6f95b4a199daf2f0470d231136cbbd0c
   subpackages:
   - ext
   - log
