@@ -10,6 +10,7 @@ import (
 func SaveSwitchStatus(db Database, status sd.SwitchStatus) error {
 	swStatus := core.SwitchDump{}
 	swStatus.Mac = status.Mac
+	swStatus.FullMac = status.FullMac
 	swStatus.IP = status.IP
 	swStatus.ErrorCode = status.ErrorCode
 	swStatus.IsConfigured = status.IsConfigured

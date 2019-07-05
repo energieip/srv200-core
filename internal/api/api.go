@@ -841,6 +841,7 @@ func (api *API) swagger() {
 
 	//Maintenance API
 	router.HandleFunc(apiV1+"/maintenance/driver", api.verification(api.replaceDriver)).Methods("POST")
+	router.HandleFunc(apiV1+"/install/status", api.verification(api.installStatus)).Methods("GET")
 
 	//Install API
 	router.HandleFunc(apiV1+"/commissioning/install", api.verification(api.installDriver)).Methods("POST")

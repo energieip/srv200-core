@@ -1,5 +1,5 @@
 hash: 7873f75061b03685fab1d37fa10ae2d9249507813e75d280fc0acfb9b629147f
-updated: 2019-07-05T09:52:23.603360599+02:00
+updated: 2019-07-05T10:48:32.934882934+02:00
 imports:
 - name: github.com/cenkalti/backoff
   version: 2146c93394225c3732078705043ce9f26584d334
@@ -53,6 +53,8 @@ imports:
   version: f018bc92e7d71f27c04e04cbf008860416c21d01
 - name: github.com/sirupsen/logrus
   version: 07a84ee7412e7a28663d92930a1d46f81b124ee1
+- name: github.com/tealeg/xlsx
+  version: e2d23f3c43dc758fca2d02d6f0052ba3d4f80e19
 - name: golang.org/x/crypto
   version: 4def268fd1a49955bfb3dda92fe3db4f924f2285
   subpackages:
