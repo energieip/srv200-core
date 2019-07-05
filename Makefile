@@ -32,7 +32,7 @@ deb-armhf: bin/$(COMPONENT)-armhf
 	make deb VERSION=$(VERSION) BUILD_PATH=$(BUILD_PATH) ARCH=$(ARCH) BUILD_NAME=$(BUILD_NAME)
 
 deb:
-	mkdir -p $(BUILD_PATH)/usr/local/bin $(BUILD_PATH)/etc/$(COMPONENT) $(BUILD_PATH)/etc/systemd/system $(BUILD_PATH)/media/userdata/www/
+	mkdir -p $(BUILD_PATH)/usr/local/bin $(BUILD_PATH)/etc/$(COMPONENT) $(BUILD_PATH)/etc/systemd/system $(BUILD_PATH)/media/userdata/www/ $(BUILD_PATH)/usr/local/share/fonts/
 	cp -r ./scripts/DEBIAN $(BUILD_PATH)/
 	cp ./scripts/config.json $(BUILD_PATH)/etc/$(COMPONENT)/
 	cp ./scripts/*.service $(BUILD_PATH)/etc/systemd/system/
@@ -42,6 +42,7 @@ deb:
 	cp ./scripts/Makefile $(BUILD_PATH)/../
 	cp bin/$(COMPONENT)-$(ARCH) $(BUILD_PATH)/usr/local/bin/$(COMPONENT)
 	cp cmd/*.py $(BUILD_PATH)/usr/local/bin/
+	cp cmd/*.ttf $(BUILD_PATH)/usr/local/share/fonts/
 	chmod +x $(BUILD_PATH)/usr/local/bin/*.py
 	cp -r internal/swaggerui $(BUILD_PATH)/media/userdata/www/
 	cp -r internal/swagger/*.json $(BUILD_PATH)/media/userdata/www/swaggerui/
