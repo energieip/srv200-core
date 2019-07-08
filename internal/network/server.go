@@ -51,7 +51,7 @@ func (net ServerNetwork) LocalConnection(conf pkg.ServiceConfig) error {
 		User:      conf.NetworkBroker.Login,
 		Password:  conf.NetworkBroker.Password,
 		CaPath:    conf.NetworkBroker.CaPath,
-		Secure:    conf.AuthBroker.Secure,
+		Secure:    conf.NetworkBroker.Secure,
 	}
 
 	for {
