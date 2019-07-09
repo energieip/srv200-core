@@ -47,7 +47,8 @@ def buildDriver(driver):
         "group": group,
         "friendlyName": friend,
         "dumpFrequency": freq,
-        "modbusID": modbusID
+        "modbusID": modbusID,
+        "protocol": driver['properties'].get("APIType", "mqtts"),
     })
 
     if deviceType != "hvac":
@@ -98,7 +99,10 @@ def buildSwitch(driver):
         "friendlyName": friend,
         "dumpFrequency": freq,
         "modbusID": modbusID,
-        "cluster": cluster
+        "cluster": cluster,
+        "protocol": driver['properties'].get("APIType", "rest"),
+        "ip": driver['properties'].get("IP", "0"),
+        "profil": driver['properties'].get("Profil", "none")
     })
     return res
 
@@ -111,14 +115,45 @@ def buildWago(driver):
     friend = driver['properties'].get("FriendlyName", label)
     slaveID = driver['properties'].get("SlaveID", 0)
     cluster = driver['properties'].get("Cluster", 0)
+    freq = driver['properties'].get("DumpFrequency", 1000)
     apiType = driver['properties'].get("APIType", "modbus")
     res = collections.OrderedDict({
         "label": label,
+        "dumpFrequency": freq,
         "friendlyName": friend,
         "slaveID": slaveID,
         "cluster": cluster,
         "apiType": apiType,
-        "api": driver['properties'].get("valeur de tableau", {})
+        "api": driver['properties'].get("API", {}),
+        "ip": driver['properties'].get("IP", "0"),
+        "modbusOffset": driver['properties'].get("ModbusOffset", 0),
+        "protocol": driver['properties'].get("APIType", "modbus"),
+    })
+    return res
+
+def buildNanoSense(driver):
+    res = {}
+    deviceType = getDeviceType(driver)
+    if deviceType != "nanosense":
+        return res
+    label = driver["Label"]
+    friend = driver['properties'].get("FriendlyName", label)
+    modbusID = driver['properties'].get("ModbusID", 0)
+    cluster = driver['properties'].get("Cluster", 0)
+    freq = driver['properties'].get("DumpFrequency", 1000)
+    apiType = driver['properties'].get("APIType", "modbus")
+    res = collections.OrderedDict({
+        "label": label,
+        "dumpFrequency": freq,
+        "friendlyName": friend,
+        "modbusID": modbusID,
+        "cluster": cluster,
+        "apiType": apiType,
+        "group": driver['properties'].get("Group", 0),
+        "api": driver['properties'].get("API", {}),
+        "ip": driver['properties'].get("IP", "0"),
+        "modbusOffset": driver['properties'].get("ModbusOffset", 0),
+        "protocol": driver['properties'].get("APIType", "modbus"),
     })
     return res
 
@@ -135,7 +170,8 @@ def buildFrame(driver):
         "label": label,
         "friendlyName": friend,
         "modbusID": modbusID,
-        "cluster": cluster
+        "cluster": cluster,
+        "protocol": driver['properties'].get("APIType", "rest")
     }
     return res
 
@@ -223,7 +259,8 @@ def parseIfc(filepath):
 
             projects[label] = {
                 "label": label,
-                "modelName": modelName
+                "modelName": modelName,
+                "commissioningDate": ""
             }
 
             lbl = label.replace("_", "-")
@@ -252,7 +289,7 @@ def parseIfc(filepath):
             if deviceType not in drivers:
                 drivers[deviceType] = collections.OrderedDict()
 
-            if deviceType not in ["switch", "frame", "wago"]:
+            if deviceType not in ["switch", "frame", "wago", "nanosense"]:
                 modbusID = instance['properties'].get("ModbusID", 0)
                 projects[label]["modbusID"] = modbusID
                 drivers[deviceType][label] = buildDriver(instance)
@@ -268,6 +305,8 @@ def parseIfc(filepath):
                 modbusID = instance['properties'].get("ModbusID", 0)
                 projects[label]["modbusID"] = modbusID
                 drivers[deviceType][label] = buildFrame(instance)
+            elif deviceType == "nanosense":
+                drivers[deviceType][label] = buildNanoSense(instance)
             else:
                 drivers[deviceType][label] = {
                     "label": label
@@ -355,6 +394,7 @@ def parseIfc(filepath):
         "models": models,
         "switchs": drivers.get("switch", {}),
         "wagos": drivers.get("wago", {}),
+        "nanosenses": drivers.get("nanosense", {}),
         "projects": projects
     })
     print(json.dumps(dump, indent=4))
