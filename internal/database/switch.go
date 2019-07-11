@@ -12,6 +12,7 @@ func SaveSwitchStatus(db Database, status sd.SwitchStatus) error {
 	swStatus.Mac = status.Mac
 	swStatus.FullMac = status.FullMac
 	swStatus.IP = status.IP
+	swStatus.Cluster = status.Cluster
 	swStatus.Label = status.Label
 	swStatus.Profil = status.Profil
 	swStatus.StatePuls1 = status.StatePuls1
@@ -290,6 +291,25 @@ func GetCluster(db Database, cluster int) map[string]core.SwitchConfig {
 			continue
 		}
 		res[*sw.IP] = *sw
+	}
+	return res
+}
+
+//GetSwitchStatusCluster get cluster Config list
+func GetSwitchStatusCluster(db Database, cluster int) map[string]core.SwitchDump {
+	res := make(map[string]core.SwitchDump)
+	criteria := make(map[string]interface{})
+	criteria["Cluster"] = cluster
+	swStored, err := db.GetRecords(pconst.DbStatus, pconst.TbSwitchs, criteria)
+	if err != nil || swStored == nil {
+		return res
+	}
+	for _, elt := range swStored {
+		sw, err := core.ToSwitchDump(elt)
+		if err != nil || sw == nil {
+			continue
+		}
+		res[sw.Mac] = *sw
 	}
 	return res
 }

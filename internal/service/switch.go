@@ -315,6 +315,7 @@ func (s *CoreService) prepareSetupSwitchConfig(switchStatus sd.SwitchStatus) *sd
 	if config.FriendlyName != nil {
 		setup.FriendlyName = *config.FriendlyName
 	}
+	setup.Cluster = config.Cluster
 	setup.Label = config.Label
 	setup.Profil = config.Profil
 	setup.IsConfigured = &isConfigured
@@ -409,6 +410,7 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 	if config.Profil != "" {
 		setup.Profil = config.Profil
 	}
+	setup.Cluster = config.Cluster
 	setup.IsConfigured = &isConfigured
 
 	setup.LedsSetup = make(map[string]dl.LedSetup)

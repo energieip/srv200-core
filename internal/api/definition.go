@@ -126,8 +126,9 @@ type DumpSwitch struct {
 
 //DumpFrame
 type DumpFrame struct {
-	Ifc    core.IfcInfo `json:"ifc"`
-	Status core.Frame   `json:"status"`
+	Ifc    core.IfcInfo     `json:"ifc"`
+	Config core.Frame       `json:"config"`
+	Status core.FrameStatus `json:"status"`
 }
 
 //DumpWago

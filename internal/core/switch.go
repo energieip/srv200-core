@@ -28,6 +28,7 @@ type SwitchCmd struct {
 
 type SwitchDump struct {
 	sd.Switch
+	Cluster      int   `json:"cluster"`
 	StatePuls1   int   `json:"statePuls1"`
 	StatePuls2   int   `json:"statePuls2"`
 	StatePuls3   int   `json:"statePuls3"`

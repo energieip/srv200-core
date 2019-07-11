@@ -290,6 +290,7 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 	var leds []DumpLed
 	var sensors []DumpSensor
 	var switchs []DumpSwitch
+	var frames []DumpFrame
 	var blinds []DumpBlind
 	var hvacs []DumpHvac
 	var wagos []DumpWago
@@ -329,6 +330,8 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 	wagosConfig := database.GetWagosConfigByLabel(api.db)
 	switchElts := database.GetSwitchsDumpByLabel(api.db)
 	switchEltsConfig := database.GetSwitchsConfigByLabel(api.db)
+	frameElts := database.GetFramesDumpByLabel(api.db)
+	frameEltsConfig := database.GetFramesConfigByLabel(api.db)
 
 	ifcs := database.GetIfcs(api.db)
 	for _, ifc := range ifcs {
@@ -461,6 +464,18 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 			}
 			dump.Ifc = ifc
 			switchs = append(switchs, dump)
+		case "frame":
+			dump := DumpFrame{}
+			frameElt, ok := frameElts[ifc.Label]
+			if ok {
+				dump.Status = frameElt
+			}
+			config, ok := frameEltsConfig[ifc.Label]
+			if ok {
+				dump.Config = config
+			}
+			dump.Ifc = ifc
+			frames = append(frames, dump)
 		}
 	}
 
@@ -484,6 +499,7 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 		Hvacs:   hvacs,
 		Wagos:   wagos,
 		Switchs: switchs,
+		Frames:  frames,
 		Groups:  groups,
 	}
 
