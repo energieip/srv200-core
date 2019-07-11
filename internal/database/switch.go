@@ -80,6 +80,9 @@ func UpdateSwitchConfig(db Database, config core.SwitchConfig) error {
 	if config.Label != nil {
 		setup.Label = config.Label
 	}
+	if config.Profil != "" {
+		setup.Profil = config.Profil
+	}
 
 	return db.UpdateRecord(pconst.DbConfig, pconst.TbSwitchs, dbID, setup)
 }
@@ -123,6 +126,9 @@ func UpdateSwitchLabelConfig(db Database, config core.SwitchConfig) error {
 	}
 	if config.Label != nil {
 		setup.Label = config.Label
+	}
+	if config.Profil != "" {
+		setup.Profil = config.Profil
 	}
 
 	return db.UpdateRecord(pconst.DbConfig, pconst.TbSwitchs, dbID, setup)

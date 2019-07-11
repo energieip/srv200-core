@@ -2045,9 +2045,6 @@
           "description": "upload map status",
           "operationId": "uploadStatus",
           "parameters": [],
-          "requestBody": {
-            "description": "Get upload status"
-          },
           "responses": {
             "200": {
               "description": "sucessful operation",
@@ -5905,7 +5902,7 @@
               "description": "Is the hvac configured"
             },
             "softwareVersion": {
-              "type": "number",
+              "type": "string",
               "description": "hvac Software version"
             },
             "hardwareVersion": {
@@ -5921,21 +5918,110 @@
               "type": "string",
               "description": "Hvac FriendlyName"
             },
-            "setpoint": {
-              "type": "string",
-              "description": "current setpoint"
+            "linePower": {
+              "type": "integer",
+              "description": "Line Power (W)",
+              "format": "int32"
             },
-            "heat": {
-              "type": "string",
-              "description": "setpoint when the mode is heating"
+            "holdOff1": {
+              "type": "integer",
+              "description": "Window Open status",
+              "format": "int32"
             },
-            "cool": {
-              "type": "string",
-              "description": "setpoint when the mode is cooling"
+            "spaceTemp1": {
+              "type": "integer",
+              "description": "nanosense temperature in (1/10°C)",
+              "format": "int32"
             },
-            "damper": {
-              "type": "string",
-              "description": "damper"
+            "occManCmd1": {
+              "type": "integer",
+              "description": "occupied/unoccupied status from sensor",
+              "format": "int32"
+            },
+            "shift": {
+              "type": "integer",
+              "description": "temperature shift (in 1/10°C)",
+              "format": "int32"
+            },
+            "heatCool1": {
+              "type": "integer",
+              "description": "pcVue control for heat/cool mode",
+              "format": "int32"
+            },
+            "dewSensor1": {
+              "type": "integer",
+              "description": "humidity contact",
+              "format": "int32"
+            },
+            "spaceCo2": {
+              "type": "integer",
+              "description": "Space CO2 from nanosense",
+              "format": "int32"
+            },
+            "temperatureSelect": {
+              "type": "integer",
+              "description": "target temperature (in 1/10°C)",
+              "format": "int32"
+            },
+            "setpointOccupiedCool1": {
+              "type": "integer",
+              "description": "setpoint occupied cool mode (in 1/10°C)",
+              "format": "int32"
+            },
+            "setpointOccupiedHeat1": {
+              "type": "integer",
+              "description": "setpoint occupied heat mode (in 1/10°C)",
+              "format": "int32"
+            },
+            "setpointUnoccupiedCool1": {
+              "type": "integer",
+              "description": "setpoint unoccupied cool mode (in 1/10°C)",
+              "format": "int32"
+            },
+            "setpointUnoccupiedHeat1": {
+              "type": "integer",
+              "description": "setpoint unoccupied heat mode (in 1/10°C)",
+              "format": "int32"
+            },
+            "setpointStandbyCool1": {
+              "type": "integer",
+              "description": "setpoint standby cool mode (in 1/10°C)",
+              "format": "int32"
+            },
+            "setpointStandbyHeat1": {
+              "type": "integer",
+              "description": "setpoint standby heat mode (in 1/10°C)",
+              "format": "int32"
+            },
+            "effectSetPoint1": {
+              "type": "integer",
+              "description": "effective setpoint (in 1/10°C)",
+              "format": "int32"
+            },
+            "heatOutput1": {
+              "type": "integer",
+              "description": "opening heat valve percentage",
+              "format": "int32"
+            },
+            "coolOutput1": {
+              "type": "integer",
+              "description": "opening cool valve percentage",
+              "format": "int32"
+            },
+            "oaDamper": {
+              "type": "integer",
+              "description": "opening damper percentage",
+              "format": "int32"
+            },
+            "dumpFrequency": {
+              "type": "integer",
+              "description": "dump frequency (in ms)",
+              "format": "int32"
+            },
+            "spaceCOV": {
+              "type": "integer",
+              "description": "space COV from nanosense",
+              "format": "int32"
             },
             "label": {
               "type": "string",
