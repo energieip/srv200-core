@@ -315,6 +315,8 @@ func (s *CoreService) prepareSetupSwitchConfig(switchStatus sd.SwitchStatus) *sd
 	if config.FriendlyName != nil {
 		setup.FriendlyName = *config.FriendlyName
 	}
+	setup.Label = config.Label
+	setup.Profil = config.Profil
 	setup.IsConfigured = &isConfigured
 	setup.LedsSetup = database.GetLedSwitchSetup(s.db, switchStatus.Mac)
 	setup.SensorsSetup = database.GetSensorSwitchSetup(s.db, switchStatus.Mac)
@@ -399,6 +401,13 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 	setup.IP = *config.IP
 	if config.FriendlyName != nil {
 		setup.FriendlyName = *config.FriendlyName
+	}
+	if config.Label != nil {
+		setup.Label = config.Label
+	}
+
+	if config.Profil != "" {
+		setup.Profil = config.Profil
 	}
 	setup.IsConfigured = &isConfigured
 

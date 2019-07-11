@@ -5589,6 +5589,89 @@
             "lastSystemUpgradeDate": {
               "type": "string",
               "description": "Last system upgrade date"
+            },
+            "label": {
+              "type": "string",
+              "description": "Cable Label name"
+            },
+            "profil": {
+              "type": "string",
+              "enum": [
+                "none",
+                "puls"
+              ],
+              "description": "I/O card Profil",
+              "example": "none"
+            },
+            "statePuls1": {
+              "type": "integer",
+              "format": "int32",
+              "description": "State Puls 1"
+            },
+            "statePuls2": {
+              "type": "integer",
+              "format": "int32",
+              "description": "State Puls 2"
+            },
+            "statePuls3": {
+              "type": "integer",
+              "format": "int32",
+              "description": "State Puls 3"
+            },
+            "statePuls4": {
+              "type": "integer",
+              "format": "int32",
+              "description": "State Puls 4"
+            },
+            "statePuls5": {
+              "type": "integer",
+              "format": "int32",
+              "description": "State Puls 5"
+            },
+            "stateBaes": {
+              "type": "integer",
+              "format": "int32",
+              "description": "State Baes"
+            },
+            "ledsPower": {
+              "type": "integer",
+              "format": "int64",
+              "description": "Leds Power (W)"
+            },
+            "blindsPower": {
+              "type": "integer",
+              "format": "int64",
+              "description": "Blinds Power (W)"
+            },
+            "hvacsPower": {
+              "type": "integer",
+              "format": "int64",
+              "description": "Hvacs Power (W)"
+            },
+            "totalPower": {
+              "type": "integer",
+              "format": "int64",
+              "description": "total Power (W)"
+            },
+            "ledsEnergy": {
+              "type": "integer",
+              "format": "int64",
+              "description": "Leds Energy (Wh)"
+            },
+            "blindsEnergy": {
+              "type": "integer",
+              "format": "int64",
+              "description": "Blinds Energy (Wh)"
+            },
+            "hvacsEnergy": {
+              "type": "integer",
+              "format": "int64",
+              "description": "Hvacs Energy (Wh)"
+            },
+            "totalEnergy": {
+              "type": "integer",
+              "format": "int64",
+              "description": "total Energy (Wh)"
             }
           }
         },
