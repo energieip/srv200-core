@@ -103,6 +103,7 @@ func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
 	var blinds []DumpBlind
 	var hvacs []DumpHvac
 	var wagos []DumpWago
+	var frames []DumpFrame
 	var groups []DumpGroup
 	macs := make(map[string]bool)
 	driversMac := make(map[string]bool)
@@ -139,6 +140,8 @@ func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
 	wagosConfig := database.GetWagosConfigByLabel(api.db)
 	switchElts := database.GetSwitchsDumpByLabel(api.db)
 	switchEltsConfig := database.GetSwitchsConfigByLabel(api.db)
+	frameElts := database.GetFramesDumpByLabel(api.db)
+	frameEltsConfig := database.GetFramesConfigByLabel(api.db)
 
 	ifcs := database.GetIfcs(api.db)
 	for _, ifc := range ifcs {
@@ -158,69 +161,49 @@ func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
 		case "led":
 			dump := DumpLed{}
 			led, ok := lights[ifc.Label]
-			gr := 0
 			if ok {
 				dump.Status = led
-				gr = led.Group
 			}
 			config, ok := lightsConfig[ifc.Label]
 			if ok {
 				dump.Config = config
-				if gr == 0 && config.Group != nil {
-					gr = *config.Group
-				}
 			}
 			dump.Ifc = ifc
 
 			leds = append(leds, dump)
 		case "sensor":
 			dump := DumpSensor{}
-			gr := 0
 			sensor, ok := cells[ifc.Label]
 			if ok {
 				dump.Status = sensor
-				gr = sensor.Group
 			}
 			config, ok := cellsConfig[ifc.Label]
 			if ok {
 				dump.Config = config
-				if gr == 0 && config.Group != nil {
-					gr = *config.Group
-				}
 			}
 			dump.Ifc = ifc
 			sensors = append(sensors, dump)
 		case "blind":
 			dump := DumpBlind{}
-			gr := 0
 			bld, ok := blds[ifc.Label]
 			if ok {
 				dump.Status = bld
-				gr = bld.Group
 			}
 			config, ok := bldsConfig[ifc.Label]
 			if ok {
 				dump.Config = config
-				if gr == 0 && config.Group != nil {
-					gr = *config.Group
-				}
 			}
 			dump.Ifc = ifc
 			blinds = append(blinds, dump)
 		case "hvac":
 			dump := DumpHvac{}
-			gr := 0
 			hvac, ok := hvcs[ifc.Label]
 			if ok {
 				dump.Status = hvac
-				gr = hvac.Group
 			}
 			config, ok := hvcsConfig[ifc.Label]
 			if ok {
 				dump.Config = config
-				if gr == 0 && config.Group != nil {
-					gr = *config.Group
-				}
 			}
 			dump.Ifc = ifc
 			hvacs = append(hvacs, dump)
@@ -248,6 +231,18 @@ func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
 			}
 			dump.Ifc = ifc
 			switchs = append(switchs, dump)
+		case "frame":
+			dump := DumpFrame{}
+			frameElt, ok := frameElts[ifc.Label]
+			if ok {
+				dump.Status = frameElt
+			}
+			config, ok := frameEltsConfig[ifc.Label]
+			if ok {
+				dump.Config = config
+			}
+			dump.Ifc = ifc
+			frames = append(frames, dump)
 		}
 	}
 
@@ -272,6 +267,7 @@ func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
 		Wagos:   wagos,
 		Switchs: switchs,
 		Groups:  groups,
+		Frames:  frames,
 	}
 
 	inrec, _ := json.MarshalIndent(dump, "", "  ")
