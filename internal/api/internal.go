@@ -4,10 +4,16 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 
 	"io/ioutil"
 	"strings"
 
+	"github.com/energieip/common-components-go/pkg/dblind"
+	gm "github.com/energieip/common-components-go/pkg/dgroup"
+	"github.com/energieip/common-components-go/pkg/dhvac"
+	dl "github.com/energieip/common-components-go/pkg/dled"
+	ds "github.com/energieip/common-components-go/pkg/dsensor"
 	pkg "github.com/energieip/common-components-go/pkg/service"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
 	"github.com/gorilla/mux"
@@ -372,6 +378,169 @@ func (api *InternalAPI) sendGroupCommand(w http.ResponseWriter, req *http.Reques
 	w.Write([]byte("{}"))
 }
 
+func (api *InternalAPI) setLedConfig(w http.ResponseWriter, req *http.Request) {
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		api.sendError(w, APIErrorBodyParsing, "Error reading request body", http.StatusInternalServerError)
+		return
+	}
+
+	led := dl.LedConf{}
+	err = json.Unmarshal(body, &led)
+	if err != nil {
+		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if led.Group != nil {
+		if *led.Group < 0 {
+			api.sendError(w, APIErrorInvalidValue, "Invalid groupID "+strconv.Itoa(*led.Group), http.StatusInternalServerError)
+			return
+		}
+		gr, _ := database.GetGroupConfig(api.db, *led.Group)
+		if gr == nil {
+			name := "Group " + strconv.Itoa(*led.Group)
+			group := gm.GroupConfig{
+				Group:        *led.Group,
+				FriendlyName: &name,
+			}
+			if led.Mac != "" {
+				leds := []string{led.Mac}
+				group.Leds = leds
+			}
+			eventGr := make(map[string]interface{})
+			eventGr["group"] = group
+			api.EventsToBackend <- eventGr
+		}
+	}
+	event := make(map[string]interface{})
+	event["led"] = led
+	api.EventsToBackend <- event
+	w.Write([]byte("{}"))
+}
+
+func (api *InternalAPI) setSensorConfig(w http.ResponseWriter, req *http.Request) {
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		api.sendError(w, APIErrorBodyParsing, "Error reading request body", http.StatusInternalServerError)
+		return
+	}
+
+	sensor := ds.SensorConf{}
+	err = json.Unmarshal(body, &sensor)
+	if err != nil {
+		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if sensor.Group != nil {
+		if *sensor.Group < 0 {
+			api.sendError(w, APIErrorInvalidValue, "Invalid groupID "+strconv.Itoa(*sensor.Group), http.StatusInternalServerError)
+			return
+		}
+		gr, _ := database.GetGroupConfig(api.db, *sensor.Group)
+		if gr == nil {
+			name := "Group " + strconv.Itoa(*sensor.Group)
+			group := gm.GroupConfig{
+				Group:        *sensor.Group,
+				FriendlyName: &name,
+			}
+			if sensor.Mac != "" {
+				sensors := []string{sensor.Mac}
+				group.Sensors = sensors
+			}
+			eventGr := make(map[string]interface{})
+			eventGr["group"] = group
+			api.EventsToBackend <- eventGr
+		}
+	}
+	event := make(map[string]interface{})
+	event["sensor"] = sensor
+	api.EventsToBackend <- event
+	w.Write([]byte("{}"))
+}
+
+func (api *InternalAPI) setBlindConfig(w http.ResponseWriter, req *http.Request) {
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		api.sendError(w, APIErrorBodyParsing, "Error reading request body", http.StatusInternalServerError)
+		return
+	}
+
+	cfg := dblind.BlindConf{}
+	err = json.Unmarshal(body, &cfg)
+	if err != nil {
+		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if cfg.Group != nil {
+		if *cfg.Group < 0 {
+			api.sendError(w, APIErrorInvalidValue, "Invalid groupID "+strconv.Itoa(*cfg.Group), http.StatusInternalServerError)
+			return
+		}
+		gr, _ := database.GetGroupConfig(api.db, *cfg.Group)
+		if gr == nil {
+			name := "Group " + strconv.Itoa(*cfg.Group)
+			group := gm.GroupConfig{
+				Group:        *cfg.Group,
+				FriendlyName: &name,
+			}
+			if cfg.Mac != "" {
+				blinds := []string{cfg.Mac}
+				group.Blinds = blinds
+			}
+			eventGr := make(map[string]interface{})
+			eventGr["group"] = group
+			api.EventsToBackend <- eventGr
+		}
+	}
+	event := make(map[string]interface{})
+	event["blind"] = cfg
+	api.EventsToBackend <- event
+	w.Write([]byte("{}"))
+}
+
+func (api *InternalAPI) setHvacConfig(w http.ResponseWriter, req *http.Request) {
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		api.sendError(w, APIErrorBodyParsing, "Error reading request body", http.StatusInternalServerError)
+		return
+	}
+
+	cfg := dhvac.HvacConf{}
+	err = json.Unmarshal(body, &cfg)
+	if err != nil {
+		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if cfg.Group != nil {
+		if *cfg.Group < 0 {
+			api.sendError(w, APIErrorInvalidValue, "Invalid groupID "+strconv.Itoa(*cfg.Group), http.StatusInternalServerError)
+			return
+		}
+		gr, _ := database.GetGroupConfig(api.db, *cfg.Group)
+		if gr == nil {
+			name := "Group " + strconv.Itoa(*cfg.Group)
+			group := gm.GroupConfig{
+				Group:        *cfg.Group,
+				FriendlyName: &name,
+			}
+			if cfg.Mac != "" {
+				hvacs := []string{cfg.Mac}
+				group.Hvacs = hvacs
+			}
+			eventGr := make(map[string]interface{})
+			eventGr["group"] = group
+			api.EventsToBackend <- eventGr
+		}
+	}
+	event := make(map[string]interface{})
+	event["hvac"] = cfg
+	api.EventsToBackend <- event
+	w.Write([]byte("{}"))
+}
+
 func (api *InternalAPI) swagger() {
 	router := mux.NewRouter()
 	sh := http.StripPrefix("/swaggerui/", http.FileServer(http.Dir("/media/userdata/www/swaggerui/")))
@@ -383,6 +552,12 @@ func (api *InternalAPI) swagger() {
 
 	//dump API
 	router.HandleFunc(apiV1+"/dump", api.getDump).Methods("GET")
+
+	//config API
+	router.HandleFunc(apiV1+"/config/led", api.setLedConfig).Methods("POST")
+	router.HandleFunc(apiV1+"/config/sensor", api.setSensorConfig).Methods("POST")
+	router.HandleFunc(apiV1+"/config/blind", api.setBlindConfig).Methods("POST")
+	router.HandleFunc(apiV1+"/config/hvac", api.setHvacConfig).Methods("POST")
 
 	//command API
 	router.HandleFunc(apiV1+"/command/led", api.sendLedCommand).Methods("POST")

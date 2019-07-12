@@ -19,6 +19,222 @@
       }
     ],
     "paths": {
+      "/config/sensor": {
+        "post": {
+          "tags": [
+            "config"
+          ],
+          "summary": "setSensorConfig",
+          "description": "Change Sensor runtime configuration",
+          "operationId": "SetSensorConfig",
+          "parameters": [],
+          "requestBody": {
+            "description": "Sensor runtime config",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SensorConfig"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "sucessful operation, Configuration read from database",
+              "headers": {}
+            },
+            "401": {
+              "description": "Unauthorized Access",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "default": {
+              "description": "unexpected error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "deprecated": false,
+          "security": [
+            {
+              "Authorization": []
+            }
+          ]
+        }
+      },
+      "/config/led": {
+        "post": {
+          "tags": [
+            "config"
+          ],
+          "summary": "setLedConfig",
+          "description": "Change LED runtime configuration",
+          "operationId": "SetLedConfig",
+          "parameters": [],
+          "requestBody": {
+            "description": "LED runtime config",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LedConfig"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "sucessful operation, Configuration read from database",
+              "headers": {}
+            },
+            "401": {
+              "description": "Unauthorized Access",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "default": {
+              "description": "unexpected error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "deprecated": false,
+          "security": [
+            {
+              "Authorization": []
+            }
+          ]
+        }
+      },
+      "/config/blind": {
+        "post": {
+          "tags": [
+            "config"
+          ],
+          "summary": "setBlindConfig",
+          "description": "Change Blind runtime configuration",
+          "operationId": "SetBlindConfig",
+          "parameters": [],
+          "requestBody": {
+            "description": "Blind runtime config",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlindConfig"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "sucessful operation, Configuration read from database",
+              "headers": {}
+            },
+            "401": {
+              "description": "Unauthorized Access",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "default": {
+              "description": "unexpected error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "deprecated": false,
+          "security": [
+            {
+              "Authorization": []
+            }
+          ]
+        }
+      },
+      "/config/hvac": {
+        "post": {
+          "tags": [
+            "config"
+          ],
+          "summary": "setHvacConfig",
+          "description": "Change Hvac runtime configuration",
+          "operationId": "SetHvacConfig",
+          "parameters": [],
+          "requestBody": {
+            "description": "Hvac runtime config",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HvacConfig"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "sucessful operation, Configuration read from database",
+              "headers": {}
+            },
+            "401": {
+              "description": "Unauthorized Access",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "default": {
+              "description": "unexpected error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "deprecated": false,
+          "security": [
+            {
+              "Authorization": []
+            }
+          ]
+        }
+      },
       "/command/led": {
         "post": {
           "tags": [
@@ -278,6 +494,261 @@
     },
     "components": {
       "schemas": {
+        "BlindConfig": {
+          "title": "BlindConfig",
+          "required": [
+            "mac"
+          ],
+          "type": "object",
+          "properties": {
+            "mac": {
+              "type": "string",
+              "description": "Blind mac address"
+            },
+            "group": {
+              "type": "integer",
+              "description": "Associate group",
+              "format": "int32"
+            },
+            "isBleEnabled": {
+              "type": "boolean",
+              "description": "bluetooth activation"
+            },
+            "bleMode": {
+              "$ref": "#/components/schemas/BleMode"
+            },
+            "iBeaconUUID": {
+              "type": "string",
+              "description": "ibeacon UUID"
+            },
+            "iBeaconMajor": {
+              "type": "integer",
+              "description": "ibeacon Major",
+              "format": "int32"
+            },
+            "iBeaconMinor": {
+              "type": "integer",
+              "description": "ibeacon Minor",
+              "format": "int32"
+            },
+            "iBeaconTxPower": {
+              "type": "integer",
+              "description": "ibeacon Tx power",
+              "format": "int32"
+            },
+            "profile": {
+              "$ref": "#/components/schemas/BlindProfile"
+            },
+            "friendlyName": {
+              "type": "string",
+              "description": "BLIND FriendlyName"
+            },
+            "dumpFrequency": {
+              "type": "integer",
+              "description": "Dump frequency by default: 1s",
+              "format": "int32"
+            },
+            "isConfigured": {
+              "type": "boolean",
+              "description": "Is the Blind configured"
+            },
+            "label": {
+              "type": "string",
+              "description": "IFC cable label"
+            }
+          }
+        },
+        "HvacConfig": {
+          "title": "HvacConfig",
+          "required": [
+            "mac"
+          ],
+          "type": "object",
+          "properties": {
+            "mac": {
+              "type": "string",
+              "description": "Hvac mac address"
+            },
+            "group": {
+              "type": "integer",
+              "description": "Associate group",
+              "format": "int32"
+            },
+            "friendlyName": {
+              "type": "string",
+              "description": "HVAC FriendlyName"
+            },
+            "dumpFrequency": {
+              "type": "integer",
+              "description": "Dump frequency by default: 1s",
+              "format": "int32"
+            },
+            "isConfigured": {
+              "type": "boolean",
+              "description": "Is the Hvac configured"
+            },
+            "label": {
+              "type": "string",
+              "description": "IFC cable label"
+            }
+          }
+        },
+        "SensorConfig": {
+          "title": "SensorConfig",
+          "required": [
+            "mac"
+          ],
+          "type": "object",
+          "properties": {
+            "mac": {
+              "type": "string",
+              "description": "Sensor mac address"
+            },
+            "isConfigured": {
+              "type": "boolean",
+              "description": "Is the sensor configured"
+            },
+            "group": {
+              "type": "integer",
+              "description": "Associate group",
+              "format": "int32"
+            },
+            "isBleEnabled": {
+              "type": "boolean",
+              "description": "bluetooth activation"
+            },
+            "bleMode": {
+              "$ref": "#/components/schemas/BleMode"
+            },
+            "iBeaconUUID": {
+              "type": "string",
+              "description": "ibeacon UUID"
+            },
+            "iBeaconMajor": {
+              "type": "integer",
+              "description": "ibeacon Major",
+              "format": "int32"
+            },
+            "iBeaconMinor": {
+              "type": "integer",
+              "description": "ibeacon Minor",
+              "format": "int32"
+            },
+            "iBeaconTxPower": {
+              "type": "integer",
+              "description": "ibeacon Tx power",
+              "format": "int32"
+            },
+            "brightnessCorrectionFactor": {
+              "type": "integer",
+              "description": "Brightness correction factor",
+              "format": "int32"
+            },
+            "friendlyName": {
+              "type": "string",
+              "description": "Sensor FriendlyName"
+            },
+            "thresholdPresence": {
+              "type": "integer",
+              "description": "Threshold presence",
+              "format": "int32"
+            },
+            "temperatureOffset": {
+              "type": "integer",
+              "description": "Temperature offset correction",
+              "format": "int32"
+            },
+            "dumpFrequency": {
+              "type": "integer",
+              "description": "Dump frequency by default: 1s",
+              "format": "int32"
+            },
+            "label": {
+              "type": "string",
+              "description": "IFC cable label"
+            }
+          }
+        },
+        "LedConfig": {
+          "title": "LedConfig",
+          "required": [
+            "mac"
+          ],
+          "type": "object",
+          "properties": {
+            "mac": {
+              "type": "string",
+              "description": "LED mac address"
+            },
+            "group": {
+              "type": "integer",
+              "description": "Associate group",
+              "format": "int32"
+            },
+            "isBleEnabled": {
+              "type": "boolean",
+              "description": "bluetooth activation"
+            },
+            "bleMode": {
+              "$ref": "#/components/schemas/BleMode"
+            },
+            "iBeaconUUID": {
+              "type": "string",
+              "description": "ibeacon UUID"
+            },
+            "iBeaconMajor": {
+              "type": "integer",
+              "description": "ibeacon Major",
+              "format": "int32"
+            },
+            "iBeaconMinor": {
+              "type": "integer",
+              "description": "ibeacon Minor",
+              "format": "int32"
+            },
+            "iBeaconTxPower": {
+              "type": "integer",
+              "description": "ibeacon Tx power",
+              "format": "int32"
+            },
+            "isConfigured": {
+              "type": "boolean",
+              "description": "Reset the led configuration"
+            },
+            "auto": {
+              "type": "boolean",
+              "description": "Automatic mode"
+            },
+            "watchdog": {
+              "type": "integer",
+              "description": "watchdog in second",
+              "format": "int32"
+            },
+            "thresholdLow": {
+              "type": "integer",
+              "description": "Threshold low",
+              "format": "int32"
+            },
+            "thresholdHigh": {
+              "type": "integer",
+              "description": "Threshold high",
+              "format": "int32"
+            },
+            "friendlyName": {
+              "type": "string",
+              "description": "LED FriendlyName"
+            },
+            "dumpFrequency": {
+              "type": "integer",
+              "description": "Dump frequency by default: 1s",
+              "format": "int32"
+            },
+            "label": {
+              "type": "string",
+              "description": "IFC cable label"
+            }
+          }
+        },
         "SensorSetup": {
           "title": "SensorSetup",
           "required": [
