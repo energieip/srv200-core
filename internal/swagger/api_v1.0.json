@@ -2673,8 +2673,8 @@
           "tags": [
             "event"
           ],
-          "summary": "events",
-          "description": "pop event",
+          "summary": "Events websocket",
+          "description": "The websocket content will be an Event object list. Please replace https by wss. Example: wss://<ip>/v1.0/events",
           "operationId": "Events",
           "parameters": [],
           "responses": {
@@ -2706,8 +2706,8 @@
           "tags": [
             "event"
           ],
-          "summary": "eventsConsumption",
-          "description": "pop event consumption",
+          "summary": "Event consumption websocket",
+          "description": "The websocket content will be a ConsumptionEvent. Please replace https by wss. Example: wss://<ip>/v1.0/events/consumption",
           "operationId": "EventsConsumption",
           "parameters": [],
           "responses": {
