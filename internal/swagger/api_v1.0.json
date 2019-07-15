@@ -1993,7 +1993,8 @@
                   "type": "object",
                   "properties": {
                     "file": {
-                      "type": "file",
+                      "type": "string",
+                      "format": "binary",
                       "description": "file to upload"
                     }
                   }
@@ -3590,14 +3591,15 @@
               "headers": {},
               "content": {
                 "application/octet-stream": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "file": {
-                      "type": "file",
-                      "description": "file to download"
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "file": {
+                        "type": "string",
+                        "format": "binary",
+                        "description": "file to download"
+                      }
                     }
-                  }
                   }
                 }
               }
@@ -3646,14 +3648,15 @@
               "headers": {},
               "content": {
                 "application/octet-stream": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "file": {
-                      "type": "file",
-                      "description": "file to download"
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "file": {
+                        "type": "string",
+                        "format": "binary",
+                        "description": "file to download"
+                      }
                     }
-                  }
                   }
                 }
               }
