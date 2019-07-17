@@ -22,12 +22,12 @@ type HvacCmd struct {
 }
 
 type GroupCmd struct {
-	Group          int   `json:"group"`
-	Auto           *bool `json:"auto"`
-	SetpointLeds   *int  `json:"setpointLeds,omitempty"`
-	SetpointBlinds *int  `json:"setpointBlinds,omitempty"`
-	SetpointSlats  *int  `json:"setpointSlats,omitempty"`
-	//TODO temp?
+	Group              int   `json:"group"`
+	Auto               *bool `json:"auto"`
+	SetpointLeds       *int  `json:"setpointLeds,omitempty"`
+	SetpointBlinds     *int  `json:"setpointBlinds,omitempty"`
+	SetpointSlats      *int  `json:"setpointSlats,omitempty"`
+	SetpointTempOffset *int  `json:"setpointTempOffset,omitempty"` //temperature offset
 }
 
 // ToJSON dump BlindCmd struct

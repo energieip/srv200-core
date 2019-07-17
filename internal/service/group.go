@@ -486,6 +486,7 @@ func (s *CoreService) sendGroupCmd(cmd interface{}) {
 		cfg.SetpointLeds = cmdGr.SetpointLeds
 		cfg.SetpointBlinds = cmdGr.SetpointBlinds
 		cfg.SetpointSlatBlinds = cmdGr.SetpointSlats
+		cfg.SetpointTempOffset = cmdGr.SetpointTempOffset
 		switchSetup.Groups[cmdGr.Group] = cfg
 		dump, _ := switchSetup.ToJSON()
 		s.server.SendCommand(url, dump)

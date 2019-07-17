@@ -1469,6 +1469,11 @@
               "type": "integer",
               "description": "Slat Setoint value",
               "format": "int32"
+            },
+            "setpointTempOffset": {
+              "type": "integer",
+              "description": "Hvacs temperature offset (in °C)",
+              "format": "int32"
             }
           }
         },
