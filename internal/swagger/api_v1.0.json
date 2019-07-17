@@ -6354,11 +6354,12 @@
           "title": "BleMode",
           "enum": [
             "service",
-            "iBeacon"
+            "ptm",
+            "remote"
           ],
           "type": "string",
           "description": "bluetooth mode",
-          "example": "service"
+          "example": "remote"
         },
         "UploadStatus": {
           "title": "UploadStatus",
