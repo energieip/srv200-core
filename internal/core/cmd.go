@@ -17,8 +17,8 @@ type BlindCmd struct {
 }
 
 type HvacCmd struct {
-	Mac string `json:"mac"`
-	//TODO
+	Mac       string `json:"mac"`
+	ShiftTemp int    `json:"shiftTemp"`
 }
 
 type GroupCmd struct {

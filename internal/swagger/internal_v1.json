@@ -1017,6 +1017,11 @@
             "mac": {
               "type": "string",
               "description": "Hvac mac address"
+            },
+            "shiftTemp":{
+              "type": "integer",
+              "description": "Shift temperature in (1/10°C)",
+              "format": "int32"
             }
           }
         },

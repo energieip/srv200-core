@@ -133,9 +133,9 @@ func (s *CoreService) sendHvacCmd(cmdHvac interface{}) {
 	switchSetup.Mac = driver.SwitchMac
 	switchSetup.HvacsConfig = make(map[string]dhvac.HvacConf)
 
-	//TODO
 	cfg := dhvac.HvacConf{
-		Mac: cmd.Mac,
+		Mac:   cmd.Mac,
+		Shift: &cmd.ShiftTemp,
 	}
 	switchSetup.HvacsConfig[cmd.Mac] = cfg
 
