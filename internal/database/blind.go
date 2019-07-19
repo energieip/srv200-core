@@ -74,12 +74,11 @@ func UpdateBlindSetup(db Database, cfg dblind.BlindSetup) error {
 }
 
 //SwitchBlindConfig update blind config in database
-func SwitchBlindConfig(db Database, old, oldFull, new, newFull string) error {
+func SwitchBlindConfig(db Database, old, new string) error {
 	setup, dbID := GetBlindConfig(db, old)
 	if setup == nil || dbID == "" {
 		return NewError("Device " + old + " not found")
 	}
-	setup.FullMac = &newFull
 	setup.Mac = new
 	return db.UpdateRecord(pconst.DbConfig, pconst.TbBlinds, dbID, setup)
 }

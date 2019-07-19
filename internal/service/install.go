@@ -1,8 +1,6 @@
 package service
 
 import (
-	"strings"
-
 	"github.com/energieip/common-components-go/pkg/pconst"
 
 	db "github.com/energieip/common-components-go/pkg/dblind"
@@ -27,10 +25,7 @@ func (s *CoreService) installDriver(dr interface{}) {
 		rlog.Error("Unknow label " + driver.Label)
 		return
 	}
-	submac := strings.SplitN(driver.FullMac, ":", 4)
-	mac := submac[len(submac)-1]
-	proj.Mac = &mac
-	proj.FullMac = &driver.FullMac
+	proj.Mac = &driver.Mac
 
 	//update project
 	database.SaveProject(s.db, *proj)
@@ -43,8 +38,7 @@ func (s *CoreService) installDriver(dr interface{}) {
 			rlog.Error("Cannot find Led " + proj.Label + " in database")
 			return
 		}
-		elt.FullMac = &driver.FullMac
-		elt.Mac = mac
+		elt.Mac = driver.Mac
 		database.SaveLedLabelConfig(s.db, *elt)
 
 		switchConf := sd.SwitchConfig{}
@@ -60,8 +54,7 @@ func (s *CoreService) installDriver(dr interface{}) {
 			rlog.Error("Cannot find Blind " + proj.Label + " in database")
 			return
 		}
-		elt.FullMac = &driver.FullMac
-		elt.Mac = mac
+		elt.Mac = driver.Mac
 		database.SaveBlindLabelConfig(s.db, *elt)
 
 		// send allow new driver configuration to the switch
@@ -78,8 +71,7 @@ func (s *CoreService) installDriver(dr interface{}) {
 			rlog.Error("Cannot find Hvac " + proj.Label + " in database")
 			return
 		}
-		elt.FullMac = &driver.FullMac
-		elt.Mac = mac
+		elt.Mac = driver.Mac
 		database.SaveHvacLabelConfig(s.db, *elt)
 
 		// send allow new driver configuration to the switch
@@ -96,8 +88,7 @@ func (s *CoreService) installDriver(dr interface{}) {
 			rlog.Error("Cannot find Sensor " + proj.Label + " in database")
 			return
 		}
-		elt.FullMac = &driver.FullMac
-		elt.Mac = mac
+		elt.Mac = driver.Mac
 		database.SaveSensorLabelConfig(s.db, *elt)
 
 		// send allow new driver configuration to the switch
@@ -114,13 +105,11 @@ func (s *CoreService) installDriver(dr interface{}) {
 			rlog.Error("Cannot find SWITCH " + proj.Label + " in database")
 			return
 		}
-		elt.FullMac = &driver.FullMac
-		elt.Mac = &mac
+		elt.Mac = &driver.Mac
 		database.SaveSwitchLabelConfig(s.db, *elt)
 
 		switchConf := sd.SwitchConfig{}
 		switchConf.Mac = *elt.Mac
-		switchConf.FullMac = *elt.FullMac
 		url := "/write/switch/" + *elt.Mac + "/update/settings"
 		dump, _ := switchConf.ToJSON()
 		s.server.SendCommand(url, dump)

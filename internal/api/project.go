@@ -67,11 +67,6 @@ func (api *API) setBim(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	proj.Label = strings.Replace(proj.Label, "-", "_", -1)
-	if proj.FullMac != nil {
-		submac := strings.SplitN(*proj.FullMac, ":", 4)
-		mac := submac[len(submac)-1]
-		proj.Mac = &mac
-	}
 	err = database.SaveProject(api.db, proj)
 	if err != nil {
 		api.sendError(w, APIErrorDatabase, "Ifc information "+proj.Label+" cannot be added in database", http.StatusInternalServerError)

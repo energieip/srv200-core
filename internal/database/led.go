@@ -131,12 +131,11 @@ func UpdateLedLabelSetup(db Database, config dl.LedSetup) error {
 }
 
 //SwitchLedConfig update led config in database
-func SwitchLedConfig(db Database, old, oldFull, new, newFull string) error {
+func SwitchLedConfig(db Database, old, new string) error {
 	setup, dbID := GetLedConfig(db, old)
 	if setup == nil || dbID == "" {
 		return NewError("Device " + old + "not found")
 	}
-	setup.FullMac = &newFull
 	setup.Mac = new
 	return db.UpdateRecord(pconst.DbConfig, pconst.TbLeds, dbID, setup)
 }

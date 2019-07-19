@@ -73,12 +73,11 @@ func UpdateHvacSetup(db Database, cfg dhvac.HvacSetup) error {
 }
 
 //SwitchHvacConfig update hvac config in database
-func SwitchHvacConfig(db Database, old, oldFull, new, newFull string) error {
+func SwitchHvacConfig(db Database, old, new string) error {
 	setup, dbID := GetHvacConfig(db, old)
 	if setup == nil || dbID == "" {
 		return NewError("Device " + old + " not found")
 	}
-	setup.FullMac = &newFull
 	setup.Mac = new
 	return db.UpdateRecord(pconst.DbConfig, pconst.TbHvacs, dbID, setup)
 }

@@ -4606,7 +4606,7 @@
             },
             "fullMac": {
               "type": "string",
-              "description": "device mac address (long version)"
+              "description": "device mac address"
             }
           }
         },
@@ -4645,11 +4645,7 @@
             },
             "mac": {
               "type": "string",
-              "description": "device mac address (short version)"
-            },
-            "fullMac": {
-              "type": "string",
-              "description": "device mac address (long version)"
+              "description": "device mac address"
             },
             "modbusID": {
               "type": "integer",

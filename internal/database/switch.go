@@ -10,7 +10,6 @@ import (
 func SaveSwitchStatus(db Database, status sd.SwitchStatus) error {
 	swStatus := core.SwitchDump{}
 	swStatus.Mac = status.Mac
-	swStatus.FullMac = status.FullMac
 	swStatus.IP = status.IP
 	swStatus.Cluster = status.Cluster
 	swStatus.Label = status.Label
@@ -195,12 +194,11 @@ func GetSwitchLabelConfig(db Database, label string) *core.SwitchConfig {
 }
 
 //ReplaceSwitchConfig update sensor config in database
-func ReplaceSwitchConfig(db Database, old, oldFull, new, newFull string) error {
+func ReplaceSwitchConfig(db Database, old, new string) error {
 	setup, dbID := GetSwitchConfig(db, old)
 	if setup == nil || dbID == "" {
 		return NewError("Device " + old + "not found")
 	}
-	setup.FullMac = &newFull
 	setup.Mac = &new
 	return db.UpdateRecord(pconst.DbConfig, pconst.TbSwitchs, dbID, setup)
 }

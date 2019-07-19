@@ -36,12 +36,7 @@ func (api *API) replaceDriver(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	savedProject := database.GetProjectByFullMac(api.db, driver.OldFullMac)
-	if savedProject == nil {
-		oldSubmac := strings.SplitN(driver.OldFullMac, ":", 4)
-		oldMac := oldSubmac[len(oldSubmac)-1]
-		savedProject = database.GetProjectByMac(api.db, oldMac)
-	}
+	savedProject := database.GetProjectByMac(api.db, driver.OldFullMac)
 
 	if savedProject == nil {
 		api.sendError(w, APIErrorDeviceNotFound, "Unknow old driver "+driver.OldFullMac, http.StatusInternalServerError)

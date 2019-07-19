@@ -19,9 +19,6 @@ func SaveProject(db Database, cfg core.Project) error {
 	if cfg.Mac != nil {
 		proj.Mac = cfg.Mac
 	}
-	if cfg.FullMac != nil {
-		proj.FullMac = cfg.FullMac
-	}
 	if cfg.ModelName != nil {
 		proj.ModelName = cfg.ModelName
 	}
@@ -68,21 +65,6 @@ func GetProject(db Database, label string) (*core.Project, string) {
 func GetProjectByMac(db Database, mac string) *core.Project {
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = mac
-	stored, err := db.GetRecord(pconst.DbConfig, pconst.TbProjects, criteria)
-	if err != nil || stored == nil {
-		return nil
-	}
-	project, err := core.ToProject(stored)
-	if err != nil {
-		return nil
-	}
-	return project
-}
-
-//GetProjectByFullMac return the project configuration
-func GetProjectByFullMac(db Database, mac string) *core.Project {
-	criteria := make(map[string]interface{})
-	criteria["FullMac"] = mac
 	stored, err := db.GetRecord(pconst.DbConfig, pconst.TbProjects, criteria)
 	if err != nil || stored == nil {
 		return nil

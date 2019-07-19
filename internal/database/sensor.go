@@ -167,12 +167,11 @@ func GetSensorLabelConfig(db Database, label string) (*ds.SensorSetup, string) {
 }
 
 //SwitchSensorConfig update sensor config in database
-func SwitchSensorConfig(db Database, old, oldFull, new, newFull string) error {
+func SwitchSensorConfig(db Database, old, new string) error {
 	setup, dbID := GetSensorConfig(db, old)
 	if setup == nil || dbID == "" {
 		return NewError("Device " + old + "not found")
 	}
-	setup.FullMac = &newFull
 	setup.Mac = new
 	return db.UpdateRecord(pconst.DbConfig, pconst.TbSensors, dbID, setup)
 }

@@ -1,8 +1,6 @@
 package service
 
 import (
-	"strings"
-
 	"github.com/energieip/common-components-go/pkg/pconst"
 
 	db "github.com/energieip/common-components-go/pkg/dblind"
@@ -24,23 +22,13 @@ func (s *CoreService) replaceDriver(driver interface{}) {
 		return
 	}
 
-	oldSubmac := strings.SplitN(replace.OldFullMac, ":", 4)
-	oldMac := oldSubmac[len(oldSubmac)-1]
-	newSubmac := strings.SplitN(replace.NewFullMac, ":", 4)
-	newMac := newSubmac[len(newSubmac)-1]
-
-	project := database.GetProjectByFullMac(s.db, replace.OldFullMac)
-	if project == nil {
-		project = database.GetProjectByMac(s.db, oldMac)
-	}
-
+	project := database.GetProjectByMac(s.db, replace.OldFullMac)
 	if project == nil {
 		rlog.Error("Unkown old driver")
 		return
 	}
 
-	project.FullMac = &replace.NewFullMac
-	project.Mac = &newMac
+	project.Mac = &replace.NewFullMac
 
 	//update driver tables
 	if project.ModelName != nil {
@@ -48,13 +36,13 @@ func (s *CoreService) replaceDriver(driver interface{}) {
 		dType := tools.Model2Type(refModel)
 		switch dType {
 		case pconst.LED:
-			oldDriver, _ := database.GetLedConfig(s.db, oldMac)
+			oldDriver, _ := database.GetLedConfig(s.db, replace.OldFullMac)
 			if oldDriver == nil {
-				rlog.Error("Cannot find Led " + oldMac + " in database")
+				rlog.Error("Cannot find Led " + replace.OldFullMac + " in database")
 				return
 			}
 
-			err := database.SwitchLedConfig(s.db, oldMac, replace.OldFullMac, *project.Mac, *project.FullMac)
+			err := database.SwitchLedConfig(s.db, replace.OldFullMac, *project.Mac)
 			if err != nil {
 				rlog.Error("Cannot update Led database", err)
 				return
@@ -72,7 +60,7 @@ func (s *CoreService) replaceDriver(driver interface{}) {
 			groupCfg, _ := database.GetGroupConfig(s.db, *oldDriver.Group)
 			newLeds := []string{}
 			for _, led := range groupCfg.Leds {
-				if led != oldMac {
+				if led != replace.OldFullMac {
 					newLeds = append(newLeds, led)
 				}
 			}
@@ -91,13 +79,13 @@ func (s *CoreService) replaceDriver(driver interface{}) {
 			}
 
 		case pconst.BLIND:
-			oldDriver, _ := database.GetBlindConfig(s.db, oldMac)
+			oldDriver, _ := database.GetBlindConfig(s.db, replace.OldFullMac)
 			if oldDriver == nil {
-				rlog.Error("Cannot find Blind " + oldMac + " in database")
+				rlog.Error("Cannot find Blind " + replace.OldFullMac + " in database")
 				return
 			}
 
-			err := database.SwitchBlindConfig(s.db, oldMac, replace.OldFullMac, *project.Mac, *project.FullMac)
+			err := database.SwitchBlindConfig(s.db, replace.OldFullMac, *project.Mac)
 			if err != nil {
 				rlog.Error("Cannot update Blind database", err)
 				return
@@ -115,7 +103,7 @@ func (s *CoreService) replaceDriver(driver interface{}) {
 			groupCfg, _ := database.GetGroupConfig(s.db, *oldDriver.Group)
 			newBlinds := []string{}
 			for _, blind := range groupCfg.Blinds {
-				if blind != oldMac {
+				if blind != replace.OldFullMac {
 					newBlinds = append(newBlinds, blind)
 				}
 			}
@@ -133,13 +121,13 @@ func (s *CoreService) replaceDriver(driver interface{}) {
 				s.server.SendCommand(url, dump)
 			}
 		case pconst.HVAC:
-			oldDriver, _ := database.GetHvacConfig(s.db, oldMac)
+			oldDriver, _ := database.GetHvacConfig(s.db, replace.OldFullMac)
 			if oldDriver == nil {
-				rlog.Error("Cannot find Hvac " + oldMac + " in database")
+				rlog.Error("Cannot find Hvac " + replace.OldFullMac + " in database")
 				return
 			}
 
-			err := database.SwitchHvacConfig(s.db, oldMac, replace.OldFullMac, *project.Mac, *project.FullMac)
+			err := database.SwitchHvacConfig(s.db, replace.OldFullMac, *project.Mac)
 			if err != nil {
 				rlog.Error("Cannot update Hvac database", err)
 				return
@@ -157,7 +145,7 @@ func (s *CoreService) replaceDriver(driver interface{}) {
 			groupCfg, _ := database.GetGroupConfig(s.db, *oldDriver.Group)
 			newHvacs := []string{}
 			for _, hvac := range groupCfg.Hvacs {
-				if hvac != oldMac {
+				if hvac != replace.OldFullMac {
 					newHvacs = append(newHvacs, hvac)
 				}
 			}
@@ -175,13 +163,13 @@ func (s *CoreService) replaceDriver(driver interface{}) {
 				s.server.SendCommand(url, dump)
 			}
 		case pconst.SENSOR:
-			oldDriver, _ := database.GetSensorConfig(s.db, oldMac)
+			oldDriver, _ := database.GetSensorConfig(s.db, replace.OldFullMac)
 			if oldDriver == nil {
-				rlog.Error("Cannot find Sensor " + oldMac + " in database")
+				rlog.Error("Cannot find Sensor " + replace.OldFullMac + " in database")
 				return
 			}
 
-			err := database.SwitchSensorConfig(s.db, oldMac, replace.OldFullMac, *project.Mac, *project.FullMac)
+			err := database.SwitchSensorConfig(s.db, replace.OldFullMac, *project.Mac)
 			if err != nil {
 				rlog.Error("Cannot update Sensor database", err)
 				return
@@ -199,7 +187,7 @@ func (s *CoreService) replaceDriver(driver interface{}) {
 			groupCfg, _ := database.GetGroupConfig(s.db, *oldDriver.Group)
 			newSensors := []string{}
 			for _, sensor := range groupCfg.Sensors {
-				if sensor != oldMac {
+				if sensor != replace.OldFullMac {
 					newSensors = append(newSensors, sensor)
 				}
 			}
@@ -217,13 +205,13 @@ func (s *CoreService) replaceDriver(driver interface{}) {
 				s.server.SendCommand(url, dump)
 			}
 		case pconst.SWITCH:
-			device, _ := database.GetSwitchConfig(s.db, oldMac)
+			device, _ := database.GetSwitchConfig(s.db, replace.OldFullMac)
 			if device == nil {
-				rlog.Error("Cannot find Switch " + oldMac + " in database")
+				rlog.Error("Cannot find Switch " + replace.OldFullMac + " in database")
 				return
 			}
 
-			err := database.ReplaceSwitchConfig(s.db, oldMac, replace.OldFullMac, *project.Mac, *project.FullMac)
+			err := database.ReplaceSwitchConfig(s.db, replace.OldFullMac, *project.Mac)
 			if err != nil {
 				rlog.Error("Cannot update Switch database", err)
 				return

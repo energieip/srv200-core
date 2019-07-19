@@ -21,13 +21,8 @@ func GetDrivers(db Database) map[string]core.Driver {
 		if !ok {
 			continue
 		}
-		if proj.FullMac != nil {
-			mac = *proj.FullMac
-		} else {
-			if proj.Mac != nil {
-				//case old driver
-				mac = "00:00:00:" + *proj.Mac
-			}
+		if proj.Mac != nil {
+			mac = *proj.Mac
 		}
 		if mac == "" {
 			//use label : no driver installed
@@ -45,20 +40,13 @@ func GetDrivers(db Database) map[string]core.Driver {
 
 	leds := GetLedsStatus(db)
 	for _, driv := range leds {
-		mac := ""
-		if driv.FullMac != nil {
-			mac = *driv.FullMac
-		} else {
-			//case old driver
-			mac = "00:00:00:" + driv.Mac
-		}
 		d, ok := res[driv.Mac]
 		if ok {
 			d.Active = true
 			res[driv.Mac] = d
 		} else {
 			res[driv.Mac] = core.Driver{
-				Mac:    mac,
+				Mac:    driv.Mac,
 				Active: true,
 				Type:   "led",
 			}
@@ -67,20 +55,13 @@ func GetDrivers(db Database) map[string]core.Driver {
 
 	blinds := GetBlindsStatus(db)
 	for _, driv := range blinds {
-		mac := ""
-		if driv.FullMac != nil {
-			mac = *driv.FullMac
-		} else {
-			//case old driver
-			mac = "00:00:00:" + driv.Mac
-		}
 		d, ok := res[driv.Mac]
 		if ok {
 			d.Active = true
 			res[driv.Mac] = d
 		} else {
 			res[driv.Mac] = core.Driver{
-				Mac:    mac,
+				Mac:    driv.Mac,
 				Active: true,
 				Type:   "blind",
 			}
@@ -89,20 +70,13 @@ func GetDrivers(db Database) map[string]core.Driver {
 
 	sensors := GetBlindsStatus(db)
 	for _, driv := range sensors {
-		mac := ""
-		if driv.FullMac != nil {
-			mac = *driv.FullMac
-		} else {
-			//case old driver
-			mac = "00:00:00:" + driv.Mac
-		}
 		d, ok := res[driv.Mac]
 		if ok {
 			d.Active = true
 			res[driv.Mac] = d
 		} else {
 			res[driv.Mac] = core.Driver{
-				Mac:    mac,
+				Mac:    driv.Mac,
 				Active: true,
 				Type:   "sensor",
 			}
@@ -111,20 +85,13 @@ func GetDrivers(db Database) map[string]core.Driver {
 
 	hvacs := GetBlindsStatus(db)
 	for _, driv := range hvacs {
-		mac := ""
-		if driv.FullMac != nil {
-			mac = *driv.FullMac
-		} else {
-			//case old driver
-			mac = "00:00:00:" + driv.Mac
-		}
 		d, ok := res[driv.Mac]
 		if ok {
 			d.Active = true
 			res[driv.Mac] = d
 		} else {
 			res[driv.Mac] = core.Driver{
-				Mac:    mac,
+				Mac:    driv.Mac,
 				Active: true,
 				Type:   "hvac",
 			}
@@ -133,20 +100,13 @@ func GetDrivers(db Database) map[string]core.Driver {
 
 	wagos := GetWagosStatus(db)
 	for _, driv := range wagos {
-		mac := ""
-		if driv.FullMac != nil {
-			mac = *driv.FullMac
-		} else {
-			//case old driver
-			mac = "00:00:00:" + driv.Mac
-		}
 		d, ok := res[driv.Mac]
 		if ok {
 			d.Active = true
 			res[driv.Mac] = d
 		} else {
 			res[driv.Mac] = core.Driver{
-				Mac:    mac,
+				Mac:    driv.Mac,
 				Active: true,
 				Type:   "wago",
 			}
@@ -155,20 +115,13 @@ func GetDrivers(db Database) map[string]core.Driver {
 
 	switchs := GetSwitchsDump(db)
 	for _, driv := range switchs {
-		mac := ""
-		if driv.FullMac != "" {
-			mac = driv.FullMac
-		} else {
-			//case old driver
-			mac = "00:00:00:" + driv.Mac
-		}
 		d, ok := res[driv.Mac]
 		if ok {
 			d.Active = true
 			res[driv.Mac] = d
 		} else {
 			res[driv.Mac] = core.Driver{
-				Mac:    mac,
+				Mac:    driv.Mac,
 				Active: true,
 				Type:   "switch",
 			}
