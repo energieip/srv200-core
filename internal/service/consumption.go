@@ -18,6 +18,7 @@ func (s *CoreService) prepareAPIConsumption(evtObj string, power int) {
 func (s *CoreService) pushConsumptionEvent() {
 	s.bufConsumption.Set(LedElt, 0)
 	s.bufConsumption.Set(BlindElt, 0)
+	s.bufConsumption.Set(HvacElt, 0)
 	timerDump := time.NewTicker(1 * time.Second)
 	for {
 		select {
@@ -27,6 +28,8 @@ func (s *CoreService) pushConsumptionEvent() {
 			conso.Leds = led.(int)
 			blind, _ := s.bufConsumption.Get(BlindElt)
 			conso.Blinds = blind.(int)
+			hvac, _ := s.bufConsumption.Get(HvacElt)
+			conso.Hvac = hvac.(int)
 			conso.Date = time.Now().Format(time.RFC3339)
 			select {
 			case s.eventsConsumptionAPI <- conso:
@@ -37,6 +40,7 @@ func (s *CoreService) pushConsumptionEvent() {
 			s.bufConsumption = cmap.New()
 			s.bufConsumption.Set(LedElt, 0)
 			s.bufConsumption.Set(BlindElt, 0)
+			s.bufConsumption.Set(HvacElt, 0)
 		}
 	}
 }

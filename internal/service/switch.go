@@ -481,7 +481,7 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 		} else {
 			s.prepareAPIEvent(EventUpdate, HvacElt, hvac)
 			// history.SaveHvacHistory(s.historyDb, hvac)
-			// s.prepareAPIConsumption(HvacElt, hvac.LinePower)
+			s.prepareAPIConsumption(HvacElt, hvac.LinePower)
 		}
 	}
 
