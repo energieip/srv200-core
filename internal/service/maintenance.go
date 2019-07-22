@@ -64,7 +64,18 @@ func (s *CoreService) replaceDriver(driver interface{}) {
 					newLeds = append(newLeds, led)
 				}
 			}
+
+			firstDay := []string{}
+			for _, led := range groupCfg.FirstDay {
+				if led != replace.OldFullMac {
+					firstDay = append(firstDay, led)
+				} else {
+					firstDay = append(firstDay, replace.NewFullMac)
+				}
+			}
+			newLeds = append(newLeds, replace.NewFullMac)
 			groupCfg.Leds = newLeds
+			groupCfg.FirstDay = firstDay
 
 			database.UpdateGroupConfig(s.db, *groupCfg)
 			newSwitch := database.GetGroupSwitchs(s.db, groupCfg.Group)
@@ -107,6 +118,7 @@ func (s *CoreService) replaceDriver(driver interface{}) {
 					newBlinds = append(newBlinds, blind)
 				}
 			}
+			newBlinds = append(newBlinds, replace.NewFullMac)
 			groupCfg.Blinds = newBlinds
 
 			database.UpdateGroupConfig(s.db, *groupCfg)
@@ -149,6 +161,7 @@ func (s *CoreService) replaceDriver(driver interface{}) {
 					newHvacs = append(newHvacs, hvac)
 				}
 			}
+			newHvacs = append(newHvacs, replace.NewFullMac)
 			groupCfg.Hvacs = newHvacs
 
 			database.UpdateGroupConfig(s.db, *groupCfg)
@@ -191,6 +204,7 @@ func (s *CoreService) replaceDriver(driver interface{}) {
 					newSensors = append(newSensors, sensor)
 				}
 			}
+			newSensors = append(newSensors, replace.NewFullMac)
 			groupCfg.Sensors = newSensors
 
 			database.UpdateGroupConfig(s.db, *groupCfg)
