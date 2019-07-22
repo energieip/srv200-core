@@ -110,7 +110,7 @@ func GetSensorSwitchSetup(db Database, swMac string) map[string]ds.SensorSetup {
 	res := map[string]ds.SensorSetup{}
 	criteria := make(map[string]interface{})
 	criteria["SwitchMac"] = swMac
-	stored, err := db.GetRecords(pconst.DbStatus, pconst.TbSensors, criteria)
+	stored, err := db.GetRecords(pconst.DbConfig, pconst.TbSensors, criteria)
 	if err != nil || stored == nil {
 		return res
 	}

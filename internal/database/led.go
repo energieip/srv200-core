@@ -239,7 +239,7 @@ func GetLedSwitchSetup(db Database, swMac string) map[string]dl.LedSetup {
 	res := map[string]dl.LedSetup{}
 	criteria := make(map[string]interface{})
 	criteria["SwitchMac"] = swMac
-	stored, err := db.GetRecords(pconst.DbStatus, pconst.TbLeds, criteria)
+	stored, err := db.GetRecords(pconst.DbConfig, pconst.TbLeds, criteria)
 	if err != nil || stored == nil {
 		return res
 	}

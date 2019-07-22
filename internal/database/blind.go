@@ -94,7 +94,7 @@ func RemoveBlindConfig(db Database, mac string) error {
 func RemoveBlindStatus(db Database, mac string) error {
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = mac
-	return db.DeleteRecord(pconst.DbConfig, pconst.TbBlinds, criteria)
+	return db.DeleteRecord(pconst.DbStatus, pconst.TbBlinds, criteria)
 }
 
 //GetBlindSwitchStatus get cluster Config list
@@ -102,7 +102,7 @@ func GetBlindSwitchStatus(db Database, swMac string) map[string]dblind.Blind {
 	res := map[string]dblind.Blind{}
 	criteria := make(map[string]interface{})
 	criteria["SwitchMac"] = swMac
-	stored, err := db.GetRecords(pconst.DbConfig, pconst.TbBlinds, criteria)
+	stored, err := db.GetRecords(pconst.DbStatus, pconst.TbBlinds, criteria)
 	if err != nil || stored == nil {
 		return res
 	}
@@ -121,7 +121,7 @@ func GetBlindSwitchSetup(db Database, swMac string) map[string]dblind.BlindSetup
 	res := map[string]dblind.BlindSetup{}
 	criteria := make(map[string]interface{})
 	criteria["SwitchMac"] = swMac
-	stored, err := db.GetRecords(pconst.DbStatus, pconst.TbBlinds, criteria)
+	stored, err := db.GetRecords(pconst.DbConfig, pconst.TbBlinds, criteria)
 	if err != nil || stored == nil {
 		return res
 	}

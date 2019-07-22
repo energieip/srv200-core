@@ -6,6 +6,7 @@ import (
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
 	"github.com/energieip/common-components-go/pkg/dhvac"
 	dl "github.com/energieip/common-components-go/pkg/dled"
+	"github.com/energieip/common-components-go/pkg/dnanosense"
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
 	"github.com/energieip/common-components-go/pkg/duser"
 	"github.com/energieip/common-components-go/pkg/dwago"
@@ -68,6 +69,7 @@ func ConnectDatabase(ip, port string) (*Database, error) {
 			tableCfg[pconst.TbAccess] = duser.UserAccess{}
 			tableCfg[pconst.TbFrames] = core.Frame{}
 			tableCfg[pconst.TbWagos] = dwago.WagoSetup{}
+			tableCfg[pconst.TbNanosenses] = dnanosense.NanosenseSetup{}
 		} else {
 			tableCfg[pconst.TbLeds] = dl.Led{}
 			tableCfg[pconst.TbSensors] = ds.Sensor{}
@@ -77,6 +79,7 @@ func ConnectDatabase(ip, port string) (*Database, error) {
 			tableCfg[pconst.TbServices] = pkg.ServiceStatus{}
 			tableCfg[pconst.TbBlinds] = dblind.Blind{}
 			tableCfg[pconst.TbWagos] = dwago.Wago{}
+			tableCfg[pconst.TbNanosenses] = dnanosense.Nanosense{}
 		}
 		for tableName, objs := range tableCfg {
 			err = db.CreateTable(dbName, tableName, &objs)

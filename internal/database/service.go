@@ -47,7 +47,7 @@ func SaveServiceStatus(db Database, status core.ServiceDump) error {
 	criteria := make(map[string]interface{})
 	criteria["Name"] = status.Name
 	criteria["SwitchMac"] = status.SwitchMac
-	return SaveOnUpdateObject(db, status, pconst.DbConfig, pconst.TbServices, criteria)
+	return SaveOnUpdateObject(db, status, pconst.DbStatus, pconst.TbServices, criteria)
 }
 
 //RemoveServiceConfig remove sensor config in database

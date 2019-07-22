@@ -120,7 +120,7 @@ func GetHvacSwitchSetup(db Database, swMac string) map[string]dhvac.HvacSetup {
 	res := map[string]dhvac.HvacSetup{}
 	criteria := make(map[string]interface{})
 	criteria["SwitchMac"] = swMac
-	stored, err := db.GetRecords(pconst.DbStatus, pconst.TbHvacs, criteria)
+	stored, err := db.GetRecords(pconst.DbConfig, pconst.TbHvacs, criteria)
 	if err != nil || stored == nil {
 		return res
 	}

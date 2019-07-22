@@ -7,22 +7,24 @@ import (
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
 	"github.com/energieip/common-components-go/pkg/dhvac"
 	dl "github.com/energieip/common-components-go/pkg/dled"
+	"github.com/energieip/common-components-go/pkg/dnanosense"
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
 	"github.com/energieip/common-components-go/pkg/dwago"
 )
 
 //MapInfo
 type MapInfo struct {
-	Groups  map[string]gm.GroupConfig  `json:"groups"`
-	Leds    map[string]dl.LedSetup     `json:"leds"`
-	Sensors map[string]ds.SensorSetup  `json:"sensors"`
-	Hvacs   map[string]dhvac.HvacSetup `json:"hvacs"`
-	Blinds  map[string]db.BlindSetup   `json:"blinds"`
-	Models  map[string]Model           `json:"models"`
-	Wagos   map[string]dwago.WagoSetup `json:"wagos"`
-	Frames  map[string]Frame           `json:"frames"`
-	Project map[string]Project         `json:"projects"`
-	Switchs map[string]SwitchConfig    `json:"switchs"`
+	Groups     map[string]gm.GroupConfig            `json:"groups"`
+	Leds       map[string]dl.LedSetup               `json:"leds"`
+	Sensors    map[string]ds.SensorSetup            `json:"sensors"`
+	Hvacs      map[string]dhvac.HvacSetup           `json:"hvacs"`
+	Blinds     map[string]db.BlindSetup             `json:"blinds"`
+	Models     map[string]Model                     `json:"models"`
+	Wagos      map[string]dwago.WagoSetup           `json:"wagos"`
+	Nanosenses map[string]dnanosense.NanosenseSetup `json:"nanosenses"`
+	Frames     map[string]Frame                     `json:"frames"`
+	Project    map[string]Project                   `json:"projects"`
+	Switchs    map[string]SwitchConfig              `json:"switchs"`
 }
 
 // ToJSON dump MapInfo struct

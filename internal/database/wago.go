@@ -239,7 +239,7 @@ func GetWagoClusterSetup(db Database, cluster int) map[string]dwago.WagoSetup {
 	res := map[string]dwago.WagoSetup{}
 	criteria := make(map[string]interface{})
 	criteria["Cluster"] = cluster
-	stored, err := db.GetRecords(pconst.DbStatus, pconst.TbWagos, criteria)
+	stored, err := db.GetRecords(pconst.DbConfig, pconst.TbWagos, criteria)
 	if err != nil || stored == nil {
 		return res
 	}
