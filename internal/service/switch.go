@@ -515,7 +515,7 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 	if config.Cluster != nil {
 		clusters = database.GetCluster(s.db, *config.Cluster)
 		for _, cluster := range clusters {
-			if cluster.Mac != nil {
+			if cluster.Mac == nil {
 				continue
 			}
 			_, ok := switchStatus.ClusterBroker[*cluster.Mac]
