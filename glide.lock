@@ -1,5 +1,5 @@
 hash: 7873f75061b03685fab1d37fa10ae2d9249507813e75d280fc0acfb9b629147f
-updated: 2019-07-19T16:47:20.00782075+02:00
+updated: 2019-07-22T10:46:55.976070392+02:00
 imports:
 - name: github.com/cenkalti/backoff
   version: 2146c93394225c3732078705043ce9f26584d334
@@ -10,7 +10,7 @@ imports:
   subpackages:
   - packets
 - name: github.com/energieip/common-components-go
-  version: ee5b7aa96308fd7f9c56c532c6dbe8d58a8aedc2
+  version: bc579a47c7997738b581254833990c56b33b44bc
   subpackages:
   - pkg/database
   - pkg/dblind
@@ -33,7 +33,7 @@ imports:
 - name: github.com/gorilla/context
   version: 8559d4a6b87e4f517ec1846eb90a192b8748cc89
 - name: github.com/gorilla/mux
-  version: d83b6ffe499a29cc05fc977988d0392851779620
+  version: e67b3c02c7195c052acff13261f0c9fd1ba53011
 - name: github.com/gorilla/websocket
   version: ae1634f6a98965ded3b8789c626cb4e0bd78c3de
 - name: github.com/hailocab/go-hostpool
