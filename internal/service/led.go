@@ -58,11 +58,7 @@ func (s *CoreService) updateLedCfg(config interface{}) {
 		}
 		database.UpdateLedConfig(s.db, *cfg)
 		//Get corresponding switchMac
-		led, _ := database.GetLedConfig(s.db, cfg.Mac)
-		if led == nil {
-			rlog.Error("Cannot find config for " + cfg.Mac)
-			return
-		}
+		led, _ = database.GetLedConfig(s.db, cfg.Mac)
 	} else {
 		if cfg.Label == nil {
 			rlog.Error("Cannot find config for " + cfg.Mac)
@@ -76,13 +72,21 @@ func (s *CoreService) updateLedCfg(config interface{}) {
 		database.UpdateLedLabelConfig(s.db, *cfg)
 		//Get corresponding switchMac
 		led, _ = database.GetLedLabelConfig(s.db, *cfg.Label)
-		if led == nil {
-			rlog.Error("Cannot find config for " + *cfg.Label)
-			return
-		}
+
+	}
+	if led == nil {
+		rlog.Error("Cannot find config for " + cfg.Mac)
+		return
+	}
+
+	gr := 0
+	firstDay := false
+	if led.FirstDay != nil {
+		firstDay = *led.FirstDay
 	}
 
 	if led.Group != nil {
+		gr = *led.Group
 		if oldLed.Group != led.Group {
 			if oldLed.Group != nil {
 				rlog.Info("Update old group", *oldLed.Group)
@@ -106,15 +110,31 @@ func (s *CoreService) updateLedCfg(config interface{}) {
 					s.updateGroupCfg(gr)
 				}
 			}
-			rlog.Info("Update new group", *led.Group)
-			grNew, _ := database.GetGroupConfig(s.db, *led.Group)
-			if grNew != nil {
-				grNew.Leds = append(grNew.Leds, cfg.Mac)
-				rlog.Info("new group will be", grNew.Leds)
-				s.updateGroupCfg(grNew)
-			}
+		}
+	} else {
+		if oldLed.Group != nil {
+			gr = *oldLed.Group
 		}
 	}
+	rlog.Info("Update new group", gr)
+	grNew, _ := database.GetGroupConfig(s.db, gr)
+	if grNew != nil && led.Mac != "" {
+		grNew.Leds = append(grNew.Leds, cfg.Mac)
+
+		firsts := []string{}
+		for _, v := range grNew.FirstDay {
+			if v != led.Mac {
+				firsts = append(firsts, v)
+			}
+		}
+		if firstDay {
+			firsts = append(firsts, led.Mac)
+		}
+		grNew.FirstDay = firsts
+		rlog.Info("new group will be", grNew.Leds)
+		s.updateGroupCfg(grNew)
+	}
+
 	if led.SwitchMac == "" {
 		rlog.Info("No corresponding switch found for " + cfg.Mac)
 		return
@@ -157,8 +177,18 @@ func (s *CoreService) updateGroupLed(oldLed dl.LedSetup, cfg dl.LedSetup) {
 			}
 			rlog.Info("Update new group", *cfg.Group)
 			grNew, _ := database.GetGroupConfig(s.db, *cfg.Group)
-			if grNew != nil {
+			if grNew != nil && cfg.Mac != "" {
 				grNew.Leds = append(grNew.Leds, cfg.Mac)
+				firsts := []string{}
+				for _, v := range grNew.FirstDay {
+					if v != cfg.Mac {
+						firsts = append(firsts, v)
+					}
+				}
+				if cfg.FirstDay != nil && *cfg.FirstDay == true {
+					firsts = append(firsts, cfg.Mac)
+				}
+				grNew.FirstDay = firsts
 				rlog.Info("new group will be", grNew.Leds)
 				s.updateGroupCfg(grNew)
 			}

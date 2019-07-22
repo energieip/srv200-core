@@ -680,6 +680,10 @@
               "type": "string",
               "description": "LED mac address"
             },
+            "firstDay": {
+              "type": "boolean",
+              "description": "Led in first Day"
+            },
             "group": {
               "type": "integer",
               "description": "Associate group",
@@ -1036,6 +1040,10 @@
             "mac": {
               "type": "string",
               "description": "LED mac address"
+            },
+            "firstDay": {
+              "type": "boolean",
+              "description": "Led in first Day"
             },
             "group": {
               "type": "integer",
@@ -2462,6 +2470,10 @@
             "protocol": {
               "type": "string",
               "description": "LED communication protocol"
+            },
+            "firstDay": {
+              "type": "boolean",
+              "description": "Led in first Day"
             },
             "topic": {
               "type": "string",

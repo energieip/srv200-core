@@ -4387,6 +4387,10 @@
               "type": "boolean",
               "description": "Automatic mode"
             },
+            "firstDay": {
+              "type": "boolean",
+              "description": "Led in first Day"
+            },
             "watchdog": {
               "type": "integer",
               "description": "watchdog in second",
@@ -4476,6 +4480,10 @@
               "type": "integer",
               "description": "Threshold low",
               "format": "int32"
+            },
+            "firstDay": {
+              "type": "boolean",
+              "description": "Led in first Day"
             },
             "thresholdHigh": {
               "type": "integer",
@@ -6295,6 +6303,10 @@
             "auto": {
               "type": "boolean",
               "description": "Automatic mode"
+            },
+            "firstDay": {
+              "type": "boolean",
+              "description": "Led in first Day"
             },
             "dumpFrequency": {
               "type": "integer",
