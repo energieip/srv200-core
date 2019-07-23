@@ -17,13 +17,21 @@ import (
 
 func (s *CoreService) updateSwitchCfg(config interface{}) {
 	cfg, _ := core.ToSwitchConfig(config)
-	if cfg.Mac == nil {
+	if cfg == nil || cfg.Mac == nil {
 		return
 	}
 	sw, _ := database.GetSwitchConfig(s.db, *cfg.Mac)
 	if sw != nil {
 		database.UpdateSwitchConfig(s.db, *cfg)
 	} else {
+		if cfg.Label != nil {
+			sw = database.GetSwitchLabelConfig(s.db, *cfg.Label)
+			if sw != nil {
+				database.UpdateSwitchLabelConfig(s.db, *cfg)
+			}
+		}
+	}
+	if sw == nil {
 		database.SaveSwitchConfig(s.db, *cfg)
 	}
 

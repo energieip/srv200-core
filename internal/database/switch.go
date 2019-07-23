@@ -62,7 +62,7 @@ func UpdateSwitchConfig(db Database, config core.SwitchConfig) error {
 		return NewError("Switch " + *config.Mac + " not found")
 	}
 
-	if config.FriendlyName == nil {
+	if config.FriendlyName != nil {
 		setup.FriendlyName = config.FriendlyName
 	}
 
@@ -81,6 +81,9 @@ func UpdateSwitchConfig(db Database, config core.SwitchConfig) error {
 	}
 	if config.Profil != "" {
 		setup.Profil = config.Profil
+	}
+	if config.Mac != nil {
+		setup.Mac = config.Mac
 	}
 
 	return db.UpdateRecord(pconst.DbConfig, pconst.TbSwitchs, dbID, setup)
@@ -89,27 +92,27 @@ func UpdateSwitchConfig(db Database, config core.SwitchConfig) error {
 //UpdateSwitchLabelConfig update server config to database
 func UpdateSwitchLabelConfig(db Database, config core.SwitchConfig) error {
 	if config.Label == nil {
-		return NewError("Switch Mac not found")
+		return NewError("Switch Label not found")
 	}
 	criteria := make(map[string]interface{})
 	criteria["Label"] = config.Label
 	stored, err := db.GetRecord(pconst.DbConfig, pconst.TbSwitchs, criteria)
 	if err != nil || stored == nil {
-		return NewError("Switch " + *config.Mac + " not found")
+		return NewError("Switch " + *config.Label + " not found")
 	}
 	m := stored.(map[string]interface{})
 	id, ok := m["id"]
 	if !ok {
-		return NewError("Switch " + *config.Mac + " not found")
+		return NewError("Switch " + *config.Label + " not found")
 	}
 	dbID := id.(string)
 
 	setup, err := core.ToSwitchConfig(stored)
 	if err != nil || stored == nil {
-		return NewError("Switch " + *config.Mac + " not found")
+		return NewError("Switch " + *config.Label + " not found")
 	}
 
-	if config.FriendlyName == nil {
+	if config.FriendlyName != nil {
 		setup.FriendlyName = config.FriendlyName
 	}
 
@@ -128,6 +131,9 @@ func UpdateSwitchLabelConfig(db Database, config core.SwitchConfig) error {
 	}
 	if config.Profil != "" {
 		setup.Profil = config.Profil
+	}
+	if config.Mac != nil {
+		setup.Mac = config.Mac
 	}
 
 	return db.UpdateRecord(pconst.DbConfig, pconst.TbSwitchs, dbID, setup)
