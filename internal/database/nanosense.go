@@ -8,62 +8,24 @@ import (
 //SaveNanoConfig dump nano config in database
 func SaveNanoConfig(db Database, cfg dnanosense.NanosenseSetup) error {
 	criteria := make(map[string]interface{})
-	criteria["Mac"] = cfg.Mac
-	return SaveOnUpdateObject(db, cfg, pconst.DbConfig, pconst.TbNanosenses, criteria)
-}
-
-//SaveNanoLabelConfig dump nanosense config in database
-func SaveNanoLabelConfig(db Database, cfg dnanosense.NanosenseSetup) error {
-	criteria := make(map[string]interface{})
-	if cfg.Label == nil {
-		return NewError("Device " + cfg.Mac + "not found")
-	}
-	criteria["Label"] = *cfg.Label
+	criteria["Label"] = cfg.Label
 	return SaveOnUpdateObject(db, cfg, pconst.DbConfig, pconst.TbNanosenses, criteria)
 }
 
 //UpdateNanoConfig update nano config in database
 func UpdateNanoConfig(db Database, cfg dnanosense.NanosenseConf) error {
-	setup, dbID := GetNanoConfig(db, cfg.Mac)
+	setup, dbID := GetNanoConfig(db, cfg.Label)
 	if setup == nil || dbID == "" {
-		return NewError("Device " + cfg.Mac + " not found")
+		return NewError("Device " + cfg.Label + " not found")
 	}
 
 	new := dnanosense.UpdateConfig(cfg, *setup)
-	return db.UpdateRecord(pconst.DbConfig, pconst.TbNanosenses, dbID, &new)
-}
-
-//UpdateNanoLabelConfig update nano config in database
-func UpdateNanoLabelConfig(db Database, cfg dnanosense.NanosenseConf) error {
-	if cfg.Label == nil {
-		return NewError("Unknow Device")
-	}
-	setup, dbID := GetNanoLabelConfig(db, *cfg.Label)
-	if setup == nil || dbID == "" {
-		return NewError("Device " + *cfg.Label + " not found")
-	}
-
-	new := dnanosense.UpdateConfig(cfg, *setup)
-	return db.UpdateRecord(pconst.DbConfig, pconst.TbNanosenses, dbID, &new)
-}
-
-//UpdateNanoLabelSetup update nano config in database
-func UpdateNanoLabelSetup(db Database, cfg dnanosense.NanosenseSetup) error {
-	if cfg.Label == nil {
-		return NewError("Device label not found")
-	}
-	setup, dbID := GetNanoLabelConfig(db, *cfg.Label)
-	if setup == nil || dbID == "" {
-		cfg = dnanosense.FillDefaultValue(cfg)
-		return SaveNanoLabelConfig(db, cfg)
-	}
-	new := dnanosense.UpdateSetup(cfg, *setup)
 	return db.UpdateRecord(pconst.DbConfig, pconst.TbNanosenses, dbID, &new)
 }
 
 //UpdateNanoSetup update nano config in database
 func UpdateNanoSetup(db Database, cfg dnanosense.NanosenseSetup) error {
-	setup, dbID := GetNanoConfig(db, cfg.Mac)
+	setup, dbID := GetNanoConfig(db, cfg.Label)
 	if setup == nil || dbID == "" {
 		cfg = dnanosense.FillDefaultValue(cfg)
 		return SaveNanoConfig(db, cfg)
@@ -73,27 +35,17 @@ func UpdateNanoSetup(db Database, cfg dnanosense.NanosenseSetup) error {
 	return db.UpdateRecord(pconst.DbConfig, pconst.TbNanosenses, dbID, &new)
 }
 
-//SwitchNanoConfig update nano config in database
-func SwitchNanoConfig(db Database, old, new string) error {
-	setup, dbID := GetNanoConfig(db, old)
-	if setup == nil || dbID == "" {
-		return NewError("Device " + old + " not found")
-	}
-	setup.Mac = new
-	return db.UpdateRecord(pconst.DbConfig, pconst.TbNanosenses, dbID, setup)
-}
-
 //RemoveNanoConfig remove nano config in database
-func RemoveNanoConfig(db Database, mac string) error {
+func RemoveNanoConfig(db Database, label string) error {
 	criteria := make(map[string]interface{})
-	criteria["Mac"] = mac
+	criteria["Label"] = label
 	return db.DeleteRecord(pconst.DbConfig, pconst.TbNanosenses, criteria)
 }
 
-//RemoveNanoStatus remove led status in database
-func RemoveNanoStatus(db Database, mac string) error {
+//RemoveNanoStatus remove nano status in database
+func RemoveNanoStatus(db Database, label string) error {
 	criteria := make(map[string]interface{})
-	criteria["Mac"] = mac
+	criteria["Label"] = label
 	return db.DeleteRecord(pconst.DbStatus, pconst.TbNanosenses, criteria)
 }
 
@@ -111,7 +63,7 @@ func GetNanoSwitchStatus(db Database, swMac string) map[string]dnanosense.Nanose
 		if err != nil || driver == nil {
 			continue
 		}
-		res[driver.Mac] = *driver
+		res[driver.Label] = *driver
 	}
 	return res
 }
@@ -130,34 +82,13 @@ func GetNanoSwitchSetup(db Database, swMac string) map[string]dnanosense.Nanosen
 		if err != nil || driver == nil {
 			continue
 		}
-		res[driver.Mac] = *driver
+		res[driver.Label] = *driver
 	}
 	return res
 }
 
 //GetNanoConfig return the nano configuration
-func GetNanoConfig(db Database, mac string) (*dnanosense.NanosenseSetup, string) {
-	var dbID string
-	criteria := make(map[string]interface{})
-	criteria["Mac"] = mac
-	stored, err := db.GetRecord(pconst.DbConfig, pconst.TbNanosenses, criteria)
-	if err != nil || stored == nil {
-		return nil, dbID
-	}
-	m := stored.(map[string]interface{})
-	id, ok := m["id"]
-	if ok {
-		dbID = id.(string)
-	}
-	driver, err := dnanosense.ToNanosenseSetup(stored)
-	if err != nil {
-		return nil, dbID
-	}
-	return driver, dbID
-}
-
-//GetNanoLabelConfig return the sensor configuration
-func GetNanoLabelConfig(db Database, label string) (*dnanosense.NanosenseSetup, string) {
+func GetNanoConfig(db Database, label string) (*dnanosense.NanosenseSetup, string) {
 	var dbID string
 	criteria := make(map[string]interface{})
 	criteria["Label"] = label
@@ -189,24 +120,7 @@ func GetNanosConfig(db Database) map[string]dnanosense.NanosenseSetup {
 		if err != nil || driver == nil {
 			continue
 		}
-		drivers[driver.Mac] = *driver
-	}
-	return drivers
-}
-
-//GetNanosConfigByLabel return the nano config list
-func GetNanosConfigByLabel(db Database) map[string]dnanosense.NanosenseSetup {
-	drivers := map[string]dnanosense.NanosenseSetup{}
-	stored, err := db.FetchAllRecords(pconst.DbConfig, pconst.TbNanosenses)
-	if err != nil || stored == nil {
-		return drivers
-	}
-	for _, s := range stored {
-		driver, err := dnanosense.ToNanosenseSetup(s)
-		if err != nil || driver == nil || driver.Label == nil {
-			continue
-		}
-		drivers[*driver.Label] = *driver
+		drivers[driver.Label] = *driver
 	}
 	return drivers
 }
@@ -214,7 +128,7 @@ func GetNanosConfigByLabel(db Database) map[string]dnanosense.NanosenseSetup {
 //SaveNanoStatus dump nano status in database
 func SaveNanoStatus(db Database, status dnanosense.Nanosense) error {
 	criteria := make(map[string]interface{})
-	criteria["Mac"] = status.Mac
+	criteria["Label"] = status.Label
 	return SaveOnUpdateObject(db, status, pconst.DbStatus, pconst.TbNanosenses, criteria)
 }
 
@@ -230,32 +144,15 @@ func GetNanosStatus(db Database) map[string]dnanosense.Nanosense {
 		if err != nil || driver == nil {
 			continue
 		}
-		drivers[driver.Mac] = *driver
-	}
-	return drivers
-}
-
-//GetNanosStatusByLabel return the nano status list
-func GetNanosStatusByLabel(db Database) map[string]dnanosense.Nanosense {
-	drivers := map[string]dnanosense.Nanosense{}
-	stored, err := db.FetchAllRecords(pconst.DbStatus, pconst.TbNanosenses)
-	if err != nil || stored == nil {
-		return drivers
-	}
-	for _, s := range stored {
-		driver, err := dnanosense.ToNanosense(s)
-		if err != nil || driver == nil || driver.Label == nil {
-			continue
-		}
-		drivers[*driver.Label] = *driver
+		drivers[driver.Label] = *driver
 	}
 	return drivers
 }
 
 //GetNanoStatus return the nano status
-func GetNanoStatus(db Database, mac string) *dnanosense.Nanosense {
+func GetNanoStatus(db Database, label string) *dnanosense.Nanosense {
 	criteria := make(map[string]interface{})
-	criteria["Mac"] = mac
+	criteria["Label"] = label
 	stored, err := db.GetRecord(pconst.DbStatus, pconst.TbNanosenses, criteria)
 	if err != nil || stored == nil {
 		return nil
