@@ -151,7 +151,6 @@ def buildNanoSense(driver):
         "apiType": apiType,
         "group": driver['properties'].get("Group", 0),
         "api": driver['properties'].get("API", {}),
-        "ip": driver['properties'].get("IP", "0"),
         "modbusOffset": driver['properties'].get("ModbusOffset", 0),
         "protocol": driver['properties'].get("APIType", "modbus"),
     })

@@ -40,6 +40,10 @@ func (s *CoreService) updateMapInfo(config interface{}) {
 		s.updateWagoLabelSetup(dr)
 	}
 
+	for _, dr := range cfg.Nanosenses {
+		s.updateNanoLabelSetup(dr)
+	}
+
 	for _, proj := range cfg.Project {
 		database.SaveProject(s.db, proj)
 	}

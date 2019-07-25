@@ -1,6 +1,10 @@
 package service
 
 import (
+	"strconv"
+
+	"github.com/energieip/common-components-go/pkg/dnanosense"
+	"github.com/energieip/common-components-go/pkg/dwago"
 	"github.com/energieip/common-components-go/pkg/pconst"
 
 	db "github.com/energieip/common-components-go/pkg/dblind"
@@ -218,6 +222,61 @@ func (s *CoreService) replaceDriver(driver interface{}) {
 				dump, _ := switchSetup.ToJSON()
 				s.server.SendCommand(url, dump)
 			}
+		case pconst.WAGO:
+			oldDriver, _ := database.GetWagoConfig(s.db, replace.OldFullMac)
+			if oldDriver == nil {
+				rlog.Error("Cannot find Wago " + replace.OldFullMac + " in database")
+				return
+			}
+
+			err := database.SwitchWagoConfig(s.db, replace.OldFullMac, *project.Mac)
+			if err != nil {
+				rlog.Error("Cannot update Wago database", err)
+				return
+			}
+
+			newDriver, _ := database.GetWagoConfig(s.db, *project.Mac)
+			if newDriver == nil {
+				rlog.Error("Cannot find Wago " + *project.Mac + " in database")
+				return
+			}
+
+			var oldNanos []dnanosense.NanosenseSetup
+			nanos := database.GetNanoSwitchSetup(s.db, newDriver.Cluster)
+			for _, nano := range nanos {
+				oldNanos = append(oldNanos, nano)
+				nano.Mac = *project.Mac + "." + strconv.Itoa(nano.ModbusOffset)
+				database.SaveNanoLabelConfig(s.db, nano)
+			}
+
+			for sw := range database.GetCluster(s.db, oldDriver.Cluster) {
+				if sw == "" {
+					continue
+				}
+				switchSetup := sd.SwitchConfig{}
+				switchSetup.Mac = sw
+				switchSetup.WagosSetup = make(map[string]dwago.WagoSetup)
+				switchSetup.WagosSetup[oldDriver.Mac] = *oldDriver
+				switchSetup.NanosSetup = make(map[string]dnanosense.NanosenseSetup)
+				for _, nano := range oldNanos {
+					switchSetup.NanosSetup[nano.Mac] = nano
+				}
+				s.sendSwitchRemoveConfig(switchSetup)
+			}
+			for sw := range database.GetCluster(s.db, newDriver.Cluster) {
+				switchSetupNew := sd.SwitchConfig{}
+				switchSetupNew.Mac = sw
+				switchSetupNew.WagosSetup = make(map[string]dwago.WagoSetup)
+				switchSetupNew.WagosSetup[*project.Mac] = *newDriver
+				switchSetupNew.NanosSetup = make(map[string]dnanosense.NanosenseSetup)
+				for _, nano := range nanos {
+					switchSetupNew.NanosSetup[nano.Mac] = nano
+				}
+				url := "/write/switch/" + sw + "/update/settings"
+				dump, _ := switchSetupNew.ToJSON()
+				s.server.SendCommand(url, dump)
+			}
+
 		case pconst.SWITCH:
 			device, _ := database.GetSwitchConfig(s.db, replace.OldFullMac)
 			if device == nil {

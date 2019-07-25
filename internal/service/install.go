@@ -1,6 +1,8 @@
 package service
 
 import (
+	"strconv"
+
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
 	"github.com/energieip/common-components-go/pkg/pconst"
 
@@ -125,6 +127,31 @@ func (s *CoreService) installDriver(dr interface{}) {
 			dump, _ := switchConf.ToJSON()
 			s.server.SendCommand(url, dump)
 		}
+
+		groupCfg, _ := database.GetGroupConfig(s.db, *elt.Group)
+		newHvacs := []string{}
+		for _, hvac := range groupCfg.Hvacs {
+			if hvac != elt.Mac {
+				newHvacs = append(newHvacs, hvac)
+			}
+		}
+		newHvacs = append(newHvacs, elt.Mac)
+		groupCfg.Hvacs = newHvacs
+
+		database.UpdateGroupConfig(s.db, *groupCfg)
+		newSwitch := database.GetGroupSwitchs(s.db, groupCfg.Group)
+		for sw := range newSwitch {
+			if sw == "" {
+				continue
+			}
+			url := "/write/switch/" + sw + "/update/settings"
+			switchSetup := sd.SwitchConfig{}
+			switchSetup.Mac = sw
+			switchSetup.Groups = make(map[int]gm.GroupConfig)
+			switchSetup.Groups[groupCfg.Group] = *groupCfg
+			dump, _ := switchSetup.ToJSON()
+			s.server.SendCommand(url, dump)
+		}
 	case pconst.SENSOR:
 		elt, _ := database.GetSensorLabelConfig(s.db, proj.Label)
 		if elt == nil {
@@ -144,6 +171,47 @@ func (s *CoreService) installDriver(dr interface{}) {
 			dump, _ := switchConf.ToJSON()
 			s.server.SendCommand(url, dump)
 		}
+
+	case pconst.WAGO:
+		elt, _ := database.GetWagoLabelConfig(s.db, proj.Label)
+		if elt == nil {
+			rlog.Error("Cannot find Wago " + proj.Label + " in database")
+			return
+		}
+		elt.Mac = driver.Mac
+		database.SaveWagoLabelConfig(s.db, *elt)
+		nanos := database.GetNanoSwitchSetup(s.db, elt.Cluster)
+		for _, nano := range nanos {
+			nano.Mac = elt.Mac + "." + strconv.Itoa(nano.ModbusOffset)
+			database.SaveNanoLabelConfig(s.db, nano)
+
+			groupCfg, _ := database.GetGroupConfig(s.db, nano.Group)
+			newNanos := []string{}
+			for _, nano := range groupCfg.Nanosenses {
+				if nano != elt.Mac {
+					newNanos = append(newNanos, nano)
+				}
+			}
+			newNanos = append(newNanos, nano.Mac)
+			groupCfg.Nanosenses = newNanos
+
+			database.UpdateGroupConfig(s.db, *groupCfg)
+			newSwitch := database.GetGroupSwitchs(s.db, groupCfg.Group)
+			for sw := range newSwitch {
+				if sw == "" {
+					continue
+				}
+				url := "/write/switch/" + sw + "/update/settings"
+				switchSetup := sd.SwitchConfig{}
+				switchSetup.Mac = sw
+				switchSetup.Groups = make(map[int]gm.GroupConfig)
+				switchSetup.Groups[groupCfg.Group] = *groupCfg
+				dump, _ := switchSetup.ToJSON()
+				s.server.SendCommand(url, dump)
+			}
+		}
+		s.sendSwitchWagoSetup(*elt)
+
 	case pconst.SWITCH:
 		elt := database.GetSwitchLabelConfig(s.db, proj.Label)
 		if elt == nil {

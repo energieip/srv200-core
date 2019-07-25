@@ -210,6 +210,19 @@ func (s *CoreService) registerSwitchStatus(switchStatus sd.SwitchStatus) {
 		s.prepareAPIEvent(EventRemove, BlindElt, blind)
 	}
 
+	oldNanos := database.GetNanoSwitchStatus(s.db, switchStatus.Cluster)
+	for label, driver := range switchStatus.Nanos {
+		database.SaveNanoStatus(s.db, driver)
+		_, ok := oldNanos[label]
+		if ok {
+			delete(oldNanos, label)
+		}
+	}
+	for _, driver := range oldNanos {
+		database.RemoveNanoStatus(s.db, driver.Label)
+		s.prepareAPIEvent(EventRemove, NanoElt, driver)
+	}
+
 	oldHvacs := database.GetHvacSwitchStatus(s.db, switchStatus.Mac)
 	for mac, hvac := range switchStatus.Hvacs {
 		database.SaveHvacStatus(s.db, hvac)
@@ -331,6 +344,8 @@ func (s *CoreService) prepareSetupSwitchConfig(switchStatus sd.SwitchStatus) *sd
 	setup.SensorsSetup = database.GetSensorSwitchSetup(s.db, switchStatus.Mac)
 	setup.BlindsSetup = database.GetBlindSwitchSetup(s.db, switchStatus.Mac)
 	setup.HvacsSetup = database.GetHvacSwitchSetup(s.db, switchStatus.Mac)
+	setup.WagosSetup = database.GetWagoSwitchSetup(s.db, switchStatus.Cluster)
+	setup.NanosSetup = database.GetNanoSwitchSetup(s.db, switchStatus.Cluster)
 	newGroups := make(map[int]bool)
 
 	driversMac := make(map[string]bool)
@@ -426,6 +441,10 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 	setup.BlindsSetup = make(map[string]dblind.BlindSetup)
 	setup.HvacsSetup = make(map[string]dhvac.HvacSetup)
 	setup.WagosSetup = make(map[string]dwago.WagoSetup)
+	setup.WagosSetup = database.GetWagoSwitchSetup(s.db, switchStatus.Cluster)
+	setup.NanosSetup = database.GetNanoSwitchSetup(s.db, switchStatus.Cluster)
+	rlog.Infof("=== nanos %v", setup.NanosSetup)
+	rlog.Infof("=== WagosSetup %v", setup.WagosSetup)
 	grList := make(map[int]bool)
 
 	driversMac := make(map[string]bool)

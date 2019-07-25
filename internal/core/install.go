@@ -5,7 +5,7 @@ import "encoding/json"
 //InstallDriver describe the link between the object in the building map and the configuration
 type InstallDriver struct {
 	Label  string `json:"label"`   //cable label
-	Device string `json:"device"`  //device Type LED/HVAC/SENSOR/BLIND/SWITCH
+	Device string `json:"device"`  //device Type LED/HVAC/SENSOR/BLIND/SWITCH/NANOSENSE
 	Mac    string `json:"fullMac"` //device Full Mac address
 }
 

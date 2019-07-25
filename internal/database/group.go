@@ -100,6 +100,10 @@ func UpdateGroupConfig(db Database, config gm.GroupConfig) error {
 		setup.Hvacs = config.Hvacs
 	}
 
+	if config.Nanosenses != nil {
+		setup.Nanosenses = config.Nanosenses
+	}
+
 	if config.FriendlyName != nil {
 		setup.FriendlyName = config.FriendlyName
 	}

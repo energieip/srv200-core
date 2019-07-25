@@ -6,7 +6,9 @@ import (
 
 	"github.com/energieip/common-components-go/pkg/dblind"
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
+	"github.com/energieip/common-components-go/pkg/dhvac"
 	dl "github.com/energieip/common-components-go/pkg/dled"
+	"github.com/energieip/common-components-go/pkg/dnanosense"
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
 	sd "github.com/energieip/common-components-go/pkg/dswitch"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
@@ -282,6 +284,115 @@ func (s *CoreService) updateSensorGroup(mac string, grID int) {
 	}
 }
 
+func (s *CoreService) updateHvacGroup(mac string, grID int) {
+	if mac == "" {
+		return
+	}
+	old, _ := database.GetHvacConfig(s.db, mac)
+	if old == nil {
+		return
+	}
+	cfgHvac := dhvac.HvacConf{
+		Mac:   mac,
+		Group: &grID,
+	}
+	database.UpdateHvacConfig(s.db, cfgHvac)
+
+	driver, _ := database.GetHvacConfig(s.db, mac)
+	if driver.SwitchMac != "" {
+		url := "/write/switch/" + driver.SwitchMac + "/update/settings"
+		switchSetup := sd.SwitchConfig{}
+		switchSetup.Mac = driver.SwitchMac
+		switchSetup.HvacsConfig = make(map[string]dhvac.HvacConf)
+		switchSetup.HvacsConfig[driver.Mac] = cfgHvac
+
+		dump, _ := switchSetup.ToJSON()
+		s.server.SendCommand(url, dump)
+	}
+	if grID == 0 {
+		//register hvac in group 0
+		newGr, _ := database.GetGroupConfig(s.db, grID)
+		if newGr != nil {
+			if inArray(mac, newGr.Blinds) {
+				return
+			}
+			newGr.Hvacs = append(newGr.Hvacs, mac)
+			s.sendSaveGroupCfg(*newGr)
+		}
+		return
+	}
+	if old.Group == nil || *old.Group == grID {
+		return
+	}
+	oldGr, _ := database.GetGroupConfig(s.db, *old.Group)
+	if oldGr != nil {
+		hvacs := []string{}
+		for _, mac := range oldGr.Hvacs {
+			if mac != driver.Mac {
+				hvacs = append(hvacs, mac)
+			}
+		}
+		oldGr.Hvacs = hvacs
+		s.sendSaveGroupCfg(*oldGr)
+	}
+}
+
+func (s *CoreService) updateNanoGroup(mac string, grID int) {
+	if mac == "" {
+		return
+	}
+	old, _ := database.GetNanoConfig(s.db, mac)
+	if old == nil {
+		return
+	}
+	cfgNano := dnanosense.NanosenseConf{
+		Mac:   mac,
+		Group: &grID,
+	}
+	database.UpdateNanoConfig(s.db, cfgNano)
+
+	driver, _ := database.GetNanoConfig(s.db, mac)
+	for _, sw := range database.GetCluster(s.db, driver.Cluster) {
+		if sw.Mac == nil {
+			continue
+		}
+		url := "/write/switch/" + *sw.Mac + "/update/settings"
+		switchSetup := sd.SwitchConfig{}
+		switchSetup.Mac = *sw.Mac
+		switchSetup.NanosConfig = make(map[string]dnanosense.NanosenseConf)
+		switchSetup.NanosConfig[driver.Mac] = cfgNano
+
+		dump, _ := switchSetup.ToJSON()
+		s.server.SendCommand(url, dump)
+	}
+	if grID == 0 {
+		//register hvac in group 0
+		newGr, _ := database.GetGroupConfig(s.db, grID)
+		if newGr != nil {
+			if inArray(mac, newGr.Nanosenses) {
+				return
+			}
+			newGr.Nanosenses = append(newGr.Nanosenses, mac)
+			s.sendSaveGroupCfg(*newGr)
+		}
+		return
+	}
+	if old.Group == grID {
+		return
+	}
+	oldGr, _ := database.GetGroupConfig(s.db, old.Group)
+	if oldGr != nil {
+		nanos := []string{}
+		for _, mac := range oldGr.Nanosenses {
+			if mac != driver.Mac {
+				nanos = append(nanos, mac)
+			}
+		}
+		oldGr.Nanosenses = nanos
+		s.sendSaveGroupCfg(*oldGr)
+	}
+}
+
 func (s *CoreService) updateBlindGroup(mac string, grID int) {
 	if mac == "" {
 		return
@@ -420,7 +531,6 @@ func (s *CoreService) updateGroupCfg(config interface{}) {
 			}
 		}
 
-		seen = nil
 		seen = make(map[string]bool)
 		for _, mac := range new.Blinds {
 			if mac != "" && !inArray(mac, old.Blinds) {
@@ -435,6 +545,34 @@ func (s *CoreService) updateGroupCfg(config interface{}) {
 			}
 		}
 
+		seen = make(map[string]bool)
+		for _, mac := range new.Hvacs {
+			if mac != "" && !inArray(mac, old.Hvacs) {
+				s.updateHvacGroup(mac, cfg.Group)
+			}
+			seen[mac] = true
+		}
+		for _, mac := range old.Hvacs {
+			_, ok := seen[mac]
+			if !ok {
+				s.updateHvacGroup(mac, 0)
+			}
+		}
+
+		seen = make(map[string]bool)
+		for _, mac := range new.Nanosenses {
+			if mac != "" && !inArray(mac, old.Nanosenses) {
+				s.updateNanoGroup(mac, cfg.Group)
+			}
+			seen[mac] = true
+		}
+		for _, mac := range old.Nanosenses {
+			_, ok := seen[mac]
+			if !ok {
+				s.updateNanoGroup(mac, 0)
+			}
+		}
+
 	} else {
 		s.createGroup(cfg)
 		for _, led := range cfg.Leds {
@@ -445,6 +583,12 @@ func (s *CoreService) updateGroupCfg(config interface{}) {
 		}
 		for _, blind := range cfg.Blinds {
 			s.updateBlindGroup(blind, cfg.Group)
+		}
+		for _, hvac := range cfg.Hvacs {
+			s.updateHvacGroup(hvac, cfg.Group)
+		}
+		for _, nano := range cfg.Nanosenses {
+			s.updateNanoGroup(nano, cfg.Group)
 		}
 	}
 

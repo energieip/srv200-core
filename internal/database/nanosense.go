@@ -8,13 +8,31 @@ import (
 //SaveNanoConfig dump nano config in database
 func SaveNanoConfig(db Database, cfg dnanosense.NanosenseSetup) error {
 	criteria := make(map[string]interface{})
-	criteria["Label"] = cfg.Label
+	criteria["Mac"] = cfg.Label
 	return SaveOnUpdateObject(db, cfg, pconst.DbConfig, pconst.TbNanosenses, criteria)
 }
 
 //UpdateNanoConfig update nano config in database
 func UpdateNanoConfig(db Database, cfg dnanosense.NanosenseConf) error {
 	setup, dbID := GetNanoConfig(db, cfg.Label)
+	if setup == nil || dbID == "" {
+		return NewError("Device " + cfg.Label + " not found")
+	}
+
+	new := dnanosense.UpdateConfig(cfg, *setup)
+	return db.UpdateRecord(pconst.DbConfig, pconst.TbNanosenses, dbID, &new)
+}
+
+//SaveNanoConfig dump nano config in database
+func SaveNanoLabelConfig(db Database, cfg dnanosense.NanosenseSetup) error {
+	criteria := make(map[string]interface{})
+	criteria["Label"] = cfg.Label
+	return SaveOnUpdateObject(db, cfg, pconst.DbConfig, pconst.TbNanosenses, criteria)
+}
+
+//UpdateNanoLabelConfig update nano config in database
+func UpdateNanoLabelConfig(db Database, cfg dnanosense.NanosenseConf) error {
+	setup, dbID := GetNanoLabelConfig(db, cfg.Label)
 	if setup == nil || dbID == "" {
 		return NewError("Device " + cfg.Label + " not found")
 	}
@@ -50,10 +68,10 @@ func RemoveNanoStatus(db Database, label string) error {
 }
 
 //GetNanoSwitchStatus get cluster Config list
-func GetNanoSwitchStatus(db Database, swMac string) map[string]dnanosense.Nanosense {
+func GetNanoSwitchStatus(db Database, cluster int) map[string]dnanosense.Nanosense {
 	res := map[string]dnanosense.Nanosense{}
 	criteria := make(map[string]interface{})
-	criteria["SwitchMac"] = swMac
+	criteria["Cluster"] = cluster
 	stored, err := db.GetRecords(pconst.DbStatus, pconst.TbNanosenses, criteria)
 	if err != nil || stored == nil {
 		return res
@@ -69,10 +87,10 @@ func GetNanoSwitchStatus(db Database, swMac string) map[string]dnanosense.Nanose
 }
 
 //GetNanoSwitchSetup get nano Config list
-func GetNanoSwitchSetup(db Database, swMac string) map[string]dnanosense.NanosenseSetup {
+func GetNanoSwitchSetup(db Database, swCluster int) map[string]dnanosense.NanosenseSetup {
 	res := map[string]dnanosense.NanosenseSetup{}
 	criteria := make(map[string]interface{})
-	criteria["SwitchMac"] = swMac
+	criteria["Cluster"] = swCluster
 	stored, err := db.GetRecords(pconst.DbConfig, pconst.TbNanosenses, criteria)
 	if err != nil || stored == nil {
 		return res
@@ -87,11 +105,32 @@ func GetNanoSwitchSetup(db Database, swMac string) map[string]dnanosense.Nanosen
 	return res
 }
 
+//GetNanoLabelConfig return the nano configuration
+func GetNanoLabelConfig(db Database, label string) (*dnanosense.NanosenseSetup, string) {
+	var dbID string
+	criteria := make(map[string]interface{})
+	criteria["Label"] = label
+	stored, err := db.GetRecord(pconst.DbConfig, pconst.TbNanosenses, criteria)
+	if err != nil || stored == nil {
+		return nil, dbID
+	}
+	m := stored.(map[string]interface{})
+	id, ok := m["id"]
+	if ok {
+		dbID = id.(string)
+	}
+	driver, err := dnanosense.ToNanosenseSetup(stored)
+	if err != nil {
+		return nil, dbID
+	}
+	return driver, dbID
+}
+
 //GetNanoConfig return the nano configuration
 func GetNanoConfig(db Database, label string) (*dnanosense.NanosenseSetup, string) {
 	var dbID string
 	criteria := make(map[string]interface{})
-	criteria["Label"] = label
+	criteria["Mac"] = label
 	stored, err := db.GetRecord(pconst.DbConfig, pconst.TbNanosenses, criteria)
 	if err != nil || stored == nil {
 		return nil, dbID
@@ -162,4 +201,19 @@ func GetNanoStatus(db Database, label string) *dnanosense.Nanosense {
 		return nil
 	}
 	return driver
+}
+
+//UpdateNanoLabelSetup update led setup in database
+func UpdateNanoLabelSetup(db Database, config dnanosense.NanosenseSetup) error {
+	if config.Label == "" {
+		return NewError("Device label not found")
+	}
+	setup, dbID := GetNanoLabelConfig(db, config.Label)
+	if setup == nil || dbID == "" {
+		config := dnanosense.FillDefaultValue(config)
+		return SaveNanoLabelConfig(db, config)
+	}
+
+	new := dnanosense.UpdateSetup(config, *setup)
+	return db.UpdateRecord(pconst.DbConfig, pconst.TbLeds, dbID, &new)
 }

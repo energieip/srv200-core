@@ -30,7 +30,6 @@ func SaveProject(db Database, cfg core.Project) error {
 	}
 	err := db.UpdateRecord(pconst.DbConfig, pconst.TbProjects, dbID, proj)
 	return err
-
 }
 
 //RemoveProject remove project entry in database

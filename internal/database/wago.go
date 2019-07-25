@@ -234,6 +234,25 @@ func GetWagoClusterStatus(db Database, cluster int) map[string]dwago.Wago {
 	return res
 }
 
+//GetWagoSwitchSetup get wago Config list
+func GetWagoSwitchSetup(db Database, swCluster int) map[string]dwago.WagoSetup {
+	res := map[string]dwago.WagoSetup{}
+	criteria := make(map[string]interface{})
+	criteria["Cluster"] = swCluster
+	stored, err := db.GetRecords(pconst.DbConfig, pconst.TbWagos, criteria)
+	if err != nil || stored == nil {
+		return res
+	}
+	for _, elt := range stored {
+		driver, err := dwago.ToWagoSetup(elt)
+		if err != nil || driver == nil {
+			continue
+		}
+		res[driver.Mac] = *driver
+	}
+	return res
+}
+
 //GetWagoClusterSetup get wago Config list
 func GetWagoClusterSetup(db Database, cluster int) map[string]dwago.WagoSetup {
 	res := map[string]dwago.WagoSetup{}

@@ -26,6 +26,7 @@ const (
 	GroupElt  = "group"
 	HvacElt   = "hvac"
 	WagoElt   = "wago"
+	NanoElt   = "nano"
 )
 
 func (s *CoreService) prepareAPIEvent(evtType, evtObj string, event interface{}) {

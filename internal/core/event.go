@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/energieip/common-components-go/pkg/dhvac"
+	"github.com/energieip/common-components-go/pkg/dnanosense"
 	"github.com/energieip/common-components-go/pkg/dwago"
 
 	"github.com/energieip/common-components-go/pkg/dblind"
@@ -37,6 +38,11 @@ type EventWago struct {
 	Label string     `json:"label"`
 }
 
+type EventNano struct {
+	Nano  dnanosense.Nanosense `json:"nanosense"`
+	Label string               `json:"label"`
+}
+
 //EventStatus
 type EventStatus struct {
 	Leds    []EventLed       `json:"leds"`
@@ -44,6 +50,7 @@ type EventStatus struct {
 	Sensors []EventSensor    `json:"sensors"`
 	Hvacs   []EventHvac      `json:"hvacs"`
 	Wagos   []EventWago      `json:"wagos"`
+	Nanos   []EventNano      `json:"nanosenses"`
 	Groups  []gm.GroupStatus `json:"groups"`
 }
 
