@@ -14,6 +14,15 @@ func SaveProject(db Database, cfg core.Project) error {
 
 	proj, dbID := GetProject(db, cfg.Label)
 	if proj == nil || dbID == "" {
+		if cfg.Mac != nil {
+			mac := strings.ToUpper(*cfg.Mac)
+			cfg.Mac = &mac
+		}
+		if cfg.ModelName != nil {
+			model := strings.ToUpper(*cfg.ModelName)
+			cfg.ModelName = &model
+		}
+
 		_, err := db.InsertRecord(pconst.DbConfig, pconst.TbProjects, cfg)
 		return err
 	}
