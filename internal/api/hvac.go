@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"strings"
 
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
 	"github.com/energieip/common-components-go/pkg/dhvac"
@@ -31,7 +32,8 @@ func (api *API) getHvacSetup(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	params := mux.Vars(req)
-	api.readHvacConfig(w, params["mac"])
+	mac := strings.ToUpper(params["mac"])
+	api.readHvacConfig(w, mac)
 }
 
 func (api *API) setHvacSetup(w http.ResponseWriter, req *http.Request) {
@@ -50,7 +52,7 @@ func (api *API) setHvacSetup(w http.ResponseWriter, req *http.Request) {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-
+	setup.Mac = strings.ToUpper(setup.Mac)
 	event := make(map[string]interface{})
 	event["hvacSetup"] = setup
 	api.EventsToBackend <- event
@@ -74,6 +76,7 @@ func (api *API) setHvacConfig(w http.ResponseWriter, req *http.Request) {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+	cfg.Mac = strings.ToUpper(cfg.Mac)
 
 	if cfg.Group != nil {
 		if *cfg.Group < 0 {
@@ -115,6 +118,7 @@ func (api *API) sendHvacCommand(w http.ResponseWriter, req *http.Request) {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+	cmd.Mac = strings.ToUpper(cmd.Mac)
 	dr, _ := database.GetHvacConfig(api.db, cmd.Mac)
 	if dr == nil {
 		api.sendError(w, APIErrorDeviceNotFound, "Device "+cmd.Mac+" not found", http.StatusInternalServerError)
@@ -139,6 +143,7 @@ func (api *API) sendHvacCommand(w http.ResponseWriter, req *http.Request) {
 func (api *API) getHvacStatus(w http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
 	mac := params["mac"]
+	mac = strings.ToUpper(mac)
 	dr := database.GetHvacStatus(api.db, mac)
 	if dr == nil {
 		api.sendError(w, APIErrorDeviceNotFound, "Device "+mac+" not found", http.StatusInternalServerError)
@@ -159,6 +164,7 @@ func (api *API) removeHvacSetup(w http.ResponseWriter, req *http.Request) {
 	}
 	params := mux.Vars(req)
 	mac := params["mac"]
+	mac = strings.ToUpper(mac)
 	res := database.RemoveHvacConfig(api.db, mac)
 	if res != nil {
 		api.sendError(w, APIErrorDeviceNotFound, "Device "+mac+" not found", http.StatusInternalServerError)

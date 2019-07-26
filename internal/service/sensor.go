@@ -1,6 +1,8 @@
 package service
 
 import (
+	"strings"
+
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
 	sd "github.com/energieip/common-components-go/pkg/dswitch"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
@@ -156,6 +158,10 @@ func (s *CoreService) updateSensorLabelSetup(config interface{}) {
 	if cfg == nil || cfg.Label == nil {
 		return
 	}
+	cfg.Mac = strings.ToUpper(cfg.Mac)
+	if cfg.SwitchMac != "" {
+		cfg.SwitchMac = strings.ToUpper(cfg.SwitchMac)
+	}
 
 	oldSensor, _ := database.GetSensorLabelConfig(s.db, *cfg.Label)
 	if oldSensor != nil {
@@ -170,7 +176,7 @@ func (s *CoreService) updateSensorLabelSetup(config interface{}) {
 		return
 	}
 	if sensor.SwitchMac != "" {
-		cfg.SwitchMac = sensor.SwitchMac
+		cfg.SwitchMac = strings.ToUpper(sensor.SwitchMac)
 	}
 	s.sendSwitchSensorSetup(*cfg)
 }

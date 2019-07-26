@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/energieip/common-components-go/pkg/duser"
 	"github.com/energieip/common-components-go/pkg/dwago"
@@ -27,7 +28,7 @@ func (api *API) getWagoSetup(w http.ResponseWriter, req *http.Request) {
 	}
 
 	params := mux.Vars(req)
-	api.readLedConfig(w, req, params["mac"])
+	api.readLedConfig(w, req, strings.ToUpper(params["mac"]))
 }
 
 func (api *API) setWagoSetup(w http.ResponseWriter, req *http.Request) {
@@ -47,7 +48,7 @@ func (api *API) setWagoSetup(w http.ResponseWriter, req *http.Request) {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-
+	wago.Mac = strings.ToUpper(wago.Mac)
 	event := make(map[string]interface{})
 	event["wagoSetup"] = wago
 	api.EventsToBackend <- event
@@ -71,7 +72,7 @@ func (api *API) setWagoConfig(w http.ResponseWriter, req *http.Request) {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-
+	wago.Mac = strings.ToUpper(wago.Mac)
 	event := make(map[string]interface{})
 	event["wago"] = wago
 	api.EventsToBackend <- event
@@ -80,7 +81,7 @@ func (api *API) setWagoConfig(w http.ResponseWriter, req *http.Request) {
 
 func (api *API) getWagoStatus(w http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
-	mac := params["mac"]
+	mac := strings.ToUpper(params["mac"])
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin, duser.PriviledgeMaintainer}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -100,7 +101,7 @@ func (api *API) removeWagoSetup(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	params := mux.Vars(req)
-	mac := params["mac"]
+	mac := strings.ToUpper(params["mac"])
 	res := database.RemoveWagoConfig(api.db, mac)
 	if res != nil {
 		api.sendError(w, APIErrorDeviceNotFound, "Device "+mac+" not found", http.StatusInternalServerError)

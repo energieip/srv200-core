@@ -1,6 +1,8 @@
 package service
 
 import (
+	"strings"
+
 	"github.com/energieip/common-components-go/pkg/dhvac"
 	sd "github.com/energieip/common-components-go/pkg/dswitch"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
@@ -149,7 +151,10 @@ func (s *CoreService) updateHvacLabelSetup(config interface{}) {
 		rlog.Error("Cannot parse ")
 		return
 	}
-
+	cfg.Mac = strings.ToUpper(cfg.Mac)
+	if cfg.SwitchMac != "" {
+		cfg.SwitchMac = strings.ToUpper(cfg.SwitchMac)
+	}
 	oldHvac, _ := database.GetHvacLabelConfig(s.db, *cfg.Label)
 	if oldHvac != nil {
 		s.updateGroupHvac(*oldHvac, *cfg)

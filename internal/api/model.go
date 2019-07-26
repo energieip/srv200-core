@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/energieip/common-components-go/pkg/duser"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
@@ -28,6 +29,7 @@ func (api *API) getModelInfo(w http.ResponseWriter, req *http.Request) {
 	}
 	params := mux.Vars(req)
 	label := params["modelName"]
+	label = strings.ToUpper(label)
 	api.readModelInfo(w, label)
 }
 
@@ -38,6 +40,7 @@ func (api *API) removeModelInfo(w http.ResponseWriter, req *http.Request) {
 	}
 	params := mux.Vars(req)
 	modelName := params["modelName"]
+	modelName = strings.ToUpper(modelName)
 	res := database.RemoveModel(api.db, modelName)
 	if res != nil {
 		api.sendError(w, APIErrorDeviceNotFound, "Device "+modelName+" not found", http.StatusInternalServerError)
@@ -63,6 +66,8 @@ func (api *API) setModelInfo(w http.ResponseWriter, req *http.Request) {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+	model.Name = strings.ToUpper(model.Name)
+	model.DeviceType = strings.ToUpper(model.DeviceType)
 
 	database.SaveModel(api.db, model)
 	rlog.Info("Model " + model.Name + " saved")

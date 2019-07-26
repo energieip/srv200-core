@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"strings"
 
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
 	dl "github.com/energieip/common-components-go/pkg/dled"
@@ -31,7 +32,8 @@ func (api *API) getLedSetup(w http.ResponseWriter, req *http.Request) {
 	}
 
 	params := mux.Vars(req)
-	api.readLedConfig(w, req, params["mac"])
+	mac := strings.ToUpper(params["mac"])
+	api.readLedConfig(w, req, mac)
 }
 
 func (api *API) setLedSetup(w http.ResponseWriter, req *http.Request) {
@@ -51,6 +53,7 @@ func (api *API) setLedSetup(w http.ResponseWriter, req *http.Request) {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+	led.Mac = strings.ToUpper(led.Mac)
 
 	event := make(map[string]interface{})
 	event["ledSetup"] = led
@@ -75,6 +78,7 @@ func (api *API) setLedConfig(w http.ResponseWriter, req *http.Request) {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+	led.Mac = strings.ToUpper(led.Mac)
 
 	if led.Group != nil {
 		if *led.Group < 0 {
@@ -116,6 +120,7 @@ func (api *API) sendLedCommand(w http.ResponseWriter, req *http.Request) {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+	led.Mac = strings.ToUpper(led.Mac)
 	dr, _ := database.GetLedConfig(api.db, led.Mac)
 	if dr == nil {
 		api.sendError(w, APIErrorDeviceNotFound, "Device "+led.Mac+" not found", http.StatusInternalServerError)
@@ -140,6 +145,7 @@ func (api *API) sendLedCommand(w http.ResponseWriter, req *http.Request) {
 func (api *API) getLedStatus(w http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
 	mac := params["mac"]
+	mac = strings.ToUpper(mac)
 	led := database.GetLedStatus(api.db, mac)
 	if led == nil {
 		api.sendError(w, APIErrorDeviceNotFound, "Device "+mac+" not found", http.StatusInternalServerError)
@@ -159,6 +165,7 @@ func (api *API) removeLedSetup(w http.ResponseWriter, req *http.Request) {
 	}
 	params := mux.Vars(req)
 	mac := params["mac"]
+	mac = strings.ToUpper(mac)
 	res := database.RemoveLedConfig(api.db, mac)
 	if res != nil {
 		api.sendError(w, APIErrorDeviceNotFound, "Device "+mac+" not found", http.StatusInternalServerError)

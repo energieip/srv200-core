@@ -1,6 +1,8 @@
 package database
 
 import (
+	"strings"
+
 	"github.com/energieip/common-components-go/pkg/pconst"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 )
@@ -17,10 +19,12 @@ func SaveProject(db Database, cfg core.Project) error {
 	}
 
 	if cfg.Mac != nil {
-		proj.Mac = cfg.Mac
+		mac := strings.ToUpper(*cfg.Mac)
+		proj.Mac = &mac
 	}
 	if cfg.ModelName != nil {
-		proj.ModelName = cfg.ModelName
+		model := strings.ToUpper(*cfg.ModelName)
+		proj.ModelName = &model
 	}
 	if cfg.ModbusID != nil {
 		proj.ModbusID = cfg.ModbusID

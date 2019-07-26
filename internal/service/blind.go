@@ -1,6 +1,8 @@
 package service
 
 import (
+	"strings"
+
 	"github.com/energieip/common-components-go/pkg/dblind"
 	sd "github.com/energieip/common-components-go/pkg/dswitch"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
@@ -198,6 +200,8 @@ func (s *CoreService) updateBlindLabelSetup(config interface{}) {
 		rlog.Error("Cannot parse ")
 		return
 	}
+	cfg.Mac = strings.ToUpper(cfg.Mac)
+	cfg.SwitchMac = strings.ToUpper(cfg.SwitchMac)
 
 	oldBlind, _ := database.GetBlindLabelConfig(s.db, *cfg.Label)
 	if oldBlind != nil {

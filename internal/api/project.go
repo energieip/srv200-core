@@ -66,6 +66,14 @@ func (api *API) setBim(w http.ResponseWriter, req *http.Request) {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+	if proj.ModelName != nil {
+		model := strings.ToUpper(*proj.ModelName)
+		proj.ModelName = &model
+	}
+	if proj.Mac != nil {
+		mac := strings.ToUpper(*proj.Mac)
+		proj.Mac = &mac
+	}
 	proj.Label = strings.Replace(proj.Label, "-", "_", -1)
 	err = database.SaveProject(api.db, proj)
 	if err != nil {
@@ -144,6 +152,9 @@ func (api *API) setIfcInfo(w http.ResponseWriter, req *http.Request) {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+	ifcInfo.Mac = strings.ToUpper(ifcInfo.Mac)
+	ifcInfo.DeviceType = strings.ToUpper(ifcInfo.DeviceType)
+	ifcInfo.ModelName = strings.ToUpper(ifcInfo.ModelName)
 
 	model := core.Model{
 		Name:       ifcInfo.ModelName,

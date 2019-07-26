@@ -1,6 +1,8 @@
 package database
 
 import (
+	"strings"
+
 	"github.com/energieip/common-components-go/pkg/pconst"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 )
@@ -8,6 +10,8 @@ import (
 //SaveModel dump model in database
 func SaveModel(db Database, cfg core.Model) error {
 	criteria := make(map[string]interface{})
+	cfg.Name = strings.ToUpper(cfg.Name)
+	cfg.DeviceType = strings.ToUpper(cfg.DeviceType)
 	criteria["Name"] = cfg.Name
 	return SaveOnUpdateObject(db, cfg, pconst.DbConfig, pconst.TbModels, criteria)
 }

@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/energieip/common-components-go/pkg/pconst"
+
 	"github.com/energieip/common-components-go/pkg/dwago"
 
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
@@ -348,7 +350,7 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 		driversMac[ifc.Mac] = true
 
 		switch ifc.DeviceType {
-		case "led":
+		case pconst.LED:
 			dump := DumpLed{}
 			led, ok := lights[ifc.Label]
 			gr := 0
@@ -371,7 +373,7 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 			dump.Ifc = ifc
 
 			leds = append(leds, dump)
-		case "sensor":
+		case pconst.SENSOR:
 			dump := DumpSensor{}
 			gr := 0
 			sensor, ok := cells[ifc.Label]
@@ -393,7 +395,7 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 			}
 			dump.Ifc = ifc
 			sensors = append(sensors, dump)
-		case "blind":
+		case pconst.BLIND:
 			dump := DumpBlind{}
 			gr := 0
 			bld, ok := blds[ifc.Label]
@@ -415,7 +417,7 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 			}
 			dump.Ifc = ifc
 			blinds = append(blinds, dump)
-		case "hvac":
+		case pconst.HVAC:
 			dump := DumpHvac{}
 			gr := 0
 			hvac, ok := hvcs[ifc.Label]
@@ -437,7 +439,7 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 			}
 			dump.Ifc = ifc
 			hvacs = append(hvacs, dump)
-		case "wago":
+		case pconst.WAGO:
 			dump := DumpWago{}
 			wago, ok := wags[ifc.Label]
 			if ok {
@@ -452,7 +454,7 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 			}
 			dump.Ifc = ifc
 			wagos = append(wagos, dump)
-		case "switch":
+		case pconst.SWITCH:
 			dump := DumpSwitch{}
 			switchElt, ok := switchElts[ifc.Label]
 			if ok {
@@ -464,7 +466,7 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 			}
 			dump.Ifc = ifc
 			switchs = append(switchs, dump)
-		case "frame":
+		case pconst.FRAME:
 			dump := DumpFrame{}
 			frameElt, ok := frameElts[ifc.Label]
 			if ok {

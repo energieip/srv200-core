@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"strings"
 
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
 	"github.com/energieip/common-components-go/pkg/duser"
@@ -34,7 +35,8 @@ func (api *API) getSensorSetup(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	params := mux.Vars(req)
-	api.readSensorConfig(w, req, params["mac"])
+	mac := strings.ToUpper(params["mac"])
+	api.readSensorConfig(w, req, mac)
 }
 
 func (api *API) setSensorSetup(w http.ResponseWriter, req *http.Request) {
@@ -55,7 +57,7 @@ func (api *API) setSensorSetup(w http.ResponseWriter, req *http.Request) {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-
+	sensor.Mac = strings.ToUpper(sensor.Mac)
 	event := make(map[string]interface{})
 	event["sensorSetup"] = sensor
 	api.EventsToBackend <- event
@@ -79,6 +81,7 @@ func (api *API) setSensorConfig(w http.ResponseWriter, req *http.Request) {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+	sensor.Mac = strings.ToUpper(sensor.Mac)
 	if sensor.Group != nil {
 		if *sensor.Group < 0 {
 			api.sendError(w, APIErrorInvalidValue, "Invalid groupID "+strconv.Itoa(*sensor.Group), http.StatusInternalServerError)
@@ -109,6 +112,7 @@ func (api *API) setSensorConfig(w http.ResponseWriter, req *http.Request) {
 func (api *API) getSensorStatus(w http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
 	mac := params["mac"]
+	mac = strings.ToUpper(mac)
 	sensor := database.GetSensorStatus(api.db, mac)
 	if sensor == nil {
 		api.sendError(w, APIErrorDeviceNotFound, "Device "+mac+" not found", http.StatusInternalServerError)
@@ -130,6 +134,7 @@ func (api *API) removeSensorSetup(w http.ResponseWriter, req *http.Request) {
 
 	params := mux.Vars(req)
 	mac := params["mac"]
+	mac = strings.ToUpper(mac)
 	res := database.RemoveSensorConfig(api.db, mac)
 	if res != nil {
 		api.sendError(w, APIErrorDeviceNotFound, "Device "+mac+" not found", http.StatusInternalServerError)

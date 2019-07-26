@@ -293,6 +293,7 @@ func (api *InternalAPI) sendLedCommand(w http.ResponseWriter, req *http.Request)
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+	led.Mac = strings.ToUpper(led.Mac)
 	dr, _ := database.GetLedConfig(api.db, led.Mac)
 	if dr == nil {
 		api.sendError(w, APIErrorDeviceNotFound, "Device "+led.Mac+" not found", http.StatusInternalServerError)
@@ -319,6 +320,7 @@ func (api *InternalAPI) sendBlindCommand(w http.ResponseWriter, req *http.Reques
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+	cmd.Mac = strings.ToUpper(cmd.Mac)
 	dr, _ := database.GetBlindConfig(api.db, cmd.Mac)
 	if dr == nil {
 		api.sendError(w, APIErrorDeviceNotFound, "Device "+cmd.Mac+" not found", http.StatusInternalServerError)
@@ -350,6 +352,7 @@ func (api *InternalAPI) sendHvacCommand(w http.ResponseWriter, req *http.Request
 		api.sendError(w, APIErrorDeviceNotFound, "Device "+cmd.Mac+" not found", http.StatusInternalServerError)
 		return
 	}
+	cmd.Mac = strings.ToUpper(cmd.Mac)
 
 	rlog.Info("Received Hvac cmd", cmd)
 	event := make(map[string]interface{})
@@ -391,6 +394,7 @@ func (api *InternalAPI) setLedConfig(w http.ResponseWriter, req *http.Request) {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+	led.Mac = strings.ToUpper(led.Mac)
 
 	if led.Group != nil {
 		if *led.Group < 0 {
@@ -432,6 +436,7 @@ func (api *InternalAPI) setSensorConfig(w http.ResponseWriter, req *http.Request
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+	sensor.Mac = strings.ToUpper(sensor.Mac)
 	if sensor.Group != nil {
 		if *sensor.Group < 0 {
 			api.sendError(w, APIErrorInvalidValue, "Invalid groupID "+strconv.Itoa(*sensor.Group), http.StatusInternalServerError)
@@ -472,6 +477,7 @@ func (api *InternalAPI) setBlindConfig(w http.ResponseWriter, req *http.Request)
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+	cfg.Mac = strings.ToUpper(cfg.Mac)
 
 	if cfg.Group != nil {
 		if *cfg.Group < 0 {
@@ -513,6 +519,7 @@ func (api *InternalAPI) setHvacConfig(w http.ResponseWriter, req *http.Request) 
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+	cfg.Mac = strings.ToUpper(cfg.Mac)
 
 	if cfg.Group != nil {
 		if *cfg.Group < 0 {

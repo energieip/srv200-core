@@ -35,9 +35,10 @@ func (api *API) replaceDriver(w http.ResponseWriter, req *http.Request) {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+	driver.NewFullMac = strings.ToUpper(driver.NewFullMac)
+	driver.OldFullMac = strings.ToUpper(driver.OldFullMac)
 
 	savedProject := database.GetProjectByMac(api.db, driver.OldFullMac)
-
 	if savedProject == nil {
 		api.sendError(w, APIErrorDeviceNotFound, "Unknow old driver "+driver.OldFullMac, http.StatusInternalServerError)
 		return

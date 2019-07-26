@@ -1,6 +1,8 @@
 package service
 
 import (
+	"strings"
+
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
 	dl "github.com/energieip/common-components-go/pkg/dled"
 	sd "github.com/energieip/common-components-go/pkg/dswitch"
@@ -250,6 +252,10 @@ func (s *CoreService) updateLedLabelSetup(config interface{}) {
 		rlog.Error("Cannot parse ")
 		return
 	}
+	cfg.Mac = strings.ToUpper(cfg.Mac)
+	if cfg.SwitchMac != "" {
+		cfg.SwitchMac = strings.ToUpper(cfg.SwitchMac)
+	}
 
 	oldLed, _ := database.GetLedLabelConfig(s.db, *cfg.Label)
 	if oldLed != nil {
@@ -264,7 +270,7 @@ func (s *CoreService) updateLedLabelSetup(config interface{}) {
 		return
 	}
 	if led.SwitchMac != "" {
-		cfg.SwitchMac = led.SwitchMac
+		cfg.SwitchMac = strings.ToUpper(led.SwitchMac)
 	}
 	rlog.Info("Led configuration " + *cfg.Label + " saved")
 	s.sendSwitchLedSetup(*cfg)

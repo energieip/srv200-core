@@ -3,6 +3,7 @@ package service
 import (
 	"reflect"
 	"strconv"
+	"strings"
 
 	"github.com/energieip/common-components-go/pkg/dblind"
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
@@ -171,6 +172,7 @@ func (s *CoreService) updateLedGroup(mac string, grID int) {
 	if mac == "" {
 		return
 	}
+	mac = strings.ToUpper(mac)
 	oldLed, _ := database.GetLedConfig(s.db, mac)
 	if oldLed == nil {
 		return
@@ -234,6 +236,7 @@ func (s *CoreService) updateSensorGroup(mac string, grID int) {
 	if mac == "" {
 		return
 	}
+	mac = strings.ToUpper(mac)
 	oldSensor, _ := database.GetSensorConfig(s.db, mac)
 	if oldSensor == nil {
 		return
@@ -288,6 +291,7 @@ func (s *CoreService) updateHvacGroup(mac string, grID int) {
 	if mac == "" {
 		return
 	}
+	mac = strings.ToUpper(mac)
 	old, _ := database.GetHvacConfig(s.db, mac)
 	if old == nil {
 		return
@@ -341,6 +345,7 @@ func (s *CoreService) updateNanoGroup(mac string, grID int) {
 	if mac == "" {
 		return
 	}
+	mac = strings.ToUpper(mac)
 	old, _ := database.GetNanoConfig(s.db, mac)
 	if old == nil {
 		return
@@ -397,6 +402,7 @@ func (s *CoreService) updateBlindGroup(mac string, grID int) {
 	if mac == "" {
 		return
 	}
+	mac = strings.ToUpper(mac)
 	oldBlind, _ := database.GetBlindConfig(s.db, mac)
 	if oldBlind == nil {
 		return

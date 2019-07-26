@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/energieip/common-components-go/pkg/duser"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
@@ -26,7 +27,7 @@ func (api *API) getSwitchSetup(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	params := mux.Vars(req)
-	api.readSwitchConfig(w, params["mac"])
+	api.readSwitchConfig(w, strings.ToUpper(params["mac"]))
 }
 
 func (api *API) setSwitchSetup(w http.ResponseWriter, req *http.Request) {
@@ -54,6 +55,10 @@ func (api *API) setSwitchConfig(w http.ResponseWriter, req *http.Request) {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+	if device.Mac != nil {
+		mac := strings.ToUpper(*device.Mac)
+		device.Mac = &mac
+	}
 	event := make(map[string]interface{})
 	event["switch"] = device
 	api.EventsToBackend <- event
@@ -66,7 +71,7 @@ func (api *API) removeSwitchSetup(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	params := mux.Vars(req)
-	mac := params["mac"]
+	mac := strings.ToUpper(params["mac"])
 	res := database.RemoveSwitchConfig(api.db, mac)
 	if res != nil {
 		api.sendError(w, APIErrorDeviceNotFound, "Switch "+mac+" not found", http.StatusInternalServerError)

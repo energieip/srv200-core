@@ -29,8 +29,10 @@ func (api *API) installDriver(w http.ResponseWriter, req *http.Request) {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+	driver.Mac = strings.ToUpper(driver.Mac)
+	driver.Device = strings.ToUpper(driver.Device)
 	driver.Label = strings.Replace(driver.Label, "-", "_", -1)
-
+	driver.Label = strings.ToUpper(driver.Label)
 	savedProject, _ := database.GetProject(api.db, driver.Label)
 	if savedProject == nil {
 		api.sendError(w, APIErrorDeviceNotFound, "Unknow label "+driver.Label, http.StatusInternalServerError)
@@ -39,8 +41,7 @@ func (api *API) installDriver(w http.ResponseWriter, req *http.Request) {
 
 	if savedProject.ModelName != nil {
 		refModel := tools.Model2Type(*savedProject.ModelName)
-		dType := driver.Device
-		if refModel != dType {
+		if refModel != driver.Device {
 			api.sendError(w, APIErrorDeviceNotFound, "Unexpected Driver, expected "+refModel, http.StatusInternalServerError)
 			return
 		}

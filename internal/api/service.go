@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/energieip/common-components-go/pkg/duser"
 	pkg "github.com/energieip/common-components-go/pkg/service"
@@ -26,7 +27,7 @@ func (api *API) getServiceSetup(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	params := mux.Vars(req)
-	api.readServiceConfig(w, params["name"])
+	api.readServiceConfig(w, strings.ToUpper(params["name"]))
 }
 
 func (api *API) setServiceSetup(w http.ResponseWriter, req *http.Request) {
@@ -46,6 +47,7 @@ func (api *API) setServiceSetup(w http.ResponseWriter, req *http.Request) {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+	service.Name = strings.ToUpper(service.Name)
 
 	err = database.SaveServiceConfig(api.db, service)
 	if err != nil {
@@ -61,7 +63,7 @@ func (api *API) removeServiceSetup(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	params := mux.Vars(req)
-	name := params["name"]
+	name := strings.ToUpper(params["name"])
 	res := database.RemoveServiceConfig(api.db, name)
 	if res != nil {
 		api.sendError(w, APIErrorDeviceNotFound, "Service "+name+" not found", http.StatusInternalServerError)

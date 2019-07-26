@@ -1,6 +1,8 @@
 package service
 
 import (
+	"strings"
+
 	dnano "github.com/energieip/common-components-go/pkg/dnanosense"
 	sd "github.com/energieip/common-components-go/pkg/dswitch"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
@@ -57,6 +59,7 @@ func (s *CoreService) updateNanoLabelSetup(config interface{}) {
 		rlog.Error("Cannot parse ")
 		return
 	}
+	cfg.Mac = strings.ToUpper(cfg.Mac)
 
 	old, _ := database.GetNanoLabelConfig(s.db, cfg.Label)
 	if old != nil {

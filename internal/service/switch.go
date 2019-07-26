@@ -1,6 +1,8 @@
 package service
 
 import (
+	"strings"
+
 	"github.com/energieip/common-components-go/pkg/dblind"
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
 	"github.com/energieip/common-components-go/pkg/dhvac"
@@ -72,6 +74,7 @@ func (s *CoreService) updateSwitchLabelCfg(config interface{}) {
 			mac = *sw.Mac
 		}
 	}
+	mac = strings.ToUpper(mac)
 	if mac == "" {
 		return
 	}
@@ -350,9 +353,6 @@ func (s *CoreService) prepareSetupSwitchConfig(switchStatus sd.SwitchStatus) *sd
 
 	driversMac := make(map[string]bool)
 	for mac := range setup.LedsSetup {
-		driversMac[mac] = true
-	}
-	for mac := range setup.SensorsSetup {
 		driversMac[mac] = true
 	}
 	for mac := range setup.BlindsSetup {

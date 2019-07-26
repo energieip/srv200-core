@@ -1,6 +1,8 @@
 package service
 
 import (
+	"strings"
+
 	sd "github.com/energieip/common-components-go/pkg/dswitch"
 	"github.com/energieip/common-components-go/pkg/dwago"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
@@ -88,6 +90,7 @@ func (s *CoreService) updateWagoLabelSetup(config interface{}) {
 		rlog.Error("Cannot parse ")
 		return
 	}
+	cfg.Mac = strings.ToUpper(cfg.Mac)
 
 	database.UpdateWagoLabelSetup(s.db, *cfg)
 	s.sendSwitchWagoSetup(*cfg)
