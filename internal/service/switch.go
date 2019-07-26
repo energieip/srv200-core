@@ -570,14 +570,14 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 	}
 
 	nanoSeen := make(map[string]bool)
-	for mac, driver := range switchStatus.Nanos {
+	for _, driver := range switchStatus.Nanos {
 		_, ok := nanos[driver.Label]
 		if !ok {
 			s.prepareAPIEvent(EventAdd, NanoElt, driver)
 		} else {
 			s.prepareAPIEvent(EventUpdate, NanoElt, driver)
 		}
-		nanoSeen[mac] = true
+		nanoSeen[driver.Label] = true
 	}
 	for mac, driver := range nanos {
 		_, ok := nanoSeen[driver.Label]

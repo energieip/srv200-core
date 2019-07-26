@@ -6541,6 +6541,7 @@
             "blind",
             "hvac",
             "switch",
+            "nanosense",
             "wago",
             "frame"
           ],
