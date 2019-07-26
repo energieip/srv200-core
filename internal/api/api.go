@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/energieip/common-components-go/pkg/dnanosense"
+
 	"github.com/energieip/common-components-go/pkg/pconst"
 
 	"github.com/energieip/common-components-go/pkg/dwago"
@@ -173,12 +175,14 @@ func (api *API) getStatus(w http.ResponseWriter, req *http.Request) {
 	var blinds []dblind.Blind
 	var hvacs []dhvac.Hvac
 	var wagos []dwago.Wago
+	var nanos []dnanosense.Nanosense
 	var grID *int
 	var isConfig *bool
 	driverType := req.FormValue("type")
 	if driverType == "" {
 		driverType = FilterTypeAll
 	}
+	driverType = strings.ToLower(driverType)
 
 	groupID := req.FormValue("groupID")
 	if groupID != "" {
@@ -272,12 +276,26 @@ func (api *API) getStatus(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
+	if driverType == FilterTypeAll || driverType == FilterTypeNano {
+		drivers := database.GetNanosStatus(api.db)
+		for _, driver := range drivers {
+			if auth.Priviledge != duser.PriviledgeUser {
+				if !tools.IntInSlice(driver.Group, auth.AccessGroups) {
+					continue
+				}
+
+				nanos = append(nanos, driver)
+			}
+		}
+	}
+
 	status := Status{
-		Leds:    leds,
-		Sensors: sensors,
-		Blinds:  blinds,
-		Hvacs:   hvacs,
-		Wagos:   wagos,
+		Leds:       leds,
+		Sensors:    sensors,
+		Blinds:     blinds,
+		Hvacs:      hvacs,
+		Wagos:      wagos,
+		Nanosenses: nanos,
 	}
 
 	inrec, _ := json.MarshalIndent(status, "", "  ")

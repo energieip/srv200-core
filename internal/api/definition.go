@@ -38,6 +38,7 @@ const (
 	FilterTypeBlind  = "blind"
 	FilterTypeHvac   = "hvac"
 	FilterTypeWago   = "wago"
+	FilterTypeNano   = "nanosense"
 )
 
 //APIError Message error code
@@ -83,11 +84,12 @@ type Credentials struct {
 
 //Status
 type Status struct {
-	Leds    []dl.Led       `json:"leds"`
-	Sensors []ds.Sensor    `json:"sensors"`
-	Blinds  []dblind.Blind `json:"blinds"`
-	Hvacs   []dhvac.Hvac   `json:"hvacs"`
-	Wagos   []dwago.Wago   `json:"wagos"`
+	Leds       []dl.Led               `json:"leds"`
+	Sensors    []ds.Sensor            `json:"sensors"`
+	Blinds     []dblind.Blind         `json:"blinds"`
+	Hvacs      []dhvac.Hvac           `json:"hvacs"`
+	Wagos      []dwago.Wago           `json:"wagos"`
+	Nanosenses []dnanosense.Nanosense `json:"nanosenses"`
 }
 
 //DumpBlind

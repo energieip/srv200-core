@@ -5363,12 +5363,12 @@
               },
               "description": "List of hvacs status"
             },
-            "groups": {
+            "nanosenses": {
               "type": "array",
               "items": {
-                "$ref": "#/components/schemas/GroupStatus"
+                "$ref": "#/components/schemas/NanosenseStatus"
               },
-              "description": "List of groups status"
+              "description": "List of hvacs status"
             }
           }
         },
