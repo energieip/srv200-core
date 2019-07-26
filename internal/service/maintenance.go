@@ -245,8 +245,13 @@ func (s *CoreService) replaceDriver(driver interface{}) {
 			nanos := database.GetNanoSwitchSetup(s.db, newDriver.Cluster)
 			for _, nano := range nanos {
 				oldNanos = append(oldNanos, nano)
+				projectNano := database.GetProjectByMac(s.db, nano.Mac)
 				nano.Mac = *project.Mac + "." + strconv.Itoa(nano.ModbusOffset)
 				database.SaveNanoLabelConfig(s.db, nano)
+				if projectNano != nil {
+					projectNano.Mac = &nano.Mac
+					database.SaveProject(s.db, *projectNano)
+				}
 			}
 
 			for sw := range database.GetCluster(s.db, oldDriver.Cluster) {

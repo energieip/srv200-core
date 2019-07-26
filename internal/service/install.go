@@ -185,6 +185,14 @@ func (s *CoreService) installDriver(dr interface{}) {
 			nano.Mac = elt.Mac + "." + strconv.Itoa(nano.ModbusOffset)
 			database.SaveNanoLabelConfig(s.db, nano)
 
+			projNano, _ := database.GetProject(s.db, nano.Label)
+			if projNano != nil {
+				projNano.Mac = &nano.Mac
+
+				//update project
+				database.SaveProject(s.db, *projNano)
+			}
+
 			groupCfg, _ := database.GetGroupConfig(s.db, nano.Group)
 			newNanos := []string{}
 			for _, nano := range groupCfg.Nanosenses {
