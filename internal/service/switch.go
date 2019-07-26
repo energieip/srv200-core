@@ -217,27 +217,25 @@ func (s *CoreService) registerSwitchStatus(switchStatus sd.SwitchStatus) {
 	oldNanos := database.GetNanoSwitchStatus(s.db, switchStatus.Cluster)
 	for label, driver := range switchStatus.Nanos {
 		database.SaveNanoStatus(s.db, driver)
-		oldCfg, _ := database.GetHvacConfig(s.db, driver.Mac)
+		oldCfg, _ := database.GetNanoConfig(s.db, driver.Mac)
 		if oldCfg != nil {
-			if oldCfg.Group != nil {
-				gr, _ := database.GetGroupConfig(s.db, *oldCfg.Group)
-				if gr != nil {
-					nanos := []string{}
-					found := false
-					for _, v := range gr.Nanosenses {
-						if v == driver.Mac {
-							found = true
-							break
-						} else {
-							nanos = append(nanos, v)
-						}
+			gr, _ := database.GetGroupConfig(s.db, oldCfg.Group)
+			if gr != nil {
+				nanos := []string{}
+				found := false
+				for _, v := range gr.Nanosenses {
+					if v == driver.Mac {
+						found = true
+						break
+					} else {
+						nanos = append(nanos, v)
 					}
-					if !found {
-						nanos = append(nanos, driver.Mac)
-						gr.Nanosenses = nanos
-						database.SaveGroupConfig(s.db, *gr)
-						s.sendGroupConfigUpdate(*gr)
-					}
+				}
+				if !found {
+					nanos = append(nanos, driver.Mac)
+					gr.Nanosenses = nanos
+					database.SaveGroupConfig(s.db, *gr)
+					s.sendGroupConfigUpdate(*gr)
 				}
 			}
 		}

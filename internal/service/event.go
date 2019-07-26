@@ -7,6 +7,7 @@ import (
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
 	"github.com/energieip/common-components-go/pkg/dhvac"
 	dl "github.com/energieip/common-components-go/pkg/dled"
+	"github.com/energieip/common-components-go/pkg/dnanosense"
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
 	"github.com/energieip/common-components-go/pkg/dwago"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
@@ -55,6 +56,7 @@ func (s *CoreService) prepareAPIEvent(evtType, evtObj string, event interface{})
 				Blinds:  []core.EventBlind{},
 				Hvacs:   []core.EventHvac{},
 				Wagos:   []core.EventWago{},
+				Nanos:   []core.EventNano{},
 			})
 		}
 		value, ok := s.bufAPI.Get(evtType)
@@ -86,6 +88,7 @@ func (s *CoreService) prepareAPIEvent(evtType, evtObj string, event interface{})
 				Blinds:  []core.EventBlind{},
 				Hvacs:   []core.EventHvac{},
 				Wagos:   []core.EventWago{},
+				Nanos:   []core.EventNano{},
 			})
 		}
 		value, ok := s.bufAPI.Get(evtType)
@@ -117,6 +120,7 @@ func (s *CoreService) prepareAPIEvent(evtType, evtObj string, event interface{})
 				Blinds:  []core.EventBlind{},
 				Hvacs:   []core.EventHvac{},
 				Wagos:   []core.EventWago{},
+				Nanos:   []core.EventNano{},
 			})
 		}
 		value, ok := s.bufAPI.Get(evtType)
@@ -148,6 +152,7 @@ func (s *CoreService) prepareAPIEvent(evtType, evtObj string, event interface{})
 				Blinds:  []core.EventBlind{},
 				Hvacs:   []core.EventHvac{},
 				Wagos:   []core.EventWago{},
+				Nanos:   []core.EventNano{},
 			})
 		}
 		value, ok := s.bufAPI.Get(evtType)
@@ -179,11 +184,44 @@ func (s *CoreService) prepareAPIEvent(evtType, evtObj string, event interface{})
 				Blinds:  []core.EventBlind{},
 				Hvacs:   []core.EventHvac{},
 				Wagos:   []core.EventWago{},
+				Nanos:   []core.EventNano{},
 			})
 		}
 		value, ok := s.bufAPI.Get(evtType)
 		val, _ := core.ToEventStatus(value)
 		val.Wagos = append(val.Wagos, evt)
+		s.bufAPI.Set(evtType, val)
+
+	case NanoElt:
+		nano, err := dnanosense.ToNanosense(event)
+		if err != nil || nano == nil {
+			return
+		}
+		label := ""
+		project := database.GetProjectByMac(s.db, nano.Mac)
+		if project != nil {
+			label = project.Label
+		}
+		evt := core.EventNano{
+			Nano:  *nano,
+			Label: label,
+		}
+
+		_, ok := s.bufAPI.Get(evtType)
+		if !ok {
+			s.bufAPI.Set(evtType, core.EventStatus{
+				Leds:    []core.EventLed{},
+				Sensors: []core.EventSensor{},
+				Groups:  []gm.GroupStatus{},
+				Blinds:  []core.EventBlind{},
+				Hvacs:   []core.EventHvac{},
+				Wagos:   []core.EventWago{},
+				Nanos:   []core.EventNano{},
+			})
+		}
+		value, ok := s.bufAPI.Get(evtType)
+		val, _ := core.ToEventStatus(value)
+		val.Nanos = append(val.Nanos, evt)
 		s.bufAPI.Set(evtType, val)
 
 	case GroupElt:
@@ -200,6 +238,7 @@ func (s *CoreService) prepareAPIEvent(evtType, evtObj string, event interface{})
 				Blinds:  []core.EventBlind{},
 				Hvacs:   []core.EventHvac{},
 				Wagos:   []core.EventWago{},
+				Nanos:   []core.EventNano{},
 			})
 		}
 		value, ok := s.bufAPI.Get(evtType)

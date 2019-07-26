@@ -700,6 +700,13 @@ func (api *API) websocketEvents() {
 							newEvt.Leds = append(newEvt.Leds, led)
 						}
 
+						for _, hvac := range evt.Hvacs {
+							if !tools.IntInSlice(hvac.Hvac.Group, auth.AccessGroups) {
+								continue
+							}
+							newEvt.Hvacs = append(newEvt.Hvacs, hvac)
+						}
+
 						for _, sensor := range evt.Sensors {
 							if !tools.IntInSlice(sensor.Sensor.Group, auth.AccessGroups) {
 								continue
@@ -712,6 +719,9 @@ func (api *API) websocketEvents() {
 						}
 
 						for _, nano := range evt.Nanos {
+							if !tools.IntInSlice(nano.Nano.Group, auth.AccessGroups) {
+								continue
+							}
 							newEvt.Nanos = append(newEvt.Nanos, nano)
 						}
 
