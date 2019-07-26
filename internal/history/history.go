@@ -93,6 +93,13 @@ type BlindHistory struct {
 	Group  int     `json:"group"`
 }
 
+type HvacHistory struct {
+	Mac   string `json:"mac"`
+	Power int    `json:"power"`
+	Date  string `json:"date"`
+	Group int    `json:"group"`
+}
+
 type SwitchHistory struct {
 	Mac     string  `json:"mac"`
 	Energy  float64 `json:"energy"`
@@ -104,6 +111,17 @@ type SwitchHistory struct {
 //ToLedHistory convert map interface to Led object
 func ToLedHistory(val interface{}) (*LedHistory, error) {
 	var driver LedHistory
+	inrec, err := json.Marshal(val)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(inrec, &driver)
+	return &driver, err
+}
+
+//ToHvacHistory convert map interface to Hvac object
+func ToHvacHistory(val interface{}) (*HvacHistory, error) {
+	var driver HvacHistory
 	inrec, err := json.Marshal(val)
 	if err != nil {
 		return nil, err
@@ -150,6 +168,16 @@ func SaveBlindHistory(db HistoryDb, driver dblind.Blind) error {
 	return SaveHistory(db, HistoryDB, BlindsTable, blind)
 }
 
+func SaveHvacHistory(db HistoryDb, driver dhvac.Hvac) error {
+	blind := HvacHistory{
+		Mac:   driver.Mac,
+		Power: driver.LinePower,
+		Group: driver.Group,
+		Date:  time.Now().Format(time.RFC850),
+	}
+	return SaveHistory(db, HistoryDB, BlindsTable, blind)
+}
+
 func GetBlindsHistory(db HistoryDb) []BlindHistory {
 	var history []BlindHistory
 	stored, err := db.FetchAllRecords(HistoryDB, BlindsTable)
@@ -174,6 +202,22 @@ func GetLedsHistory(db HistoryDb) []LedHistory {
 	}
 	for _, l := range stored {
 		driver, err := ToLedHistory(l)
+		if err != nil || driver == nil {
+			continue
+		}
+		history = append(history, *driver)
+	}
+	return history
+}
+
+func GetHvacsHistory(db HistoryDb) []HvacHistory {
+	var history []HvacHistory
+	stored, err := db.FetchAllRecords(HistoryDB, HvacsTable)
+	if err != nil || stored == nil {
+		return history
+	}
+	for _, l := range stored {
+		driver, err := ToHvacHistory(l)
 		if err != nil || driver == nil {
 			continue
 		}

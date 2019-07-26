@@ -7,6 +7,7 @@ import (
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
 	"github.com/energieip/common-components-go/pkg/dhvac"
 	dl "github.com/energieip/common-components-go/pkg/dled"
+	"github.com/energieip/common-components-go/pkg/dnanosense"
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
 	sd "github.com/energieip/common-components-go/pkg/dswitch"
 	"github.com/energieip/common-components-go/pkg/dwago"
@@ -216,6 +217,30 @@ func (s *CoreService) registerSwitchStatus(switchStatus sd.SwitchStatus) {
 	oldNanos := database.GetNanoSwitchStatus(s.db, switchStatus.Cluster)
 	for label, driver := range switchStatus.Nanos {
 		database.SaveNanoStatus(s.db, driver)
+		oldCfg, _ := database.GetHvacConfig(s.db, driver.Mac)
+		if oldCfg != nil {
+			if oldCfg.Group != nil {
+				gr, _ := database.GetGroupConfig(s.db, *oldCfg.Group)
+				if gr != nil {
+					nanos := []string{}
+					found := false
+					for _, v := range gr.Nanosenses {
+						if v == driver.Mac {
+							found = true
+							break
+						} else {
+							nanos = append(nanos, v)
+						}
+					}
+					if !found {
+						nanos = append(nanos, driver.Mac)
+						gr.Nanosenses = nanos
+						database.SaveGroupConfig(s.db, *gr)
+						s.sendGroupConfigUpdate(*gr)
+					}
+				}
+			}
+		}
 		_, ok := oldNanos[label]
 		if ok {
 			delete(oldNanos, label)
@@ -441,10 +466,12 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 	setup.BlindsSetup = make(map[string]dblind.BlindSetup)
 	setup.HvacsSetup = make(map[string]dhvac.HvacSetup)
 	setup.WagosSetup = make(map[string]dwago.WagoSetup)
-	setup.WagosSetup = database.GetWagoSwitchSetup(s.db, switchStatus.Cluster)
-	setup.NanosSetup = database.GetNanoSwitchSetup(s.db, switchStatus.Cluster)
-	rlog.Infof("=== nanos %v", setup.NanosSetup)
-	rlog.Infof("=== WagosSetup %v", setup.WagosSetup)
+
+	nanos := database.GetNanoSwitchSetup(s.db, switchStatus.Cluster)
+	wagos := database.GetWagoSwitchSetup(s.db, switchStatus.Cluster)
+	setup.WagosSetup = make(map[string]dwago.WagoSetup)
+	setup.NanosSetup = make(map[string]dnanosense.NanosenseSetup)
+
 	grList := make(map[int]bool)
 
 	driversMac := make(map[string]bool)
@@ -507,7 +534,7 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 			s.prepareAPIEvent(EventAdd, HvacElt, hvac)
 		} else {
 			s.prepareAPIEvent(EventUpdate, HvacElt, hvac)
-			// history.SaveHvacHistory(s.historyDb, hvac)
+			history.SaveHvacHistory(s.historyDb, hvac)
 			s.prepareAPIConsumption(HvacElt, hvac.LinePower)
 		}
 	}
@@ -524,16 +551,40 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 		}
 	}
 
+	wagoSeen := make(map[string]bool)
 	for mac, wago := range switchStatus.Wagos {
-		if !wago.IsConfigured {
-			ssetup, _ := database.GetWagoConfig(s.db, mac)
-			if ssetup != nil {
-				setup.WagosSetup[mac] = *ssetup
-			}
+		_, ok := wagos[mac]
+		if !ok {
 			s.prepareAPIEvent(EventAdd, WagoElt, wago)
 		} else {
 			s.prepareAPIEvent(EventUpdate, WagoElt, wago)
 		}
+		wagoSeen[mac] = true
+	}
+	for mac, driver := range wagos {
+		_, ok := wagoSeen[mac]
+		if ok {
+			continue
+		}
+		setup.WagosSetup[mac] = driver
+	}
+
+	nanoSeen := make(map[string]bool)
+	for mac, driver := range switchStatus.Nanos {
+		_, ok := nanos[driver.Label]
+		if !ok {
+			s.prepareAPIEvent(EventAdd, NanoElt, driver)
+		} else {
+			s.prepareAPIEvent(EventUpdate, NanoElt, driver)
+		}
+		nanoSeen[mac] = true
+	}
+	for mac, driver := range nanos {
+		_, ok := nanoSeen[driver.Label]
+		if ok {
+			continue
+		}
+		setup.NanosSetup[mac] = driver
 	}
 
 	//Prepare Cluster

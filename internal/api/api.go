@@ -682,6 +682,7 @@ func (api *API) websocketEvents() {
 							Groups:  []gm.GroupStatus{},
 							Blinds:  []core.EventBlind{},
 							Wagos:   []core.EventWago{},
+							Nanos:   []core.EventNano{},
 							Hvacs:   []core.EventHvac{},
 						}
 
@@ -708,6 +709,10 @@ func (api *API) websocketEvents() {
 
 						for _, wago := range evt.Wagos {
 							newEvt.Wagos = append(newEvt.Wagos, wago)
+						}
+
+						for _, nano := range evt.Nanos {
+							newEvt.Nanos = append(newEvt.Nanos, nano)
 						}
 
 						for _, group := range evt.Groups {
