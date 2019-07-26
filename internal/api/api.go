@@ -297,6 +297,7 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 	var hvacs []DumpHvac
 	var wagos []DumpWago
 	var groups []DumpGroup
+	var nanos []DumpNanosense
 	macs := make(map[string]bool)
 	driversMac := make(map[string]bool)
 	labels := make(map[string]bool)
@@ -306,7 +307,7 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 		tempMac := strings.Split(MacsParam, ",")
 
 		for _, v := range tempMac {
-			macs[v] = true
+			macs[strings.ToUpper(v)] = true
 			filterByMac = true
 		}
 	}
@@ -334,6 +335,8 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 	switchEltsConfig := database.GetSwitchsConfigByLabel(api.db)
 	frameElts := database.GetFramesDumpByLabel(api.db)
 	frameEltsConfig := database.GetFramesConfigByLabel(api.db)
+	nans := database.GetNanosStatusByLabel(api.db)
+	nanosConfig := database.GetNanosConfigByLabel(api.db)
 
 	ifcs := database.GetIfcs(api.db)
 	for _, ifc := range ifcs {
@@ -465,6 +468,9 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 				dump.Config = config
 			}
 			dump.Ifc = ifc
+			if auth.Priviledge == duser.PriviledgeUser {
+				continue
+			}
 			switchs = append(switchs, dump)
 		case pconst.FRAME:
 			dump := DumpFrame{}
@@ -477,7 +483,32 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 				dump.Config = config
 			}
 			dump.Ifc = ifc
+			if auth.Priviledge == duser.PriviledgeUser {
+				continue
+			}
 			frames = append(frames, dump)
+		case pconst.NANOSENSE:
+			dump := DumpNanosense{}
+			gr := 0
+			nano, ok := nans[ifc.Label]
+			if ok {
+				dump.Status = nano
+				gr = nano.Group
+			}
+			config, ok := nanosConfig[ifc.Label]
+			if ok {
+				dump.Config = config
+				if gr == 0 {
+					gr = config.Group
+				}
+			}
+			if auth.Priviledge == duser.PriviledgeUser {
+				if !tools.IntInSlice(gr, auth.AccessGroups) {
+					continue
+				}
+			}
+			dump.Ifc = ifc
+			nanos = append(nanos, dump)
 		}
 	}
 
@@ -495,14 +526,15 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 	}
 
 	dump := Dump{
-		Leds:    leds,
-		Sensors: sensors,
-		Blinds:  blinds,
-		Hvacs:   hvacs,
-		Wagos:   wagos,
-		Switchs: switchs,
-		Frames:  frames,
-		Groups:  groups,
+		Leds:       leds,
+		Sensors:    sensors,
+		Blinds:     blinds,
+		Hvacs:      hvacs,
+		Wagos:      wagos,
+		Switchs:    switchs,
+		Frames:     frames,
+		Groups:     groups,
+		Nanosenses: nanos,
 	}
 
 	inrec, _ := json.MarshalIndent(dump, "", "  ")

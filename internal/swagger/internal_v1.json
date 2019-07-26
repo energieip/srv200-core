@@ -1285,6 +1285,20 @@
               },
               "description": "Array of Sensor mac addresses"
             },
+            "hvacs": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Array of HVAC mac addresses"
+            },
+            "nanosenses": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Array of Nanosense mac addresses"
+            },
             "ruleBrightness": {
               "type": "integer",
               "description": "Brightness in Lux",
@@ -1423,6 +1437,20 @@
                 "type": "string"
               },
               "description": "Array of Sensor mac addresses"
+            },
+            "hvacs": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Array of HVAC mac addresses"
+            },
+            "nanosenses": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Array of Nanosense mac addresses"
             },
             "ruleBrightness": {
               "type": "integer",
@@ -1672,6 +1700,13 @@
                 "$ref": "#/components/schemas/WagoDump"
               },
               "description": "List of wagos dump"
+            },
+            "nanos": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/NanosenseDump"
+              },
+              "description": "List of nanosenses dump"
             },
             "switchs": {
               "type": "array",
@@ -2429,6 +2464,108 @@
             "label": {
               "type": "string",
               "description": "IFC cable label"
+            }
+          }
+        },
+        "NanosenseSetup": {
+          "title": "NanoSetup",
+          "required": [
+            "mac"
+          ],
+          "type": "object",
+          "properties": {
+            "mac": {
+              "type": "string",
+              "description": "Nanosense mac address"
+            },
+            "cluster": {
+              "type": "integer",
+              "description": "Associate cluster",
+              "format": "int32"
+            },
+            "group": {
+              "type": "integer",
+              "description": "Associate group",
+              "format": "int32"
+            },
+            "friendlyName": {
+              "type": "string",
+              "description": "Wago FriendlyName"
+            },
+            "label": {
+              "type": "string",
+              "description": "IFC cable label"
+            }
+          }
+        },
+        "NanosenseStatus": {
+          "title": "NanosenseStatus",
+          "required": [
+            "mac"
+          ],
+          "type": "object",
+          "properties": {
+            "mac": {
+              "type": "string",
+              "description": "Wago mac address"
+            },
+            "cluster": {
+              "type": "integer",
+              "description": "Associate cluster",
+              "format": "int32"
+            },
+            "group": {
+              "type": "integer",
+              "description": "Associate group",
+              "format": "int32"
+            },
+            "isConfigured": {
+              "type": "boolean",
+              "description": "Is the hvac configured"
+            },
+            "error": {
+              "type": "integer",
+              "description": "Error code value: 0 means no error",
+              "format": "int32"
+            },
+            "friendlyName": {
+              "type": "string",
+              "description": "Hvac FriendlyName"
+            },
+            "temperature": {
+              "type": "integer",
+              "description": "temperature (in 1/10°C)"
+            },
+            "co2": {
+              "type": "integer",
+              "description": "CO2 level (in 1/10 ppm)"
+            },
+            "cov": {
+              "type": "integer",
+              "description": "cov level (in 1/10 ppm)"
+            },
+            "hygrometry": {
+              "type": "integer",
+              "description": "Hygrometry level level (in 1/10 %)"
+            },
+            "label": {
+              "type": "string",
+              "description": "IFC cable label"
+            }
+          }
+        },
+        "NanosenseDump": {
+          "title": "NanosenseDump",
+          "type": "object",
+          "properties": {
+            "status": {
+              "$ref": "#/components/schemas/NanosenseStatus"
+            },
+            "ifc": {
+              "$ref": "#/components/schemas/IfcInfo"
+            },
+            "config": {
+              "$ref": "#/components/schemas/NanosenseSetup"
             }
           }
         },

@@ -14,6 +14,7 @@ import (
 	"github.com/energieip/common-components-go/pkg/dhvac"
 	dl "github.com/energieip/common-components-go/pkg/dled"
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
+	"github.com/energieip/common-components-go/pkg/pconst"
 	pkg "github.com/energieip/common-components-go/pkg/service"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
 	"github.com/gorilla/mux"
@@ -111,6 +112,7 @@ func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
 	var wagos []DumpWago
 	var frames []DumpFrame
 	var groups []DumpGroup
+	var nanos []DumpNanosense
 	macs := make(map[string]bool)
 	driversMac := make(map[string]bool)
 	labels := make(map[string]bool)
@@ -118,9 +120,8 @@ func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
 	MacsParam := req.FormValue("macs")
 	if MacsParam != "" {
 		tempMac := strings.Split(MacsParam, ",")
-
 		for _, v := range tempMac {
-			macs[v] = true
+			macs[strings.ToUpper(v)] = true
 			filterByMac = true
 		}
 	}
@@ -148,6 +149,8 @@ func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
 	switchEltsConfig := database.GetSwitchsConfigByLabel(api.db)
 	frameElts := database.GetFramesDumpByLabel(api.db)
 	frameEltsConfig := database.GetFramesConfigByLabel(api.db)
+	nans := database.GetNanosStatusByLabel(api.db)
+	nanosConfig := database.GetNanosConfigByLabel(api.db)
 
 	ifcs := database.GetIfcs(api.db)
 	for _, ifc := range ifcs {
@@ -249,6 +252,23 @@ func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
 			}
 			dump.Ifc = ifc
 			frames = append(frames, dump)
+		case pconst.NANOSENSE:
+			dump := DumpNanosense{}
+			gr := 0
+			nano, ok := nans[ifc.Label]
+			if ok {
+				dump.Status = nano
+				gr = nano.Group
+			}
+			config, ok := nanosConfig[ifc.Label]
+			if ok {
+				dump.Config = config
+				if gr == 0 {
+					gr = config.Group
+				}
+			}
+			dump.Ifc = ifc
+			nanos = append(nanos, dump)
 		}
 	}
 
@@ -266,14 +286,15 @@ func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
 	}
 
 	dump := Dump{
-		Leds:    leds,
-		Sensors: sensors,
-		Blinds:  blinds,
-		Hvacs:   hvacs,
-		Wagos:   wagos,
-		Switchs: switchs,
-		Groups:  groups,
-		Frames:  frames,
+		Leds:       leds,
+		Sensors:    sensors,
+		Blinds:     blinds,
+		Hvacs:      hvacs,
+		Wagos:      wagos,
+		Switchs:    switchs,
+		Groups:     groups,
+		Frames:     frames,
+		Nanosenses: nanos,
 	}
 
 	inrec, _ := json.MarshalIndent(dump, "", "  ")

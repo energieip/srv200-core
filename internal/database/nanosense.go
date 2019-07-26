@@ -183,7 +183,7 @@ func GetNanosStatus(db Database) map[string]dnanosense.Nanosense {
 		if err != nil || driver == nil {
 			continue
 		}
-		drivers[driver.Label] = *driver
+		drivers[driver.Mac] = *driver
 	}
 	return drivers
 }
@@ -215,5 +215,39 @@ func UpdateNanoLabelSetup(db Database, config dnanosense.NanosenseSetup) error {
 	}
 
 	new := dnanosense.UpdateSetup(config, *setup)
-	return db.UpdateRecord(pconst.DbConfig, pconst.TbLeds, dbID, &new)
+	return db.UpdateRecord(pconst.DbConfig, pconst.TbNanosenses, dbID, &new)
+}
+
+//GetNanosStatusByLabel return the nano status list
+func GetNanosStatusByLabel(db Database) map[string]dnanosense.Nanosense {
+	drivers := map[string]dnanosense.Nanosense{}
+	stored, err := db.FetchAllRecords(pconst.DbStatus, pconst.TbNanosenses)
+	if err != nil || stored == nil {
+		return drivers
+	}
+	for _, l := range stored {
+		driver, err := dnanosense.ToNanosense(l)
+		if err != nil || driver == nil {
+			continue
+		}
+		drivers[driver.Label] = *driver
+	}
+	return drivers
+}
+
+//GetNanosConfigByLabel return the sensor config list
+func GetNanosConfigByLabel(db Database) map[string]dnanosense.NanosenseSetup {
+	drivers := map[string]dnanosense.NanosenseSetup{}
+	stored, err := db.FetchAllRecords(pconst.DbConfig, pconst.TbNanosenses)
+	if err != nil || stored == nil {
+		return drivers
+	}
+	for _, l := range stored {
+		driver, err := dnanosense.ToNanosenseSetup(l)
+		if err != nil || driver == nil {
+			continue
+		}
+		drivers[driver.Label] = *driver
+	}
+	return drivers
 }

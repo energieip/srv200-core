@@ -3,6 +3,7 @@ package api
 import (
 	"sync"
 
+	"github.com/energieip/common-components-go/pkg/dnanosense"
 	"github.com/energieip/common-components-go/pkg/dwago"
 
 	jwt "github.com/dgrijalva/jwt-go"
@@ -138,6 +139,13 @@ type DumpWago struct {
 	Config dwago.WagoSetup `json:"config"`
 }
 
+//DumpNano
+type DumpNanosense struct {
+	Ifc    core.IfcInfo              `json:"ifc"`
+	Status dnanosense.Nanosense      `json:"status"`
+	Config dnanosense.NanosenseSetup `json:"config"`
+}
+
 //DumpSwitch
 type DumpGroup struct {
 	Status gm.GroupStatus `json:"status"`
@@ -146,14 +154,15 @@ type DumpGroup struct {
 
 //Dump
 type Dump struct {
-	Leds    []DumpLed    `json:"leds"`
-	Sensors []DumpSensor `json:"sensors"`
-	Blinds  []DumpBlind  `json:"blinds"`
-	Hvacs   []DumpHvac   `json:"hvacs"`
-	Wagos   []DumpWago   `json:"wagos"`
-	Switchs []DumpSwitch `json:"switchs"`
-	Groups  []DumpGroup  `json:"groups"`
-	Frames  []DumpFrame  `json:"frames"`
+	Leds       []DumpLed       `json:"leds"`
+	Sensors    []DumpSensor    `json:"sensors"`
+	Blinds     []DumpBlind     `json:"blinds"`
+	Hvacs      []DumpHvac      `json:"hvacs"`
+	Wagos      []DumpWago      `json:"wagos"`
+	Switchs    []DumpSwitch    `json:"switchs"`
+	Groups     []DumpGroup     `json:"groups"`
+	Frames     []DumpFrame     `json:"frames"`
+	Nanosenses []DumpNanosense `json:"nanos"`
 }
 
 //UserAuthorization
