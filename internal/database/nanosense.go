@@ -14,9 +14,9 @@ func SaveNanoConfig(db Database, cfg dnanosense.NanosenseSetup) error {
 
 //UpdateNanoConfig update nano config in database
 func UpdateNanoConfig(db Database, cfg dnanosense.NanosenseConf) error {
-	setup, dbID := GetNanoConfig(db, cfg.Label)
+	setup, dbID := GetNanoConfig(db, cfg.Mac)
 	if setup == nil || dbID == "" {
-		return NewError("Device " + cfg.Label + " not found")
+		return NewError("Device " + cfg.Mac + " not found")
 	}
 
 	new := dnanosense.UpdateConfig(cfg, *setup)
@@ -127,10 +127,10 @@ func GetNanoLabelConfig(db Database, label string) (*dnanosense.NanosenseSetup, 
 }
 
 //GetNanoConfig return the nano configuration
-func GetNanoConfig(db Database, label string) (*dnanosense.NanosenseSetup, string) {
+func GetNanoConfig(db Database, mac string) (*dnanosense.NanosenseSetup, string) {
 	var dbID string
 	criteria := make(map[string]interface{})
-	criteria["Mac"] = label
+	criteria["Mac"] = mac
 	stored, err := db.GetRecord(pconst.DbConfig, pconst.TbNanosenses, criteria)
 	if err != nil || stored == nil {
 		return nil, dbID

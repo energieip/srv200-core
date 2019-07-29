@@ -883,6 +883,7 @@ func (api *API) swagger() {
 	router.HandleFunc(apiV1+"/config/blind", api.verification(api.setBlindConfig)).Methods("POST")
 	router.HandleFunc(apiV1+"/config/hvac", api.verification(api.setHvacConfig)).Methods("POST")
 	router.HandleFunc(apiV1+"/config/wago", api.verification(api.setWagoConfig)).Methods("POST")
+	router.HandleFunc(apiV1+"/config/nanosense", api.verification(api.setNanoConfig)).Methods("POST")
 	router.HandleFunc(apiV1+"/config/group", api.verification(api.setGroupConfig)).Methods("POST")
 	router.HandleFunc(apiV1+"/config/switch", api.verification(api.setSwitchConfig)).Methods("POST")
 	router.HandleFunc(apiV1+"/configs", api.verification(api.setConfig)).Methods("POST")
