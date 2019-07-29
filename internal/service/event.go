@@ -256,7 +256,7 @@ func (s *CoreService) prepareAPIEvent(evtType, evtObj string, event interface{})
 		s.bufAPI.Set(evtType, val)
 
 	case SwitchElt:
-		sw, err := dswitch.ToSwitch(event)
+		sw, err := dswitch.ToSwitchStatus(event)
 		if err != nil || sw == nil {
 			return
 		}

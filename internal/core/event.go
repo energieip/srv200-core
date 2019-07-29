@@ -46,8 +46,8 @@ type EventNano struct {
 }
 
 type EventSwitch struct {
-	Switch dswitch.Switch `json:"switch"`
-	Label  string         `json:"label"`
+	Switch dswitch.SwitchStatus `json:"switch"`
+	Label  string               `json:"label"`
 }
 
 //EventStatus
