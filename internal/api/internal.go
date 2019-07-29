@@ -94,6 +94,7 @@ func (api *InternalAPI) getV1Functions(w http.ResponseWriter, req *http.Request)
 	apiV1 := "/v1.0"
 	functions := []string{
 		apiV1 + "/command/led", apiV1 + "/command/blind", apiV1 + "/command/hvac",
+		apiV1 + "/config/led", apiV1 + "/config/blind", apiV1 + "/config/hvac",
 		apiV1 + "/command/group", apiV1 + "/dump",
 	}
 	apiInfo := APIFunctions{
