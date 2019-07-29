@@ -167,7 +167,7 @@ func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
 		driversMac[ifc.Mac] = true
 
 		switch ifc.DeviceType {
-		case "led":
+		case pconst.LED:
 			dump := DumpLed{}
 			led, ok := lights[ifc.Label]
 			if ok {
@@ -180,7 +180,7 @@ func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
 			dump.Ifc = ifc
 
 			leds = append(leds, dump)
-		case "sensor":
+		case pconst.SENSOR:
 			dump := DumpSensor{}
 			sensor, ok := cells[ifc.Label]
 			if ok {
@@ -192,7 +192,7 @@ func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
 			}
 			dump.Ifc = ifc
 			sensors = append(sensors, dump)
-		case "blind":
+		case pconst.BLIND:
 			dump := DumpBlind{}
 			bld, ok := blds[ifc.Label]
 			if ok {
@@ -204,7 +204,7 @@ func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
 			}
 			dump.Ifc = ifc
 			blinds = append(blinds, dump)
-		case "hvac":
+		case pconst.HVAC:
 			dump := DumpHvac{}
 			hvac, ok := hvcs[ifc.Label]
 			if ok {
@@ -216,7 +216,7 @@ func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
 			}
 			dump.Ifc = ifc
 			hvacs = append(hvacs, dump)
-		case "wago":
+		case pconst.WAGO:
 			dump := DumpWago{}
 			wago, ok := wags[ifc.Label]
 			if ok {
@@ -228,7 +228,7 @@ func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
 			}
 			dump.Ifc = ifc
 			wagos = append(wagos, dump)
-		case "switch":
+		case pconst.SWITCH:
 			dump := DumpSwitch{}
 			switchElt, ok := switchElts[ifc.Label]
 			if ok {
@@ -240,7 +240,7 @@ func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
 			}
 			dump.Ifc = ifc
 			switchs = append(switchs, dump)
-		case "frame":
+		case pconst.FRAME:
 			dump := DumpFrame{}
 			frameElt, ok := frameElts[ifc.Label]
 			if ok {
