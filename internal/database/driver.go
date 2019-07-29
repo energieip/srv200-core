@@ -68,7 +68,7 @@ func GetDrivers(db Database) map[string]core.Driver {
 		}
 	}
 
-	sensors := GetBlindsStatus(db)
+	sensors := GetSensorsStatus(db)
 	for _, driv := range sensors {
 		d, ok := res[driv.Mac]
 		if ok {
@@ -83,7 +83,7 @@ func GetDrivers(db Database) map[string]core.Driver {
 		}
 	}
 
-	hvacs := GetBlindsStatus(db)
+	hvacs := GetHvacsStatus(db)
 	for _, driv := range hvacs {
 		d, ok := res[driv.Mac]
 		if ok {
@@ -109,6 +109,21 @@ func GetDrivers(db Database) map[string]core.Driver {
 				Mac:    driv.Mac,
 				Active: true,
 				Type:   "wago",
+			}
+		}
+	}
+
+	nanos := GetNanosStatus(db)
+	for _, driv := range nanos {
+		d, ok := res[driv.Mac]
+		if ok {
+			d.Active = true
+			res[driv.Mac] = d
+		} else {
+			res[driv.Mac] = core.Driver{
+				Mac:    driv.Mac,
+				Active: true,
+				Type:   "nanosense",
 			}
 		}
 	}
