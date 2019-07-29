@@ -583,6 +583,11 @@
               "description": "Dump frequency by default: 1s",
               "format": "int32"
             },
+            "heatCool": {
+              "type": "integer",
+              "description": "Regulation mode: Heat -> 1, Cool -> 3, Off -> 6",
+              "format": "int32"
+            },
             "isConfigured": {
               "type": "boolean",
               "description": "Is the Hvac configured"
