@@ -315,6 +315,14 @@ func (s *CoreService) registerSwitchStatus(switchStatus sd.SwitchStatus) {
 		serv.SwitchMac = switchStatus.Mac
 		database.SaveServiceStatus(s.db, serv)
 	}
+	if switchStatus.IsConfigured != nil {
+		isConfig := *switchStatus.IsConfigured
+		if isConfig {
+			s.prepareAPIEvent(EventUpdate, SwitchElt, switchStatus)
+		} else {
+			s.prepareAPIEvent(EventAdd, SwitchElt, switchStatus)
+		}
+	}
 	database.SaveSwitchStatus(s.db, switchStatus)
 }
 

@@ -684,6 +684,7 @@ func (api *API) websocketEvents() {
 							Wagos:   []core.EventWago{},
 							Nanos:   []core.EventNano{},
 							Hvacs:   []core.EventHvac{},
+							Switchs: []core.EventSwitch{},
 						}
 
 						for _, bld := range evt.Blinds {
@@ -715,7 +716,17 @@ func (api *API) websocketEvents() {
 						}
 
 						for _, wago := range evt.Wagos {
+							if !tools.StringInSlice(auth.Priviledge, []string{duser.PriviledgeAdmin, duser.PriviledgeMaintainer}) {
+								continue
+							}
 							newEvt.Wagos = append(newEvt.Wagos, wago)
+						}
+
+						for _, sw := range evt.Switchs {
+							if !tools.StringInSlice(auth.Priviledge, []string{duser.PriviledgeAdmin, duser.PriviledgeMaintainer}) {
+								continue
+							}
+							newEvt.Switchs = append(newEvt.Switchs, sw)
 						}
 
 						for _, nano := range evt.Nanos {

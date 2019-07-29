@@ -9,6 +9,7 @@ import (
 	dl "github.com/energieip/common-components-go/pkg/dled"
 	"github.com/energieip/common-components-go/pkg/dnanosense"
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
+	"github.com/energieip/common-components-go/pkg/dswitch"
 	"github.com/energieip/common-components-go/pkg/dwago"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
@@ -28,6 +29,7 @@ const (
 	HvacElt   = "hvac"
 	WagoElt   = "wago"
 	NanoElt   = "nano"
+	SwitchElt = "switch"
 )
 
 func (s *CoreService) prepareAPIEvent(evtType, evtObj string, event interface{}) {
@@ -56,6 +58,7 @@ func (s *CoreService) prepareAPIEvent(evtType, evtObj string, event interface{})
 				Blinds:  []core.EventBlind{},
 				Hvacs:   []core.EventHvac{},
 				Wagos:   []core.EventWago{},
+				Switchs: []core.EventSwitch{},
 				Nanos:   []core.EventNano{},
 			})
 		}
@@ -89,6 +92,7 @@ func (s *CoreService) prepareAPIEvent(evtType, evtObj string, event interface{})
 				Hvacs:   []core.EventHvac{},
 				Wagos:   []core.EventWago{},
 				Nanos:   []core.EventNano{},
+				Switchs: []core.EventSwitch{},
 			})
 		}
 		value, ok := s.bufAPI.Get(evtType)
@@ -121,6 +125,7 @@ func (s *CoreService) prepareAPIEvent(evtType, evtObj string, event interface{})
 				Hvacs:   []core.EventHvac{},
 				Wagos:   []core.EventWago{},
 				Nanos:   []core.EventNano{},
+				Switchs: []core.EventSwitch{},
 			})
 		}
 		value, ok := s.bufAPI.Get(evtType)
@@ -153,6 +158,7 @@ func (s *CoreService) prepareAPIEvent(evtType, evtObj string, event interface{})
 				Hvacs:   []core.EventHvac{},
 				Wagos:   []core.EventWago{},
 				Nanos:   []core.EventNano{},
+				Switchs: []core.EventSwitch{},
 			})
 		}
 		value, ok := s.bufAPI.Get(evtType)
@@ -185,6 +191,7 @@ func (s *CoreService) prepareAPIEvent(evtType, evtObj string, event interface{})
 				Hvacs:   []core.EventHvac{},
 				Wagos:   []core.EventWago{},
 				Nanos:   []core.EventNano{},
+				Switchs: []core.EventSwitch{},
 			})
 		}
 		value, ok := s.bufAPI.Get(evtType)
@@ -217,6 +224,7 @@ func (s *CoreService) prepareAPIEvent(evtType, evtObj string, event interface{})
 				Hvacs:   []core.EventHvac{},
 				Wagos:   []core.EventWago{},
 				Nanos:   []core.EventNano{},
+				Switchs: []core.EventSwitch{},
 			})
 		}
 		value, ok := s.bufAPI.Get(evtType)
@@ -239,11 +247,44 @@ func (s *CoreService) prepareAPIEvent(evtType, evtObj string, event interface{})
 				Hvacs:   []core.EventHvac{},
 				Wagos:   []core.EventWago{},
 				Nanos:   []core.EventNano{},
+				Switchs: []core.EventSwitch{},
 			})
 		}
 		value, ok := s.bufAPI.Get(evtType)
 		val, _ := core.ToEventStatus(value)
 		val.Groups = append(val.Groups, *group)
+		s.bufAPI.Set(evtType, val)
+
+	case SwitchElt:
+		sw, err := dswitch.ToSwitch(event)
+		if err != nil || sw == nil {
+			return
+		}
+		label := ""
+		project := database.GetProjectByMac(s.db, sw.Mac)
+		if project != nil {
+			label = project.Label
+		}
+		evt := core.EventSwitch{
+			Switch: *sw,
+			Label:  label,
+		}
+		_, ok := s.bufAPI.Get(evtType)
+		if !ok {
+			s.bufAPI.Set(evtType, core.EventStatus{
+				Leds:    []core.EventLed{},
+				Sensors: []core.EventSensor{},
+				Groups:  []gm.GroupStatus{},
+				Blinds:  []core.EventBlind{},
+				Hvacs:   []core.EventHvac{},
+				Wagos:   []core.EventWago{},
+				Nanos:   []core.EventNano{},
+				Switchs: []core.EventSwitch{},
+			})
+		}
+		value, ok := s.bufAPI.Get(evtType)
+		val, _ := core.ToEventStatus(value)
+		val.Switchs = append(val.Switchs, evt)
 		s.bufAPI.Set(evtType, val)
 	}
 }

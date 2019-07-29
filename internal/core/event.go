@@ -3,6 +3,8 @@ package core
 import (
 	"encoding/json"
 
+	"github.com/energieip/common-components-go/pkg/dswitch"
+
 	"github.com/energieip/common-components-go/pkg/dhvac"
 	"github.com/energieip/common-components-go/pkg/dnanosense"
 	"github.com/energieip/common-components-go/pkg/dwago"
@@ -43,6 +45,11 @@ type EventNano struct {
 	Label string               `json:"label"`
 }
 
+type EventSwitch struct {
+	Switch dswitch.Switch `json:"switch"`
+	Label  string         `json:"label"`
+}
+
 //EventStatus
 type EventStatus struct {
 	Leds    []EventLed       `json:"leds"`
@@ -52,6 +59,7 @@ type EventStatus struct {
 	Wagos   []EventWago      `json:"wagos"`
 	Nanos   []EventNano      `json:"nanosenses"`
 	Groups  []gm.GroupStatus `json:"groups"`
+	Switchs []EventSwitch    `json:"switchs"`
 }
 
 //ToEventStatus convert map interface to EventStatus object
