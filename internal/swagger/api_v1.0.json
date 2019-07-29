@@ -6187,9 +6187,9 @@
               "description": "humidity contact",
               "format": "int32"
             },
-            "spaceCo2": {
+            "spaceCO2": {
               "type": "integer",
-              "description": "Space CO2 from nanosense",
+              "description": "Space CO2 from nanosense (in 1/10 ppm)",
               "format": "int32"
             },
             "temperatureSelect": {
@@ -6254,7 +6254,7 @@
             },
             "spaceCOV": {
               "type": "integer",
-              "description": "space COV from nanosense",
+              "description": "space COV from nanosense (in 1/10 ppm)",
               "format": "int32"
             },
             "label": {
