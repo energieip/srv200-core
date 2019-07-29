@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -151,6 +152,255 @@ func (api *API) installStatus(w http.ResponseWriter, req *http.Request) {
 			cell.Value = "KO"
 			cell.SetStyle(redStyle)
 		}
+	}
+
+	sheet3, _ := file.AddSheet("Sensors")
+
+	row = sheet3.AddRow()
+	cell = row.AddCell()
+	cell.Value = "MAC"
+	cell.SetStyle(boldStyle)
+
+	cell = row.AddCell()
+	cell.Value = "Label"
+	cell.SetStyle(boldStyle)
+
+	cell = row.AddCell()
+	cell.Value = "Switch"
+	cell.SetStyle(boldStyle)
+
+	cell = row.AddCell()
+	cell.Value = "Temperature (°C)"
+	cell.SetStyle(boldStyle)
+
+	cell = row.AddCell()
+	cell.Value = "Hygrometry (%)"
+	cell.SetStyle(boldStyle)
+
+	cell = row.AddCell()
+	cell.Value = "Brightness (Lux)"
+	cell.SetStyle(boldStyle)
+
+	cell = row.AddCell()
+	cell.Value = "Presence"
+	cell.SetStyle(boldStyle)
+
+	sensors := database.GetSensorsStatus(api.db)
+	for _, driv := range sensors {
+		row = sheet3.AddRow()
+		cell = row.AddCell()
+		cell.Value = driv.Mac
+
+		cell = row.AddCell()
+		label := ""
+		if driv.Label != nil {
+			label = strings.Replace(*driv.Label, "_", "-", -1)
+		}
+		cell.Value = label
+
+		cell = row.AddCell()
+		cell.Value = driv.SwitchMac
+
+		cell = row.AddCell()
+		temperature := float32(driv.Temperature) / 10
+		cell.Value = fmt.Sprintf("%f", temperature)
+
+		cell = row.AddCell()
+		hum := float32(driv.Humidity) / 10
+		cell.Value = fmt.Sprintf("%f", hum)
+
+		cell = row.AddCell()
+		bright := float32(driv.Brightness) / 10
+		cell.Value = fmt.Sprintf("%f", bright)
+
+		cell = row.AddCell()
+		if driv.Presence {
+			cell.Value = "DETECTED"
+		} else {
+			cell.Value = "NONE"
+		}
+	}
+
+	sheet4, _ := file.AddSheet("Nanosenses")
+
+	row = sheet4.AddRow()
+	cell = row.AddCell()
+	cell.Value = "MAC"
+	cell.SetStyle(boldStyle)
+
+	cell = row.AddCell()
+	cell.Value = "Label"
+	cell.SetStyle(boldStyle)
+
+	cell = row.AddCell()
+	cell.Value = "Temperature (°C)"
+	cell.SetStyle(boldStyle)
+
+	cell = row.AddCell()
+	cell.Value = "CO2 (ppm)"
+	cell.SetStyle(boldStyle)
+
+	cell = row.AddCell()
+	cell.Value = "COV (ppm)"
+	cell.SetStyle(boldStyle)
+
+	cell = row.AddCell()
+	cell.Value = "Hygrometry (%)"
+	cell.SetStyle(boldStyle)
+
+	nanos := database.GetNanosStatus(api.db)
+	for _, driv := range nanos {
+		row = sheet4.AddRow()
+		cell = row.AddCell()
+		cell.Value = driv.Mac
+
+		cell = row.AddCell()
+		cell.Value = strings.Replace(driv.Label, "_", "-", -1)
+
+		cell = row.AddCell()
+		temperature := float32(driv.Temperature) / 10
+		cell.Value = fmt.Sprintf("%f", temperature)
+
+		cell = row.AddCell()
+		co2 := float32(driv.CO2) / 10
+		cell.Value = fmt.Sprintf("%f", co2)
+
+		cell = row.AddCell()
+		cov := float32(driv.COV) / 10
+		cell.Value = fmt.Sprintf("%f", cov)
+
+		cell = row.AddCell()
+		hum := float32(driv.Hygrometry) / 10
+		cell.Value = fmt.Sprintf("%f", hum)
+	}
+
+	sheet5, _ := file.AddSheet("Blinds")
+
+	row = sheet5.AddRow()
+	cell = row.AddCell()
+	cell.Value = "MAC"
+	cell.SetStyle(boldStyle)
+
+	cell = row.AddCell()
+	cell.Value = "Label"
+	cell.SetStyle(boldStyle)
+
+	cell = row.AddCell()
+	cell.Value = "Switch"
+	cell.SetStyle(boldStyle)
+
+	cell = row.AddCell()
+	cell.Value = "Windows 1 Contact"
+	cell.SetStyle(boldStyle)
+
+	cell = row.AddCell()
+	cell.Value = "Windows 2 Contact"
+	cell.SetStyle(boldStyle)
+
+	blinds := database.GetBlindsStatus(api.db)
+	for _, driv := range blinds {
+		row = sheet5.AddRow()
+		cell = row.AddCell()
+		cell.Value = driv.Mac
+
+		cell = row.AddCell()
+		label := ""
+		if driv.Label != nil {
+			label = strings.Replace(*driv.Label, "_", "-", -1)
+		}
+		cell.Value = label
+
+		cell = row.AddCell()
+		cell.Value = driv.SwitchMac
+
+		cell = row.AddCell()
+		if driv.WindowStatus1 {
+			cell.Value = "OPENED"
+		} else {
+			cell.Value = "CLOSED"
+		}
+		cell = row.AddCell()
+		if driv.WindowStatus2 {
+			cell.Value = "OPENED"
+		} else {
+			cell.Value = "CLOSED"
+		}
+	}
+
+	sheet6, _ := file.AddSheet("HVACs")
+
+	row = sheet6.AddRow()
+	cell = row.AddCell()
+	cell.Value = "MAC"
+	cell.SetStyle(boldStyle)
+
+	cell = row.AddCell()
+	cell.Value = "Label"
+	cell.SetStyle(boldStyle)
+
+	cell = row.AddCell()
+	cell.Value = "Switch"
+	cell.SetStyle(boldStyle)
+
+	cell = row.AddCell()
+	cell.Value = "Dew Sensor Status"
+	cell.SetStyle(boldStyle)
+
+	hvacs := database.GetHvacsStatus(api.db)
+	for _, driv := range hvacs {
+		row = sheet6.AddRow()
+		cell = row.AddCell()
+		cell.Value = driv.Mac
+
+		cell = row.AddCell()
+		label := ""
+		if driv.Label != nil {
+			label = strings.Replace(*driv.Label, "_", "-", -1)
+		}
+		cell.Value = label
+
+		cell = row.AddCell()
+		cell.Value = driv.SwitchMac
+
+		cell = row.AddCell()
+		if driv.DewSensor1 == 0 {
+			cell.Value = "Inactive"
+			cell.SetStyle(greenStyle)
+		} else {
+			cell.Value = "Active"
+			cell.SetStyle(redStyle)
+		}
+	}
+
+	sheet7, _ := file.AddSheet("Switchs")
+	row = sheet7.AddRow()
+	cell = row.AddCell()
+	cell.Value = "MAC"
+	cell.SetStyle(boldStyle)
+
+	cell = row.AddCell()
+	cell.Value = "Label"
+	cell.SetStyle(boldStyle)
+
+	cell = row.AddCell()
+	cell.Value = "Profil"
+	cell.SetStyle(boldStyle)
+
+	switchs := database.GetSwitchsDump(api.db)
+	for _, driv := range switchs {
+		row = sheet7.AddRow()
+		cell = row.AddCell()
+		cell.Value = driv.Mac
+
+		cell = row.AddCell()
+		label := ""
+		if driv.Label != nil {
+			label = strings.Replace(*driv.Label, "_", "-", -1)
+		}
+		cell.Value = label
+
+		cell = row.AddCell()
+		cell.Value = driv.Profil
 	}
 
 	err = file.Save(path)
