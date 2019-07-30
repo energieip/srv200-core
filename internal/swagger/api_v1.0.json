@@ -3687,6 +3687,114 @@
           ]
         }
       },
+      "/maintenance/exportDB": {
+        "get": {
+          "tags": [
+            "maintenance"
+          ],
+          "summary": "Export Database",
+          "description": "Prepare database export",
+          "operationId": "databaseContent",
+          "parameters": [],
+          "responses": {
+            "201": {
+              "description": "Wait for operation to complete",
+              "headers": {},
+              "content": {
+                }
+            },
+            "401": {
+              "description": "Unauthorized Access",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "default": {
+              "description": "unexpected error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "deprecated": false,
+          "security": [
+            {
+              "Authorization": []
+            }
+          ]
+        }
+      },
+      "/maintenance/exportDB/result": {
+        "get": {
+          "tags": [
+            "maintenance"
+          ],
+          "summary": "Export Database Result",
+          "description": "Get database export",
+          "operationId": "databaseContent",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "sucessful operation",
+              "headers": {},
+              "content": {
+                "application/octet-stream": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "file": {
+                        "type": "string",
+                        "format": "binary",
+                        "description": "file to download"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "201": {
+              "description": "Wait for operation to complete",
+              "headers": {},
+              "content": {
+                }
+            },
+            "401": {
+              "description": "Unauthorized Access",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "default": {
+              "description": "unexpected error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "deprecated": false,
+          "security": [
+            {
+              "Authorization": []
+            }
+          ]
+        }
+      },
       "/install/stickers": {
         "get": {
           "tags": [

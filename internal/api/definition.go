@@ -66,6 +66,8 @@ type API struct {
 	browsingFolder  string
 	dataPath        string
 	uploadValue     *string
+	exportDBPath    string
+	exportDBStatus  string
 }
 
 type JwtToken struct {
