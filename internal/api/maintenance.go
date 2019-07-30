@@ -386,6 +386,30 @@ func (api *API) installStatus(w http.ResponseWriter, req *http.Request) {
 	cell.Value = "Profil"
 	cell.SetStyle(boldStyle)
 
+	cell = row.AddCell()
+	cell.Value = "Baes"
+	cell.SetStyle(boldStyle)
+
+	cell = row.AddCell()
+	cell.Value = "Puls 1"
+	cell.SetStyle(boldStyle)
+
+	cell = row.AddCell()
+	cell.Value = "Puls 2"
+	cell.SetStyle(boldStyle)
+
+	cell = row.AddCell()
+	cell.Value = "Puls 3"
+	cell.SetStyle(boldStyle)
+
+	cell = row.AddCell()
+	cell.Value = "Puls 4"
+	cell.SetStyle(boldStyle)
+
+	cell = row.AddCell()
+	cell.Value = "Puls 5+"
+	cell.SetStyle(boldStyle)
+
 	switchs := database.GetSwitchsDump(api.db)
 	for _, driv := range switchs {
 		row = sheet7.AddRow()
@@ -400,7 +424,29 @@ func (api *API) installStatus(w http.ResponseWriter, req *http.Request) {
 		cell.Value = label
 
 		cell = row.AddCell()
-		cell.Value = driv.Profil
+		profil := driv.Profil
+		if profil == "" {
+			profil = "none"
+		}
+		cell.Value = profil
+
+		cell = row.AddCell()
+		cell.Value = strconv.Itoa(driv.StateBaes)
+
+		cell = row.AddCell()
+		cell.Value = strconv.Itoa(driv.StatePuls1)
+
+		cell = row.AddCell()
+		cell.Value = strconv.Itoa(driv.StatePuls2)
+
+		cell = row.AddCell()
+		cell.Value = strconv.Itoa(driv.StatePuls3)
+
+		cell = row.AddCell()
+		cell.Value = strconv.Itoa(driv.StatePuls4)
+
+		cell = row.AddCell()
+		cell.Value = strconv.Itoa(driv.StatePuls5)
 	}
 
 	err = file.Save(path)
