@@ -195,9 +195,9 @@ func (s *CoreService) installDriver(dr interface{}) {
 
 			groupCfg, _ := database.GetGroupConfig(s.db, nano.Group)
 			newNanos := []string{}
-			for _, nano := range groupCfg.Nanosenses {
-				if nano != elt.Mac {
-					newNanos = append(newNanos, nano)
+			for _, n := range groupCfg.Nanosenses {
+				if n != nano.Mac {
+					newNanos = append(newNanos, n)
 				}
 			}
 			newNanos = append(newNanos, nano.Mac)
