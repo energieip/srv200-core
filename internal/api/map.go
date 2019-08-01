@@ -30,7 +30,7 @@ func (api *API) uploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	chunk := make([]byte, 4096) // 4k size byte slice
+	chunk := make([]byte, 10485760) // 10M size byte slice
 	tempFile, err := ioutil.TempFile(api.dataPath, "temp-file")
 	if err != nil {
 		rlog.Error("Hit error while creating temp file: ", err.Error())

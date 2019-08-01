@@ -3739,7 +3739,7 @@
           ],
           "summary": "Export Database Result",
           "description": "Get database export",
-          "operationId": "databaseContent",
+          "operationId": "databaseContentResult",
           "parameters": [],
           "responses": {
             "200": {
