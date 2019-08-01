@@ -19,7 +19,6 @@ func (s *CoreService) sendSwitchNanoSetup(driver dnano.NanosenseSetup) {
 		switchSetup.Mac = sw
 		switchSetup.NanosSetup = make(map[string]dnano.NanosenseSetup)
 		switchSetup.NanosSetup[driver.Label] = driver
-
 		dump, _ := switchSetup.ToJSON()
 		s.server.SendCommand(url, dump)
 	}

@@ -121,7 +121,9 @@ func (s *CoreService) updateLedCfg(config interface{}) {
 	rlog.Info("Update new group", gr)
 	grNew, _ := database.GetGroupConfig(s.db, gr)
 	if grNew != nil && led.Mac != "" {
-		grNew.Leds = append(grNew.Leds, cfg.Mac)
+		if !inArray(cfg.Mac, grNew.Leds) {
+			grNew.Leds = append(grNew.Leds, cfg.Mac)
+		}
 
 		firsts := []string{}
 		for _, v := range grNew.FirstDay {
@@ -145,9 +147,7 @@ func (s *CoreService) updateLedCfg(config interface{}) {
 	switchSetup := sd.SwitchConfig{}
 	switchSetup.Mac = led.SwitchMac
 	switchSetup.LedsConfig = make(map[string]dl.LedConf)
-
 	switchSetup.LedsConfig[cfg.Mac] = *cfg
-
 	dump, _ := switchSetup.ToJSON()
 	s.server.SendCommand(url, dump)
 }
@@ -180,7 +180,9 @@ func (s *CoreService) updateGroupLed(oldLed dl.LedSetup, cfg dl.LedSetup) {
 			rlog.Info("Update new group", *cfg.Group)
 			grNew, _ := database.GetGroupConfig(s.db, *cfg.Group)
 			if grNew != nil && cfg.Mac != "" {
-				grNew.Leds = append(grNew.Leds, cfg.Mac)
+				if !inArray(cfg.Mac, grNew.Leds) {
+					grNew.Leds = append(grNew.Leds, cfg.Mac)
+				}
 				firsts := []string{}
 				for _, v := range grNew.FirstDay {
 					if v != cfg.Mac {

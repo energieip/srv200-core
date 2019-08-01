@@ -30,9 +30,11 @@ func (s *CoreService) updateGroupSensor(oldSensor ds.SensorSetup, sensor ds.Sens
 			rlog.Info("Update new group", *sensor.Group)
 			grNew, _ := database.GetGroupConfig(s.db, *sensor.Group)
 			if grNew != nil {
-				grNew.Sensors = append(grNew.Sensors, sensor.Mac)
-				rlog.Info("new group will be", grNew.Sensors)
-				s.updateGroupCfg(grNew)
+				if !inArray(sensor.Mac, grNew.Sensors) {
+					grNew.Sensors = append(grNew.Sensors, sensor.Mac)
+					rlog.Info("new group will be", grNew.Sensors)
+					s.updateGroupCfg(grNew)
+				}
 			}
 		}
 	}
@@ -48,7 +50,6 @@ func (s *CoreService) sendSwitchSensorSetup(elt ds.SensorSetup) {
 	switchSetup.Mac = elt.SwitchMac
 	switchSetup.SensorsSetup = make(map[string]ds.SensorSetup)
 	switchSetup.SensorsSetup[elt.Mac] = elt
-
 	dump, _ := switchSetup.ToJSON()
 	s.server.SendCommand(url, dump)
 }
@@ -103,7 +104,6 @@ func (s *CoreService) updateSensorCfg(config interface{}) {
 	switchSetup.Mac = sensor.SwitchMac
 	switchSetup.SensorsConfig = make(map[string]ds.SensorConf)
 	switchSetup.SensorsConfig[cfg.Mac] = *cfg
-
 	dump, _ := switchSetup.ToJSON()
 	s.server.SendCommand(url, dump)
 }

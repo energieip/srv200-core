@@ -471,7 +471,6 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 	setup.SensorsSetup = make(map[string]ds.SensorSetup)
 	setup.BlindsSetup = make(map[string]dblind.BlindSetup)
 	setup.HvacsSetup = make(map[string]dhvac.HvacSetup)
-	setup.WagosSetup = make(map[string]dwago.WagoSetup)
 
 	nanos := database.GetNanoSwitchSetup(s.db, switchStatus.Cluster)
 	wagos := database.GetWagoSwitchSetup(s.db, switchStatus.Cluster)

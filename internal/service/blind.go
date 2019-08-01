@@ -30,7 +30,7 @@ func (s *CoreService) updateGroupBlind(oldBlind dblind.BlindSetup, blind dblind.
 			}
 			rlog.Info("Update new group", *blind.Group)
 			grNew, _ := database.GetGroupConfig(s.db, *blind.Group)
-			if grNew != nil {
+			if grNew != nil && blind.Mac != "" && !inArray(blind.Mac, grNew.Blinds) {
 				grNew.Blinds = append(grNew.Blinds, blind.Mac)
 				rlog.Info("new group will be", grNew.Blinds)
 				s.updateGroupCfg(grNew)

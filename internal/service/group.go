@@ -80,6 +80,18 @@ func (s *CoreService) isGroupRequiredUpdate(old gm.GroupStatus, new gm.GroupConf
 		}
 	}
 
+	for i, v := range old.Nanosenses {
+		if v != new.Nanosenses[i] {
+			return true
+		}
+	}
+
+	for i, v := range old.Hvacs {
+		if v != new.Hvacs[i] {
+			return true
+		}
+	}
+
 	if new.FriendlyName != nil {
 		if old.FriendlyName != *new.FriendlyName {
 			return true
@@ -190,9 +202,7 @@ func (s *CoreService) updateLedGroup(mac string, grID int) {
 		switchSetup := sd.SwitchConfig{}
 		switchSetup.Mac = led.SwitchMac
 		switchSetup.LedsConfig = make(map[string]dl.LedConf)
-
 		switchSetup.LedsConfig[led.Mac] = cfgLed
-
 		dump, _ := switchSetup.ToJSON()
 		s.server.SendCommand(url, dump)
 	}
@@ -253,9 +263,7 @@ func (s *CoreService) updateSensorGroup(mac string, grID int) {
 		switchSetup := sd.SwitchConfig{}
 		switchSetup.Mac = sensor.SwitchMac
 		switchSetup.SensorsConfig = make(map[string]ds.SensorConf)
-
 		switchSetup.SensorsConfig[sensor.Mac] = cfgSensor
-
 		dump, _ := switchSetup.ToJSON()
 		s.server.SendCommand(url, dump)
 	}
@@ -366,7 +374,6 @@ func (s *CoreService) updateNanoGroup(mac string, grID int) {
 		switchSetup.Mac = *sw.Mac
 		switchSetup.NanosConfig = make(map[string]dnanosense.NanosenseConf)
 		switchSetup.NanosConfig[driver.Mac] = cfgNano
-
 		dump, _ := switchSetup.ToJSON()
 		s.server.SendCommand(url, dump)
 	}

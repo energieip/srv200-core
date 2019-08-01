@@ -30,7 +30,7 @@ func (s *CoreService) updateGroupHvac(oldHvac dhvac.HvacSetup, hvac dhvac.HvacSe
 			}
 			rlog.Info("Update new group", *hvac.Group)
 			grNew, _ := database.GetGroupConfig(s.db, *hvac.Group)
-			if grNew != nil {
+			if grNew != nil && hvac.Mac != "" && !inArray(hvac.Mac, grNew.Hvacs) {
 				grNew.Hvacs = append(grNew.Hvacs, hvac.Mac)
 				rlog.Info("new group will be", grNew.Hvacs)
 				s.updateGroupCfg(grNew)
