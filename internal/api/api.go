@@ -791,7 +791,7 @@ func (api *API) getV1Functions(w http.ResponseWriter, req *http.Request) {
 	api.setDefaultHeader(w, req)
 	apiV1 := "/v1.0"
 	functions := []string{apiV1 + "/setup/sensor", apiV1 + "/setup/led",
-		apiV1 + "/setup/group", apiV1 + "/setup/switch", apiV1 + "/setup/installMode",
+		apiV1 + "/setup/group", apiV1 + "/setup/switch",
 		apiV1 + "/setup/service", apiV1 + "/setup/blind", apiV1 + "/setup/hvac", apiV1 + "/setup/wago",
 		apiV1 + "/config/led", apiV1 + "/config/sensor", apiV1 + "/config/blind", apiV1 + "/config/hvac",
 		apiV1 + "/config/group", apiV1 + "/config/switch", apiV1 + "/config/wago", apiV1 + "/configs",
@@ -800,7 +800,7 @@ func (api *API) getV1Functions(w http.ResponseWriter, req *http.Request) {
 		apiV1 + "/project/model", apiV1 + "/project/bim", apiV1 + "/project", apiV1 + "/dump",
 		apiV1 + "/status/sensor", apiV1 + "/status/group", apiV1 + "/status/led", apiV1 + "/status/blind", apiV1 + "/status/hvac",
 		apiV1 + "/status/groups", apiV1 + "/status/wago", apiV1 + "/maintenance/driver", apiV1 + "/commissioning/install",
-		apiV1 + "/install/status", apiV1 + "/install/stickers",
+		apiV1 + "/install/status", apiV1 + "/install/stickers", apiV1 + "/maintenance/exportDB",
 		apiV1 + "/user/info", apiV1 + "/user/login", apiV1 + "/map/upload", apiV1 + "/map/upload/status",
 	}
 	apiInfo := APIFunctions{
@@ -940,7 +940,6 @@ func (api *API) swagger() {
 	router.HandleFunc(apiV1+"/install/status", api.verification(api.installStatus)).Methods("GET")
 	router.HandleFunc(apiV1+"/install/stickers", api.verification(api.qrcodeGeneration)).Methods("GET")
 	router.HandleFunc(apiV1+"/maintenance/exportDB", api.verification(api.exportDBStart)).Methods("GET")
-	router.HandleFunc(apiV1+"/maintenance/exportDB/result", api.verification(api.exportDB)).Methods("GET")
 
 	//Install API
 	router.HandleFunc(apiV1+"/commissioning/install", api.verification(api.installDriver)).Methods("POST")

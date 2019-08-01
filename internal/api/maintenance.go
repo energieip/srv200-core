@@ -509,48 +509,45 @@ func (api *API) exportDBStart(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if api.exportDBStatus != "" {
-		url := "exportDB/status"
-		http.Redirect(w, req, url, 201)
-	}
-
-	go func() {
-		api.exportDBStatus = "running"
-		cmd := exec.Command("rethinkdb", "dump")
-		cmd.Dir = "/tmp"
-		out, err := cmd.CombinedOutput()
+	if api.exportDBPath != "" {
+		fi, err := os.Stat(api.exportDBPath)
 		if err != nil {
 			api.exportDBStatus = ""
-			rlog.Error("cmd.Run() failed with status " + err.Error() + " : " + string(out))
-			api.sendError(w, APIErrorDeviceNotFound, "Unable to open file", http.StatusInternalServerError)
-			return
-		}
-		tempPath := ""
-		for _, line := range strings.Split(string(out), "\n") {
-			if !strings.HasPrefix(line, "Done") {
-				continue
+		} else {
+			currTime := time.Now()
+			if currTime.Sub(fi.ModTime()).Seconds() > 60 {
+				//re-generate export
+				os.Remove(api.exportDBPath)
+				api.exportDBStatus = ""
 			}
-			elts := strings.Split(line, " ")
-			tempPath = elts[len(elts)-1]
-			break
 		}
-		api.exportDBPath = tempPath
-		api.exportDBStatus = "done"
-
-	}()
-	http.Redirect(w, req, req.URL.Path+"/result", 201)
-}
-
-func (api *API) exportDB(w http.ResponseWriter, req *http.Request) {
-	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin, duser.PriviledgeMaintainer}) != nil {
-		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
-		return
 	}
 
 	switch api.exportDBStatus {
 	case "":
-		rlog.Error("No database export running")
-		api.sendError(w, APIErrorDeviceNotFound, "Unable to open file", http.StatusInternalServerError)
+		go func() {
+			api.exportDBStatus = "running"
+			cmd := exec.Command("rethinkdb", "dump")
+			cmd.Dir = "/tmp"
+			out, err := cmd.CombinedOutput()
+			if err != nil {
+				api.exportDBStatus = ""
+				rlog.Error("cmd.Run() failed with status " + err.Error() + " : " + string(out))
+				return
+			}
+			tempPath := ""
+			for _, line := range strings.Split(string(out), "\n") {
+				if !strings.HasPrefix(line, "Done") {
+					continue
+				}
+				elts := strings.Split(line, " ")
+				tempPath = elts[len(elts)-1]
+				break
+			}
+			api.exportDBPath = tempPath
+			api.exportDBStatus = "done"
+		}()
+		http.Redirect(w, req, req.URL.Path, 201)
 
 	case "running":
 		http.Redirect(w, req, req.URL.Path, 201)
@@ -570,7 +567,7 @@ func (api *API) exportDB(w http.ResponseWriter, req *http.Request) {
 		w.Header().Set("Content-Transfer-Encoding", "binary")
 		w.Header().Set("Content-Length", strconv.FormatInt(fi.Size(), 10))
 		w.Header().Set("Content-Control", "private, no-transform, no-store, must-revalidate")
-		api.exportDBStatus = ""
+		// api.exportDBStatus = ""
 		http.ServeFile(w, req, api.exportDBPath)
 	}
 }
