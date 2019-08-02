@@ -604,7 +604,6 @@ func (api *API) importDBStart(w http.ResponseWriter, r *http.Request) {
 		api.sendError(w, APIErrorBodyParsing, "Error while fetching file", http.StatusInternalServerError)
 		return
 	}
-	newFilename := ""
 
 	// continue looping through all parts, *multipart.Reader.NextPart() will
 	// return an End of File when all parts have been read.
@@ -616,21 +615,15 @@ func (api *API) importDBStart(w http.ResponseWriter, r *http.Request) {
 			tempFile.Close()
 			rlog.Info("Hit last part of multipart upload / do post treatment")
 			go func(filename string) {
-				rlog.Info("Rename " + tempFile.Name() + " into " + newFilename)
-				err = os.Rename(tempFile.Name(), newFilename)
-				if err != nil {
-					rlog.Error("Cannot parse command ", err.Error())
-					os.Remove(tempFile.Name())
-					api.importDBStatus = "failure"
-					return
-				}
-				cmd := exec.Command("rethinkdb", "restore", newFilename, "--force")
+				cmd := exec.Command("rethinkdb", "restore", filename, "--force")
 				out, err := cmd.CombinedOutput()
 				if err != nil {
+					os.Remove(filename)
 					rlog.Error("rethinkdb restore failed with status " + err.Error() + " : " + string(out))
 					api.importDBStatus = "failure"
 					return
 				}
+				os.Remove(filename)
 				api.importDBStatus = "success"
 
 			}(tempFile.Name())
@@ -648,8 +641,6 @@ func (api *API) importDBStart(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		newFilename = api.dataPath + "/" + p.FileName()
-		rlog.Info("Uploaded filename: " + newFilename)
 		uploaded := false
 
 		// continue reading the part stream of this loop until either done or err.
