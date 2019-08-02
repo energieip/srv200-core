@@ -802,6 +802,7 @@ func (api *API) getV1Functions(w http.ResponseWriter, req *http.Request) {
 		apiV1 + "/status/groups", apiV1 + "/status/wago", apiV1 + "/maintenance/driver", apiV1 + "/commissioning/install",
 		apiV1 + "/install/status", apiV1 + "/install/stickers", apiV1 + "/maintenance/exportDB",
 		apiV1 + "/user/info", apiV1 + "/user/login", apiV1 + "/map/upload", apiV1 + "/map/upload/status",
+		apiV1 + "/maintenance/importDB", apiV1 + "/maintenance/importDB/status",
 	}
 	apiInfo := APIFunctions{
 		Functions: functions,
@@ -940,6 +941,8 @@ func (api *API) swagger() {
 	router.HandleFunc(apiV1+"/install/status", api.verification(api.installStatus)).Methods("GET")
 	router.HandleFunc(apiV1+"/install/stickers", api.verification(api.qrcodeGeneration)).Methods("GET")
 	router.HandleFunc(apiV1+"/maintenance/exportDB", api.verification(api.exportDBStart)).Methods("GET")
+	router.HandleFunc(apiV1+"/maintenance/importDB", api.verification(api.importDBStart)).Methods("POST")
+	router.HandleFunc(apiV1+"/maintenance/importDB/status", api.verification(api.uploadDBStatus)).Methods("GET")
 
 	//Install API
 	router.HandleFunc(apiV1+"/commissioning/install", api.verification(api.installDriver)).Methods("POST")

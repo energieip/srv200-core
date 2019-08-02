@@ -3750,6 +3750,116 @@
           ]
         }
       },
+      "/maintenance/importDB": {
+        "post": {
+          "tags": [
+            "maintenance"
+          ],
+          "summary": "import DB",
+          "description": "upload DB",
+          "operationId": "importDB",
+          "parameters": [],
+          "requestBody": {
+            "description": "database file to upload",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "file": {
+                      "type": "string",
+                      "format": "binary",
+                      "description": "file to upload"
+                    }
+                  }
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "sucessful operation",
+              "headers": {}
+            },
+            "401": {
+              "description": "Unauthorized Access",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "default": {
+              "description": "unexpected error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "deprecated": false,
+          "security": [
+            {
+              "Authorization": []
+            }
+          ]
+        }
+      },
+      "/maintenance/importDB/status": {
+        "get": {
+          "tags": [
+            "maintenance"
+          ],
+          "summary": "import DB status",
+          "description": "import DB status",
+          "operationId": "importDBStatus",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "sucessful operation",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/UploadStatus"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Unauthorized Access",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "default": {
+              "description": "unexpected error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "deprecated": false,
+          "security": [
+            {
+              "Authorization": []
+            }
+          ]
+        }
+      },
       "/install/stickers": {
         "get": {
           "tags": [

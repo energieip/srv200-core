@@ -68,6 +68,7 @@ type API struct {
 	uploadValue     *string
 	exportDBPath    string
 	exportDBStatus  string
+	importDBStatus  string
 }
 
 type JwtToken struct {
