@@ -625,6 +625,10 @@
             "bleMode": {
               "$ref": "#/components/schemas/BleMode"
             },
+            "ptmMac": {
+              "type": "string",
+              "description": "Enocean Switch Mac"
+            },
             "iBeaconUUID": {
               "type": "string",
               "description": "ibeacon UUID"
@@ -780,6 +784,10 @@
             },
             "bleMode": {
               "$ref": "#/components/schemas/BleMode"
+            },
+            "ptmMac": {
+              "type": "string",
+              "description": "Enocean Switch Mac"
             },
             "iBeaconUUID": {
               "type": "string",
@@ -1573,6 +1581,10 @@
             },
             "bleMode": {
               "$ref": "#/components/schemas/BleMode"
+            },
+            "ptmMac": {
+              "type": "string",
+              "description": "Enocean Switch Mac"
             },
             "iBeaconUUID": {
               "type": "string",

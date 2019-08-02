@@ -4082,6 +4082,10 @@
               "type": "string",
               "description": "ibeacon UUID"
             },
+            "ptmMac": {
+              "type": "string",
+              "description": "Enocean Switch Mac"
+            },
             "iBeaconMajor": {
               "type": "integer",
               "description": "ibeacon Major",
@@ -4172,6 +4176,10 @@
               "type": "integer",
               "description": "ibeacon Tx power",
               "format": "int32"
+            },
+            "ptmMac": {
+              "type": "string",
+              "description": "Enocean Switch Mac"
             },
             "brightnessCorrectionFactor": {
               "type": "integer",
@@ -5488,6 +5496,10 @@
             },
             "bleMode": {
               "$ref": "#/components/schemas/BleMode"
+            },
+            "ptmMac": {
+              "type": "string",
+              "description": "Enocean Switch Mac"
             },
             "iBeaconUUID": {
               "type": "string",
