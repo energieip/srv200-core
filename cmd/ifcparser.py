@@ -53,6 +53,7 @@ def buildDriver(driver):
 
     if deviceType != "hvac":
         res["isBleEnabled"] = driver['properties'].get("ActivateBluetooth", False)
+        res["mac_ptm"] = driver['properties'].get("MacPtm", "")
         res["bleMode"] = driver['properties'].get("BluetoothMode", "service")
         res["iBeaconUUID"] = driver['properties'].get("IBeaconUUID", "")
         res["iBeaconMajor"] = driver['properties'].get("IBeaconMajor", 0)
