@@ -4082,7 +4082,7 @@
               "type": "string",
               "description": "ibeacon UUID"
             },
-            "ptmMac": {
+            "mac_ptm": {
               "type": "string",
               "description": "Enocean Switch Mac"
             },
@@ -4177,7 +4177,7 @@
               "description": "ibeacon Tx power",
               "format": "int32"
             },
-            "ptmMac": {
+            "mac_ptm": {
               "type": "string",
               "description": "Enocean Switch Mac"
             },
@@ -4296,7 +4296,7 @@
             "bleMode": {
               "$ref": "#/components/schemas/BleMode"
             },
-            "ptmMac": {
+            "mac_ptm": {
               "type": "string",
               "description": "Enocean Switch Mac"
             },
@@ -4360,7 +4360,7 @@
             "bleMode": {
               "$ref": "#/components/schemas/BleMode"
             },
-            "ptmMac": {
+            "mac_ptm": {
               "type": "string",
               "description": "Enocean Switch Mac"
             },
@@ -4664,7 +4664,7 @@
             "bleMode": {
               "$ref": "#/components/schemas/BleMode"
             },
-            "ptmMac": {
+            "mac_ptm": {
               "type": "string",
               "description": "Enocean Switch Mac"
             },
@@ -4753,7 +4753,7 @@
             "bleMode": {
               "$ref": "#/components/schemas/BleMode"
             },
-            "ptmMac": {
+            "mac_ptm": {
               "type": "string",
               "description": "Enocean Switch Mac"
             },
@@ -5513,7 +5513,7 @@
             "bleMode": {
               "$ref": "#/components/schemas/BleMode"
             },
-            "ptmMac": {
+            "mac_ptm": {
               "type": "string",
               "description": "Enocean Switch Mac"
             },
@@ -6516,7 +6516,7 @@
             "bleMode": {
               "$ref": "#/components/schemas/BleMode"
             },
-            "ptmMac": {
+            "mac_ptm": {
               "type": "string",
               "description": "Enocean Switch Mac"
             },
@@ -6632,7 +6632,7 @@
             "bleMode": {
               "$ref": "#/components/schemas/BleMode"
             },
-            "ptmMac": {
+            "mac_ptm": {
               "type": "string",
               "description": "Enocean Switch Mac"
             },
