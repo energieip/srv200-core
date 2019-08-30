@@ -42,8 +42,11 @@ def Ifc2gltf(filepath):
             storeys[str(i)] = {
                 "name": name,
                 "filepath": path,
-                "filename": filename
+                "filename": filename,
+                "default": False,
             }
+            if s == 0:
+                storeys[str(i)]["default"] = True
             i += 1
     except Exception as exc:
         print("exc", exc)
@@ -54,7 +57,7 @@ def Ifc2gltf(filepath):
         gltf = os.path.join(folder, storey["filename"])
         dae = gltf.replace("gltf", "dae")
         name = storey["name"]
-        cmd = "IfcConvert "+ filepath + " "+ dae +" --use-element-names --include+=arg Name \""+ name +"\""
+        cmd = "IfcConvert "+ filepath + " "+ dae +" -y --center-model --use-element-names --include+=arg Name \""+ name +"\""
         print(cmd)
         os.system(cmd)
 
