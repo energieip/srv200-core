@@ -102,7 +102,22 @@ def buildHvac(driver):
         "outputY7": driver['properties'].get("OutputY7", 0),
         "outputY8": driver['properties'].get("OutputY8", 0),
         "outputYa": driver['properties'].get("OutputYa", 0),
-        "outputYb": driver['properties'].get("OutputYb", 0)
+        "outputYb": driver['properties'].get("OutputYb", 0),
+        "temperatureSelection": driver['properties'].get("TemperatureSelection", 1),
+        "regulationType": driver['properties'].get("RegulationType", 9),
+        "loopUsed": driver['properties'].get("LoopUsed", 1),
+        "fanOffDelay": driver['properties'].get("FanOffDelay", 0),
+        "fanConfig": driver['properties'].get("FanConfig", 0),
+        "fanMode": driver['properties'].get("fanMode", 1),
+        "fanOverride": driver['properties'].get("FanOverride", 0),
+        "oaDamperMode": driver['properties'].get("OaDamperMode", 5),
+        "co2Mode":  driver['properties'].get("CO2Mode", 1),
+        "co2Max": driver['properties'].get("CO2Max", 5000),
+        "valve6WayCoolMin": driver['properties'].get("valve6WayCoolMin", 0),
+        "valve6WayCoolMax": driver['properties'].get("Valve6WayCoolMax", 0),
+        "valve6WayHeatMin": driver['properties'].get("Valve6WayHeatMin", 0),
+        "valve6WayHeatMax": driver['properties'].get("Valve6WayHeatMax", 0),
+        "valve6WayRefPoint": driver['properties'].get("Valve6WayRefPoint", 0)
     })
 
 def buildSensor(driver):
