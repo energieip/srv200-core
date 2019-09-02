@@ -64,6 +64,8 @@ def buildDriver(driver):
         res.update(buildLed(driver))
     elif deviceType == "sensor":
         res.update(buildSensor(driver))
+    elif deviceType == "hvac":
+        res.update(buildHvac(driver))
     return res
 
 def buildLed(driver):
@@ -74,6 +76,33 @@ def buildLed(driver):
         "pMax": driver['properties'].get("Power", 0),
         "defaultSetpoint": driver['properties'].get("DefaultSetpoint", 5),
         "firstDay": driver['properties'].get("FirstDay", False)
+    })
+
+def buildHvac(driver):
+    deviceType = getDeviceType(driver)
+    if deviceType != "hvac":
+        return {}
+    return collections.OrderedDict({
+        "setpointCoolOccupied": driver['properties'].get("SetpointOccupiedCool", 190),
+        "setpointHeatOccupied": driver['properties'].get("SetpointOccupiedHeat", 260),
+        "setpointCoolInoccupied": driver['properties'].get("SetpointUnoccupiedCool", 300),
+        "setpointHeatInoccupied": driver['properties'].get("SetpointUnoccupiedHeat", 150),
+        "setpointCoolStandby": driver['properties'].get("SetpointStandbyCool", 300),
+        "setpointHeatStandby": driver['properties'].get("SetpointStandbyHeat", 170),
+        "inputE1": driver['properties'].get("InputE1", 0),
+        "inputE2": driver['properties'].get("InputE2", 0),
+        "inputE3": driver['properties'].get("InputE3", 0),
+        "inputE4": driver['properties'].get("InputE4", 0),
+        "inputE5": driver['properties'].get("InputE5", 0),
+        "inputE6": driver['properties'].get("InputE6", 0),
+        "inputC1": driver['properties'].get("InputC1", 0),
+        "inputC2": driver['properties'].get("InputC2", 0),
+        "outputY5": driver['properties'].get("OutputY5", 0),
+        "outputY6": driver['properties'].get("OutputY6", 0),
+        "outputY7": driver['properties'].get("OutputY7", 0),
+        "outputY8": driver['properties'].get("OutputY8", 0),
+        "outputYa": driver['properties'].get("OutputYa", 0),
+        "outputYb": driver['properties'].get("OutputYb", 0)
     })
 
 def buildSensor(driver):
