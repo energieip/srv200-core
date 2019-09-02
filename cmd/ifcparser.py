@@ -264,6 +264,9 @@ def parseIfc(filepath):
             }
 
             lbl = label.replace("_", "-")
+            if label in stickers:
+                raise Exception("Duplicated Label Name! " + lbl)
+
             qr = qrcode.QRCode(
                     version=1,
                     error_correction=qrcode.constants.ERROR_CORRECT_L,
