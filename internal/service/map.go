@@ -45,6 +45,7 @@ func (s *CoreService) updateMapInfo(config interface{}) {
 	}
 
 	for _, proj := range cfg.Project {
+		proj.CommissioningDate = nil
 		database.SaveProject(s.db, proj)
 	}
 
