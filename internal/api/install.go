@@ -32,7 +32,6 @@ func (api *API) installDriver(w http.ResponseWriter, req *http.Request) {
 	driver.Mac = strings.ToUpper(driver.Mac)
 	driver.Device = strings.ToUpper(driver.Device)
 	driver.Label = strings.Replace(driver.Label, "-", "_", -1)
-	driver.Label = strings.ToUpper(driver.Label)
 	savedProject, _ := database.GetProject(api.db, driver.Label)
 	if savedProject == nil {
 		api.sendError(w, APIErrorDeviceNotFound, "Unknow label "+driver.Label, http.StatusInternalServerError)
