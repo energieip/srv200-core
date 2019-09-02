@@ -4,11 +4,12 @@ import "encoding/json"
 
 //Project describe the link between the object in the building map and the configuration
 type Project struct {
-	Label     string  `json:"label"` //cable label
-	ModelName *string `json:"modelName,omitempty"`
-	Mac       *string `json:"mac,omitempty"`      //device Mac address
-	ModbusID  *int    `json:"modbusID,omitempty"` //modbusID
-	SlaveID   *int    `json:"slaveID,omitempty"`  //slavedID
+	Label             string  `json:"label"` //cable label
+	ModelName         *string `json:"modelName,omitempty"`
+	CommissioningDate *string `json:"commissioningDate,omitempty"`
+	Mac               *string `json:"mac,omitempty"`      //device Mac address
+	ModbusID          *int    `json:"modbusID,omitempty"` //modbusID
+	SlaveID           *int    `json:"slaveID,omitempty"`  //slavedID
 }
 
 // ToJSON dump Project struct

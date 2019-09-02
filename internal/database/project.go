@@ -41,6 +41,9 @@ func SaveProject(db Database, cfg core.Project) error {
 	if cfg.SlaveID != nil {
 		proj.SlaveID = cfg.SlaveID
 	}
+	if cfg.CommissioningDate != nil {
+		proj.CommissioningDate = cfg.CommissioningDate
+	}
 	err := db.UpdateRecord(pconst.DbConfig, pconst.TbProjects, dbID, proj)
 	return err
 }

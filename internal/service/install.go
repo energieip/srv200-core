@@ -2,6 +2,7 @@ package service
 
 import (
 	"strconv"
+	"time"
 
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
 	"github.com/energieip/common-components-go/pkg/pconst"
@@ -29,6 +30,9 @@ func (s *CoreService) installDriver(dr interface{}) {
 		return
 	}
 	proj.Mac = &driver.Mac
+	t := time.Now()
+	DateConv := t.Format(time.RFC3339)
+	proj.CommissioningDate = &DateConv
 
 	//update project
 	database.SaveProject(s.db, *proj)
