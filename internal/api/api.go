@@ -939,6 +939,7 @@ func (api *API) swagger() {
 	//Maintenance API
 	router.HandleFunc(apiV1+"/maintenance/driver", api.verification(api.replaceDriver)).Methods("POST")
 	router.HandleFunc(apiV1+"/install/status", api.verification(api.installStatus)).Methods("GET")
+	router.HandleFunc(apiV1+"/install/modbusTable", api.verification(api.modbusTableAPI)).Methods("GET")
 	router.HandleFunc(apiV1+"/install/stickers", api.verification(api.qrcodeGeneration)).Methods("GET")
 	router.HandleFunc(apiV1+"/maintenance/exportDB", api.verification(api.exportDBStart)).Methods("GET")
 	router.HandleFunc(apiV1+"/maintenance/importDB", api.verification(api.importDBStart)).Methods("POST")
