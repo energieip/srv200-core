@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/energieip/common-components-go/pkg/dserver"
 	"github.com/energieip/common-components-go/pkg/duser"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
@@ -92,7 +93,7 @@ func (api *API) readIfcInfo(w http.ResponseWriter, label string) {
 		api.sendError(w, APIErrorDeviceNotFound, "Could not found information on device "+label, http.StatusInternalServerError)
 		return
 	}
-	info := core.IfcInfo{
+	info := dserver.IfcInfo{
 		Label: label,
 	}
 	if project.ModelName != nil {
@@ -146,7 +147,7 @@ func (api *API) setIfcInfo(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	ifcInfo := core.IfcInfo{}
+	ifcInfo := dserver.IfcInfo{}
 	err = json.Unmarshal(body, &ifcInfo)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)
@@ -187,7 +188,7 @@ func (api *API) getIfc(w http.ResponseWriter, req *http.Request) {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
 	}
-	var infos []core.IfcInfo
+	var infos []dserver.IfcInfo
 
 	ifcs := database.GetIfcs(api.db)
 	for _, info := range ifcs {

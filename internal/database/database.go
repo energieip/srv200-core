@@ -8,6 +8,7 @@ import (
 	dl "github.com/energieip/common-components-go/pkg/dled"
 	"github.com/energieip/common-components-go/pkg/dnanosense"
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
+	"github.com/energieip/common-components-go/pkg/dserver"
 	"github.com/energieip/common-components-go/pkg/duser"
 	"github.com/energieip/common-components-go/pkg/dwago"
 	"github.com/energieip/common-components-go/pkg/pconst"
@@ -61,13 +62,13 @@ func ConnectDatabase(ip, port string) (*Database, error) {
 			tableCfg[pconst.TbSensors] = ds.SensorSetup{}
 			tableCfg[pconst.TbHvacs] = dhvac.HvacSetup{}
 			tableCfg[pconst.TbGroups] = gm.GroupConfig{}
-			tableCfg[pconst.TbSwitchs] = core.SwitchConfig{}
+			tableCfg[pconst.TbSwitchs] = dserver.SwitchConfig{}
 			tableCfg[pconst.TbServices] = pkg.Service{}
 			tableCfg[pconst.TbModels] = core.Model{}
 			tableCfg[pconst.TbProjects] = core.Project{}
 			tableCfg[pconst.TbBlinds] = dblind.BlindSetup{}
 			tableCfg[pconst.TbAccess] = duser.UserAccess{}
-			tableCfg[pconst.TbFrames] = core.Frame{}
+			tableCfg[pconst.TbFrames] = dserver.Frame{}
 			tableCfg[pconst.TbWagos] = dwago.WagoSetup{}
 			tableCfg[pconst.TbNanosenses] = dnanosense.NanosenseSetup{}
 		} else {
@@ -75,7 +76,7 @@ func ConnectDatabase(ip, port string) (*Database, error) {
 			tableCfg[pconst.TbSensors] = ds.Sensor{}
 			tableCfg[pconst.TbHvacs] = dhvac.Hvac{}
 			tableCfg[pconst.TbGroups] = gm.GroupStatus{}
-			tableCfg[pconst.TbSwitchs] = core.SwitchDump{}
+			tableCfg[pconst.TbSwitchs] = dserver.SwitchDump{}
 			tableCfg[pconst.TbServices] = pkg.ServiceStatus{}
 			tableCfg[pconst.TbBlinds] = dblind.Blind{}
 			tableCfg[pconst.TbWagos] = dwago.Wago{}

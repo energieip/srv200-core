@@ -9,6 +9,7 @@ import (
 	dl "github.com/energieip/common-components-go/pkg/dled"
 	"github.com/energieip/common-components-go/pkg/dnanosense"
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
+	"github.com/energieip/common-components-go/pkg/dserver"
 	"github.com/energieip/common-components-go/pkg/dwago"
 )
 
@@ -22,9 +23,9 @@ type MapInfo struct {
 	Models     map[string]Model                     `json:"models"`
 	Wagos      map[string]dwago.WagoSetup           `json:"wagos"`
 	Nanosenses map[string]dnanosense.NanosenseSetup `json:"nanosenses"`
-	Frames     map[string]Frame                     `json:"frames"`
+	Frames     map[string]dserver.Frame             `json:"frames"`
 	Project    map[string]Project                   `json:"projects"`
-	Switchs    map[string]SwitchConfig              `json:"switchs"`
+	Switchs    map[string]dserver.SwitchConfig      `json:"switchs"`
 }
 
 // ToJSON dump MapInfo struct

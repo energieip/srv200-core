@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/energieip/common-components-go/pkg/dserver"
 	"github.com/energieip/common-components-go/pkg/duser"
-	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
 	"github.com/gorilla/mux"
 )
@@ -49,7 +49,7 @@ func (api *API) setSwitchConfig(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	device := core.SwitchConfig{}
+	device := dserver.SwitchConfig{}
 	err = json.Unmarshal(body, &device)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)

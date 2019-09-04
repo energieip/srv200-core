@@ -9,6 +9,7 @@ import (
 	dl "github.com/energieip/common-components-go/pkg/dled"
 	"github.com/energieip/common-components-go/pkg/dnanosense"
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
+	"github.com/energieip/common-components-go/pkg/dserver"
 	sd "github.com/energieip/common-components-go/pkg/dswitch"
 	"github.com/energieip/common-components-go/pkg/dwago"
 	pkg "github.com/energieip/common-components-go/pkg/service"
@@ -19,7 +20,7 @@ import (
 )
 
 func (s *CoreService) updateSwitchCfg(config interface{}) {
-	cfg, _ := core.ToSwitchConfig(config)
+	cfg, _ := dserver.ToSwitchConfig(config)
 	if cfg == nil || cfg.Mac == nil {
 		return
 	}
@@ -56,7 +57,7 @@ func (s *CoreService) updateSwitchCfg(config interface{}) {
 }
 
 func (s *CoreService) updateSwitchLabelCfg(config interface{}) {
-	cfg, _ := core.ToSwitchConfig(config)
+	cfg, _ := dserver.ToSwitchConfig(config)
 	if cfg == nil || cfg.Label == nil {
 		return
 	}
@@ -415,7 +416,7 @@ func (s *CoreService) prepareSetupSwitchConfig(switchStatus sd.SwitchStatus) *sd
 	}
 
 	//Prepare Cluster
-	var clusters map[string]core.SwitchConfig
+	var clusters map[string]dserver.SwitchConfig
 	switchCluster := make(map[string]sd.SwitchCluster)
 	if config.Cluster != nil {
 		clusters = database.GetCluster(s.db, *config.Cluster)
@@ -593,7 +594,7 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 	}
 
 	//Prepare Cluster
-	var clusters map[string]core.SwitchConfig
+	var clusters map[string]dserver.SwitchConfig
 	switchCluster := make(map[string]sd.SwitchCluster)
 	if config.Cluster != nil {
 		clusters = database.GetCluster(s.db, *config.Cluster)

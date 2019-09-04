@@ -8,7 +8,7 @@ import (
 	"github.com/energieip/common-components-go/pkg/dblind"
 	"github.com/energieip/common-components-go/pkg/dhvac"
 	dl "github.com/energieip/common-components-go/pkg/dled"
-	"github.com/energieip/srv200-coreservice-go/internal/core"
+	"github.com/energieip/common-components-go/pkg/dserver"
 	"github.com/romana/rlog"
 )
 
@@ -63,7 +63,7 @@ func ConnectDatabase(ip, port string) (*HistoryDb, error) {
 
 		tableCfg := make(map[string]interface{})
 		tableCfg[LedsTable] = dl.Led{}
-		tableCfg[SwitchsTable] = core.SwitchDump{}
+		tableCfg[SwitchsTable] = dserver.SwitchDump{}
 		tableCfg[BlindsTable] = dblind.Blind{}
 		tableCfg[HvacsTable] = dhvac.Hvac{}
 

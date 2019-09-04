@@ -1,11 +1,11 @@
 package database
 
 import (
-	"github.com/energieip/srv200-coreservice-go/internal/core"
+	"github.com/energieip/common-components-go/pkg/dserver"
 )
 
-func GetIfcs(db Database) []core.IfcInfo {
-	var res []core.IfcInfo
+func GetIfcs(db Database) []dserver.IfcInfo {
+	var res []dserver.IfcInfo
 	projects := GetProjects(db)
 	models := GetModels(db)
 
@@ -21,7 +21,7 @@ func GetIfcs(db Database) []core.IfcInfo {
 		if project.Mac != nil {
 			mac = *project.Mac
 		}
-		ifc := core.IfcInfo{
+		ifc := dserver.IfcInfo{
 			Label:          project.Label,
 			ModelName:      model.Name,
 			Mac:            mac,

@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/energieip/common-components-go/pkg/dnanosense"
+	"github.com/energieip/common-components-go/pkg/dserver"
 
 	"github.com/energieip/common-components-go/pkg/pconst"
 
@@ -289,7 +290,7 @@ func (api *API) getStatus(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	status := Status{
+	status := dserver.Status{
 		Leds:       leds,
 		Sensors:    sensors,
 		Blinds:     blinds,
@@ -307,15 +308,15 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 	var auth duser.UserAccess
 	mapstructure.Decode(decoded.(duser.UserAccess), &auth)
 
-	var leds []DumpLed
-	var sensors []DumpSensor
-	var switchs []DumpSwitch
-	var frames []DumpFrame
-	var blinds []DumpBlind
-	var hvacs []DumpHvac
-	var wagos []DumpWago
-	var groups []DumpGroup
-	var nanos []DumpNanosense
+	var leds []dserver.DumpLed
+	var sensors []dserver.DumpSensor
+	var switchs []dserver.DumpSwitch
+	var frames []dserver.DumpFrame
+	var blinds []dserver.DumpBlind
+	var hvacs []dserver.DumpHvac
+	var wagos []dserver.DumpWago
+	var groups []dserver.DumpGroup
+	var nanos []dserver.DumpNanosense
 	macs := make(map[string]bool)
 	driversMac := make(map[string]bool)
 	labels := make(map[string]bool)
@@ -372,7 +373,7 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 
 		switch ifc.DeviceType {
 		case pconst.LED:
-			dump := DumpLed{}
+			dump := dserver.DumpLed{}
 			led, ok := lights[ifc.Label]
 			gr := 0
 			if ok {
@@ -395,7 +396,7 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 
 			leds = append(leds, dump)
 		case pconst.SENSOR:
-			dump := DumpSensor{}
+			dump := dserver.DumpSensor{}
 			gr := 0
 			sensor, ok := cells[ifc.Label]
 			if ok {
@@ -417,7 +418,7 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 			dump.Ifc = ifc
 			sensors = append(sensors, dump)
 		case pconst.BLIND:
-			dump := DumpBlind{}
+			dump := dserver.DumpBlind{}
 			gr := 0
 			bld, ok := blds[ifc.Label]
 			if ok {
@@ -439,7 +440,7 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 			dump.Ifc = ifc
 			blinds = append(blinds, dump)
 		case pconst.HVAC:
-			dump := DumpHvac{}
+			dump := dserver.DumpHvac{}
 			gr := 0
 			hvac, ok := hvcs[ifc.Label]
 			if ok {
@@ -461,7 +462,7 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 			dump.Ifc = ifc
 			hvacs = append(hvacs, dump)
 		case pconst.WAGO:
-			dump := DumpWago{}
+			dump := dserver.DumpWago{}
 			wago, ok := wags[ifc.Label]
 			if ok {
 				dump.Status = wago
@@ -476,7 +477,7 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 			dump.Ifc = ifc
 			wagos = append(wagos, dump)
 		case pconst.SWITCH:
-			dump := DumpSwitch{}
+			dump := dserver.DumpSwitch{}
 			switchElt, ok := switchElts[ifc.Label]
 			if ok {
 				dump.Status = switchElt
@@ -491,7 +492,7 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 			}
 			switchs = append(switchs, dump)
 		case pconst.FRAME:
-			dump := DumpFrame{}
+			dump := dserver.DumpFrame{}
 			frameElt, ok := frameElts[ifc.Label]
 			if ok {
 				dump.Status = frameElt
@@ -506,7 +507,7 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 			}
 			frames = append(frames, dump)
 		case pconst.NANOSENSE:
-			dump := DumpNanosense{}
+			dump := dserver.DumpNanosense{}
 			gr := 0
 			nano, ok := nans[ifc.Label]
 			if ok {
@@ -534,7 +535,7 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 	groupsConfig := database.GetGroupConfigs(api.db, driversMac)
 
 	for _, gr := range groupsConfig {
-		dump := DumpGroup{}
+		dump := dserver.DumpGroup{}
 		grStatus, ok := groupsStatus[gr.Group]
 		if ok {
 			dump.Status = grStatus
@@ -543,7 +544,7 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 		groups = append(groups, dump)
 	}
 
-	dump := Dump{
+	dump := dserver.Dump{
 		Leds:       leds,
 		Sensors:    sensors,
 		Blinds:     blinds,
@@ -605,7 +606,7 @@ func (api *API) setConfig(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	config := Conf{}
+	config := dserver.Conf{}
 	err = json.Unmarshal([]byte(body), &config)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)

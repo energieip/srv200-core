@@ -3,15 +3,7 @@ package api
 import (
 	"sync"
 
-	"github.com/energieip/common-components-go/pkg/dnanosense"
-	"github.com/energieip/common-components-go/pkg/dwago"
-
 	jwt "github.com/dgrijalva/jwt-go"
-	"github.com/energieip/common-components-go/pkg/dblind"
-	gm "github.com/energieip/common-components-go/pkg/dgroup"
-	"github.com/energieip/common-components-go/pkg/dhvac"
-	dl "github.com/energieip/common-components-go/pkg/dled"
-	ds "github.com/energieip/common-components-go/pkg/dsensor"
 	"github.com/energieip/common-components-go/pkg/duser"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
@@ -85,91 +77,6 @@ type Credentials struct {
 	UserKey string `json:"userKey"`
 }
 
-//Status
-type Status struct {
-	Leds       []dl.Led               `json:"leds"`
-	Sensors    []ds.Sensor            `json:"sensors"`
-	Blinds     []dblind.Blind         `json:"blinds"`
-	Hvacs      []dhvac.Hvac           `json:"hvacs"`
-	Wagos      []dwago.Wago           `json:"wagos"`
-	Nanosenses []dnanosense.Nanosense `json:"nanosenses"`
-}
-
-//DumpBlind
-type DumpBlind struct {
-	Ifc    core.IfcInfo      `json:"ifc"`
-	Status dblind.Blind      `json:"status"`
-	Config dblind.BlindSetup `json:"config"`
-}
-
-//DumpHvac
-type DumpHvac struct {
-	Ifc    core.IfcInfo    `json:"ifc"`
-	Status dhvac.Hvac      `json:"status"`
-	Config dhvac.HvacSetup `json:"config"`
-}
-
-//DumpLed
-type DumpLed struct {
-	Ifc    core.IfcInfo `json:"ifc"`
-	Status dl.Led       `json:"status"`
-	Config dl.LedSetup  `json:"config"`
-}
-
-//DumpSensor
-type DumpSensor struct {
-	Ifc    core.IfcInfo   `json:"ifc"`
-	Status ds.Sensor      `json:"status"`
-	Config ds.SensorSetup `json:"config"`
-}
-
-//DumpSwitch
-type DumpSwitch struct {
-	Ifc    core.IfcInfo      `json:"ifc"`
-	Status core.SwitchDump   `json:"status"`
-	Config core.SwitchConfig `json:"config"`
-}
-
-//DumpFrame
-type DumpFrame struct {
-	Ifc    core.IfcInfo     `json:"ifc"`
-	Config core.Frame       `json:"config"`
-	Status core.FrameStatus `json:"status"`
-}
-
-//DumpWago
-type DumpWago struct {
-	Ifc    core.IfcInfo    `json:"ifc"`
-	Status dwago.Wago      `json:"status"`
-	Config dwago.WagoSetup `json:"config"`
-}
-
-//DumpNano
-type DumpNanosense struct {
-	Ifc    core.IfcInfo              `json:"ifc"`
-	Status dnanosense.Nanosense      `json:"status"`
-	Config dnanosense.NanosenseSetup `json:"config"`
-}
-
-//DumpSwitch
-type DumpGroup struct {
-	Status gm.GroupStatus `json:"status"`
-	Config gm.GroupConfig `json:"config"`
-}
-
-//Dump
-type Dump struct {
-	Leds       []DumpLed       `json:"leds"`
-	Sensors    []DumpSensor    `json:"sensors"`
-	Blinds     []DumpBlind     `json:"blinds"`
-	Hvacs      []DumpHvac      `json:"hvacs"`
-	Wagos      []DumpWago      `json:"wagos"`
-	Switchs    []DumpSwitch    `json:"switchs"`
-	Groups     []DumpGroup     `json:"groups"`
-	Frames     []DumpFrame     `json:"frames"`
-	Nanosenses []DumpNanosense `json:"nanos"`
-}
-
 //UserAuthorization
 type UserAuthorization struct {
 	Priviledges []string `json:"priviledges"`
@@ -192,16 +99,6 @@ type APIInfo struct {
 
 type APIFunctions struct {
 	Functions []string `json:"functions"`
-}
-
-type Conf struct {
-	Leds    []dl.LedConf        `json:"leds"`
-	Sensors []ds.SensorConf     `json:"sensors"`
-	Blinds  []dblind.BlindConf  `json:"blinds"`
-	Hvacs   []dhvac.HvacConf    `json:"hvacs"`
-	Wagos   []dwago.WagoConf    `json:"wagos"`
-	Groups  []gm.GroupConfig    `json:"groups"`
-	Switchs []core.SwitchConfig `json:"switchs"`
 }
 
 type networkError struct {

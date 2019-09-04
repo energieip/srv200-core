@@ -1,14 +1,14 @@
 package database
 
 import (
+	"github.com/energieip/common-components-go/pkg/dserver"
 	sd "github.com/energieip/common-components-go/pkg/dswitch"
 	"github.com/energieip/common-components-go/pkg/pconst"
-	"github.com/energieip/srv200-coreservice-go/internal/core"
 )
 
 //SaveSwitchStatus dump switch status in database
 func SaveSwitchStatus(db Database, status sd.SwitchStatus) error {
-	swStatus := core.SwitchDump{}
+	swStatus := dserver.SwitchDump{}
 	swStatus.Mac = status.Mac
 	swStatus.IP = status.IP
 	swStatus.Cluster = status.Cluster
@@ -40,7 +40,7 @@ func SaveSwitchStatus(db Database, status sd.SwitchStatus) error {
 }
 
 //UpdateSwitchConfig update server config to database
-func UpdateSwitchConfig(db Database, config core.SwitchConfig) error {
+func UpdateSwitchConfig(db Database, config dserver.SwitchConfig) error {
 	if config.Label == nil {
 		return NewError("Switch Mac not found")
 	}
@@ -57,7 +57,7 @@ func UpdateSwitchConfig(db Database, config core.SwitchConfig) error {
 	}
 	dbID := id.(string)
 
-	setup, err := core.ToSwitchConfig(stored)
+	setup, err := dserver.ToSwitchConfig(stored)
 	if err != nil || stored == nil {
 		return NewError("Switch " + *config.Mac + " not found")
 	}
@@ -90,7 +90,7 @@ func UpdateSwitchConfig(db Database, config core.SwitchConfig) error {
 }
 
 //UpdateSwitchLabelConfig update server config to database
-func UpdateSwitchLabelConfig(db Database, config core.SwitchConfig) error {
+func UpdateSwitchLabelConfig(db Database, config dserver.SwitchConfig) error {
 	if config.Label == nil {
 		return NewError("Switch Label not found")
 	}
@@ -107,7 +107,7 @@ func UpdateSwitchLabelConfig(db Database, config core.SwitchConfig) error {
 	}
 	dbID := id.(string)
 
-	setup, err := core.ToSwitchConfig(stored)
+	setup, err := dserver.ToSwitchConfig(stored)
 	if err != nil || stored == nil {
 		return NewError("Switch " + *config.Label + " not found")
 	}
@@ -140,7 +140,7 @@ func UpdateSwitchLabelConfig(db Database, config core.SwitchConfig) error {
 }
 
 //SaveSwitchLabelConfig update server config to database
-func SaveSwitchLabelConfig(db Database, config core.SwitchConfig) error {
+func SaveSwitchLabelConfig(db Database, config dserver.SwitchConfig) error {
 	if config.Label == nil {
 		return NewError("Switch Label not found")
 	}
@@ -157,14 +157,14 @@ func RemoveSwitchConfig(db Database, mac string) error {
 }
 
 //SaveSwitchConfig register switch config in database
-func SaveSwitchConfig(db Database, sw core.SwitchConfig) error {
+func SaveSwitchConfig(db Database, sw dserver.SwitchConfig) error {
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = sw.Mac
 	return SaveOnUpdateObject(db, sw, pconst.DbConfig, pconst.TbSwitchs, criteria)
 }
 
 //GetSwitchConfig get switch Config
-func GetSwitchConfig(db Database, mac string) (*core.SwitchConfig, string) {
+func GetSwitchConfig(db Database, mac string) (*dserver.SwitchConfig, string) {
 	dbID := ""
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = mac
@@ -177,7 +177,7 @@ func GetSwitchConfig(db Database, mac string) (*core.SwitchConfig, string) {
 	if ok {
 		dbID = id.(string)
 	}
-	sw, err := core.ToSwitchConfig(swStored)
+	sw, err := dserver.ToSwitchConfig(swStored)
 	if err != nil || sw == nil {
 		return nil, ""
 	}
@@ -185,14 +185,14 @@ func GetSwitchConfig(db Database, mac string) (*core.SwitchConfig, string) {
 }
 
 //GetSwitchLabelConfig return the switch configuration
-func GetSwitchLabelConfig(db Database, label string) *core.SwitchConfig {
+func GetSwitchLabelConfig(db Database, label string) *dserver.SwitchConfig {
 	criteria := make(map[string]interface{})
 	criteria["Label"] = label
 	swStored, err := db.GetRecord(pconst.DbConfig, pconst.TbSwitchs, criteria)
 	if err != nil || swStored == nil {
 		return nil
 	}
-	sw, err := core.ToSwitchConfig(swStored)
+	sw, err := dserver.ToSwitchConfig(swStored)
 	if err != nil || sw == nil {
 		return nil
 	}
@@ -210,14 +210,14 @@ func ReplaceSwitchConfig(db Database, old, new string) error {
 }
 
 //GetSwitchsConfig return the switch config list
-func GetSwitchsConfig(db Database) map[string]core.SwitchConfig {
-	switchs := map[string]core.SwitchConfig{}
+func GetSwitchsConfig(db Database) map[string]dserver.SwitchConfig {
+	switchs := map[string]dserver.SwitchConfig{}
 	stored, err := db.FetchAllRecords(pconst.DbConfig, pconst.TbSwitchs)
 	if err != nil || stored == nil {
 		return switchs
 	}
 	for _, l := range stored {
-		sw, err := core.ToSwitchConfig(l)
+		sw, err := dserver.ToSwitchConfig(l)
 		if err != nil || sw == nil {
 			continue
 		}
@@ -230,14 +230,14 @@ func GetSwitchsConfig(db Database) map[string]core.SwitchConfig {
 }
 
 //GetSwitchsConfigByLabel return the switch config list
-func GetSwitchsConfigByLabel(db Database) map[string]core.SwitchConfig {
-	switchs := map[string]core.SwitchConfig{}
+func GetSwitchsConfigByLabel(db Database) map[string]dserver.SwitchConfig {
+	switchs := map[string]dserver.SwitchConfig{}
 	stored, err := db.FetchAllRecords(pconst.DbConfig, pconst.TbSwitchs)
 	if err != nil || stored == nil {
 		return switchs
 	}
 	for _, l := range stored {
-		sw, err := core.ToSwitchConfig(l)
+		sw, err := dserver.ToSwitchConfig(l)
 		if err != nil || sw == nil {
 			continue
 		}
@@ -250,14 +250,14 @@ func GetSwitchsConfigByLabel(db Database) map[string]core.SwitchConfig {
 }
 
 //GetSwitchsDump return the switch status list
-func GetSwitchsDump(db Database) map[string]core.SwitchDump {
-	switchs := map[string]core.SwitchDump{}
+func GetSwitchsDump(db Database) map[string]dserver.SwitchDump {
+	switchs := map[string]dserver.SwitchDump{}
 	stored, err := db.FetchAllRecords(pconst.DbStatus, pconst.TbSwitchs)
 	if err != nil || stored == nil {
 		return switchs
 	}
 	for _, l := range stored {
-		sw, err := core.ToSwitchDump(l)
+		sw, err := dserver.ToSwitchDump(l)
 		if err != nil || sw == nil {
 			continue
 		}
@@ -267,14 +267,14 @@ func GetSwitchsDump(db Database) map[string]core.SwitchDump {
 }
 
 //GetSwitchsDumpByLabel return the switch status list
-func GetSwitchsDumpByLabel(db Database) map[string]core.SwitchDump {
-	switchs := map[string]core.SwitchDump{}
+func GetSwitchsDumpByLabel(db Database) map[string]dserver.SwitchDump {
+	switchs := map[string]dserver.SwitchDump{}
 	stored, err := db.FetchAllRecords(pconst.DbStatus, pconst.TbSwitchs)
 	if err != nil || stored == nil {
 		return switchs
 	}
 	for _, l := range stored {
-		sw, err := core.ToSwitchDump(l)
+		sw, err := dserver.ToSwitchDump(l)
 		if err != nil || sw == nil || sw.Label == nil {
 			continue
 		}
@@ -284,8 +284,8 @@ func GetSwitchsDumpByLabel(db Database) map[string]core.SwitchDump {
 }
 
 //GetCluster get cluster Config list
-func GetCluster(db Database, cluster int) map[string]core.SwitchConfig {
-	res := make(map[string]core.SwitchConfig)
+func GetCluster(db Database, cluster int) map[string]dserver.SwitchConfig {
+	res := make(map[string]dserver.SwitchConfig)
 	criteria := make(map[string]interface{})
 	criteria["Cluster"] = cluster
 	swStored, err := db.GetRecords(pconst.DbConfig, pconst.TbSwitchs, criteria)
@@ -293,7 +293,7 @@ func GetCluster(db Database, cluster int) map[string]core.SwitchConfig {
 		return res
 	}
 	for _, elt := range swStored {
-		sw, err := core.ToSwitchConfig(elt)
+		sw, err := dserver.ToSwitchConfig(elt)
 		if err != nil || sw == nil {
 			continue
 		}
@@ -306,8 +306,8 @@ func GetCluster(db Database, cluster int) map[string]core.SwitchConfig {
 }
 
 //GetSwitchStatusCluster get cluster Config list
-func GetSwitchStatusCluster(db Database, cluster int) map[string]core.SwitchDump {
-	res := make(map[string]core.SwitchDump)
+func GetSwitchStatusCluster(db Database, cluster int) map[string]dserver.SwitchDump {
+	res := make(map[string]dserver.SwitchDump)
 	criteria := make(map[string]interface{})
 	criteria["Cluster"] = cluster
 	swStored, err := db.GetRecords(pconst.DbStatus, pconst.TbSwitchs, criteria)
@@ -315,7 +315,7 @@ func GetSwitchStatusCluster(db Database, cluster int) map[string]core.SwitchDump
 		return res
 	}
 	for _, elt := range swStored {
-		sw, err := core.ToSwitchDump(elt)
+		sw, err := dserver.ToSwitchDump(elt)
 		if err != nil || sw == nil {
 			continue
 		}

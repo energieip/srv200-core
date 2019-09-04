@@ -14,6 +14,7 @@ import (
 	"github.com/energieip/common-components-go/pkg/dhvac"
 	dl "github.com/energieip/common-components-go/pkg/dled"
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
+	"github.com/energieip/common-components-go/pkg/dserver"
 	"github.com/energieip/common-components-go/pkg/pconst"
 	pkg "github.com/energieip/common-components-go/pkg/service"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
@@ -105,15 +106,15 @@ func (api *InternalAPI) getV1Functions(w http.ResponseWriter, req *http.Request)
 }
 
 func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
-	var leds []DumpLed
-	var sensors []DumpSensor
-	var switchs []DumpSwitch
-	var blinds []DumpBlind
-	var hvacs []DumpHvac
-	var wagos []DumpWago
-	var frames []DumpFrame
-	var groups []DumpGroup
-	var nanos []DumpNanosense
+	var leds []dserver.DumpLed
+	var sensors []dserver.DumpSensor
+	var switchs []dserver.DumpSwitch
+	var blinds []dserver.DumpBlind
+	var hvacs []dserver.DumpHvac
+	var wagos []dserver.DumpWago
+	var frames []dserver.DumpFrame
+	var groups []dserver.DumpGroup
+	var nanos []dserver.DumpNanosense
 	macs := make(map[string]bool)
 	driversMac := make(map[string]bool)
 	labels := make(map[string]bool)
@@ -169,7 +170,7 @@ func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
 
 		switch ifc.DeviceType {
 		case pconst.LED:
-			dump := DumpLed{}
+			dump := dserver.DumpLed{}
 			led, ok := lights[ifc.Label]
 			if ok {
 				dump.Status = led
@@ -182,7 +183,7 @@ func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
 
 			leds = append(leds, dump)
 		case pconst.SENSOR:
-			dump := DumpSensor{}
+			dump := dserver.DumpSensor{}
 			sensor, ok := cells[ifc.Label]
 			if ok {
 				dump.Status = sensor
@@ -194,7 +195,7 @@ func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
 			dump.Ifc = ifc
 			sensors = append(sensors, dump)
 		case pconst.BLIND:
-			dump := DumpBlind{}
+			dump := dserver.DumpBlind{}
 			bld, ok := blds[ifc.Label]
 			if ok {
 				dump.Status = bld
@@ -206,7 +207,7 @@ func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
 			dump.Ifc = ifc
 			blinds = append(blinds, dump)
 		case pconst.HVAC:
-			dump := DumpHvac{}
+			dump := dserver.DumpHvac{}
 			hvac, ok := hvcs[ifc.Label]
 			if ok {
 				dump.Status = hvac
@@ -218,7 +219,7 @@ func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
 			dump.Ifc = ifc
 			hvacs = append(hvacs, dump)
 		case pconst.WAGO:
-			dump := DumpWago{}
+			dump := dserver.DumpWago{}
 			wago, ok := wags[ifc.Label]
 			if ok {
 				dump.Status = wago
@@ -230,7 +231,7 @@ func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
 			dump.Ifc = ifc
 			wagos = append(wagos, dump)
 		case pconst.SWITCH:
-			dump := DumpSwitch{}
+			dump := dserver.DumpSwitch{}
 			switchElt, ok := switchElts[ifc.Label]
 			if ok {
 				dump.Status = switchElt
@@ -242,7 +243,7 @@ func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
 			dump.Ifc = ifc
 			switchs = append(switchs, dump)
 		case pconst.FRAME:
-			dump := DumpFrame{}
+			dump := dserver.DumpFrame{}
 			frameElt, ok := frameElts[ifc.Label]
 			if ok {
 				dump.Status = frameElt
@@ -254,7 +255,7 @@ func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
 			dump.Ifc = ifc
 			frames = append(frames, dump)
 		case pconst.NANOSENSE:
-			dump := DumpNanosense{}
+			dump := dserver.DumpNanosense{}
 			gr := 0
 			nano, ok := nans[ifc.Label]
 			if ok {
@@ -277,7 +278,7 @@ func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
 	groupsConfig := database.GetGroupConfigs(api.db, driversMac)
 
 	for _, gr := range groupsConfig {
-		dump := DumpGroup{}
+		dump := dserver.DumpGroup{}
 		grStatus, ok := groupsStatus[gr.Group]
 		if ok {
 			dump.Status = grStatus
@@ -286,7 +287,7 @@ func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
 		groups = append(groups, dump)
 	}
 
-	dump := Dump{
+	dump := dserver.Dump{
 		Leds:       leds,
 		Sensors:    sensors,
 		Blinds:     blinds,

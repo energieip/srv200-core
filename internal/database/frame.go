@@ -1,12 +1,12 @@
 package database
 
 import (
+	"github.com/energieip/common-components-go/pkg/dserver"
 	"github.com/energieip/common-components-go/pkg/pconst"
-	"github.com/energieip/srv200-coreservice-go/internal/core"
 )
 
 //SaveFrame dump project in database
-func SaveFrame(db Database, cfg core.Frame) error {
+func SaveFrame(db Database, cfg dserver.Frame) error {
 	criteria := make(map[string]interface{})
 	criteria["Label"] = cfg.Label
 
@@ -26,7 +26,7 @@ func RemoveFrame(db Database, label string) error {
 }
 
 //GetFrame return the project configuration
-func GetFrame(db Database, label string) (*core.Frame, string) {
+func GetFrame(db Database, label string) (*dserver.Frame, string) {
 	criteria := make(map[string]interface{})
 	criteria["Label"] = label
 	stored, err := db.GetRecord(pconst.DbConfig, pconst.TbFrames, criteria)
@@ -39,7 +39,7 @@ func GetFrame(db Database, label string) (*core.Frame, string) {
 	if ok {
 		dbID = id.(string)
 	}
-	project, err := core.ToFrame(stored)
+	project, err := dserver.ToFrame(stored)
 	if err != nil {
 		return nil, dbID
 	}
@@ -47,14 +47,14 @@ func GetFrame(db Database, label string) (*core.Frame, string) {
 }
 
 //GetFrames return the frame configuration
-func GetFrames(db Database) []core.Frame {
-	var projects []core.Frame
+func GetFrames(db Database) []dserver.Frame {
+	var projects []dserver.Frame
 	stored, err := db.FetchAllRecords(pconst.DbConfig, pconst.TbFrames)
 	if err != nil || stored == nil {
 		return nil
 	}
 	for _, st := range stored {
-		project, err := core.ToFrame(st)
+		project, err := dserver.ToFrame(st)
 		if err != nil || project == nil {
 			continue
 		}
@@ -64,14 +64,14 @@ func GetFrames(db Database) []core.Frame {
 }
 
 //GetFramesConfigByLabel return the frame configuration
-func GetFramesConfigByLabel(db Database) map[string]core.Frame {
-	projects := make(map[string]core.Frame)
+func GetFramesConfigByLabel(db Database) map[string]dserver.Frame {
+	projects := make(map[string]dserver.Frame)
 	stored, err := db.FetchAllRecords(pconst.DbConfig, pconst.TbFrames)
 	if err != nil || stored == nil {
 		return nil
 	}
 	for _, st := range stored {
-		project, err := core.ToFrame(st)
+		project, err := dserver.ToFrame(st)
 		if err != nil || project == nil {
 			continue
 		}
@@ -81,8 +81,8 @@ func GetFramesConfigByLabel(db Database) map[string]core.Frame {
 }
 
 //GetFramesDumpByLabel return the switch status list
-func GetFramesDumpByLabel(db Database) map[string]core.FrameStatus {
-	frames := make(map[string]core.FrameStatus)
+func GetFramesDumpByLabel(db Database) map[string]dserver.FrameStatus {
+	frames := make(map[string]dserver.FrameStatus)
 
 	configs := GetFramesConfigByLabel(db)
 	for _, fr := range configs {
@@ -135,7 +135,7 @@ func GetFramesDumpByLabel(db Database) map[string]core.FrameStatus {
 			}
 		}
 
-		frame := core.FrameStatus{
+		frame := dserver.FrameStatus{
 			Label:        fr.Label,
 			FriendlyName: fr.FriendlyName,
 			Cluster:      fr.Cluster,
