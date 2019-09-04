@@ -9,9 +9,9 @@ import (
 
 	"github.com/energieip/common-components-go/pkg/dblind"
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
+	"github.com/energieip/common-components-go/pkg/dserver"
 	"github.com/energieip/common-components-go/pkg/duser"
 
-	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
 	"github.com/gorilla/mux"
 	"github.com/romana/rlog"
@@ -112,7 +112,7 @@ func (api *API) sendBlindCommand(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	cmd := core.BlindCmd{}
+	cmd := dserver.BlindCmd{}
 	err = json.Unmarshal([]byte(body), &cmd)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)

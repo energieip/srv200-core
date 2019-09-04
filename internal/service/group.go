@@ -11,8 +11,8 @@ import (
 	dl "github.com/energieip/common-components-go/pkg/dled"
 	"github.com/energieip/common-components-go/pkg/dnanosense"
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
+	"github.com/energieip/common-components-go/pkg/dserver"
 	sd "github.com/energieip/common-components-go/pkg/dswitch"
-	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
 	"github.com/romana/rlog"
 )
@@ -624,7 +624,7 @@ func (s *CoreService) sendGroupConfigUpdate(cfg gm.GroupConfig) {
 }
 
 func (s *CoreService) sendGroupCmd(cmd interface{}) {
-	cmdGr, _ := core.ToGroupCmd(cmd)
+	cmdGr, _ := dserver.ToGroupCmd(cmd)
 	if cmdGr == nil {
 		rlog.Error("Cannot parse cmd")
 		return

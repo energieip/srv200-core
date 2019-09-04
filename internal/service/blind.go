@@ -4,8 +4,8 @@ import (
 	"strings"
 
 	"github.com/energieip/common-components-go/pkg/dblind"
+	"github.com/energieip/common-components-go/pkg/dserver"
 	sd "github.com/energieip/common-components-go/pkg/dswitch"
-	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
 	"github.com/romana/rlog"
 )
@@ -115,7 +115,7 @@ func (s *CoreService) updateBlindCfg(config interface{}) {
 }
 
 func (s *CoreService) sendBlindCmd(cmdBlind interface{}) {
-	cmd, _ := core.ToBlindCmd(cmdBlind)
+	cmd, _ := dserver.ToBlindCmd(cmdBlind)
 	if cmd == nil {
 		rlog.Error("Cannot parse cmd")
 		return

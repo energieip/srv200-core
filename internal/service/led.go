@@ -5,8 +5,8 @@ import (
 
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
 	dl "github.com/energieip/common-components-go/pkg/dled"
+	"github.com/energieip/common-components-go/pkg/dserver"
 	sd "github.com/energieip/common-components-go/pkg/dswitch"
-	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
 	"github.com/romana/rlog"
 )
@@ -279,7 +279,7 @@ func (s *CoreService) updateLedLabelSetup(config interface{}) {
 }
 
 func (s *CoreService) sendLedCmd(cmd interface{}) {
-	cmdLed, _ := core.ToLedCmd(cmd)
+	cmdLed, _ := dserver.ToLedCmd(cmd)
 	if cmdLed == nil {
 		rlog.Error("Cannot parse cmd")
 		return

@@ -20,8 +20,6 @@ import (
 	"github.com/energieip/srv200-coreservice-go/internal/database"
 	"github.com/gorilla/mux"
 	"github.com/romana/rlog"
-
-	"github.com/energieip/srv200-coreservice-go/internal/core"
 )
 
 type InternalAPI struct {
@@ -310,7 +308,7 @@ func (api *InternalAPI) sendLedCommand(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	led := core.LedCmd{}
+	led := dserver.LedCmd{}
 	err = json.Unmarshal([]byte(body), &led)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)
@@ -337,7 +335,7 @@ func (api *InternalAPI) sendBlindCommand(w http.ResponseWriter, req *http.Reques
 		return
 	}
 
-	cmd := core.BlindCmd{}
+	cmd := dserver.BlindCmd{}
 	err = json.Unmarshal([]byte(body), &cmd)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)
@@ -364,7 +362,7 @@ func (api *InternalAPI) sendHvacCommand(w http.ResponseWriter, req *http.Request
 		return
 	}
 
-	cmd := core.HvacCmd{}
+	cmd := dserver.HvacCmd{}
 	err = json.Unmarshal([]byte(body), &cmd)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)
@@ -391,7 +389,7 @@ func (api *InternalAPI) sendGroupCommand(w http.ResponseWriter, req *http.Reques
 		return
 	}
 
-	gr := core.GroupCmd{}
+	gr := dserver.GroupCmd{}
 	err = json.Unmarshal(body, &gr)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)

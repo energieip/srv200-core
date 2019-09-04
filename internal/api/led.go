@@ -9,8 +9,8 @@ import (
 
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
 	dl "github.com/energieip/common-components-go/pkg/dled"
+	"github.com/energieip/common-components-go/pkg/dserver"
 	"github.com/energieip/common-components-go/pkg/duser"
-	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
 	"github.com/gorilla/mux"
 	"github.com/romana/rlog"
@@ -114,7 +114,7 @@ func (api *API) sendLedCommand(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	led := core.LedCmd{}
+	led := dserver.LedCmd{}
 	err = json.Unmarshal([]byte(body), &led)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)

@@ -4,8 +4,8 @@ import (
 	"strings"
 
 	"github.com/energieip/common-components-go/pkg/dhvac"
+	"github.com/energieip/common-components-go/pkg/dserver"
 	sd "github.com/energieip/common-components-go/pkg/dswitch"
-	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
 	"github.com/romana/rlog"
 )
@@ -115,7 +115,7 @@ func (s *CoreService) updateHvacCfg(config interface{}) {
 }
 
 func (s *CoreService) sendHvacCmd(cmdHvac interface{}) {
-	cmd, _ := core.ToHvacCmd(cmdHvac)
+	cmd, _ := dserver.ToHvacCmd(cmdHvac)
 	if cmd == nil {
 		rlog.Error("Cannot parse cmd")
 		return
