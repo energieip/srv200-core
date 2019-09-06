@@ -1,13 +1,16 @@
 package api
 
 import (
+	"crypto/tls"
+	"io"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
 
-	"github.com/energieip/common-components-go/pkg/duser"
 	"github.com/romana/rlog"
+
+	"github.com/energieip/common-components-go/pkg/duser"
 )
 
 func (api *API) modbusTableAPI(w http.ResponseWriter, req *http.Request) {
@@ -15,9 +18,35 @@ func (api *API) modbusTableAPI(w http.ResponseWriter, req *http.Request) {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
 	}
-	dt := time.Now()
-	path := "/tmp/modbus_table.xlsx"
 
+	url := "https://127.0.0.1:8888/v1.0/generateDoc"
+
+	reqTmp, _ := http.NewRequest("POST", url, nil)
+	transCfg := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // ignore expired SSL certificates
+	}
+	reqTmp.Close = true
+	client := &http.Client{Transport: transCfg}
+	resp, err := client.Do(reqTmp)
+
+	if err != nil {
+		rlog.Error(err.Error())
+		api.sendError(w, APIErrorDeviceNotFound, "Unable to open new files", http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+	path := "/tmp/tmp_modbus_table.xlsx"
+
+	out, err := os.Create(path)
+	if err != nil {
+		rlog.Error(err.Error())
+		api.sendError(w, APIErrorDeviceNotFound, "Unable to open new files", http.StatusInternalServerError)
+		return
+	}
+	defer out.Close()
+	io.Copy(out, resp.Body)
+
+	dt := time.Now()
 	filename := dt.Format("01-02-2006") + "_modbus_table.xlsx"
 
 	fi, err := os.Stat(path)
