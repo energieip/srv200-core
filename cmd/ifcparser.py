@@ -301,12 +301,6 @@ def parseIfc(filepath):
             modelName = instance['properties'].get("ModelLabel", deviceType)
             group = instance['properties'].get("Group", 0)
 
-            projects[label] = {
-                "label": label,
-                "modelName": modelName,
-                "commissioningDate": ""
-            }
-
             lbl = label.replace("_", "-")
             if label in stickers:
                 raise Exception("Duplicated Label Name! " + lbl)
@@ -336,27 +330,48 @@ def parseIfc(filepath):
             if deviceType not in drivers:
                 drivers[deviceType] = collections.OrderedDict()
 
-            if deviceType not in ["switch", "frame", "wago", "nanosense"]:
+            if isDriver(deviceType):
                 modbusID = instance['properties'].get("ModbusID", 0)
-                projects[label]["modbusID"] = modbusID
                 drivers[deviceType][label] = buildDriver(instance)
+                projects[label] = {
+                    "label": label,
+                    "modelName": modelName,
+                    "modbusID": modbusID,
+                    "commissioningDate": ""
+                }
             elif deviceType == "switch":
                 modbusID = instance['properties'].get("ModbusID", 0)
-                projects[label]["modbusID"] = modbusID
                 drivers[deviceType][label] = buildSwitch(instance)
+                projects[label] = {
+                    "label": label,
+                    "modelName": modelName,
+                    "modbusID": modbusID,
+                    "commissioningDate": ""
+                }
             elif deviceType == "wago":
                 drivers[deviceType][label] = buildWago(instance)
                 slaveID = instance['properties'].get("SlaveID", 0)
-                projects[label]["slaveID"] = slaveID
+                projects[label] = {
+                    "label": label,
+                    "modelName": modelName,
+                    "slaveID": slaveID,
+                    "commissioningDate": ""
+                }
             elif deviceType == "frame":
                 modbusID = instance['properties'].get("ModbusID", 0)
-                projects[label]["modbusID"] = modbusID
                 drivers[deviceType][label] = buildFrame(instance)
+                projects[label] = {
+                    "label": label,
+                    "modelName": modelName,
+                    "modbusID": modbusID,
+                    "commissioningDate": ""
+                }
             elif deviceType == "nanosense":
                 drivers[deviceType][label] = buildNanoSense(instance)
-            else:
-                drivers[deviceType][label] = {
-                    "label": label
+                projects[label] = {
+                    "label": label,
+                    "modelName": modelName,
+                    "commissioningDate": ""
                 }
 
             if modelName in models:
