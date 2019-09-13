@@ -1,8 +1,6 @@
 package service
 
 import (
-	"time"
-
 	"github.com/energieip/common-components-go/pkg/dblind"
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
 	"github.com/energieip/common-components-go/pkg/dhvac"
@@ -33,6 +31,7 @@ const (
 )
 
 func (s *CoreService) prepareAPIEvent(evtType, evtObj string, event interface{}) {
+	bufAPI := cmap.New()
 	switch evtObj {
 	case SensorElt:
 		sensor, err := ds.ToSensor(event)
@@ -49,23 +48,21 @@ func (s *CoreService) prepareAPIEvent(evtType, evtObj string, event interface{})
 			Sensor: *sensor,
 			Label:  label,
 		}
-		_, ok := s.bufAPI.Get(evtType)
-		if !ok {
-			s.bufAPI.Set(evtType, core.EventStatus{
-				Leds:    []core.EventLed{},
-				Sensors: []core.EventSensor{},
-				Groups:  []gm.GroupStatus{},
-				Blinds:  []core.EventBlind{},
-				Hvacs:   []core.EventHvac{},
-				Wagos:   []core.EventWago{},
-				Switchs: []core.EventSwitch{},
-				Nanos:   []core.EventNano{},
-			})
-		}
-		value, ok := s.bufAPI.Get(evtType)
+		bufAPI.Set(evtType, core.EventStatus{
+			Leds:    []core.EventLed{},
+			Sensors: []core.EventSensor{},
+			Groups:  []gm.GroupStatus{},
+			Blinds:  []core.EventBlind{},
+			Hvacs:   []core.EventHvac{},
+			Wagos:   []core.EventWago{},
+			Switchs: []core.EventSwitch{},
+			Nanos:   []core.EventNano{},
+		})
+
+		value, _ := bufAPI.Get(evtType)
 		val, _ := core.ToEventStatus(value)
 		val.Sensors = append(val.Sensors, evt)
-		s.bufAPI.Set(evtType, val)
+		bufAPI.Set(evtType, val)
 
 	case LedElt:
 		led, err := dl.ToLed(event)
@@ -82,23 +79,21 @@ func (s *CoreService) prepareAPIEvent(evtType, evtObj string, event interface{})
 			Label: label,
 		}
 
-		_, ok := s.bufAPI.Get(evtType)
-		if !ok {
-			s.bufAPI.Set(evtType, core.EventStatus{
-				Leds:    []core.EventLed{},
-				Sensors: []core.EventSensor{},
-				Groups:  []gm.GroupStatus{},
-				Blinds:  []core.EventBlind{},
-				Hvacs:   []core.EventHvac{},
-				Wagos:   []core.EventWago{},
-				Nanos:   []core.EventNano{},
-				Switchs: []core.EventSwitch{},
-			})
-		}
-		value, ok := s.bufAPI.Get(evtType)
+		bufAPI.Set(evtType, core.EventStatus{
+			Leds:    []core.EventLed{},
+			Sensors: []core.EventSensor{},
+			Groups:  []gm.GroupStatus{},
+			Blinds:  []core.EventBlind{},
+			Hvacs:   []core.EventHvac{},
+			Wagos:   []core.EventWago{},
+			Nanos:   []core.EventNano{},
+			Switchs: []core.EventSwitch{},
+		})
+
+		value, _ := bufAPI.Get(evtType)
 		val, _ := core.ToEventStatus(value)
 		val.Leds = append(val.Leds, evt)
-		s.bufAPI.Set(evtType, val)
+		bufAPI.Set(evtType, val)
 
 	case BlindElt:
 		blind, err := dblind.ToBlind(event)
@@ -115,23 +110,21 @@ func (s *CoreService) prepareAPIEvent(evtType, evtObj string, event interface{})
 			Label: label,
 		}
 
-		_, ok := s.bufAPI.Get(evtType)
-		if !ok {
-			s.bufAPI.Set(evtType, core.EventStatus{
-				Leds:    []core.EventLed{},
-				Sensors: []core.EventSensor{},
-				Groups:  []gm.GroupStatus{},
-				Blinds:  []core.EventBlind{},
-				Hvacs:   []core.EventHvac{},
-				Wagos:   []core.EventWago{},
-				Nanos:   []core.EventNano{},
-				Switchs: []core.EventSwitch{},
-			})
-		}
-		value, ok := s.bufAPI.Get(evtType)
+		bufAPI.Set(evtType, core.EventStatus{
+			Leds:    []core.EventLed{},
+			Sensors: []core.EventSensor{},
+			Groups:  []gm.GroupStatus{},
+			Blinds:  []core.EventBlind{},
+			Hvacs:   []core.EventHvac{},
+			Wagos:   []core.EventWago{},
+			Nanos:   []core.EventNano{},
+			Switchs: []core.EventSwitch{},
+		})
+
+		value, _ := bufAPI.Get(evtType)
 		val, _ := core.ToEventStatus(value)
 		val.Blinds = append(val.Blinds, evt)
-		s.bufAPI.Set(evtType, val)
+		bufAPI.Set(evtType, val)
 
 	case HvacElt:
 		hvac, err := dhvac.ToHvac(event)
@@ -147,24 +140,21 @@ func (s *CoreService) prepareAPIEvent(evtType, evtObj string, event interface{})
 			Hvac:  *hvac,
 			Label: label,
 		}
+		bufAPI.Set(evtType, core.EventStatus{
+			Leds:    []core.EventLed{},
+			Sensors: []core.EventSensor{},
+			Groups:  []gm.GroupStatus{},
+			Blinds:  []core.EventBlind{},
+			Hvacs:   []core.EventHvac{},
+			Wagos:   []core.EventWago{},
+			Nanos:   []core.EventNano{},
+			Switchs: []core.EventSwitch{},
+		})
 
-		_, ok := s.bufAPI.Get(evtType)
-		if !ok {
-			s.bufAPI.Set(evtType, core.EventStatus{
-				Leds:    []core.EventLed{},
-				Sensors: []core.EventSensor{},
-				Groups:  []gm.GroupStatus{},
-				Blinds:  []core.EventBlind{},
-				Hvacs:   []core.EventHvac{},
-				Wagos:   []core.EventWago{},
-				Nanos:   []core.EventNano{},
-				Switchs: []core.EventSwitch{},
-			})
-		}
-		value, ok := s.bufAPI.Get(evtType)
+		value, _ := bufAPI.Get(evtType)
 		val, _ := core.ToEventStatus(value)
 		val.Hvacs = append(val.Hvacs, evt)
-		s.bufAPI.Set(evtType, val)
+		bufAPI.Set(evtType, val)
 
 	case WagoElt:
 		wago, err := dwago.ToWago(event)
@@ -181,23 +171,20 @@ func (s *CoreService) prepareAPIEvent(evtType, evtObj string, event interface{})
 			Label: label,
 		}
 
-		_, ok := s.bufAPI.Get(evtType)
-		if !ok {
-			s.bufAPI.Set(evtType, core.EventStatus{
-				Leds:    []core.EventLed{},
-				Sensors: []core.EventSensor{},
-				Groups:  []gm.GroupStatus{},
-				Blinds:  []core.EventBlind{},
-				Hvacs:   []core.EventHvac{},
-				Wagos:   []core.EventWago{},
-				Nanos:   []core.EventNano{},
-				Switchs: []core.EventSwitch{},
-			})
-		}
-		value, ok := s.bufAPI.Get(evtType)
+		bufAPI.Set(evtType, core.EventStatus{
+			Leds:    []core.EventLed{},
+			Sensors: []core.EventSensor{},
+			Groups:  []gm.GroupStatus{},
+			Blinds:  []core.EventBlind{},
+			Hvacs:   []core.EventHvac{},
+			Wagos:   []core.EventWago{},
+			Nanos:   []core.EventNano{},
+			Switchs: []core.EventSwitch{},
+		})
+		value, _ := bufAPI.Get(evtType)
 		val, _ := core.ToEventStatus(value)
 		val.Wagos = append(val.Wagos, evt)
-		s.bufAPI.Set(evtType, val)
+		bufAPI.Set(evtType, val)
 
 	case NanoElt:
 		nano, err := dnanosense.ToNanosense(event)
@@ -214,46 +201,42 @@ func (s *CoreService) prepareAPIEvent(evtType, evtObj string, event interface{})
 			Label: label,
 		}
 
-		_, ok := s.bufAPI.Get(evtType)
-		if !ok {
-			s.bufAPI.Set(evtType, core.EventStatus{
-				Leds:    []core.EventLed{},
-				Sensors: []core.EventSensor{},
-				Groups:  []gm.GroupStatus{},
-				Blinds:  []core.EventBlind{},
-				Hvacs:   []core.EventHvac{},
-				Wagos:   []core.EventWago{},
-				Nanos:   []core.EventNano{},
-				Switchs: []core.EventSwitch{},
-			})
-		}
-		value, ok := s.bufAPI.Get(evtType)
+		bufAPI.Set(evtType, core.EventStatus{
+			Leds:    []core.EventLed{},
+			Sensors: []core.EventSensor{},
+			Groups:  []gm.GroupStatus{},
+			Blinds:  []core.EventBlind{},
+			Hvacs:   []core.EventHvac{},
+			Wagos:   []core.EventWago{},
+			Nanos:   []core.EventNano{},
+			Switchs: []core.EventSwitch{},
+		})
+
+		value, _ := bufAPI.Get(evtType)
 		val, _ := core.ToEventStatus(value)
 		val.Nanos = append(val.Nanos, evt)
-		s.bufAPI.Set(evtType, val)
+		bufAPI.Set(evtType, val)
 
 	case GroupElt:
 		group, err := gm.ToGroupStatus(event)
 		if err != nil || group == nil {
 			return
 		}
-		_, ok := s.bufAPI.Get(evtType)
-		if !ok {
-			s.bufAPI.Set(evtType, core.EventStatus{
-				Leds:    []core.EventLed{},
-				Sensors: []core.EventSensor{},
-				Groups:  []gm.GroupStatus{},
-				Blinds:  []core.EventBlind{},
-				Hvacs:   []core.EventHvac{},
-				Wagos:   []core.EventWago{},
-				Nanos:   []core.EventNano{},
-				Switchs: []core.EventSwitch{},
-			})
-		}
-		value, ok := s.bufAPI.Get(evtType)
+		bufAPI.Set(evtType, core.EventStatus{
+			Leds:    []core.EventLed{},
+			Sensors: []core.EventSensor{},
+			Groups:  []gm.GroupStatus{},
+			Blinds:  []core.EventBlind{},
+			Hvacs:   []core.EventHvac{},
+			Wagos:   []core.EventWago{},
+			Nanos:   []core.EventNano{},
+			Switchs: []core.EventSwitch{},
+		})
+
+		value, _ := bufAPI.Get(evtType)
 		val, _ := core.ToEventStatus(value)
 		val.Groups = append(val.Groups, *group)
-		s.bufAPI.Set(evtType, val)
+		bufAPI.Set(evtType, val)
 
 	case SwitchElt:
 		sw, err := dswitch.ToSwitchStatus(event)
@@ -269,41 +252,28 @@ func (s *CoreService) prepareAPIEvent(evtType, evtObj string, event interface{})
 			Switch: *sw,
 			Label:  label,
 		}
-		_, ok := s.bufAPI.Get(evtType)
-		if !ok {
-			s.bufAPI.Set(evtType, core.EventStatus{
-				Leds:    []core.EventLed{},
-				Sensors: []core.EventSensor{},
-				Groups:  []gm.GroupStatus{},
-				Blinds:  []core.EventBlind{},
-				Hvacs:   []core.EventHvac{},
-				Wagos:   []core.EventWago{},
-				Nanos:   []core.EventNano{},
-				Switchs: []core.EventSwitch{},
-			})
-		}
-		value, ok := s.bufAPI.Get(evtType)
+		bufAPI.Set(evtType, core.EventStatus{
+			Leds:    []core.EventLed{},
+			Sensors: []core.EventSensor{},
+			Groups:  []gm.GroupStatus{},
+			Blinds:  []core.EventBlind{},
+			Hvacs:   []core.EventHvac{},
+			Wagos:   []core.EventWago{},
+			Nanos:   []core.EventNano{},
+			Switchs: []core.EventSwitch{},
+		})
+
+		value, _ := bufAPI.Get(evtType)
 		val, _ := core.ToEventStatus(value)
 		val.Switchs = append(val.Switchs, evt)
-		s.bufAPI.Set(evtType, val)
+		bufAPI.Set(evtType, val)
 	}
-}
-
-func (s *CoreService) pushAPIEvent() {
-	timerDump := time.NewTicker(1 * time.Second)
-	for {
+	if len(bufAPI) != 0 {
 		select {
-		case <-timerDump.C:
-			if len(s.bufAPI) != 0 {
-				select {
-				case s.eventsAPI <- s.bufAPI.Items():
-					rlog.Debug("API event Sent", s.bufAPI)
-				default:
-					rlog.Debug("API event Dropped", s.bufAPI)
-				}
-			}
-			s.bufAPI = nil
-			s.bufAPI = cmap.New()
+		case s.eventsAPI <- bufAPI.Items():
+			rlog.Debug("API event Sent", bufAPI)
+		default:
+			rlog.Debug("API event Dropped", bufAPI)
 		}
 	}
 }

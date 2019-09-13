@@ -41,7 +41,6 @@ type CoreService struct {
 	eventsAPI            chan map[string]interface{}
 	api                  *api.API
 	internalApi          *api.InternalAPI
-	bufAPI               cmap.ConcurrentMap
 	bufConsumption       cmap.ConcurrentMap
 	eventsConsumptionAPI chan core.EventConsumption
 	uploadValue          string
@@ -52,7 +51,6 @@ func (s *CoreService) Initialize(confFile string) error {
 	s.mac, s.ip = tools.GetNetworkInfo()
 	s.events = make(chan string)
 	s.eventsAPI = make(chan map[string]interface{})
-	s.bufAPI = cmap.New()
 	s.bufConsumption = cmap.New()
 	s.eventsConsumptionAPI = make(chan core.EventConsumption)
 	s.uploadValue = "none"
@@ -231,7 +229,6 @@ func (s *CoreService) manageAuthMQTTDumpEvent(users map[string]duser.UserAccess)
 
 //Run service mainloop
 func (s *CoreService) Run() error {
-	go s.pushAPIEvent()
 	go s.pushConsumptionEvent()
 	go s.readAPIEvents()
 	for {
