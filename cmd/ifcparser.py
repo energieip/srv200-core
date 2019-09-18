@@ -298,6 +298,8 @@ def parseIfc(filepath):
             deviceType = instance['properties'].get("Type", "").lower()
             if deviceType == "":
                 continue
+            if "output2" in label.lower():
+                continue
             modelName = instance['properties'].get("ModelLabel", deviceType)
             group = instance['properties'].get("Group", 0)
 

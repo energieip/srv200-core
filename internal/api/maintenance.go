@@ -517,7 +517,7 @@ func (api *API) exportDBStart(w http.ResponseWriter, req *http.Request) {
 			api.exportDBStatus = ""
 		} else {
 			currTime := time.Now()
-			if currTime.Sub(fi.ModTime()).Seconds() > 60 {
+			if currTime.Sub(fi.ModTime()).Seconds() > 600 {
 				//re-generate export
 				os.Remove(api.exportDBPath)
 				api.exportDBStatus = ""
