@@ -371,6 +371,11 @@ func (s *CoreService) prepareSetupSwitchConfig(switchStatus sd.SwitchStatus) *sd
 	if config.FriendlyName != nil {
 		setup.FriendlyName = *config.FriendlyName
 	}
+	freq := 1000
+	if config.DumpFrequency != nil {
+		freq = *config.DumpFrequency
+	}
+	setup.DumpFrequency = freq
 	setup.Cluster = config.Cluster
 	setup.Label = config.Label
 	setup.Profil = config.Profil
@@ -465,6 +470,12 @@ func (s *CoreService) prepareSwitchConfig(switchStatus sd.SwitchStatus) *sd.Swit
 	if config.Profil != "" {
 		setup.Profil = config.Profil
 	}
+	freq := 1000
+	if config.DumpFrequency != nil {
+		freq = *config.DumpFrequency
+	}
+	setup.DumpFrequency = freq
+
 	setup.Cluster = config.Cluster
 	setup.IsConfigured = &isConfigured
 
