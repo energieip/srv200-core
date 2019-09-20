@@ -2,7 +2,6 @@ package history
 
 import (
 	"encoding/json"
-	"time"
 
 	"github.com/energieip/common-components-go/pkg/database"
 	"github.com/energieip/common-components-go/pkg/dblind"
@@ -147,35 +146,38 @@ func SaveHistory(db HistoryDb, dbName, tbName string, obj interface{}) error {
 }
 
 func SaveLedHistory(db HistoryDb, driver dl.Led) error {
-	led := LedHistory{
-		Mac:    driver.Mac,
-		Energy: driver.Energy,
-		Power:  driver.LinePower,
-		Group:  driver.Group,
-		Date:   time.Now().Format(time.RFC850),
-	}
-	return SaveHistory(db, HistoryDB, LedsTable, led)
+	// led := LedHistory{
+	// 	Mac:    driver.Mac,
+	// 	Energy: driver.Energy,
+	// 	Power:  driver.LinePower,
+	// 	Group:  driver.Group,
+	// 	Date:   time.Now().Format(time.RFC850),
+	// }
+	// return SaveHistory(db, HistoryDB, LedsTable, led)
+	return nil
 }
 
 func SaveBlindHistory(db HistoryDb, driver dblind.Blind) error {
-	blind := BlindHistory{
-		Mac: driver.Mac,
-		// Energy: driver.Energy,
-		Power: driver.LinePower,
-		Group: driver.Group,
-		Date:  time.Now().Format(time.RFC850),
-	}
-	return SaveHistory(db, HistoryDB, BlindsTable, blind)
+	// blind := BlindHistory{
+	// 	Mac: driver.Mac,
+	// 	// Energy: driver.Energy,
+	// 	Power: driver.LinePower,
+	// 	Group: driver.Group,
+	// 	Date:  time.Now().Format(time.RFC850),
+	// }
+	// return SaveHistory(db, HistoryDB, BlindsTable, blind)
+	return nil
 }
 
 func SaveHvacHistory(db HistoryDb, driver dhvac.Hvac) error {
-	blind := HvacHistory{
-		Mac:   driver.Mac,
-		Power: driver.LinePower,
-		Group: driver.Group,
-		Date:  time.Now().Format(time.RFC850),
-	}
-	return SaveHistory(db, HistoryDB, BlindsTable, blind)
+	// blind := HvacHistory{
+	// 	Mac:   driver.Mac,
+	// 	Power: driver.LinePower,
+	// 	Group: driver.Group,
+	// 	Date:  time.Now().Format(time.RFC850),
+	// }
+	// return SaveHistory(db, HistoryDB, BlindsTable, blind)
+	return nil
 }
 
 func GetBlindsHistory(db HistoryDb) []BlindHistory {
