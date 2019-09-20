@@ -8,8 +8,34 @@ import datetime
 import traceback
 import os
 import json
+import threading
 
 ifc_types = ['IfcProduct']
+
+class ExtractStorey(threading.Thread):
+    def __init__(self, filepath, gltf, dae, name):
+        threading.Thread.__init__(self)
+        self.gltf = gltf
+        self.dae = dae
+        self.name = name
+        self.filepath = filepath
+
+    def run(self):
+        cmd = "IfcConvert "+ self.filepath + " "+ self.dae +" -y --center-model --use-element-names --include+=arg Name \""+ self.name +"\""
+        print(cmd)
+        os.system(cmd)
+
+        cmd = "COLLADA2GLTF-bin -i " + self.dae + " -o " + self.gltf
+        print(cmd)
+        res = os.system(cmd)
+        try:
+            os.remove(self.dae)
+        except:
+            pass
+        if res != 0:
+            print("Finished with error " + str(res))
+            sys.exit(1)
+        print("File " + self.gltf + " created")
 
 def Ifc2gltf(filepath):
     storeys = {}
@@ -52,26 +78,18 @@ def Ifc2gltf(filepath):
         print("exc", exc)
         return 1
 
+    threads = []
     for s in storeys:
         storey = storeys[s]
         gltf = os.path.join(folder, storey["filename"])
         dae = gltf.replace("gltf", "dae")
         name = storey["name"]
-        cmd = "IfcConvert "+ filepath + " "+ dae +" -y --center-model --use-element-names --include+=arg Name \""+ name +"\""
-        print(cmd)
-        os.system(cmd)
+        t = ExtractStorey(filepath, gltf, dae, name)
+        t.start()
+        threads.append(t)
 
-        cmd = "COLLADA2GLTF-bin -i " + dae + " -o " + gltf
-        print(cmd)
-        res = os.system(cmd)
-        try:
-            os.remove(dae)
-        except:
-            pass
-        if res != 0:
-            print("Finished with error " + str(res))
-            return 1
-        print("File " + gltf + " created")
+    for s in threads:
+        s.join()
 
     with open(os.path.join(folder, "maps.json"), "w") as f:
         json.dump(storeys, f, sort_keys=True, ensure_ascii=False, indent=4)
