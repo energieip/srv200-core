@@ -103,8 +103,10 @@ func (s *CoreService) registerSwitchStatus(switchStatus sd.SwitchStatus) {
 		database.SaveLedStatus(s.db, led)
 		oldCfg, _ := database.GetLedConfig(s.db, led.Mac)
 		if oldCfg != nil {
-			oldCfg.SwitchMac = led.SwitchMac
-			database.SaveLedConfig(s.db, *oldCfg)
+			if oldCfg.SwitchMac != led.SwitchMac {
+				oldCfg.SwitchMac = led.SwitchMac
+				database.SaveLedConfig(s.db, *oldCfg)
+			}
 			if oldCfg.Group != nil {
 				gr, _ := database.GetGroupConfig(s.db, *oldCfg.Group)
 				if gr != nil {
@@ -142,8 +144,10 @@ func (s *CoreService) registerSwitchStatus(switchStatus sd.SwitchStatus) {
 		database.SaveSensorStatus(s.db, sensor)
 		oldCfg, _ := database.GetSensorConfig(s.db, sensor.Mac)
 		if oldCfg != nil {
-			oldCfg.SwitchMac = sensor.SwitchMac
-			database.SaveSensorConfig(s.db, *oldCfg)
+			if oldCfg.SwitchMac != sensor.SwitchMac {
+				oldCfg.SwitchMac = sensor.SwitchMac
+				database.SaveSensorConfig(s.db, *oldCfg)
+			}
 			if oldCfg.Group != nil {
 				gr, _ := database.GetGroupConfig(s.db, *oldCfg.Group)
 				if gr != nil {
@@ -181,8 +185,10 @@ func (s *CoreService) registerSwitchStatus(switchStatus sd.SwitchStatus) {
 		database.SaveBlindStatus(s.db, blind)
 		oldCfg, _ := database.GetBlindConfig(s.db, blind.Mac)
 		if oldCfg != nil {
-			oldCfg.SwitchMac = blind.SwitchMac
-			database.SaveBlindConfig(s.db, *oldCfg)
+			if oldCfg.SwitchMac != blind.SwitchMac {
+				oldCfg.SwitchMac = blind.SwitchMac
+				database.SaveBlindConfig(s.db, *oldCfg)
+			}
 			if oldCfg.Group != nil {
 				gr, _ := database.GetGroupConfig(s.db, *oldCfg.Group)
 				if gr != nil {
@@ -255,8 +261,10 @@ func (s *CoreService) registerSwitchStatus(switchStatus sd.SwitchStatus) {
 		database.SaveHvacStatus(s.db, hvac)
 		oldCfg, _ := database.GetHvacConfig(s.db, hvac.Mac)
 		if oldCfg != nil {
-			oldCfg.SwitchMac = hvac.SwitchMac
-			database.SaveHvacConfig(s.db, *oldCfg)
+			if oldCfg.SwitchMac != hvac.SwitchMac {
+				oldCfg.SwitchMac = hvac.SwitchMac
+				database.SaveHvacConfig(s.db, *oldCfg)
+			}
 			if oldCfg.Group != nil {
 				gr, _ := database.GetGroupConfig(s.db, *oldCfg.Group)
 				if gr != nil {
