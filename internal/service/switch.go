@@ -2,6 +2,7 @@ package service
 
 import (
 	"strings"
+	"time"
 
 	"github.com/energieip/common-components-go/pkg/dblind"
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
@@ -98,6 +99,7 @@ func (s *CoreService) updateSwitchLabelCfg(config interface{}) {
 }
 
 func (s *CoreService) registerSwitchStatus(switchStatus sd.SwitchStatus) {
+	s.switchsSeen.Set(switchStatus.Mac, time.Now().UTC())
 	oldLeds := database.GetLedSwitchStatus(s.db, switchStatus.Mac)
 	for mac, led := range switchStatus.Leds {
 		database.SaveLedStatus(s.db, led)

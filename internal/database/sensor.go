@@ -72,6 +72,13 @@ func UpdateSensorLabelSetup(db Database, cfg ds.SensorSetup) error {
 	return db.UpdateRecord(pconst.DbConfig, pconst.TbSensors, dbID, &new)
 }
 
+//RemoveSwitchSensorStatus remove led status in database
+func RemoveSwitchSensorStatus(db Database, mac string) error {
+	criteria := make(map[string]interface{})
+	criteria["SwitchMac"] = mac
+	return db.DeleteRecord(pconst.DbStatus, pconst.TbSensors, criteria)
+}
+
 //RemoveSensorConfig remove sensor config in database
 func RemoveSensorConfig(db Database, mac string) error {
 	criteria := make(map[string]interface{})

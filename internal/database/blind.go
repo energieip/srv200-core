@@ -22,6 +22,13 @@ func SaveBlindLabelConfig(db Database, cfg dblind.BlindSetup) error {
 	return SaveOnUpdateObject(db, cfg, pconst.DbConfig, pconst.TbBlinds, criteria)
 }
 
+//RemoveSwitchBlindStatus remove led status in database
+func RemoveSwitchBlindStatus(db Database, mac string) error {
+	criteria := make(map[string]interface{})
+	criteria["SwitchMac"] = mac
+	return db.DeleteRecord(pconst.DbStatus, pconst.TbBlinds, criteria)
+}
+
 //UpdateBlindConfig update blind config in database
 func UpdateBlindConfig(db Database, cfg dblind.BlindConf) error {
 	setup, dbID := GetBlindConfig(db, cfg.Mac)

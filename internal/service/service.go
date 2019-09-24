@@ -2,6 +2,7 @@ package service
 
 import (
 	"os"
+	"time"
 
 	"github.com/energieip/common-components-go/pkg/dserver"
 	"github.com/energieip/common-components-go/pkg/duser"
@@ -23,9 +24,6 @@ const (
 	ActionSetup  = "setup"
 	ActionDump   = "dump"
 	ActionRemove = "remove"
-
-	UrlStatus = "status/dump"
-	UrlHello  = "setup/hello"
 )
 
 //CoreService content
@@ -44,14 +42,18 @@ type CoreService struct {
 	bufConsumption       cmap.ConcurrentMap
 	eventsConsumptionAPI chan core.EventConsumption
 	uploadValue          string
+	timerDump            time.Duration
+	switchsSeen          cmap.ConcurrentMap
 }
 
 //Initialize service
 func (s *CoreService) Initialize(confFile string) error {
 	s.mac, s.ip = tools.GetNetworkInfo()
+	s.timerDump = 1000
 	s.events = make(chan string)
 	s.eventsAPI = make(chan map[string]interface{})
 	s.bufConsumption = cmap.New()
+	s.switchsSeen = cmap.New()
 	s.eventsConsumptionAPI = make(chan core.EventConsumption)
 	s.uploadValue = "none"
 
@@ -227,8 +229,48 @@ func (s *CoreService) manageAuthMQTTDumpEvent(users map[string]duser.UserAccess)
 	database.SetUsersDump(s.db, users)
 }
 
+func (s *CoreService) cleanupOldStatus() {
+	timeNow := time.Now().UTC()
+	toRemove := make(map[string]bool)
+	switchs := database.GetSwitchsDump(s.db)
+	for _, driver := range switchs {
+		sw, _ := sd.ToSwitch(driver)
+		val, ok := s.switchsSeen.Get(sw.Mac)
+		if ok && val != nil {
+			maxDuration := time.Duration(5*sw.DumpFrequency) * time.Millisecond
+			if timeNow.Sub(val.(time.Time)) > maxDuration {
+				rlog.Info("Switch " + sw.Mac + " timeout")
+				s.switchsSeen.Remove(sw.Mac)
+				toRemove[sw.Mac] = true
+			}
+		} else {
+			toRemove[sw.Mac] = true
+		}
+	}
+	for mac := range toRemove {
+		database.RemoveSwitchStatus(s.db, mac)
+		database.RemoveSwitchLedStatus(s.db, mac)
+		database.RemoveSwitchBlindStatus(s.db, mac)
+		database.RemoveSwitchSensorStatus(s.db, mac)
+		database.RemoveSwitchHvacStatus(s.db, mac)
+	}
+}
+
+func (s *CoreService) cronCleanup() {
+	timerDump := time.NewTicker(s.timerDump * time.Millisecond)
+	for {
+		select {
+		case <-timerDump.C:
+			s.cleanupOldStatus()
+			timerDump.Stop()
+			timerDump = time.NewTicker(s.timerDump * time.Millisecond)
+		}
+	}
+}
+
 //Run service mainloop
 func (s *CoreService) Run() error {
+	go s.cronCleanup()
 	go s.pushConsumptionEvent()
 	go s.readAPIEvents()
 	for {

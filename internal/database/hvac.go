@@ -33,6 +33,13 @@ func UpdateHvacConfig(db Database, cfg dhvac.HvacConf) error {
 	return db.UpdateRecord(pconst.DbConfig, pconst.TbHvacs, dbID, &new)
 }
 
+//RemoveSwitchHvacStatus remove led status in database
+func RemoveSwitchHvacStatus(db Database, mac string) error {
+	criteria := make(map[string]interface{})
+	criteria["SwitchMac"] = mac
+	return db.DeleteRecord(pconst.DbStatus, pconst.TbHvacs, criteria)
+}
+
 //UpdateHvacLabelConfig update hvac config in database
 func UpdateHvacLabelConfig(db Database, cfg dhvac.HvacConf) error {
 	if cfg.Label == nil {

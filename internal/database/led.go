@@ -36,6 +36,13 @@ func RemoveLedStatus(db Database, mac string) error {
 	return db.DeleteRecord(pconst.DbStatus, pconst.TbLeds, criteria)
 }
 
+//RemoveSwitchLedStatus remove led status in database
+func RemoveSwitchLedStatus(db Database, mac string) error {
+	criteria := make(map[string]interface{})
+	criteria["SwitchMac"] = mac
+	return db.DeleteRecord(pconst.DbStatus, pconst.TbLeds, criteria)
+}
+
 //GetLedConfig return the led configuration
 func GetLedConfig(db Database, mac string) (*dl.LedSetup, string) {
 	var dbID string

@@ -10,6 +10,7 @@ import (
 func SaveSwitchStatus(db Database, status sd.SwitchStatus) error {
 	swStatus := dserver.SwitchDump{}
 	swStatus.Mac = status.Mac
+	swStatus.DumpFrequency = status.DumpFrequency
 	swStatus.IP = status.IP
 	swStatus.Cluster = status.Cluster
 	swStatus.Label = status.Label
@@ -154,6 +155,13 @@ func RemoveSwitchConfig(db Database, mac string) error {
 	criteria := make(map[string]interface{})
 	criteria["Mac"] = mac
 	return db.DeleteRecord(pconst.DbConfig, pconst.TbSwitchs, criteria)
+}
+
+//RemoveSwitchStatus remove switch status in database
+func RemoveSwitchStatus(db Database, mac string) error {
+	criteria := make(map[string]interface{})
+	criteria["Mac"] = mac
+	return db.DeleteRecord(pconst.DbStatus, pconst.TbSwitchs, criteria)
 }
 
 //SaveSwitchConfig register switch config in database
