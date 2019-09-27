@@ -15,15 +15,23 @@ func (s *CoreService) sendSwitchLedSetup(led dl.LedSetup) {
 	if led.SwitchMac == "" {
 		return
 	}
+	sw, _ := database.GetSwitchConfig(s.db, led.SwitchMac)
+	if sw != nil {
+		ip := "0"
+		if sw.IP != nil {
+			ip = *sw.IP
+		}
 
-	url := "/write/switch/" + led.SwitchMac + "/update/settings"
-	switchSetup := sd.SwitchConfig{}
-	switchSetup.Mac = led.SwitchMac
-	switchSetup.LedsSetup = make(map[string]dl.LedSetup)
-	switchSetup.LedsSetup[led.Mac] = led
+		url := "/write/switch/" + led.SwitchMac + "/update/settings"
+		switchSetup := sd.SwitchConfig{}
+		switchSetup.Mac = led.SwitchMac
+		switchSetup.IP = ip
+		switchSetup.LedsSetup = make(map[string]dl.LedSetup)
+		switchSetup.LedsSetup[led.Mac] = led
 
-	dump, _ := switchSetup.ToJSON()
-	s.server.SendCommand(url, dump)
+		dump, _ := switchSetup.ToJSON()
+		s.server.SendCommand(url, dump)
+	}
 }
 
 func (s *CoreService) updateDriverGroup(grID int) {
@@ -32,14 +40,25 @@ func (s *CoreService) updateDriverGroup(grID int) {
 		return
 	}
 
-	for sw := range database.GetGroupSwitchs(s.db, grID) {
-		url := "/write/switch/" + sw + "/update/settings"
-		switchSetup := sd.SwitchConfig{}
-		switchSetup.Mac = sw
-		switchSetup.Groups = make(map[int]gm.GroupConfig)
-		switchSetup.Groups[gr.Group] = *gr
-		dump, _ := switchSetup.ToJSON()
-		s.server.SendCommand(url, dump)
+	for mac := range database.GetGroupSwitchs(s.db, grID) {
+		if mac == "" {
+			continue
+		}
+		sw, _ := database.GetSwitchConfig(s.db, mac)
+		if sw != nil {
+			ip := "0"
+			if sw.IP != nil {
+				ip = *sw.IP
+			}
+			url := "/write/switch/" + mac + "/update/settings"
+			switchSetup := sd.SwitchConfig{}
+			switchSetup.Mac = mac
+			switchSetup.IP = ip
+			switchSetup.Groups = make(map[int]gm.GroupConfig)
+			switchSetup.Groups[gr.Group] = *gr
+			dump, _ := switchSetup.ToJSON()
+			s.server.SendCommand(url, dump)
+		}
 	}
 }
 
@@ -143,13 +162,21 @@ func (s *CoreService) updateLedCfg(config interface{}) {
 		rlog.Info("No corresponding switch found for " + cfg.Mac)
 		return
 	}
-	url := "/write/switch/" + led.SwitchMac + "/update/settings"
-	switchSetup := sd.SwitchConfig{}
-	switchSetup.Mac = led.SwitchMac
-	switchSetup.LedsConfig = make(map[string]dl.LedConf)
-	switchSetup.LedsConfig[cfg.Mac] = *cfg
-	dump, _ := switchSetup.ToJSON()
-	s.server.SendCommand(url, dump)
+	sw, _ := database.GetSwitchConfig(s.db, led.SwitchMac)
+	if sw != nil {
+		ip := "0"
+		if sw.IP != nil {
+			ip = *sw.IP
+		}
+		url := "/write/switch/" + led.SwitchMac + "/update/settings"
+		switchSetup := sd.SwitchConfig{}
+		switchSetup.Mac = led.SwitchMac
+		switchSetup.IP = ip
+		switchSetup.LedsConfig = make(map[string]dl.LedConf)
+		switchSetup.LedsConfig[cfg.Mac] = *cfg
+		dump, _ := switchSetup.ToJSON()
+		s.server.SendCommand(url, dump)
+	}
 }
 
 func (s *CoreService) updateGroupLed(oldLed dl.LedSetup, cfg dl.LedSetup) {
@@ -294,21 +321,29 @@ func (s *CoreService) sendLedCmd(cmd interface{}) {
 		rlog.Error("Corresponding switch not found " + cmdLed.Mac)
 		return
 	}
-	url := "/write/switch/" + led.SwitchMac + "/update/settings"
-	switchSetup := sd.SwitchConfig{}
-	switchSetup.Mac = led.SwitchMac
-	switchSetup.LedsConfig = make(map[string]dl.LedConf)
+	sw, _ := database.GetSwitchConfig(s.db, led.SwitchMac)
+	if sw != nil {
+		ip := "0"
+		if sw.IP != nil {
+			ip = *sw.IP
+		}
+		url := "/write/switch/" + led.SwitchMac + "/update/settings"
+		switchSetup := sd.SwitchConfig{}
+		switchSetup.Mac = led.SwitchMac
+		switchSetup.IP = ip
+		switchSetup.LedsConfig = make(map[string]dl.LedConf)
 
-	auto := cmdLed.Auto
-	setpoint := cmdLed.Setpoint
+		auto := cmdLed.Auto
+		setpoint := cmdLed.Setpoint
 
-	ledCfg := dl.LedConf{
-		Mac:            led.Mac,
-		Auto:           &auto,
-		SetpointManual: &setpoint,
+		ledCfg := dl.LedConf{
+			Mac:            led.Mac,
+			Auto:           &auto,
+			SetpointManual: &setpoint,
+		}
+		switchSetup.LedsConfig[led.Mac] = ledCfg
+
+		dump, _ := switchSetup.ToJSON()
+		s.server.SendCommand(url, dump)
 	}
-	switchSetup.LedsConfig[led.Mac] = ledCfg
-
-	dump, _ := switchSetup.ToJSON()
-	s.server.SendCommand(url, dump)
 }

@@ -26,14 +26,22 @@ func (s *CoreService) addNewUser(user duser.UserAccess) {
 			switchs = append(switchs, sw)
 		}
 	}
-	for _, sw := range switchs {
-		url := "/write/switch/" + sw + "/update/settings"
-		switchSetup := sd.SwitchConfig{}
-		switchSetup.Mac = sw
-		switchSetup.Users = make(map[string]duser.UserAccess)
-		switchSetup.Users[user.UserHash] = user
-		dump, _ := switchSetup.ToJSON()
-		s.server.SendCommand(url, dump)
+	for _, mac := range switchs {
+		sw, _ := database.GetSwitchConfig(s.db, mac)
+		if sw != nil {
+			ip := "0"
+			if sw.IP != nil {
+				ip = *sw.IP
+			}
+			url := "/write/switch/" + mac + "/update/settings"
+			switchSetup := sd.SwitchConfig{}
+			switchSetup.Mac = mac
+			switchSetup.IP = ip
+			switchSetup.Users = make(map[string]duser.UserAccess)
+			switchSetup.Users[user.UserHash] = user
+			dump, _ := switchSetup.ToJSON()
+			s.server.SendCommand(url, dump)
+		}
 	}
 
 	rlog.Info("Send new User Access for", user.UserHash)
@@ -59,14 +67,22 @@ func (s *CoreService) removeUser(user duser.UserAccess) {
 		}
 	}
 
-	for _, sw := range switchs {
-		url := "/write/switch/" + sw + "/remove/settings"
-		switchSetup := sd.SwitchConfig{}
-		switchSetup.Mac = sw
-		switchSetup.Users = make(map[string]duser.UserAccess)
-		switchSetup.Users[user.UserHash] = user
-		dump, _ := switchSetup.ToJSON()
-		s.server.SendCommand(url, dump)
+	for _, mac := range switchs {
+		sw, _ := database.GetSwitchConfig(s.db, mac)
+		if sw != nil {
+			ip := "0"
+			if sw.IP != nil {
+				ip = *sw.IP
+			}
+			url := "/write/switch/" + mac + "/remove/settings"
+			switchSetup := sd.SwitchConfig{}
+			switchSetup.Mac = mac
+			switchSetup.IP = ip
+			switchSetup.Users = make(map[string]duser.UserAccess)
+			switchSetup.Users[user.UserHash] = user
+			dump, _ := switchSetup.ToJSON()
+			s.server.SendCommand(url, dump)
+		}
 	}
 	rlog.Info("Send remove User Access for", user.UserHash)
 }

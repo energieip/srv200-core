@@ -49,13 +49,21 @@ func (s *CoreService) installDriver(dr interface{}) {
 		database.SaveLedLabelConfig(s.db, *elt)
 
 		if elt.SwitchMac != "" {
-			switchConf := sd.SwitchConfig{}
-			switchConf.Mac = elt.SwitchMac
-			switchConf.LedsSetup = make(map[string]dl.LedSetup)
-			switchConf.LedsSetup[elt.Mac] = *elt
-			url := "/write/switch/" + elt.SwitchMac + "/update/settings"
-			dump, _ := switchConf.ToJSON()
-			s.server.SendCommand(url, dump)
+			sw, _ := database.GetSwitchConfig(s.db, elt.SwitchMac)
+			if sw != nil {
+				ip := "0"
+				if sw.IP != nil {
+					ip = *sw.IP
+				}
+				switchConf := sd.SwitchConfig{}
+				switchConf.Mac = elt.SwitchMac
+				switchConf.IP = ip
+				switchConf.LedsSetup = make(map[string]dl.LedSetup)
+				switchConf.LedsSetup[elt.Mac] = *elt
+				url := "/write/switch/" + elt.SwitchMac + "/update/settings"
+				dump, _ := switchConf.ToJSON()
+				s.server.SendCommand(url, dump)
+			}
 		}
 
 		groupCfg, _ := database.GetGroupConfig(s.db, *elt.Group)
@@ -81,17 +89,25 @@ func (s *CoreService) installDriver(dr interface{}) {
 
 		database.UpdateGroupConfig(s.db, *groupCfg)
 		newSwitch := database.GetGroupSwitchs(s.db, groupCfg.Group)
-		for sw := range newSwitch {
-			if sw == "" {
+		for mac := range newSwitch {
+			if mac == "" {
 				continue
 			}
-			url := "/write/switch/" + sw + "/update/settings"
-			switchSetup := sd.SwitchConfig{}
-			switchSetup.Mac = sw
-			switchSetup.Groups = make(map[int]gm.GroupConfig)
-			switchSetup.Groups[groupCfg.Group] = *groupCfg
-			dump, _ := switchSetup.ToJSON()
-			s.server.SendCommand(url, dump)
+			sw, _ := database.GetSwitchConfig(s.db, mac)
+			if sw != nil {
+				ip := "0"
+				if sw.IP != nil {
+					ip = *sw.IP
+				}
+				url := "/write/switch/" + mac + "/update/settings"
+				switchSetup := sd.SwitchConfig{}
+				switchSetup.Mac = mac
+				switchSetup.IP = ip
+				switchSetup.Groups = make(map[int]gm.GroupConfig)
+				switchSetup.Groups[groupCfg.Group] = *groupCfg
+				dump, _ := switchSetup.ToJSON()
+				s.server.SendCommand(url, dump)
+			}
 		}
 	case pconst.BLIND:
 		elt, _ := database.GetBlindLabelConfig(s.db, proj.Label)
@@ -104,13 +120,21 @@ func (s *CoreService) installDriver(dr interface{}) {
 
 		// send allow new driver configuration to the switch
 		if elt.SwitchMac != "" {
-			switchConf := sd.SwitchConfig{}
-			switchConf.Mac = elt.SwitchMac
-			switchConf.BlindsSetup = make(map[string]db.BlindSetup)
-			switchConf.BlindsSetup[elt.Mac] = *elt
-			url := "/write/switch/" + elt.SwitchMac + "/update/settings"
-			dump, _ := switchConf.ToJSON()
-			s.server.SendCommand(url, dump)
+			sw, _ := database.GetSwitchConfig(s.db, elt.SwitchMac)
+			if sw != nil {
+				ip := "0"
+				if sw.IP != nil {
+					ip = *sw.IP
+				}
+				switchConf := sd.SwitchConfig{}
+				switchConf.Mac = elt.SwitchMac
+				switchConf.IP = ip
+				switchConf.BlindsSetup = make(map[string]db.BlindSetup)
+				switchConf.BlindsSetup[elt.Mac] = *elt
+				url := "/write/switch/" + elt.SwitchMac + "/update/settings"
+				dump, _ := switchConf.ToJSON()
+				s.server.SendCommand(url, dump)
+			}
 		}
 
 		groupCfg, _ := database.GetGroupConfig(s.db, *elt.Group)
@@ -125,17 +149,25 @@ func (s *CoreService) installDriver(dr interface{}) {
 
 		database.UpdateGroupConfig(s.db, *groupCfg)
 		newSwitch := database.GetGroupSwitchs(s.db, groupCfg.Group)
-		for sw := range newSwitch {
-			if sw == "" {
+		for mac := range newSwitch {
+			if mac == "" {
 				continue
 			}
-			url := "/write/switch/" + sw + "/update/settings"
-			switchSetup := sd.SwitchConfig{}
-			switchSetup.Mac = sw
-			switchSetup.Groups = make(map[int]gm.GroupConfig)
-			switchSetup.Groups[groupCfg.Group] = *groupCfg
-			dump, _ := switchSetup.ToJSON()
-			s.server.SendCommand(url, dump)
+			sw, _ := database.GetSwitchConfig(s.db, mac)
+			if sw != nil {
+				ip := "0"
+				if sw.IP != nil {
+					ip = *sw.IP
+				}
+				url := "/write/switch/" + mac + "/update/settings"
+				switchSetup := sd.SwitchConfig{}
+				switchSetup.Mac = mac
+				switchSetup.IP = ip
+				switchSetup.Groups = make(map[int]gm.GroupConfig)
+				switchSetup.Groups[groupCfg.Group] = *groupCfg
+				dump, _ := switchSetup.ToJSON()
+				s.server.SendCommand(url, dump)
+			}
 		}
 
 	case pconst.HVAC:
@@ -149,13 +181,21 @@ func (s *CoreService) installDriver(dr interface{}) {
 
 		// send allow new driver configuration to the switch
 		if elt.SwitchMac != "" {
-			switchConf := sd.SwitchConfig{}
-			switchConf.Mac = elt.SwitchMac
-			switchConf.HvacsSetup = make(map[string]dh.HvacSetup)
-			switchConf.HvacsSetup[elt.Mac] = *elt
-			url := "/write/switch/" + elt.SwitchMac + "/update/settings"
-			dump, _ := switchConf.ToJSON()
-			s.server.SendCommand(url, dump)
+			sw, _ := database.GetSwitchConfig(s.db, elt.SwitchMac)
+			if sw != nil {
+				ip := "0"
+				if sw.IP != nil {
+					ip = *sw.IP
+				}
+				switchConf := sd.SwitchConfig{}
+				switchConf.Mac = elt.SwitchMac
+				switchConf.IP = ip
+				switchConf.HvacsSetup = make(map[string]dh.HvacSetup)
+				switchConf.HvacsSetup[elt.Mac] = *elt
+				url := "/write/switch/" + elt.SwitchMac + "/update/settings"
+				dump, _ := switchConf.ToJSON()
+				s.server.SendCommand(url, dump)
+			}
 		}
 
 		groupCfg, _ := database.GetGroupConfig(s.db, *elt.Group)
@@ -170,17 +210,25 @@ func (s *CoreService) installDriver(dr interface{}) {
 
 		database.UpdateGroupConfig(s.db, *groupCfg)
 		newSwitch := database.GetGroupSwitchs(s.db, groupCfg.Group)
-		for sw := range newSwitch {
-			if sw == "" {
+		for mac := range newSwitch {
+			if mac == "" {
 				continue
 			}
-			url := "/write/switch/" + sw + "/update/settings"
-			switchSetup := sd.SwitchConfig{}
-			switchSetup.Mac = sw
-			switchSetup.Groups = make(map[int]gm.GroupConfig)
-			switchSetup.Groups[groupCfg.Group] = *groupCfg
-			dump, _ := switchSetup.ToJSON()
-			s.server.SendCommand(url, dump)
+			sw, _ := database.GetSwitchConfig(s.db, mac)
+			if sw != nil {
+				ip := "0"
+				if sw.IP != nil {
+					ip = *sw.IP
+				}
+				url := "/write/switch/" + mac + "/update/settings"
+				switchSetup := sd.SwitchConfig{}
+				switchSetup.Mac = mac
+				switchSetup.IP = ip
+				switchSetup.Groups = make(map[int]gm.GroupConfig)
+				switchSetup.Groups[groupCfg.Group] = *groupCfg
+				dump, _ := switchSetup.ToJSON()
+				s.server.SendCommand(url, dump)
+			}
 		}
 	case pconst.SENSOR:
 		elt, _ := database.GetSensorLabelConfig(s.db, proj.Label)
@@ -193,13 +241,21 @@ func (s *CoreService) installDriver(dr interface{}) {
 
 		// send allow new driver configuration to the switch
 		if elt.SwitchMac != "" {
-			switchConf := sd.SwitchConfig{}
-			switchConf.Mac = elt.SwitchMac
-			switchConf.SensorsSetup = make(map[string]ds.SensorSetup)
-			switchConf.SensorsSetup[elt.Mac] = *elt
-			url := "/write/switch/" + elt.SwitchMac + "/update/settings"
-			dump, _ := switchConf.ToJSON()
-			s.server.SendCommand(url, dump)
+			sw, _ := database.GetSwitchConfig(s.db, elt.SwitchMac)
+			if sw != nil {
+				ip := "0"
+				if sw.IP != nil {
+					ip = *sw.IP
+				}
+				switchConf := sd.SwitchConfig{}
+				switchConf.Mac = elt.SwitchMac
+				switchConf.IP = ip
+				switchConf.SensorsSetup = make(map[string]ds.SensorSetup)
+				switchConf.SensorsSetup[elt.Mac] = *elt
+				url := "/write/switch/" + elt.SwitchMac + "/update/settings"
+				dump, _ := switchConf.ToJSON()
+				s.server.SendCommand(url, dump)
+			}
 		}
 
 		groupCfg, _ := database.GetGroupConfig(s.db, *elt.Group)
@@ -214,17 +270,25 @@ func (s *CoreService) installDriver(dr interface{}) {
 
 		database.UpdateGroupConfig(s.db, *groupCfg)
 		newSwitch := database.GetGroupSwitchs(s.db, groupCfg.Group)
-		for sw := range newSwitch {
-			if sw == "" {
+		for mac := range newSwitch {
+			if mac == "" {
 				continue
 			}
-			url := "/write/switch/" + sw + "/update/settings"
-			switchSetup := sd.SwitchConfig{}
-			switchSetup.Mac = sw
-			switchSetup.Groups = make(map[int]gm.GroupConfig)
-			switchSetup.Groups[groupCfg.Group] = *groupCfg
-			dump, _ := switchSetup.ToJSON()
-			s.server.SendCommand(url, dump)
+			sw, _ := database.GetSwitchConfig(s.db, mac)
+			if sw != nil {
+				ip := "0"
+				if sw.IP != nil {
+					ip = *sw.IP
+				}
+				url := "/write/switch/" + mac + "/update/settings"
+				switchSetup := sd.SwitchConfig{}
+				switchSetup.Mac = mac
+				switchSetup.IP = ip
+				switchSetup.Groups = make(map[int]gm.GroupConfig)
+				switchSetup.Groups[groupCfg.Group] = *groupCfg
+				dump, _ := switchSetup.ToJSON()
+				s.server.SendCommand(url, dump)
+			}
 		}
 
 	case pconst.WAGO:
@@ -260,17 +324,25 @@ func (s *CoreService) installDriver(dr interface{}) {
 
 			database.UpdateGroupConfig(s.db, *groupCfg)
 			newSwitch := database.GetGroupSwitchs(s.db, groupCfg.Group)
-			for sw := range newSwitch {
-				if sw == "" {
+			for mac := range newSwitch {
+				if mac == "" {
 					continue
 				}
-				url := "/write/switch/" + sw + "/update/settings"
-				switchSetup := sd.SwitchConfig{}
-				switchSetup.Mac = sw
-				switchSetup.Groups = make(map[int]gm.GroupConfig)
-				switchSetup.Groups[groupCfg.Group] = *groupCfg
-				dump, _ := switchSetup.ToJSON()
-				s.server.SendCommand(url, dump)
+				sw, _ := database.GetSwitchConfig(s.db, mac)
+				if sw != nil {
+					ip := "0"
+					if sw.IP != nil {
+						ip = *sw.IP
+					}
+					url := "/write/switch/" + mac + "/update/settings"
+					switchSetup := sd.SwitchConfig{}
+					switchSetup.Mac = mac
+					switchSetup.IP = ip
+					switchSetup.Groups = make(map[int]gm.GroupConfig)
+					switchSetup.Groups[groupCfg.Group] = *groupCfg
+					dump, _ := switchSetup.ToJSON()
+					s.server.SendCommand(url, dump)
+				}
 			}
 		}
 		s.sendSwitchWagoSetup(*elt)

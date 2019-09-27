@@ -14,13 +14,21 @@ func (s *CoreService) sendSwitchNanoSetup(driver dnano.NanosenseSetup) {
 		if sw == "" {
 			continue
 		}
-		url := "/write/switch/" + sw + "/update/settings"
-		switchSetup := sd.SwitchConfig{}
-		switchSetup.Mac = sw
-		switchSetup.NanosSetup = make(map[string]dnano.NanosenseSetup)
-		switchSetup.NanosSetup[driver.Label] = driver
-		dump, _ := switchSetup.ToJSON()
-		s.server.SendCommand(url, dump)
+		switchS, _ := database.GetSwitchConfig(s.db, sw)
+		if switchS != nil {
+			ip := "0"
+			if switchS.IP != nil {
+				ip = *switchS.IP
+			}
+			url := "/write/switch/" + sw + "/update/settings"
+			switchSetup := sd.SwitchConfig{}
+			switchSetup.Mac = sw
+			switchSetup.IP = ip
+			switchSetup.NanosSetup = make(map[string]dnano.NanosenseSetup)
+			switchSetup.NanosSetup[driver.Label] = driver
+			dump, _ := switchSetup.ToJSON()
+			s.server.SendCommand(url, dump)
+		}
 	}
 }
 

@@ -154,29 +154,45 @@ func (s *CoreService) sendSaveGroupCfg(cfg gm.GroupConfig) {
 	oldSwitch := database.GetGroupSwitchs(s.db, cfg.Group)
 	database.UpdateGroupConfig(s.db, cfg)
 	newSwitch := database.GetGroupSwitchs(s.db, cfg.Group)
-	for sw := range oldSwitch {
-		if sw == "" {
+	for mac := range oldSwitch {
+		if mac == "" {
 			continue
 		}
-		url := "/write/switch/" + sw + "/update/settings"
-		switchSetup := sd.SwitchConfig{}
-		switchSetup.Mac = sw
-		switchSetup.Groups = make(map[int]gm.GroupConfig)
-		switchSetup.Groups[cfg.Group] = cfg
-		dump, _ := switchSetup.ToJSON()
-		s.server.SendCommand(url, dump)
+		sw, _ := database.GetSwitchConfig(s.db, mac)
+		if sw != nil {
+			ip := "0"
+			if sw.IP != nil {
+				ip = *sw.IP
+			}
+			url := "/write/switch/" + mac + "/update/settings"
+			switchSetup := sd.SwitchConfig{}
+			switchSetup.Mac = mac
+			switchSetup.IP = ip
+			switchSetup.Groups = make(map[int]gm.GroupConfig)
+			switchSetup.Groups[cfg.Group] = cfg
+			dump, _ := switchSetup.ToJSON()
+			s.server.SendCommand(url, dump)
+		}
 	}
-	for sw := range newSwitch {
-		if sw == "" {
+	for mac := range newSwitch {
+		if mac == "" {
 			continue
 		}
-		url := "/write/switch/" + sw + "/update/settings"
-		switchSetup := sd.SwitchConfig{}
-		switchSetup.Mac = sw
-		switchSetup.Groups = make(map[int]gm.GroupConfig)
-		switchSetup.Groups[cfg.Group] = cfg
-		dump, _ := switchSetup.ToJSON()
-		s.server.SendCommand(url, dump)
+		sw, _ := database.GetSwitchConfig(s.db, mac)
+		if sw != nil {
+			ip := "0"
+			if sw.IP != nil {
+				ip = *sw.IP
+			}
+			url := "/write/switch/" + mac + "/update/settings"
+			switchSetup := sd.SwitchConfig{}
+			switchSetup.Mac = mac
+			switchSetup.IP = ip
+			switchSetup.Groups = make(map[int]gm.GroupConfig)
+			switchSetup.Groups[cfg.Group] = cfg
+			dump, _ := switchSetup.ToJSON()
+			s.server.SendCommand(url, dump)
+		}
 	}
 }
 
@@ -198,13 +214,21 @@ func (s *CoreService) updateLedGroup(mac string, grID int) {
 
 	led, _ := database.GetLedConfig(s.db, mac)
 	if led.SwitchMac != "" {
-		url := "/write/switch/" + led.SwitchMac + "/update/settings"
-		switchSetup := sd.SwitchConfig{}
-		switchSetup.Mac = led.SwitchMac
-		switchSetup.LedsConfig = make(map[string]dl.LedConf)
-		switchSetup.LedsConfig[led.Mac] = cfgLed
-		dump, _ := switchSetup.ToJSON()
-		s.server.SendCommand(url, dump)
+		sw, _ := database.GetSwitchConfig(s.db, led.SwitchMac)
+		if sw != nil {
+			ip := "0"
+			if sw.IP != nil {
+				ip = *sw.IP
+			}
+			url := "/write/switch/" + led.SwitchMac + "/update/settings"
+			switchSetup := sd.SwitchConfig{}
+			switchSetup.Mac = led.SwitchMac
+			switchSetup.IP = ip
+			switchSetup.LedsConfig = make(map[string]dl.LedConf)
+			switchSetup.LedsConfig[led.Mac] = cfgLed
+			dump, _ := switchSetup.ToJSON()
+			s.server.SendCommand(url, dump)
+		}
 	}
 	if grID == 0 {
 		//register led in group 0 == remove it from the current group
@@ -259,13 +283,21 @@ func (s *CoreService) updateSensorGroup(mac string, grID int) {
 
 	sensor, _ := database.GetSensorConfig(s.db, mac)
 	if sensor.SwitchMac != "" {
-		url := "/write/switch/" + sensor.SwitchMac + "/update/settings"
-		switchSetup := sd.SwitchConfig{}
-		switchSetup.Mac = sensor.SwitchMac
-		switchSetup.SensorsConfig = make(map[string]ds.SensorConf)
-		switchSetup.SensorsConfig[sensor.Mac] = cfgSensor
-		dump, _ := switchSetup.ToJSON()
-		s.server.SendCommand(url, dump)
+		sw, _ := database.GetSwitchConfig(s.db, mac)
+		if sw != nil {
+			ip := "0"
+			if sw.IP != nil {
+				ip = *sw.IP
+			}
+			url := "/write/switch/" + sensor.SwitchMac + "/update/settings"
+			switchSetup := sd.SwitchConfig{}
+			switchSetup.Mac = sensor.SwitchMac
+			switchSetup.IP = ip
+			switchSetup.SensorsConfig = make(map[string]ds.SensorConf)
+			switchSetup.SensorsConfig[sensor.Mac] = cfgSensor
+			dump, _ := switchSetup.ToJSON()
+			s.server.SendCommand(url, dump)
+		}
 	}
 	if grID == 0 {
 		//register sensor in group 0
@@ -312,14 +344,22 @@ func (s *CoreService) updateHvacGroup(mac string, grID int) {
 
 	driver, _ := database.GetHvacConfig(s.db, mac)
 	if driver.SwitchMac != "" {
-		url := "/write/switch/" + driver.SwitchMac + "/update/settings"
-		switchSetup := sd.SwitchConfig{}
-		switchSetup.Mac = driver.SwitchMac
-		switchSetup.HvacsConfig = make(map[string]dhvac.HvacConf)
-		switchSetup.HvacsConfig[driver.Mac] = cfgHvac
+		sw, _ := database.GetSwitchConfig(s.db, driver.SwitchMac)
+		if sw != nil {
+			ip := "0"
+			if sw.IP != nil {
+				ip = *sw.IP
+			}
+			url := "/write/switch/" + driver.SwitchMac + "/update/settings"
+			switchSetup := sd.SwitchConfig{}
+			switchSetup.Mac = driver.SwitchMac
+			switchSetup.IP = ip
+			switchSetup.HvacsConfig = make(map[string]dhvac.HvacConf)
+			switchSetup.HvacsConfig[driver.Mac] = cfgHvac
 
-		dump, _ := switchSetup.ToJSON()
-		s.server.SendCommand(url, dump)
+			dump, _ := switchSetup.ToJSON()
+			s.server.SendCommand(url, dump)
+		}
 	}
 	if grID == 0 {
 		//register hvac in group 0
@@ -369,9 +409,15 @@ func (s *CoreService) updateNanoGroup(mac string, grID int) {
 		if sw.Mac == nil {
 			continue
 		}
+
 		url := "/write/switch/" + *sw.Mac + "/update/settings"
 		switchSetup := sd.SwitchConfig{}
 		switchSetup.Mac = *sw.Mac
+		ip := "0"
+		if sw.IP != nil {
+			ip = *sw.IP
+		}
+		switchSetup.IP = ip
 		switchSetup.NanosConfig = make(map[string]dnanosense.NanosenseConf)
 		switchSetup.NanosConfig[driver.Mac] = cfgNano
 		dump, _ := switchSetup.ToJSON()
@@ -422,15 +468,23 @@ func (s *CoreService) updateBlindGroup(mac string, grID int) {
 
 	blind, _ := database.GetBlindConfig(s.db, mac)
 	if blind.SwitchMac != "" {
-		url := "/write/switch/" + blind.SwitchMac + "/update/settings"
-		switchSetup := sd.SwitchConfig{}
-		switchSetup.Mac = blind.SwitchMac
-		switchSetup.BlindsConfig = make(map[string]dblind.BlindConf)
+		sw, _ := database.GetSwitchConfig(s.db, blind.SwitchMac)
+		if sw != nil {
+			ip := "0"
+			if sw.IP != nil {
+				ip = *sw.IP
+			}
+			url := "/write/switch/" + blind.SwitchMac + "/update/settings"
+			switchSetup := sd.SwitchConfig{}
+			switchSetup.IP = ip
+			switchSetup.Mac = blind.SwitchMac
+			switchSetup.BlindsConfig = make(map[string]dblind.BlindConf)
 
-		switchSetup.BlindsConfig[blind.Mac] = cfgBlind
+			switchSetup.BlindsConfig[blind.Mac] = cfgBlind
 
-		dump, _ := switchSetup.ToJSON()
-		s.server.SendCommand(url, dump)
+			dump, _ := switchSetup.ToJSON()
+			s.server.SendCommand(url, dump)
+		}
 	}
 	if grID == 0 {
 		//register blind in group 0
@@ -609,17 +663,25 @@ func (s *CoreService) updateGroupCfg(config interface{}) {
 }
 
 func (s *CoreService) sendGroupConfigUpdate(cfg gm.GroupConfig) {
-	for sw := range database.GetGroupSwitchs(s.db, cfg.Group) {
-		if sw == "" {
+	for mac := range database.GetGroupSwitchs(s.db, cfg.Group) {
+		if mac == "" {
 			continue
 		}
-		url := "/write/switch/" + sw + "/update/settings"
-		switchSetup := sd.SwitchConfig{}
-		switchSetup.Mac = sw
-		switchSetup.Groups = make(map[int]gm.GroupConfig)
-		switchSetup.Groups[cfg.Group] = cfg
-		dump, _ := switchSetup.ToJSON()
-		s.server.SendCommand(url, dump)
+		sw, _ := database.GetSwitchConfig(s.db, mac)
+		if sw != nil {
+			ip := "0"
+			if sw.IP != nil {
+				ip = *sw.IP
+			}
+			url := "/write/switch/" + mac + "/update/settings"
+			switchSetup := sd.SwitchConfig{}
+			switchSetup.Mac = mac
+			switchSetup.IP = ip
+			switchSetup.Groups = make(map[int]gm.GroupConfig)
+			switchSetup.Groups[cfg.Group] = cfg
+			dump, _ := switchSetup.ToJSON()
+			s.server.SendCommand(url, dump)
+		}
 	}
 }
 
@@ -629,23 +691,31 @@ func (s *CoreService) sendGroupCmd(cmd interface{}) {
 		rlog.Error("Cannot parse cmd")
 		return
 	}
-	for sw := range database.GetGroupSwitchs(s.db, cmdGr.Group) {
-		if sw == "" {
+	for mac := range database.GetGroupSwitchs(s.db, cmdGr.Group) {
+		if mac == "" {
 			continue
 		}
-		url := "/write/switch/" + sw + "/update/settings"
-		switchSetup := sd.SwitchConfig{}
-		switchSetup.Mac = sw
-		switchSetup.Groups = make(map[int]gm.GroupConfig)
-		cfg := gm.GroupConfig{}
-		cfg.Group = cmdGr.Group
-		cfg.Auto = cmdGr.Auto
-		cfg.SetpointLeds = cmdGr.SetpointLeds
-		cfg.SetpointBlinds = cmdGr.SetpointBlinds
-		cfg.SetpointSlatBlinds = cmdGr.SetpointSlats
-		cfg.SetpointTempOffset = cmdGr.SetpointTempOffset
-		switchSetup.Groups[cmdGr.Group] = cfg
-		dump, _ := switchSetup.ToJSON()
-		s.server.SendCommand(url, dump)
+		sw, _ := database.GetSwitchConfig(s.db, mac)
+		if sw != nil {
+			ip := "0"
+			if sw.IP != nil {
+				ip = *sw.IP
+			}
+			url := "/write/switch/" + mac + "/update/settings"
+			switchSetup := sd.SwitchConfig{}
+			switchSetup.Mac = mac
+			switchSetup.IP = ip
+			switchSetup.Groups = make(map[int]gm.GroupConfig)
+			cfg := gm.GroupConfig{}
+			cfg.Group = cmdGr.Group
+			cfg.Auto = cmdGr.Auto
+			cfg.SetpointLeds = cmdGr.SetpointLeds
+			cfg.SetpointBlinds = cmdGr.SetpointBlinds
+			cfg.SetpointSlatBlinds = cmdGr.SetpointSlats
+			cfg.SetpointTempOffset = cmdGr.SetpointTempOffset
+			switchSetup.Groups[cmdGr.Group] = cfg
+			dump, _ := switchSetup.ToJSON()
+			s.server.SendCommand(url, dump)
+		}
 	}
 }

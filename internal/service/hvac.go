@@ -43,15 +43,21 @@ func (s *CoreService) sendSwitchHvacSetup(elt dhvac.HvacSetup) {
 	if elt.SwitchMac == "" {
 		return
 	}
-
-	url := "/write/switch/" + elt.SwitchMac + "/update/settings"
-	switchSetup := sd.SwitchConfig{}
-	switchSetup.Mac = elt.SwitchMac
-	switchSetup.HvacsSetup = make(map[string]dhvac.HvacSetup)
-	switchSetup.HvacsSetup[elt.Mac] = elt
-
-	dump, _ := switchSetup.ToJSON()
-	s.server.SendCommand(url, dump)
+	sw, _ := database.GetSwitchConfig(s.db, elt.SwitchMac)
+	if sw != nil {
+		ip := "0"
+		if sw.IP != nil {
+			ip = *sw.IP
+		}
+		url := "/write/switch/" + elt.SwitchMac + "/update/settings"
+		switchSetup := sd.SwitchConfig{}
+		switchSetup.Mac = elt.SwitchMac
+		switchSetup.IP = ip
+		switchSetup.HvacsSetup = make(map[string]dhvac.HvacSetup)
+		switchSetup.HvacsSetup[elt.Mac] = elt
+		dump, _ := switchSetup.ToJSON()
+		s.server.SendCommand(url, dump)
+	}
 }
 
 func (s *CoreService) updateHvacCfg(config interface{}) {
@@ -103,15 +109,21 @@ func (s *CoreService) updateHvacCfg(config interface{}) {
 		return
 	}
 
-	url := "/write/switch/" + hvac.SwitchMac + "/update/settings"
-	switchSetup := sd.SwitchConfig{}
-	switchSetup.Mac = hvac.SwitchMac
-	switchSetup.HvacsConfig = make(map[string]dhvac.HvacConf)
-
-	switchSetup.HvacsConfig[cfg.Mac] = *cfg
-
-	dump, _ := switchSetup.ToJSON()
-	s.server.SendCommand(url, dump)
+	sw, _ := database.GetSwitchConfig(s.db, hvac.SwitchMac)
+	if sw != nil {
+		ip := "0"
+		if sw.IP != nil {
+			ip = *sw.IP
+		}
+		url := "/write/switch/" + hvac.SwitchMac + "/update/settings"
+		switchSetup := sd.SwitchConfig{}
+		switchSetup.Mac = hvac.SwitchMac
+		switchSetup.IP = ip
+		switchSetup.HvacsConfig = make(map[string]dhvac.HvacConf)
+		switchSetup.HvacsConfig[cfg.Mac] = *cfg
+		dump, _ := switchSetup.ToJSON()
+		s.server.SendCommand(url, dump)
+	}
 }
 
 func (s *CoreService) sendHvacCmd(cmdHvac interface{}) {
@@ -130,19 +142,25 @@ func (s *CoreService) sendHvacCmd(cmdHvac interface{}) {
 		rlog.Error("No corresponding switch found for " + cmd.Mac)
 		return
 	}
-	url := "/write/switch/" + driver.SwitchMac + "/update/settings"
-	switchSetup := sd.SwitchConfig{}
-	switchSetup.Mac = driver.SwitchMac
-	switchSetup.HvacsConfig = make(map[string]dhvac.HvacConf)
-
-	cfg := dhvac.HvacConf{
-		Mac:   cmd.Mac,
-		Shift: &cmd.ShiftTemp,
+	sw, _ := database.GetSwitchConfig(s.db, driver.SwitchMac)
+	if sw != nil {
+		ip := "0"
+		if sw.IP != nil {
+			ip = *sw.IP
+		}
+		url := "/write/switch/" + driver.SwitchMac + "/update/settings"
+		switchSetup := sd.SwitchConfig{}
+		switchSetup.Mac = driver.SwitchMac
+		switchSetup.IP = ip
+		switchSetup.HvacsConfig = make(map[string]dhvac.HvacConf)
+		cfg := dhvac.HvacConf{
+			Mac:   cmd.Mac,
+			Shift: &cmd.ShiftTemp,
+		}
+		switchSetup.HvacsConfig[cmd.Mac] = cfg
+		dump, _ := switchSetup.ToJSON()
+		s.server.SendCommand(url, dump)
 	}
-	switchSetup.HvacsConfig[cmd.Mac] = cfg
-
-	dump, _ := switchSetup.ToJSON()
-	s.server.SendCommand(url, dump)
 }
 
 func (s *CoreService) updateHvacLabelSetup(config interface{}) {

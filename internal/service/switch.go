@@ -40,9 +40,15 @@ func (s *CoreService) updateSwitchCfg(config interface{}) {
 		database.SaveSwitchConfig(s.db, *cfg)
 	}
 
+	ip := "0"
+	if cfg.IP != nil {
+		ip = *cfg.IP
+	}
+
 	url := "/write/switch/" + *cfg.Mac + "/update/settings"
 	switchCfg := sd.SwitchConfig{}
 	switchCfg.Mac = *cfg.Mac
+	switchCfg.IP = ip
 	if cfg.DumpFrequency != nil {
 		switchCfg.DumpFrequency = *cfg.DumpFrequency
 	}

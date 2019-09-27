@@ -44,14 +44,21 @@ func (s *CoreService) sendSwitchSensorSetup(elt ds.SensorSetup) {
 	if elt.SwitchMac == "" {
 		return
 	}
-
-	url := "/write/switch/" + elt.SwitchMac + "/update/settings"
-	switchSetup := sd.SwitchConfig{}
-	switchSetup.Mac = elt.SwitchMac
-	switchSetup.SensorsSetup = make(map[string]ds.SensorSetup)
-	switchSetup.SensorsSetup[elt.Mac] = elt
-	dump, _ := switchSetup.ToJSON()
-	s.server.SendCommand(url, dump)
+	sw, _ := database.GetSwitchConfig(s.db, elt.SwitchMac)
+	if sw != nil {
+		ip := "0"
+		if sw.IP != nil {
+			ip = *sw.IP
+		}
+		url := "/write/switch/" + elt.SwitchMac + "/update/settings"
+		switchSetup := sd.SwitchConfig{}
+		switchSetup.Mac = elt.SwitchMac
+		switchSetup.IP = ip
+		switchSetup.SensorsSetup = make(map[string]ds.SensorSetup)
+		switchSetup.SensorsSetup[elt.Mac] = elt
+		dump, _ := switchSetup.ToJSON()
+		s.server.SendCommand(url, dump)
+	}
 }
 
 func (s *CoreService) updateSensorCfg(config interface{}) {
@@ -99,13 +106,21 @@ func (s *CoreService) updateSensorCfg(config interface{}) {
 		return
 	}
 
-	url := "/write/switch/" + sensor.SwitchMac + "/update/settings"
-	switchSetup := sd.SwitchConfig{}
-	switchSetup.Mac = sensor.SwitchMac
-	switchSetup.SensorsConfig = make(map[string]ds.SensorConf)
-	switchSetup.SensorsConfig[cfg.Mac] = *cfg
-	dump, _ := switchSetup.ToJSON()
-	s.server.SendCommand(url, dump)
+	sw, _ := database.GetSwitchConfig(s.db, sensor.SwitchMac)
+	if sw != nil {
+		ip := "0"
+		if sw.IP != nil {
+			ip = *sw.IP
+		}
+		url := "/write/switch/" + sensor.SwitchMac + "/update/settings"
+		switchSetup := sd.SwitchConfig{}
+		switchSetup.Mac = sensor.SwitchMac
+		switchSetup.IP = ip
+		switchSetup.SensorsConfig = make(map[string]ds.SensorConf)
+		switchSetup.SensorsConfig[cfg.Mac] = *cfg
+		dump, _ := switchSetup.ToJSON()
+		s.server.SendCommand(url, dump)
+	}
 }
 
 func (s *CoreService) updateSensorSetup(config interface{}) {

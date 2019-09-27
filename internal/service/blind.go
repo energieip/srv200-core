@@ -43,15 +43,22 @@ func (s *CoreService) sendSwitchBlindSetup(bld dblind.BlindSetup) {
 	if bld.SwitchMac == "" {
 		return
 	}
+	sw, _ := database.GetSwitchConfig(s.db, bld.SwitchMac)
+	if sw != nil {
+		ip := "0"
+		if sw.IP != nil {
+			ip = *sw.IP
+		}
+		url := "/write/switch/" + bld.SwitchMac + "/update/settings"
+		switchSetup := sd.SwitchConfig{}
+		switchSetup.Mac = bld.SwitchMac
+		switchSetup.IP = ip
+		switchSetup.BlindsSetup = make(map[string]dblind.BlindSetup)
+		switchSetup.BlindsSetup[bld.Mac] = bld
 
-	url := "/write/switch/" + bld.SwitchMac + "/update/settings"
-	switchSetup := sd.SwitchConfig{}
-	switchSetup.Mac = bld.SwitchMac
-	switchSetup.BlindsSetup = make(map[string]dblind.BlindSetup)
-	switchSetup.BlindsSetup[bld.Mac] = bld
-
-	dump, _ := switchSetup.ToJSON()
-	s.server.SendCommand(url, dump)
+		dump, _ := switchSetup.ToJSON()
+		s.server.SendCommand(url, dump)
+	}
 }
 
 func (s *CoreService) updateBlindCfg(config interface{}) {
@@ -103,15 +110,23 @@ func (s *CoreService) updateBlindCfg(config interface{}) {
 		return
 	}
 
-	url := "/write/switch/" + blind.SwitchMac + "/update/settings"
-	switchSetup := sd.SwitchConfig{}
-	switchSetup.Mac = blind.SwitchMac
-	switchSetup.BlindsConfig = make(map[string]dblind.BlindConf)
+	sw, _ := database.GetSwitchConfig(s.db, blind.SwitchMac)
+	if sw != nil {
+		ip := "0"
+		if sw.IP != nil {
+			ip = *sw.IP
+		}
+		url := "/write/switch/" + blind.SwitchMac + "/update/settings"
+		switchSetup := sd.SwitchConfig{}
+		switchSetup.Mac = blind.SwitchMac
+		switchSetup.IP = ip
+		switchSetup.BlindsConfig = make(map[string]dblind.BlindConf)
 
-	switchSetup.BlindsConfig[cfg.Mac] = *cfg
+		switchSetup.BlindsConfig[cfg.Mac] = *cfg
 
-	dump, _ := switchSetup.ToJSON()
-	s.server.SendCommand(url, dump)
+		dump, _ := switchSetup.ToJSON()
+		s.server.SendCommand(url, dump)
+	}
 }
 
 func (s *CoreService) sendBlindCmd(cmdBlind interface{}) {
@@ -130,22 +145,30 @@ func (s *CoreService) sendBlindCmd(cmdBlind interface{}) {
 		rlog.Error("No corresponding switch present for " + cmd.Mac)
 		return
 	}
-	url := "/write/switch/" + driver.SwitchMac + "/update/settings"
-	switchSetup := sd.SwitchConfig{}
-	switchSetup.Mac = driver.SwitchMac
-	switchSetup.BlindsConfig = make(map[string]dblind.BlindConf)
+	sw, _ := database.GetSwitchConfig(s.db, driver.SwitchMac)
+	if sw != nil {
+		ip := "0"
+		if sw.IP != nil {
+			ip = *sw.IP
+		}
+		url := "/write/switch/" + driver.SwitchMac + "/update/settings"
+		switchSetup := sd.SwitchConfig{}
+		switchSetup.Mac = driver.SwitchMac
+		switchSetup.IP = ip
+		switchSetup.BlindsConfig = make(map[string]dblind.BlindConf)
 
-	cfg := dblind.BlindConf{
-		Mac:    cmd.Mac,
-		Blind1: cmd.Blind1,
-		Blind2: cmd.Blind2,
-		Slat1:  cmd.Slat1,
-		Slat2:  cmd.Slat2,
+		cfg := dblind.BlindConf{
+			Mac:    cmd.Mac,
+			Blind1: cmd.Blind1,
+			Blind2: cmd.Blind2,
+			Slat1:  cmd.Slat1,
+			Slat2:  cmd.Slat2,
+		}
+		switchSetup.BlindsConfig[cmd.Mac] = cfg
+
+		dump, _ := switchSetup.ToJSON()
+		s.server.SendCommand(url, dump)
 	}
-	switchSetup.BlindsConfig[cmd.Mac] = cfg
-
-	dump, _ := switchSetup.ToJSON()
-	s.server.SendCommand(url, dump)
 }
 
 func (s *CoreService) updateBlindSetup(config interface{}) {

@@ -11,18 +11,25 @@ import (
 
 func (s *CoreService) sendSwitchWagoSetup(wago dwago.WagoSetup) {
 
-	for sw := range database.GetCluster(s.db, wago.Cluster) {
-		if sw == "" {
+	for mac := range database.GetCluster(s.db, wago.Cluster) {
+		if mac == "" {
 			continue
 		}
-		url := "/write/switch/" + sw + "/update/settings"
-		switchSetup := sd.SwitchConfig{}
-		switchSetup.Mac = sw
-		switchSetup.WagosSetup = make(map[string]dwago.WagoSetup)
-		switchSetup.WagosSetup[wago.Mac] = wago
-
-		dump, _ := switchSetup.ToJSON()
-		s.server.SendCommand(url, dump)
+		sw, _ := database.GetSwitchConfig(s.db, mac)
+		if sw != nil {
+			ip := "0"
+			if sw.IP != nil {
+				ip = *sw.IP
+			}
+			url := "/write/switch/" + mac + "/update/settings"
+			switchSetup := sd.SwitchConfig{}
+			switchSetup.Mac = mac
+			switchSetup.IP = ip
+			switchSetup.WagosSetup = make(map[string]dwago.WagoSetup)
+			switchSetup.WagosSetup[wago.Mac] = wago
+			dump, _ := switchSetup.ToJSON()
+			s.server.SendCommand(url, dump)
+		}
 	}
 }
 
