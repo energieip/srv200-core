@@ -84,6 +84,11 @@ func (s *CoreService) updateSwitchLabelCfg(config interface{}) {
 	url := "/write/switch/" + mac + "/update/settings"
 	switchCfg := sd.SwitchConfig{}
 	switchCfg.Mac = mac
+	ip := "0"
+	if cfg.IP != nil {
+		ip = *cfg.IP
+	}
+	switchCfg.IP = ip
 	if cfg.DumpFrequency != nil {
 		switchCfg.DumpFrequency = *cfg.DumpFrequency
 	}
