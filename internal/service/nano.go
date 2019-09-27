@@ -20,10 +20,15 @@ func (s *CoreService) sendSwitchNanoSetup(driver dnano.NanosenseSetup) {
 			if switchS.IP != nil {
 				ip = *switchS.IP
 			}
+			dumpFreq := 1000
+			if switchS.DumpFrequency != nil {
+				dumpFreq = *switchS.DumpFrequency
+			}
 			url := "/write/switch/" + sw + "/update/settings"
 			switchSetup := sd.SwitchConfig{}
 			switchSetup.Mac = sw
 			switchSetup.IP = ip
+			switchSetup.DumpFrequency = dumpFreq
 			switchSetup.NanosSetup = make(map[string]dnano.NanosenseSetup)
 			switchSetup.NanosSetup[driver.Label] = driver
 			dump, _ := switchSetup.ToJSON()

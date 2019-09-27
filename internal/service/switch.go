@@ -44,14 +44,15 @@ func (s *CoreService) updateSwitchCfg(config interface{}) {
 	if cfg.IP != nil {
 		ip = *cfg.IP
 	}
-
+	dumpFreq := 1000
+	if sw.DumpFrequency != nil {
+		dumpFreq = *sw.DumpFrequency
+	}
 	url := "/write/switch/" + *cfg.Mac + "/update/settings"
 	switchCfg := sd.SwitchConfig{}
 	switchCfg.Mac = *cfg.Mac
 	switchCfg.IP = ip
-	if cfg.DumpFrequency != nil {
-		switchCfg.DumpFrequency = *cfg.DumpFrequency
-	}
+	switchCfg.DumpFrequency = dumpFreq
 	if cfg.FriendlyName != nil {
 		switchCfg.FriendlyName = *cfg.FriendlyName
 	}
@@ -94,10 +95,12 @@ func (s *CoreService) updateSwitchLabelCfg(config interface{}) {
 	if cfg.IP != nil {
 		ip = *cfg.IP
 	}
-	switchCfg.IP = ip
-	if cfg.DumpFrequency != nil {
-		switchCfg.DumpFrequency = *cfg.DumpFrequency
+	dumpFreq := 1000
+	if sw.DumpFrequency != nil {
+		dumpFreq = *sw.DumpFrequency
 	}
+	switchCfg.IP = ip
+	switchCfg.DumpFrequency = dumpFreq
 	if cfg.FriendlyName != nil {
 		switchCfg.FriendlyName = *cfg.FriendlyName
 	}

@@ -49,10 +49,15 @@ func (s *CoreService) sendSwitchBlindSetup(bld dblind.BlindSetup) {
 		if sw.IP != nil {
 			ip = *sw.IP
 		}
+		dumpFreq := 1000
+		if sw.DumpFrequency != nil {
+			dumpFreq = *sw.DumpFrequency
+		}
 		url := "/write/switch/" + bld.SwitchMac + "/update/settings"
 		switchSetup := sd.SwitchConfig{}
 		switchSetup.Mac = bld.SwitchMac
 		switchSetup.IP = ip
+		switchSetup.DumpFrequency = dumpFreq
 		switchSetup.BlindsSetup = make(map[string]dblind.BlindSetup)
 		switchSetup.BlindsSetup[bld.Mac] = bld
 
@@ -116,10 +121,15 @@ func (s *CoreService) updateBlindCfg(config interface{}) {
 		if sw.IP != nil {
 			ip = *sw.IP
 		}
+		dumpFreq := 1000
+		if sw.DumpFrequency != nil {
+			dumpFreq = *sw.DumpFrequency
+		}
 		url := "/write/switch/" + blind.SwitchMac + "/update/settings"
 		switchSetup := sd.SwitchConfig{}
 		switchSetup.Mac = blind.SwitchMac
 		switchSetup.IP = ip
+		switchSetup.DumpFrequency = dumpFreq
 		switchSetup.BlindsConfig = make(map[string]dblind.BlindConf)
 
 		switchSetup.BlindsConfig[cfg.Mac] = *cfg
@@ -151,10 +161,15 @@ func (s *CoreService) sendBlindCmd(cmdBlind interface{}) {
 		if sw.IP != nil {
 			ip = *sw.IP
 		}
+		dumpFreq := 1000
+		if sw.DumpFrequency != nil {
+			dumpFreq = *sw.DumpFrequency
+		}
 		url := "/write/switch/" + driver.SwitchMac + "/update/settings"
 		switchSetup := sd.SwitchConfig{}
 		switchSetup.Mac = driver.SwitchMac
 		switchSetup.IP = ip
+		switchSetup.DumpFrequency = dumpFreq
 		switchSetup.BlindsConfig = make(map[string]dblind.BlindConf)
 
 		cfg := dblind.BlindConf{

@@ -21,10 +21,15 @@ func (s *CoreService) sendSwitchWagoSetup(wago dwago.WagoSetup) {
 			if sw.IP != nil {
 				ip = *sw.IP
 			}
+			dumpFreq := 1000
+			if sw.DumpFrequency != nil {
+				dumpFreq = *sw.DumpFrequency
+			}
 			url := "/write/switch/" + mac + "/update/settings"
 			switchSetup := sd.SwitchConfig{}
 			switchSetup.Mac = mac
 			switchSetup.IP = ip
+			switchSetup.DumpFrequency = dumpFreq
 			switchSetup.WagosSetup = make(map[string]dwago.WagoSetup)
 			switchSetup.WagosSetup[wago.Mac] = wago
 			dump, _ := switchSetup.ToJSON()

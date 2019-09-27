@@ -50,10 +50,15 @@ func (s *CoreService) sendSwitchSensorSetup(elt ds.SensorSetup) {
 		if sw.IP != nil {
 			ip = *sw.IP
 		}
+		dumpFreq := 1000
+		if sw.DumpFrequency != nil {
+			dumpFreq = *sw.DumpFrequency
+		}
 		url := "/write/switch/" + elt.SwitchMac + "/update/settings"
 		switchSetup := sd.SwitchConfig{}
 		switchSetup.Mac = elt.SwitchMac
 		switchSetup.IP = ip
+		switchSetup.DumpFrequency = dumpFreq
 		switchSetup.SensorsSetup = make(map[string]ds.SensorSetup)
 		switchSetup.SensorsSetup[elt.Mac] = elt
 		dump, _ := switchSetup.ToJSON()
@@ -112,10 +117,15 @@ func (s *CoreService) updateSensorCfg(config interface{}) {
 		if sw.IP != nil {
 			ip = *sw.IP
 		}
+		dumpFreq := 1000
+		if sw.DumpFrequency != nil {
+			dumpFreq = *sw.DumpFrequency
+		}
 		url := "/write/switch/" + sensor.SwitchMac + "/update/settings"
 		switchSetup := sd.SwitchConfig{}
 		switchSetup.Mac = sensor.SwitchMac
 		switchSetup.IP = ip
+		switchSetup.DumpFrequency = dumpFreq
 		switchSetup.SensorsConfig = make(map[string]ds.SensorConf)
 		switchSetup.SensorsConfig[cfg.Mac] = *cfg
 		dump, _ := switchSetup.ToJSON()

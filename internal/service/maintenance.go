@@ -93,10 +93,15 @@ func (s *CoreService) replaceDriver(driver interface{}) {
 					if sw.IP != nil {
 						ip = *sw.IP
 					}
+					dumpFreq := 1000
+					if sw.DumpFrequency != nil {
+						dumpFreq = *sw.DumpFrequency
+					}
 					url := "/write/switch/" + mac + "/update/settings"
 					switchSetup := sd.SwitchConfig{}
 					switchSetup.Mac = mac
 					switchSetup.IP = ip
+					switchSetup.DumpFrequency = dumpFreq
 					switchSetup.Groups = make(map[int]gm.GroupConfig)
 					switchSetup.Groups[groupCfg.Group] = *groupCfg
 					dump, _ := switchSetup.ToJSON()
@@ -145,10 +150,15 @@ func (s *CoreService) replaceDriver(driver interface{}) {
 					if sw.IP != nil {
 						ip = *sw.IP
 					}
+					dumpFreq := 1000
+					if sw.DumpFrequency != nil {
+						dumpFreq = *sw.DumpFrequency
+					}
 					url := "/write/switch/" + mac + "/update/settings"
 					switchSetup := sd.SwitchConfig{}
 					switchSetup.Mac = mac
 					switchSetup.IP = ip
+					switchSetup.DumpFrequency = dumpFreq
 					switchSetup.Groups = make(map[int]gm.GroupConfig)
 					switchSetup.Groups[groupCfg.Group] = *groupCfg
 					dump, _ := switchSetup.ToJSON()
@@ -199,10 +209,15 @@ func (s *CoreService) replaceDriver(driver interface{}) {
 					if sw.IP != nil {
 						ip = *sw.IP
 					}
+					dumpFreq := 1000
+					if sw.DumpFrequency != nil {
+						dumpFreq = *sw.DumpFrequency
+					}
 					url := "/write/switch/" + mac + "/update/settings"
 					switchSetup := sd.SwitchConfig{}
 					switchSetup.Mac = mac
 					switchSetup.IP = ip
+					switchSetup.DumpFrequency = dumpFreq
 					switchSetup.Groups = make(map[int]gm.GroupConfig)
 					switchSetup.Groups[groupCfg.Group] = *groupCfg
 					dump, _ := switchSetup.ToJSON()
@@ -253,10 +268,15 @@ func (s *CoreService) replaceDriver(driver interface{}) {
 					if sw.IP != nil {
 						ip = *sw.IP
 					}
+					dumpFreq := 1000
+					if sw.DumpFrequency != nil {
+						dumpFreq = *sw.DumpFrequency
+					}
 					url := "/write/switch/" + mac + "/update/settings"
 					switchSetup := sd.SwitchConfig{}
 					switchSetup.Mac = mac
 					switchSetup.IP = ip
+					switchSetup.DumpFrequency = dumpFreq
 					switchSetup.Groups = make(map[int]gm.GroupConfig)
 					switchSetup.Groups[groupCfg.Group] = *groupCfg
 					dump, _ := switchSetup.ToJSON()
@@ -319,9 +339,14 @@ func (s *CoreService) replaceDriver(driver interface{}) {
 					if sw.IP != nil {
 						ip = *sw.IP
 					}
+					dumpFreq := 1000
+					if sw.DumpFrequency != nil {
+						dumpFreq = *sw.DumpFrequency
+					}
 					switchSetupNew := sd.SwitchConfig{}
 					switchSetupNew.Mac = mac
 					switchSetupNew.IP = ip
+					switchSetupNew.DumpFrequency = dumpFreq
 					switchSetupNew.WagosSetup = make(map[string]dwago.WagoSetup)
 					switchSetupNew.WagosSetup[*project.Mac] = *newDriver
 					switchSetupNew.NanosSetup = make(map[string]dnanosense.NanosenseSetup)

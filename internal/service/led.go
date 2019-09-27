@@ -21,11 +21,15 @@ func (s *CoreService) sendSwitchLedSetup(led dl.LedSetup) {
 		if sw.IP != nil {
 			ip = *sw.IP
 		}
-
+		dumpFreq := 1000
+		if sw.DumpFrequency != nil {
+			dumpFreq = *sw.DumpFrequency
+		}
 		url := "/write/switch/" + led.SwitchMac + "/update/settings"
 		switchSetup := sd.SwitchConfig{}
 		switchSetup.Mac = led.SwitchMac
 		switchSetup.IP = ip
+		switchSetup.DumpFrequency = dumpFreq
 		switchSetup.LedsSetup = make(map[string]dl.LedSetup)
 		switchSetup.LedsSetup[led.Mac] = led
 
@@ -50,10 +54,15 @@ func (s *CoreService) updateDriverGroup(grID int) {
 			if sw.IP != nil {
 				ip = *sw.IP
 			}
+			dumpFreq := 1000
+			if sw.DumpFrequency != nil {
+				dumpFreq = *sw.DumpFrequency
+			}
 			url := "/write/switch/" + mac + "/update/settings"
 			switchSetup := sd.SwitchConfig{}
 			switchSetup.Mac = mac
 			switchSetup.IP = ip
+			switchSetup.DumpFrequency = dumpFreq
 			switchSetup.Groups = make(map[int]gm.GroupConfig)
 			switchSetup.Groups[gr.Group] = *gr
 			dump, _ := switchSetup.ToJSON()
@@ -168,10 +177,15 @@ func (s *CoreService) updateLedCfg(config interface{}) {
 		if sw.IP != nil {
 			ip = *sw.IP
 		}
+		dumpFreq := 1000
+		if sw.DumpFrequency != nil {
+			dumpFreq = *sw.DumpFrequency
+		}
 		url := "/write/switch/" + led.SwitchMac + "/update/settings"
 		switchSetup := sd.SwitchConfig{}
 		switchSetup.Mac = led.SwitchMac
 		switchSetup.IP = ip
+		switchSetup.DumpFrequency = dumpFreq
 		switchSetup.LedsConfig = make(map[string]dl.LedConf)
 		switchSetup.LedsConfig[cfg.Mac] = *cfg
 		dump, _ := switchSetup.ToJSON()
@@ -327,10 +341,15 @@ func (s *CoreService) sendLedCmd(cmd interface{}) {
 		if sw.IP != nil {
 			ip = *sw.IP
 		}
+		dumpFreq := 1000
+		if sw.DumpFrequency != nil {
+			dumpFreq = *sw.DumpFrequency
+		}
 		url := "/write/switch/" + led.SwitchMac + "/update/settings"
 		switchSetup := sd.SwitchConfig{}
 		switchSetup.Mac = led.SwitchMac
 		switchSetup.IP = ip
+		switchSetup.DumpFrequency = dumpFreq
 		switchSetup.LedsConfig = make(map[string]dl.LedConf)
 
 		auto := cmdLed.Auto

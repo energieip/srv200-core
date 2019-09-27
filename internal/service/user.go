@@ -33,10 +33,15 @@ func (s *CoreService) addNewUser(user duser.UserAccess) {
 			if sw.IP != nil {
 				ip = *sw.IP
 			}
+			dumpFreq := 1000
+			if sw.DumpFrequency != nil {
+				dumpFreq = *sw.DumpFrequency
+			}
 			url := "/write/switch/" + mac + "/update/settings"
 			switchSetup := sd.SwitchConfig{}
 			switchSetup.Mac = mac
 			switchSetup.IP = ip
+			switchSetup.DumpFrequency = dumpFreq
 			switchSetup.Users = make(map[string]duser.UserAccess)
 			switchSetup.Users[user.UserHash] = user
 			dump, _ := switchSetup.ToJSON()
@@ -74,10 +79,15 @@ func (s *CoreService) removeUser(user duser.UserAccess) {
 			if sw.IP != nil {
 				ip = *sw.IP
 			}
+			dumpFreq := 1000
+			if sw.DumpFrequency != nil {
+				dumpFreq = *sw.DumpFrequency
+			}
 			url := "/write/switch/" + mac + "/remove/settings"
 			switchSetup := sd.SwitchConfig{}
 			switchSetup.Mac = mac
 			switchSetup.IP = ip
+			switchSetup.DumpFrequency = dumpFreq
 			switchSetup.Users = make(map[string]duser.UserAccess)
 			switchSetup.Users[user.UserHash] = user
 			dump, _ := switchSetup.ToJSON()

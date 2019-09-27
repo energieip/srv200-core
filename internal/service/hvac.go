@@ -49,10 +49,15 @@ func (s *CoreService) sendSwitchHvacSetup(elt dhvac.HvacSetup) {
 		if sw.IP != nil {
 			ip = *sw.IP
 		}
+		dumpFreq := 1000
+		if sw.DumpFrequency != nil {
+			dumpFreq = *sw.DumpFrequency
+		}
 		url := "/write/switch/" + elt.SwitchMac + "/update/settings"
 		switchSetup := sd.SwitchConfig{}
 		switchSetup.Mac = elt.SwitchMac
 		switchSetup.IP = ip
+		switchSetup.DumpFrequency = dumpFreq
 		switchSetup.HvacsSetup = make(map[string]dhvac.HvacSetup)
 		switchSetup.HvacsSetup[elt.Mac] = elt
 		dump, _ := switchSetup.ToJSON()
@@ -115,10 +120,15 @@ func (s *CoreService) updateHvacCfg(config interface{}) {
 		if sw.IP != nil {
 			ip = *sw.IP
 		}
+		dumpFreq := 1000
+		if sw.DumpFrequency != nil {
+			dumpFreq = *sw.DumpFrequency
+		}
 		url := "/write/switch/" + hvac.SwitchMac + "/update/settings"
 		switchSetup := sd.SwitchConfig{}
 		switchSetup.Mac = hvac.SwitchMac
 		switchSetup.IP = ip
+		switchSetup.DumpFrequency = dumpFreq
 		switchSetup.HvacsConfig = make(map[string]dhvac.HvacConf)
 		switchSetup.HvacsConfig[cfg.Mac] = *cfg
 		dump, _ := switchSetup.ToJSON()
@@ -148,10 +158,15 @@ func (s *CoreService) sendHvacCmd(cmdHvac interface{}) {
 		if sw.IP != nil {
 			ip = *sw.IP
 		}
+		dumpFreq := 1000
+		if sw.DumpFrequency != nil {
+			dumpFreq = *sw.DumpFrequency
+		}
 		url := "/write/switch/" + driver.SwitchMac + "/update/settings"
 		switchSetup := sd.SwitchConfig{}
 		switchSetup.Mac = driver.SwitchMac
 		switchSetup.IP = ip
+		switchSetup.DumpFrequency = dumpFreq
 		switchSetup.HvacsConfig = make(map[string]dhvac.HvacConf)
 		cfg := dhvac.HvacConf{
 			Mac:   cmd.Mac,

@@ -164,10 +164,15 @@ func (s *CoreService) sendSaveGroupCfg(cfg gm.GroupConfig) {
 			if sw.IP != nil {
 				ip = *sw.IP
 			}
+			dumpFreq := 1000
+			if sw.DumpFrequency != nil {
+				dumpFreq = *sw.DumpFrequency
+			}
 			url := "/write/switch/" + mac + "/update/settings"
 			switchSetup := sd.SwitchConfig{}
 			switchSetup.Mac = mac
 			switchSetup.IP = ip
+			switchSetup.DumpFrequency = dumpFreq
 			switchSetup.Groups = make(map[int]gm.GroupConfig)
 			switchSetup.Groups[cfg.Group] = cfg
 			dump, _ := switchSetup.ToJSON()
@@ -184,10 +189,15 @@ func (s *CoreService) sendSaveGroupCfg(cfg gm.GroupConfig) {
 			if sw.IP != nil {
 				ip = *sw.IP
 			}
+			dumpFreq := 1000
+			if sw.DumpFrequency != nil {
+				dumpFreq = *sw.DumpFrequency
+			}
 			url := "/write/switch/" + mac + "/update/settings"
 			switchSetup := sd.SwitchConfig{}
 			switchSetup.Mac = mac
 			switchSetup.IP = ip
+			switchSetup.DumpFrequency = dumpFreq
 			switchSetup.Groups = make(map[int]gm.GroupConfig)
 			switchSetup.Groups[cfg.Group] = cfg
 			dump, _ := switchSetup.ToJSON()
@@ -220,10 +230,15 @@ func (s *CoreService) updateLedGroup(mac string, grID int) {
 			if sw.IP != nil {
 				ip = *sw.IP
 			}
+			dumpFreq := 1000
+			if sw.DumpFrequency != nil {
+				dumpFreq = *sw.DumpFrequency
+			}
 			url := "/write/switch/" + led.SwitchMac + "/update/settings"
 			switchSetup := sd.SwitchConfig{}
 			switchSetup.Mac = led.SwitchMac
 			switchSetup.IP = ip
+			switchSetup.DumpFrequency = dumpFreq
 			switchSetup.LedsConfig = make(map[string]dl.LedConf)
 			switchSetup.LedsConfig[led.Mac] = cfgLed
 			dump, _ := switchSetup.ToJSON()
@@ -289,10 +304,15 @@ func (s *CoreService) updateSensorGroup(mac string, grID int) {
 			if sw.IP != nil {
 				ip = *sw.IP
 			}
+			dumpFreq := 1000
+			if sw.DumpFrequency != nil {
+				dumpFreq = *sw.DumpFrequency
+			}
 			url := "/write/switch/" + sensor.SwitchMac + "/update/settings"
 			switchSetup := sd.SwitchConfig{}
 			switchSetup.Mac = sensor.SwitchMac
 			switchSetup.IP = ip
+			switchSetup.DumpFrequency = dumpFreq
 			switchSetup.SensorsConfig = make(map[string]ds.SensorConf)
 			switchSetup.SensorsConfig[sensor.Mac] = cfgSensor
 			dump, _ := switchSetup.ToJSON()
@@ -350,10 +370,15 @@ func (s *CoreService) updateHvacGroup(mac string, grID int) {
 			if sw.IP != nil {
 				ip = *sw.IP
 			}
+			dumpFreq := 1000
+			if sw.DumpFrequency != nil {
+				dumpFreq = *sw.DumpFrequency
+			}
 			url := "/write/switch/" + driver.SwitchMac + "/update/settings"
 			switchSetup := sd.SwitchConfig{}
 			switchSetup.Mac = driver.SwitchMac
 			switchSetup.IP = ip
+			switchSetup.DumpFrequency = dumpFreq
 			switchSetup.HvacsConfig = make(map[string]dhvac.HvacConf)
 			switchSetup.HvacsConfig[driver.Mac] = cfgHvac
 
@@ -417,6 +442,11 @@ func (s *CoreService) updateNanoGroup(mac string, grID int) {
 		if sw.IP != nil {
 			ip = *sw.IP
 		}
+		dumpFreq := 1000
+		if sw.DumpFrequency != nil {
+			dumpFreq = *sw.DumpFrequency
+		}
+		switchSetup.DumpFrequency = dumpFreq
 		switchSetup.IP = ip
 		switchSetup.NanosConfig = make(map[string]dnanosense.NanosenseConf)
 		switchSetup.NanosConfig[driver.Mac] = cfgNano
@@ -474,9 +504,14 @@ func (s *CoreService) updateBlindGroup(mac string, grID int) {
 			if sw.IP != nil {
 				ip = *sw.IP
 			}
+			dumpFreq := 1000
+			if sw.DumpFrequency != nil {
+				dumpFreq = *sw.DumpFrequency
+			}
 			url := "/write/switch/" + blind.SwitchMac + "/update/settings"
 			switchSetup := sd.SwitchConfig{}
 			switchSetup.IP = ip
+			switchSetup.DumpFrequency = dumpFreq
 			switchSetup.Mac = blind.SwitchMac
 			switchSetup.BlindsConfig = make(map[string]dblind.BlindConf)
 
@@ -673,10 +708,15 @@ func (s *CoreService) sendGroupConfigUpdate(cfg gm.GroupConfig) {
 			if sw.IP != nil {
 				ip = *sw.IP
 			}
+			dumpFreq := 1000
+			if sw.DumpFrequency != nil {
+				dumpFreq = *sw.DumpFrequency
+			}
 			url := "/write/switch/" + mac + "/update/settings"
 			switchSetup := sd.SwitchConfig{}
 			switchSetup.Mac = mac
 			switchSetup.IP = ip
+			switchSetup.DumpFrequency = dumpFreq
 			switchSetup.Groups = make(map[int]gm.GroupConfig)
 			switchSetup.Groups[cfg.Group] = cfg
 			dump, _ := switchSetup.ToJSON()
@@ -701,10 +741,15 @@ func (s *CoreService) sendGroupCmd(cmd interface{}) {
 			if sw.IP != nil {
 				ip = *sw.IP
 			}
+			dumpFreq := 1000
+			if sw.DumpFrequency != nil {
+				dumpFreq = *sw.DumpFrequency
+			}
 			url := "/write/switch/" + mac + "/update/settings"
 			switchSetup := sd.SwitchConfig{}
 			switchSetup.Mac = mac
 			switchSetup.IP = ip
+			switchSetup.DumpFrequency = dumpFreq
 			switchSetup.Groups = make(map[int]gm.GroupConfig)
 			cfg := gm.GroupConfig{}
 			cfg.Group = cmdGr.Group
