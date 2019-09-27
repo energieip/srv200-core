@@ -377,6 +377,11 @@ func (s *CoreService) prepareSetupSwitchConfig(switchStatus sd.SwitchStatus) *sd
 
 	isConfigured := true
 	setup := sd.SwitchConfig{}
+	ip := "0"
+	if config.IP != nil {
+		ip = *config.IP
+	}
+	setup.IP = ip
 	setup.Mac = switchStatus.Mac
 	if config.FriendlyName != nil {
 		setup.FriendlyName = *config.FriendlyName
