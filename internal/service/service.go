@@ -191,6 +191,32 @@ func (s *CoreService) readAPIEvents() {
 			for eventType, event := range internalAPIEvents {
 				rlog.Info("get internal API event", eventType, event)
 				switch eventType {
+				case "led":
+					s.updateLedCfg(event)
+				case "ledSetup":
+					s.updateLedSetup(event)
+				case "blind":
+					s.updateBlindCfg(event)
+				case "blindSetup":
+					s.updateBlindSetup(event)
+				case "hvac":
+					s.updateHvacCfg(event)
+				case "hvacSetup":
+					s.updateHvacSetup(event)
+				case "sensor":
+					s.updateSensorCfg(event)
+				case "sensorSetup":
+					s.updateSensorSetup(event)
+				case "wago":
+					s.updateWagoCfg(event)
+				case "nano":
+					s.updateNanoCfg(event)
+				case "wagoSetup":
+					s.updateWagoSetup(event)
+				case "group":
+					s.updateGroupCfg(event)
+				case "switch":
+					s.updateSwitchCfg(event)
 				case "groupCmd":
 					s.sendGroupCmd(event)
 				case "ledCmd":
@@ -199,6 +225,12 @@ func (s *CoreService) readAPIEvents() {
 					s.sendBlindCmd(event)
 				case "hvacCmd":
 					s.sendHvacCmd(event)
+				case "replaceDriver":
+					s.replaceDriver(event)
+				case "installDriver":
+					s.installDriver(event)
+				case "map":
+					s.updateMapInfo(event)
 				}
 			}
 		}
