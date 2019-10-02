@@ -21,7 +21,7 @@ class ExtractStorey(threading.Thread):
         self.filepath = filepath
 
     def run(self):
-        cmd = "IfcConvert "+ self.filepath + " "+ self.dae +" -y --center-model --use-element-names --include+=arg Name \""+ self.name +"\""
+        cmd = "IfcConvert \""+ self.filepath + "\" \""+ self.dae +"\" -y --center-model --use-element-names --include+=arg Name \""+ self.name +"\""
         print(cmd)
         os.system(cmd)
 
