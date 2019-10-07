@@ -139,7 +139,7 @@ func (s *CoreService) installDriver(dr interface{}) {
 
 		groupCfg, _ := database.GetGroupConfig(s.db, *elt.Group)
 		newBlinds := []string{}
-		for _, bld := range groupCfg.Sensors {
+		for _, bld := range groupCfg.Blinds {
 			if bld != elt.Mac {
 				newBlinds = append(newBlinds, bld)
 			}
