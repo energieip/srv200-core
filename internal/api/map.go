@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
 	"io"
 	"io/ioutil"
@@ -8,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/energieip/common-components-go/pkg/duser"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
@@ -57,17 +59,34 @@ func (api *API) uploadHandler(w http.ResponseWriter, r *http.Request) {
 			rlog.Info("Hit last part of multipart upload / do post treatment")
 			go func(filename string) {
 				cmd := exec.Command("ifcparser.py", "-i", filename)
-				out, err := cmd.CombinedOutput()
+				stdout, err := cmd.StdoutPipe()
+				cmd.Start()
+				var outF bytes.Buffer
+				io.Copy(&outF, stdout)
+				mapInfo := core.MapInfo{}
+
+				err = json.Unmarshal(outF.Bytes(), &mapInfo)
 				if err != nil {
-					rlog.Error("cmd.Run() failed with status " + err.Error() + " : " + string(out))
+					switch e := err.(type) {
+					case *json.UnmarshalTypeError:
+						rlog.Errorf("UnmarshalTypeError: Value[%s] Type[%v] Field[%v]\n", e.Value, e.Type, e.Field)
+					case *json.InvalidUnmarshalError:
+						rlog.Errorf("InvalidUnmarshalError: Type[%v]\n", e.Type)
+					default:
+						lines := strings.Split(outF.String(), "\n")
+						if len(lines) <= 2 {
+							rlog.Error("Output", outF.String())
+						}
+					}
+
+					rlog.Error("Cannot parse command ", err.Error())
 					os.Remove(tempFile.Name())
 					*api.uploadValue = "failure"
 					return
 				}
-				mapInfo := core.MapInfo{}
-				err = json.Unmarshal(out, &mapInfo)
-				if err != nil {
-					rlog.Error("Cannot parse command ", err.Error())
+
+				if err := cmd.Wait(); err != nil {
+					rlog.Error("cmd.Run() failed with status " + err.Error())
 					os.Remove(tempFile.Name())
 					*api.uploadValue = "failure"
 					return
@@ -81,7 +100,7 @@ func (api *API) uploadHandler(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 				cmd = exec.Command("ifc2gltf.py", "-i", newFilename)
-				out, err = cmd.CombinedOutput()
+				out, err := cmd.CombinedOutput()
 				if err != nil {
 					rlog.Error("ifc2gltf.py failed with status " + err.Error() + " : " + string(out))
 					*api.uploadValue = "failure"
