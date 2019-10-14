@@ -1,5 +1,5 @@
 hash: 7873f75061b03685fab1d37fa10ae2d9249507813e75d280fc0acfb9b629147f
-updated: 2019-09-27T12:49:07.663756028+02:00
+updated: 2019-10-14T16:08:45.920607446+02:00
 imports:
 - name: github.com/cenkalti/backoff
   version: 2146c93394225c3732078705043ce9f26584d334
@@ -10,7 +10,7 @@ imports:
   subpackages:
   - packets
 - name: github.com/energieip/common-components-go
-  version: b39ae2645754420fb4db04476ebff10bad315273
+  version: e5a8d3f2f59c87758882b82c2d2e54e98f238772
   subpackages:
   - pkg/database
   - pkg/dblind
@@ -53,21 +53,21 @@ imports:
 - name: github.com/romana/rlog
   version: f018bc92e7d71f27c04e04cbf008860416c21d01
 - name: github.com/sirupsen/logrus
-  version: de736cf91b921d56253b4010270681d33fdf7cb5
+  version: d12cdc065f60fad310aec12d82e57208a0cfee52
 - name: github.com/tealeg/xlsx
-  version: a6243d92b3699a06d678109bc19b1529b3f84aba
+  version: 0ecf9ee820d547003af8776f4a2c762f73bb9763
 - name: golang.org/x/crypto
-  version: cea2066c64117dea9cba47afc7c35e4d2299107d
+  version: 87dc89f01550277dc22b74ffcf4cd89fa2f40f4c
   subpackages:
   - pbkdf2
 - name: golang.org/x/net
-  version: c00fd9afed17cfdca9b3e1e3b8de7ef2b3f0347b
+  version: 491137f692577e390404f177a0515c9f86f79754
   subpackages:
   - context
   - internal/socks
   - proxy
 - name: golang.org/x/sys
-  version: c990c680b611ac1aeb7d8f2af94a825f98d69720
+  version: b09406accb4736d857a32bf9444cd7edae2ffa79
   subpackages:
   - unix
 - name: gopkg.in/fatih/pool.v2

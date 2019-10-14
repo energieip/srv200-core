@@ -657,6 +657,11 @@
               "description": "Brightness correction factor",
               "format": "int32"
             },
+            "brightnessCorrectionOffset": {
+              "type": "integer",
+              "description": "Brightness correction offset",
+              "format": "int32"
+            },
             "friendlyName": {
               "type": "string",
               "description": "Sensor FriendlyName"
@@ -819,6 +824,11 @@
             "brightnessCorrectionFactor": {
               "type": "integer",
               "description": "Brightness correction factor",
+              "format": "int32"
+            },
+            "brightnessCorrectionOffset": {
+              "type": "integer",
+              "description": "Brightness correction offset",
               "format": "int32"
             },
             "friendlyName": {
@@ -1648,6 +1658,11 @@
             "brightnessCorrectionFactor": {
               "type": "integer",
               "description": "Brightness correction factor",
+              "format": "int32"
+            },
+            "brightnessCorrectionOffset": {
+              "type": "integer",
+              "description": "Brightness correction offset",
               "format": "int32"
             },
             "thresholdPresence": {
