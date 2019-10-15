@@ -19,7 +19,8 @@ import (
 
 func (s *CoreService) isGroupRequiredUpdate(old gm.GroupStatus, new gm.GroupConfig) bool {
 	if len(old.Leds) != len(new.Leds) || len(old.Sensors) != len(new.Sensors) ||
-		len(old.Blinds) != len(new.Blinds) || len(old.FirstDay) != len(new.FirstDay) {
+		len(old.Blinds) != len(new.Blinds) || len(old.FirstDay) != len(new.FirstDay) ||
+		len(old.Hvacs) != len(new.Hvacs) || len(old.Nanosenses) != len(new.Nanosenses) {
 		return true
 	}
 
@@ -134,6 +135,61 @@ func (s *CoreService) isGroupRequiredUpdate(old gm.GroupStatus, new gm.GroupConf
 			return true
 		}
 	}
+
+	if new.SetpointOccupiedCool1 != nil {
+		if old.SetpointOccupiedCool1 != *new.SetpointOccupiedCool1 {
+			return true
+		}
+	}
+
+	if new.SetpointOccupiedHeat1 != nil {
+		if old.SetpointOccupiedHeat1 != *new.SetpointOccupiedHeat1 {
+			return true
+		}
+	}
+
+	if new.SetpointUnoccupiedCool1 != nil {
+		if old.SetpointUnoccupiedCool1 != *new.SetpointUnoccupiedCool1 {
+			return true
+		}
+	}
+
+	if new.SetpointUnoccupiedHeat1 != nil {
+		if old.SetpointUnoccupiedHeat1 != *new.SetpointUnoccupiedHeat1 {
+			return true
+		}
+	}
+
+	if new.SetpointStandbyCool1 != nil {
+		if old.SetpointStandbyCool1 != *new.SetpointStandbyCool1 {
+			return true
+		}
+	}
+
+	if new.SetpointStandbyHeat1 != nil {
+		if old.SetpointStandbyHeat1 != *new.SetpointStandbyHeat1 {
+			return true
+		}
+	}
+
+	if new.CorrectionInterval != nil {
+		if old.CorrectionInterval != *new.CorrectionInterval {
+			return true
+		}
+	}
+
+	if new.EipDriversReset != nil {
+		if *new.EipDriversReset == true {
+			return true
+		}
+	}
+
+	if new.HvacsTargetMode != nil {
+		if old.HvacsTargetMode != *new.HvacsTargetMode {
+			return true
+		}
+	}
+
 	return false
 }
 
@@ -552,7 +608,7 @@ func (s *CoreService) updateBlindGroup(mac string, grID int) {
 func (s *CoreService) createGroup(cfg *gm.GroupConfig) {
 	//Force default value
 	if cfg.CorrectionInterval == nil {
-		correction := 10
+		correction := 60
 		cfg.CorrectionInterval = &correction
 	}
 	if cfg.FriendlyName == nil {
@@ -564,11 +620,11 @@ func (s *CoreService) createGroup(cfg *gm.GroupConfig) {
 		cfg.RuleBrightness = &brigthness
 	}
 	if cfg.RulePresence == nil {
-		presence := 1200
+		presence := 3600
 		cfg.RulePresence = &presence
 	}
 	if cfg.Watchdog == nil {
-		watchdog := 600
+		watchdog := 3600
 		cfg.Watchdog = &watchdog
 	}
 	if cfg.SensorRule == nil {
@@ -586,11 +642,12 @@ func (s *CoreService) createGroup(cfg *gm.GroupConfig) {
 	if cfg.SlopeStopAuto == nil {
 		cfg.SlopeStopAuto = &slope
 	}
+	slopeManual := 2000
 	if cfg.SlopeStartManual == nil {
-		cfg.SlopeStartManual = &slope
+		cfg.SlopeStartManual = &slopeManual
 	}
 	if cfg.SlopeStopManual == nil {
-		cfg.SlopeStopManual = &slope
+		cfg.SlopeStopManual = &slopeManual
 	}
 	database.SaveGroupConfig(s.db, *cfg)
 }

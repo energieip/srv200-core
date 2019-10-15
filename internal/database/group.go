@@ -155,6 +155,35 @@ func UpdateGroupConfig(db Database, config gm.GroupConfig) error {
 	if config.FirstDayOffset != nil {
 		setup.FirstDayOffset = config.FirstDayOffset
 	}
+
+	if config.SetpointOccupiedCool1 != nil {
+		setup.SetpointOccupiedCool1 = config.SetpointOccupiedCool1
+	}
+
+	if config.SetpointOccupiedHeat1 != nil {
+		setup.SetpointOccupiedHeat1 = config.SetpointOccupiedHeat1
+	}
+
+	if config.SetpointUnoccupiedCool1 != nil {
+		setup.SetpointUnoccupiedCool1 = config.SetpointUnoccupiedCool1
+	}
+
+	if config.SetpointUnoccupiedHeat1 != nil {
+		setup.SetpointUnoccupiedHeat1 = config.SetpointUnoccupiedHeat1
+	}
+
+	if config.SetpointStandbyCool1 != nil {
+		setup.SetpointStandbyCool1 = config.SetpointStandbyCool1
+	}
+
+	if config.SetpointStandbyHeat1 != nil {
+		setup.SetpointStandbyHeat1 = config.SetpointStandbyHeat1
+	}
+
+	if config.HvacsTargetMode != nil {
+		setup.HvacsTargetMode = config.HvacsTargetMode
+	}
+
 	return db.UpdateRecord(pconst.DbConfig, pconst.TbGroups, dbID, setup)
 }
 

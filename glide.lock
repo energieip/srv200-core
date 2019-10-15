@@ -1,5 +1,5 @@
 hash: 7873f75061b03685fab1d37fa10ae2d9249507813e75d280fc0acfb9b629147f
-updated: 2019-10-14T16:08:45.920607446+02:00
+updated: 2019-10-15T10:48:56.954715833+02:00
 imports:
 - name: github.com/cenkalti/backoff
   version: 2146c93394225c3732078705043ce9f26584d334
@@ -10,7 +10,7 @@ imports:
   subpackages:
   - packets
 - name: github.com/energieip/common-components-go
-  version: e5a8d3f2f59c87758882b82c2d2e54e98f238772
+  version: a6c076117b758570a211067d003e9b6f3b31e335
   subpackages:
   - pkg/database
   - pkg/dblind
@@ -53,7 +53,7 @@ imports:
 - name: github.com/romana/rlog
   version: f018bc92e7d71f27c04e04cbf008860416c21d01
 - name: github.com/sirupsen/logrus
-  version: d12cdc065f60fad310aec12d82e57208a0cfee52
+  version: fb62dbe2f2a2c88b150fa1668a773505a7920a3d
 - name: github.com/tealeg/xlsx
   version: 0ecf9ee820d547003af8776f4a2c762f73bb9763
 - name: golang.org/x/crypto
@@ -61,7 +61,7 @@ imports:
   subpackages:
   - pbkdf2
 - name: golang.org/x/net
-  version: 491137f692577e390404f177a0515c9f86f79754
+  version: da9a3fd4c5820e74b24a6cb7fb438dc9b0dd377c
   subpackages:
   - context
   - internal/socks
