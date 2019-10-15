@@ -1411,47 +1411,52 @@
             "friendlyName": {
               "type": "string",
               "description": "Group FriendlyName"
-          },
-          "setpointOccupiedCool1": {
-            "type": "integer",
-            "description": "setpoint occupied cool mode (in 1/10°C)",
-            "format": "int32"
-          },
-          "setpointOccupiedHeat1": {
-            "type": "integer",
-            "description": "setpoint occupied heat mode (in 1/10°C)",
-            "format": "int32"
-          },
-          "setpointUnoccupiedCool1": {
-            "type": "integer",
-            "description": "setpoint unoccupied cool mode (in 1/10°C)",
-            "format": "int32"
-          },
-          "setpointUnoccupiedHeat1": {
-            "type": "integer",
-            "description": "setpoint unoccupied heat mode (in 1/10°C)",
-            "format": "int32"
-          },
-          "setpointStandbyCool1": {
-            "type": "integer",
-            "description": "setpoint standby cool mode (in 1/10°C)",
-            "format": "int32"
-          },
-          "setpointStandbyHeat1": {
-            "type": "integer",
-            "description": "setpoint standby heat mode (in 1/10°C)",
-            "format": "int32"
-          },
-          "hvacsTargetMode": {
-            "type": "integer",
-            "description": "Hvacs target Mode (OCCUPANCY_AUTO = 0, OCCUPANCY_COMFORT = 1, OCCUPANCY_STANDBY = 2, OCCUPANCY_ECONOMY = 3, OCCUPANCY_BUILDING_PROTECTION = 4)",
-            "format": "int32"
-          },
-          "hvacsEffectMode": {
-            "type": "integer",
-            "description": "Hvacs effect Mode (OCCUPANCY_AUTO = 0, OCCUPANCY_COMFORT = 1, OCCUPANCY_STANDBY = 2, OCCUPANCY_ECONOMY = 3, OCCUPANCY_BUILDING_PROTECTION = 4)",
-            "format": "int32"
-          }
+            },
+            "setpointOccupiedCool1": {
+              "type": "integer",
+              "description": "setpoint occupied cool mode (in 1/10°C)",
+              "format": "int32"
+            },
+            "setpointOccupiedHeat1": {
+              "type": "integer",
+              "description": "setpoint occupied heat mode (in 1/10°C)",
+              "format": "int32"
+            },
+            "setpointUnoccupiedCool1": {
+              "type": "integer",
+              "description": "setpoint unoccupied cool mode (in 1/10°C)",
+              "format": "int32"
+            },
+            "setpointUnoccupiedHeat1": {
+              "type": "integer",
+              "description": "setpoint unoccupied heat mode (in 1/10°C)",
+              "format": "int32"
+            },
+            "setpointStandbyCool1": {
+              "type": "integer",
+              "description": "setpoint standby cool mode (in 1/10°C)",
+              "format": "int32"
+            },
+            "setpointStandbyHeat1": {
+              "type": "integer",
+              "description": "setpoint standby heat mode (in 1/10°C)",
+              "format": "int32"
+            },
+            "hvacsTargetMode": {
+              "type": "integer",
+              "description": "Hvacs target Mode (OCCUPANCY_AUTO = 0, OCCUPANCY_COMFORT = 1, OCCUPANCY_STANDBY = 2, OCCUPANCY_ECONOMY = 3, OCCUPANCY_BUILDING_PROTECTION = 4)",
+              "format": "int32"
+            },
+            "hvacsEffectMode": {
+              "type": "integer",
+              "description": "Hvacs effect Mode (OCCUPANCY_AUTO = 0, OCCUPANCY_COMFORT = 1, OCCUPANCY_STANDBY = 2, OCCUPANCY_ECONOMY = 3, OCCUPANCY_BUILDING_PROTECTION = 4)",
+              "format": "int32"
+            },
+            "hvacsHeatCool": {
+              "type": "integer",
+              "description": "Hvacs Configuration Heat/Cool",
+              "format": "int32"
+            }
           }
         },
         "GroupConfig": {
@@ -1595,6 +1600,11 @@
             "hvacsEffectMode": {
               "type": "integer",
               "description": "Hvacs effect Mode (OCCUPANCY_AUTO = 0, OCCUPANCY_COMFORT = 1, OCCUPANCY_STANDBY = 2, OCCUPANCY_ECONOMY = 3, OCCUPANCY_BUILDING_PROTECTION = 4)",
+              "format": "int32"
+            },
+            "hvacsHeatCool": {
+              "type": "integer",
+              "description": "Hvacs Configuration Heat/Cool",
               "format": "int32"
             }
           }

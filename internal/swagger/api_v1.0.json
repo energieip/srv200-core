@@ -5288,6 +5288,11 @@
               "type": "integer",
               "description": "Hvacs effect Mode (OCCUPANCY_AUTO = 0, OCCUPANCY_COMFORT = 1, OCCUPANCY_STANDBY = 2, OCCUPANCY_ECONOMY = 3, OCCUPANCY_BUILDING_PROTECTION = 4)",
               "format": "int32"
+            },
+            "hvacsHeatCool": {
+              "type": "integer",
+              "description": "Hvacs Configuration Heat/Cool",
+              "format": "int32"
             }
           }
         },
@@ -5418,6 +5423,11 @@
             "eipDriversReset": {
               "type": "boolean",
               "description": "Reset all EIP drivers"
+            },
+            "hvacsHeatCool": {
+              "type": "integer",
+              "description": "Hvacs Configuration Heat/Cool",
+              "format": "int32"
             }
           }
         },
@@ -5562,6 +5572,11 @@
             "eipDriversReset": {
               "type": "boolean",
               "description": "Reset all EIP drivers"
+            },
+            "hvacsHeatCool": {
+              "type": "integer",
+              "description": "Hvacs Configuration Heat/Cool",
+              "format": "int32"
             }
           }
         },

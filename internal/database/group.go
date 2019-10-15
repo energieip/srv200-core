@@ -184,6 +184,10 @@ func UpdateGroupConfig(db Database, config gm.GroupConfig) error {
 		setup.HvacsTargetMode = config.HvacsTargetMode
 	}
 
+	if config.HvacsHeatCool != nil {
+		setup.HvacsHeatCool = config.HvacsHeatCool
+	}
+
 	return db.UpdateRecord(pconst.DbConfig, pconst.TbGroups, dbID, setup)
 }
 

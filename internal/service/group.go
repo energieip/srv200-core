@@ -190,6 +190,12 @@ func (s *CoreService) isGroupRequiredUpdate(old gm.GroupStatus, new gm.GroupConf
 		}
 	}
 
+	if new.HvacsHeatCool != nil {
+		if old.HvacsHeatCool != *new.HvacsHeatCool {
+			return true
+		}
+	}
+
 	return false
 }
 
@@ -446,7 +452,7 @@ func (s *CoreService) updateHvacGroup(mac string, grID int) {
 		//register hvac in group 0
 		newGr, _ := database.GetGroupConfig(s.db, grID)
 		if newGr != nil {
-			if inArray(mac, newGr.Blinds) {
+			if inArray(mac, newGr.Hvacs) {
 				return
 			}
 			newGr.Hvacs = append(newGr.Hvacs, mac)
