@@ -9,9 +9,6 @@ import (
 
 //SaveProject dump project in database
 func SaveProject(db Database, cfg core.Project) error {
-	criteria := make(map[string]interface{})
-	criteria["Label"] = cfg.Label
-
 	proj, dbID := GetProject(db, cfg.Label)
 	if proj == nil || dbID == "" {
 		if cfg.Mac != nil {

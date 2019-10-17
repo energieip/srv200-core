@@ -29,6 +29,12 @@ func (s *CoreService) installDriver(dr interface{}) {
 		rlog.Error("Unknow label " + driver.Label)
 		return
 	}
+	if proj.Mac != nil {
+		if *proj.Mac == driver.Mac {
+			rlog.Info("Driver " + driver.Mac + " already associate to " + driver.Label)
+			return
+		}
+	}
 	proj.Mac = &driver.Mac
 	t := time.Now()
 	DateConv := t.Format(time.RFC3339)

@@ -7,6 +7,7 @@ import (
 	"github.com/energieip/common-components-go/pkg/dblind"
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
 	"github.com/energieip/common-components-go/pkg/dhvac"
+	"github.com/energieip/common-components-go/pkg/dled"
 	dl "github.com/energieip/common-components-go/pkg/dled"
 	"github.com/energieip/common-components-go/pkg/dnanosense"
 	ds "github.com/energieip/common-components-go/pkg/dsensor"
@@ -117,11 +118,23 @@ func (s *CoreService) registerSwitchStatus(switchStatus sd.SwitchStatus) {
 	oldLeds := database.GetLedSwitchStatus(s.db, switchStatus.Mac)
 	for mac, led := range switchStatus.Leds {
 		database.SaveLedStatus(s.db, led)
-		oldCfg, _ := database.GetLedConfig(s.db, led.Mac)
+		var oldCfg *dled.LedSetup
+		byLabel := false
+		if led.Label != nil {
+			oldCfg, _ = database.GetLedLabelConfig(s.db, *led.Label)
+			byLabel = true
+		}
+		if oldCfg == nil {
+			oldCfg, _ = database.GetLedConfig(s.db, led.Mac)
+		}
 		if oldCfg != nil {
 			if oldCfg.SwitchMac != led.SwitchMac {
 				oldCfg.SwitchMac = led.SwitchMac
-				database.SaveLedConfig(s.db, *oldCfg)
+				if byLabel {
+					database.UpdateLedLabelSetup(s.db, *oldCfg)
+				} else {
+					database.UpdateLedSetup(s.db, *oldCfg)
+				}
 			}
 			if oldCfg.Group != nil {
 				gr, _ := database.GetGroupConfig(s.db, *oldCfg.Group)
@@ -158,11 +171,23 @@ func (s *CoreService) registerSwitchStatus(switchStatus sd.SwitchStatus) {
 	oldSensors := database.GetSensorSwitchStatus(s.db, switchStatus.Mac)
 	for mac, sensor := range switchStatus.Sensors {
 		database.SaveSensorStatus(s.db, sensor)
-		oldCfg, _ := database.GetSensorConfig(s.db, sensor.Mac)
+		var oldCfg *ds.SensorSetup
+		byLabel := false
+		if sensor.Label != nil {
+			oldCfg, _ = database.GetSensorLabelConfig(s.db, *sensor.Label)
+			byLabel = true
+		}
+		if oldCfg == nil {
+			oldCfg, _ = database.GetSensorConfig(s.db, sensor.Mac)
+		}
 		if oldCfg != nil {
 			if oldCfg.SwitchMac != sensor.SwitchMac {
 				oldCfg.SwitchMac = sensor.SwitchMac
-				database.SaveSensorConfig(s.db, *oldCfg)
+				if byLabel {
+					database.UpdateSensorLabelSetup(s.db, *oldCfg)
+				} else {
+					database.UpdateSensorSetup(s.db, *oldCfg)
+				}
 			}
 			if oldCfg.Group != nil {
 				gr, _ := database.GetGroupConfig(s.db, *oldCfg.Group)
@@ -199,11 +224,23 @@ func (s *CoreService) registerSwitchStatus(switchStatus sd.SwitchStatus) {
 	oldBlinds := database.GetBlindSwitchStatus(s.db, switchStatus.Mac)
 	for mac, blind := range switchStatus.Blinds {
 		database.SaveBlindStatus(s.db, blind)
-		oldCfg, _ := database.GetBlindConfig(s.db, blind.Mac)
+		var oldCfg *dblind.BlindSetup
+		byLabel := false
+		if blind.Label != nil {
+			oldCfg, _ = database.GetBlindLabelConfig(s.db, *blind.Label)
+			byLabel = true
+		}
+		if oldCfg == nil {
+			oldCfg, _ = database.GetBlindConfig(s.db, blind.Mac)
+		}
 		if oldCfg != nil {
 			if oldCfg.SwitchMac != blind.SwitchMac {
 				oldCfg.SwitchMac = blind.SwitchMac
-				database.SaveBlindConfig(s.db, *oldCfg)
+				if byLabel {
+					database.UpdateBlindLabelSetup(s.db, *oldCfg)
+				} else {
+					database.UpdateBlindSetup(s.db, *oldCfg)
+				}
 			}
 			if oldCfg.Group != nil {
 				gr, _ := database.GetGroupConfig(s.db, *oldCfg.Group)
@@ -240,7 +277,15 @@ func (s *CoreService) registerSwitchStatus(switchStatus sd.SwitchStatus) {
 	oldNanos := database.GetNanoSwitchStatus(s.db, switchStatus.Cluster)
 	for label, driver := range switchStatus.Nanos {
 		database.SaveNanoStatus(s.db, driver)
-		oldCfg, _ := database.GetNanoConfig(s.db, driver.Mac)
+		var oldCfg *dnanosense.NanosenseSetup
+		// byLabel := false
+		if driver.Label != "" {
+			oldCfg, _ = database.GetNanoLabelConfig(s.db, driver.Label)
+			// byLabel = true
+		}
+		if oldCfg == nil {
+			oldCfg, _ = database.GetNanoConfig(s.db, driver.Mac)
+		}
 		if oldCfg != nil {
 			gr, _ := database.GetGroupConfig(s.db, oldCfg.Group)
 			if gr != nil {
@@ -275,11 +320,23 @@ func (s *CoreService) registerSwitchStatus(switchStatus sd.SwitchStatus) {
 	oldHvacs := database.GetHvacSwitchStatus(s.db, switchStatus.Mac)
 	for mac, hvac := range switchStatus.Hvacs {
 		database.SaveHvacStatus(s.db, hvac)
-		oldCfg, _ := database.GetHvacConfig(s.db, hvac.Mac)
+		var oldCfg *dhvac.HvacSetup
+		byLabel := false
+		if hvac.Label != nil {
+			oldCfg, _ = database.GetHvacLabelConfig(s.db, *hvac.Label)
+			byLabel = true
+		}
+		if oldCfg == nil {
+			oldCfg, _ = database.GetHvacConfig(s.db, hvac.Mac)
+		}
 		if oldCfg != nil {
 			if oldCfg.SwitchMac != hvac.SwitchMac {
 				oldCfg.SwitchMac = hvac.SwitchMac
-				database.SaveHvacConfig(s.db, *oldCfg)
+				if byLabel {
+					database.UpdateHvacLabelSetup(s.db, *oldCfg)
+				} else {
+					database.UpdateHvacSetup(s.db, *oldCfg)
+				}
 			}
 			if oldCfg.Group != nil {
 				gr, _ := database.GetGroupConfig(s.db, *oldCfg.Group)
