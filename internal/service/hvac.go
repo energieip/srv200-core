@@ -178,6 +178,20 @@ func (s *CoreService) sendHvacCmd(cmdHvac interface{}) {
 	}
 }
 
+func (s *CoreService) createHvacLabelSetup(config interface{}) {
+	cfg, _ := dhvac.ToHvacSetup(config)
+	if cfg == nil || cfg.Label == nil {
+		rlog.Error("Cannot parse ")
+		return
+	}
+	cfg.Mac = strings.ToUpper(cfg.Mac)
+	if cfg.SwitchMac != "" {
+		cfg.SwitchMac = strings.ToUpper(cfg.SwitchMac)
+	}
+
+	database.CreateHvacLabelSetup(s.db, *cfg)
+}
+
 func (s *CoreService) updateHvacLabelSetup(config interface{}) {
 	cfg, _ := dhvac.ToHvacSetup(config)
 	if cfg == nil || cfg.Label == nil {

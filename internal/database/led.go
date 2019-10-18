@@ -122,6 +122,20 @@ func UpdateLedSetup(db Database, config dl.LedSetup) error {
 	return db.UpdateRecord(pconst.DbConfig, pconst.TbLeds, dbID, &new)
 }
 
+//CreateLedLabelSetup update led setup in database
+func CreateLedLabelSetup(db Database, config dl.LedSetup) error {
+	if config.Label == nil {
+		return NewError("Device label not found")
+	}
+	setup, dbID := GetLedLabelConfig(db, *config.Label)
+	if setup == nil || dbID == "" {
+		config := dl.FillDefaultValue(config)
+		return SaveLedLabelConfig(db, config)
+	}
+
+	return nil
+}
+
 //UpdateLedLabelSetup update led setup in database
 func UpdateLedLabelSetup(db Database, config dl.LedSetup) error {
 	if config.Label == nil {

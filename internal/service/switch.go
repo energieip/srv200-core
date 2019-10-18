@@ -65,6 +65,15 @@ func (s *CoreService) updateSwitchCfg(config interface{}) {
 	s.server.SendCommand(url, dump)
 }
 
+func (s *CoreService) createSwitchLabelCfg(config interface{}) {
+	cfg, _ := dserver.ToSwitchConfig(config)
+	if cfg == nil || cfg.Label == nil {
+		return
+	}
+
+	database.SaveSwitchLabelConfig(s.db, *cfg)
+}
+
 func (s *CoreService) updateSwitchLabelCfg(config interface{}) {
 	cfg, _ := dserver.ToSwitchConfig(config)
 	if cfg == nil || cfg.Label == nil {

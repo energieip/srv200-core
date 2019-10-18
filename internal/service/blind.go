@@ -232,6 +232,18 @@ func (s *CoreService) updateBlindSetup(config interface{}) {
 	s.sendSwitchBlindSetup(*cfg)
 }
 
+func (s *CoreService) createBlindLabelSetup(config interface{}) {
+	cfg, _ := dblind.ToBlindSetup(config)
+	if cfg == nil || cfg.Label == nil {
+		rlog.Error("Cannot parse ")
+		return
+	}
+	cfg.Mac = strings.ToUpper(cfg.Mac)
+	cfg.SwitchMac = strings.ToUpper(cfg.SwitchMac)
+
+	database.CreateBlindLabelSetup(s.db, *cfg)
+}
+
 func (s *CoreService) updateBlindLabelSetup(config interface{}) {
 	cfg, _ := dblind.ToBlindSetup(config)
 	if cfg == nil || cfg.Label == nil {

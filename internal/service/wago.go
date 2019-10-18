@@ -107,3 +107,14 @@ func (s *CoreService) updateWagoLabelSetup(config interface{}) {
 	database.UpdateWagoLabelSetup(s.db, *cfg)
 	s.sendSwitchWagoSetup(*cfg)
 }
+
+func (s *CoreService) createWagoLabelSetup(config interface{}) {
+	cfg, _ := dwago.ToWagoSetup(config)
+	if cfg == nil || cfg.Label == nil {
+		rlog.Error("Cannot parse ")
+		return
+	}
+	cfg.Mac = strings.ToUpper(cfg.Mac)
+
+	database.CreateWagoLabelSetup(s.db, *cfg)
+}

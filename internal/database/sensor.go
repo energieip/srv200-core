@@ -33,6 +33,19 @@ func UpdateSensorConfig(db Database, cfg ds.SensorConf) error {
 	return db.UpdateRecord(pconst.DbConfig, pconst.TbSensors, dbID, &new)
 }
 
+//CreateSensorLabelSetup sensor sensor setup in database
+func CreateSensorLabelSetup(db Database, config ds.SensorSetup) error {
+	if config.Label == nil {
+		return NewError("Device label not found")
+	}
+	setup, dbID := GetSensorLabelConfig(db, *config.Label)
+	if setup == nil || dbID == "" {
+		config := ds.FillDefaultValue(config)
+		return SaveSensorLabelConfig(db, config)
+	}
+	return nil
+}
+
 //UpdateSensorLabelConfig update sensor config in database
 func UpdateSensorLabelConfig(db Database, cfg ds.SensorConf) error {
 	if cfg.Label == nil {

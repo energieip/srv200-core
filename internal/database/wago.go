@@ -115,6 +115,19 @@ func UpdateWagoSetup(db Database, config dwago.WagoSetup) error {
 	return db.UpdateRecord(pconst.DbConfig, pconst.TbWagos, dbID, &new)
 }
 
+//CreateWagoLabelSetup create wago setup in database
+func CreateWagoLabelSetup(db Database, config dwago.WagoSetup) error {
+	if config.Label == nil {
+		return NewError("Device label not found")
+	}
+	setup, dbID := GetWagoLabelConfig(db, *config.Label)
+	if setup == nil || dbID == "" {
+		config := dwago.FillDefaultValue(config)
+		return SaveWagoLabelConfig(db, config)
+	}
+	return nil
+}
+
 //UpdateWagoLabelSetup update wago setup in database
 func UpdateWagoLabelSetup(db Database, config dwago.WagoSetup) error {
 	if config.Label == nil {

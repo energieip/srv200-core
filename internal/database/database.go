@@ -93,6 +93,53 @@ func ConnectDatabase(ip, port string) (*Database, error) {
 	return &db, nil
 }
 
+func PrepareDB(db Database, withDrop bool) {
+	for _, dbName := range []string{pconst.DbConfig, pconst.DbStatus} {
+		err := db.CreateDB(dbName)
+		if err != nil {
+			rlog.Warn("Create DB ", err.Error())
+		}
+
+		tableCfg := make(map[string]interface{})
+		if dbName == pconst.DbConfig {
+			tableCfg[pconst.TbLeds] = dl.LedSetup{}
+			tableCfg[pconst.TbSensors] = ds.SensorSetup{}
+			tableCfg[pconst.TbHvacs] = dhvac.HvacSetup{}
+			tableCfg[pconst.TbGroups] = gm.GroupConfig{}
+			tableCfg[pconst.TbSwitchs] = dserver.SwitchConfig{}
+			tableCfg[pconst.TbModels] = core.Model{}
+			tableCfg[pconst.TbBlinds] = dblind.BlindSetup{}
+			tableCfg[pconst.TbFrames] = dserver.Frame{}
+			tableCfg[pconst.TbWagos] = dwago.WagoSetup{}
+			tableCfg[pconst.TbNanosenses] = dnanosense.NanosenseSetup{}
+		} else {
+			tableCfg[pconst.TbLeds] = dl.Led{}
+			tableCfg[pconst.TbSensors] = ds.Sensor{}
+			tableCfg[pconst.TbHvacs] = dhvac.Hvac{}
+			tableCfg[pconst.TbGroups] = gm.GroupStatus{}
+			tableCfg[pconst.TbSwitchs] = dserver.SwitchDump{}
+			tableCfg[pconst.TbServices] = pkg.ServiceStatus{}
+			tableCfg[pconst.TbBlinds] = dblind.Blind{}
+			tableCfg[pconst.TbWagos] = dwago.Wago{}
+			tableCfg[pconst.TbNanosenses] = dnanosense.Nanosense{}
+		}
+		for tableName, objs := range tableCfg {
+			if withDrop {
+				err = db.DropTable(dbName, tableName)
+				if err != nil {
+					rlog.Warn("Cannot drop table ", err.Error())
+					continue
+				}
+			}
+			err = db.CreateTable(dbName, tableName, &objs)
+			if err != nil {
+				rlog.Warn("Create table ", err.Error())
+			}
+		}
+	}
+
+}
+
 //GetObjectID return id
 func GetObjectID(db Database, dbName, tbName string, criteria map[string]interface{}) string {
 	stored, err := db.GetRecord(dbName, tbName, criteria)

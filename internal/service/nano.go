@@ -65,6 +65,17 @@ func (s *CoreService) updateNanoSetup(config interface{}) {
 	s.sendSwitchNanoSetup(*cfg)
 }
 
+func (s *CoreService) createNanoLabelSetup(config interface{}) {
+	cfg, _ := dnano.ToNanosenseSetup(config)
+	if cfg == nil || cfg.Label == "" {
+		rlog.Error("Cannot parse ")
+		return
+	}
+	cfg.Mac = strings.ToUpper(cfg.Mac)
+
+	database.CreateNanoLabelSetup(s.db, *cfg)
+}
+
 func (s *CoreService) updateNanoLabelSetup(config interface{}) {
 	cfg, _ := dnano.ToNanosenseSetup(config)
 	if cfg == nil || cfg.Label == "" {

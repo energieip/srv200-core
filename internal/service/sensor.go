@@ -178,6 +178,20 @@ func (s *CoreService) updateSensorSetup(config interface{}) {
 	s.sendSwitchSensorSetup(*cfg)
 }
 
+func (s *CoreService) createSensorLabelSetup(config interface{}) {
+	cfg, _ := ds.ToSensorSetup(config)
+	if cfg == nil || cfg.Label == nil {
+		rlog.Error("Cannot parse ")
+		return
+	}
+	cfg.Mac = strings.ToUpper(cfg.Mac)
+	if cfg.SwitchMac != "" {
+		cfg.SwitchMac = strings.ToUpper(cfg.SwitchMac)
+	}
+
+	database.CreateSensorLabelSetup(s.db, *cfg)
+}
+
 func (s *CoreService) updateSensorLabelSetup(config interface{}) {
 	cfg, _ := ds.ToSensorSetup(config)
 	if cfg == nil || cfg.Label == nil {

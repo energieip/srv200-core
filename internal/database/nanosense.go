@@ -203,7 +203,21 @@ func GetNanoStatus(db Database, label string) *dnanosense.Nanosense {
 	return driver
 }
 
-//UpdateNanoLabelSetup update led setup in database
+//CreateNanoLabelSetup create nano setup in database
+func CreateNanoLabelSetup(db Database, config dnanosense.NanosenseSetup) error {
+	if config.Label == "" {
+		return NewError("Device label not found")
+	}
+	setup, dbID := GetNanoLabelConfig(db, config.Label)
+	if setup == nil || dbID == "" {
+		config := dnanosense.FillDefaultValue(config)
+		return SaveNanoLabelConfig(db, config)
+	}
+
+	return nil
+}
+
+//UpdateNanoLabelSetup update nano setup in database
 func UpdateNanoLabelSetup(db Database, config dnanosense.NanosenseSetup) error {
 	if config.Label == "" {
 		return NewError("Device label not found")

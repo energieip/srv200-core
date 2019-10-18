@@ -289,6 +289,20 @@ func (s *CoreService) updateLedSetup(config interface{}) {
 	s.sendSwitchLedSetup(*cfg)
 }
 
+func (s *CoreService) createLedLabelSetup(config interface{}) {
+	cfg, _ := dl.ToLedSetup(config)
+	if cfg == nil || cfg.Label == nil {
+		rlog.Error("Cannot parse ")
+		return
+	}
+	cfg.Mac = strings.ToUpper(cfg.Mac)
+	if cfg.SwitchMac != "" {
+		cfg.SwitchMac = strings.ToUpper(cfg.SwitchMac)
+	}
+
+	database.CreateLedLabelSetup(s.db, *cfg)
+}
+
 func (s *CoreService) updateLedLabelSetup(config interface{}) {
 	cfg, _ := dl.ToLedSetup(config)
 	if cfg == nil || cfg.Label == nil {

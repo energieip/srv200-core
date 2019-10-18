@@ -54,6 +54,19 @@ func UpdateHvacLabelConfig(db Database, cfg dhvac.HvacConf) error {
 	return db.UpdateRecord(pconst.DbConfig, pconst.TbHvacs, dbID, &new)
 }
 
+//CreateHvacLabelSetup create hvac config in database
+func CreateHvacLabelSetup(db Database, cfg dhvac.HvacSetup) error {
+	if cfg.Label == nil {
+		return NewError("Device label not found")
+	}
+	setup, dbID := GetHvacLabelConfig(db, *cfg.Label)
+	if setup == nil || dbID == "" {
+		cfg = dhvac.FillDefaultValue(cfg)
+		return SaveHvacLabelConfig(db, cfg)
+	}
+	return nil
+}
+
 //UpdateHvacLabelSetup update hvac config in database
 func UpdateHvacLabelSetup(db Database, cfg dhvac.HvacSetup) error {
 	if cfg.Label == nil {
