@@ -307,7 +307,7 @@ func (s *CoreService) installDriver(dr interface{}) {
 		database.SaveWagoLabelConfig(s.db, *elt)
 		nanos := database.GetNanoSwitchSetup(s.db, elt.Cluster)
 		for _, nano := range nanos {
-			nano.Mac = elt.Mac + "." + strconv.Itoa(nano.ModbusOffset)
+			nano.Mac = elt.Mac + "." + strconv.Itoa(nano.ModbusID)
 			database.SaveNanoLabelConfig(s.db, nano)
 
 			projNano, _ := database.GetProject(s.db, nano.Label)

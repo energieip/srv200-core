@@ -307,7 +307,7 @@ func (s *CoreService) replaceDriver(driver interface{}) {
 			for _, nano := range nanos {
 				oldNanos = append(oldNanos, nano)
 				projectNano := database.GetProjectByMac(s.db, nano.Mac)
-				nano.Mac = *project.Mac + "." + strconv.Itoa(nano.ModbusOffset)
+				nano.Mac = *project.Mac + "." + strconv.Itoa(nano.ModbusID)
 				database.SaveNanoLabelConfig(s.db, nano)
 				if projectNano != nil {
 					projectNano.Mac = &nano.Mac
