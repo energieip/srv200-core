@@ -232,6 +232,8 @@ def parseIfc(filepath):
 
 
     ref_folder = os.path.dirname(filepath)
+    if not ref_folder:
+        ref_folder = "."
     file = ifcopenshell.open(filepath)
 
     for ifc_type in ifc_types:
@@ -441,7 +443,32 @@ def parseIfc(filepath):
             path = os.path.join(folder, lbl + ".png")
             img.save(path)
 
-        os.system("montage -tile 2x7 -geometry 1171x428+7+10 "+ folder+"/*.png " + ref_folder + "/stickers.pdf")
+        pages = (len(stickers) // 14 )
+
+        start = 0
+        idx = 0
+        while True:
+            if pages == 0:
+                end = len(stickers)
+            else:
+                end = 14 * 20
+            end = start + end
+            if end > len(stickers):
+                end = len(stickers)
+            imgs = list(stickers.keys())[start: end]
+            files = ""
+            for i in imgs:
+                files = files + " " + folder +"/" + i.replace("_", "-") + ".png"
+
+            os.system("montage -tile 2x7 -geometry 1171x428+7+10 "+ files + " " + ref_folder + "/stickers-" + str(idx) + ".pdf")
+            if end == len(stickers):
+                # last page
+                break
+            start = end
+            idx += 1
+
+        os.system("pdfunite "+ ref_folder + "/stickers-*.pdf" + " " + ref_folder + "/stickers.pdf")
+        os.system("rm " + ref_folder + "/stickers-*.pdf")
         shutil.rmtree(folder)
     except Exception as exc:
         print("exc", exc)
