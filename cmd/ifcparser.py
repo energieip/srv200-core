@@ -447,21 +447,22 @@ def parseIfc(filepath):
 
         start = 0
         idx = 0
+        labels = list(sorted(stickers.keys()))
         while True:
             if pages == 0:
-                end = len(stickers)
+                end = len(labels)
             else:
                 end = 14 * 20
             end = start + end
-            if end > len(stickers):
-                end = len(stickers)
-            imgs = list(stickers.keys())[start: end]
+            if end > len(labels):
+                end = len(labels)
+            imgs = labels[start: end]
             files = ""
             for i in imgs:
                 files = files + " " + folder +"/" + i.replace("_", "-") + ".png"
 
             os.system("montage -tile 2x7 -geometry 1171x428+7+10 "+ files + " " + ref_folder + "/stickers-" + str(idx) + ".pdf")
-            if end == len(stickers):
+            if end == len(labels):
                 # last page
                 break
             start = end
