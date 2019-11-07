@@ -112,12 +112,7 @@ def buildHvac(driver):
         "fanOverride": driver['properties'].get("FanOverride", 0),
         "oaDamperMode": driver['properties'].get("OaDamperMode", 5),
         "co2Mode":  driver['properties'].get("CO2Mode", 1),
-        "co2Max": driver['properties'].get("CO2Max", 5000),
-        "valve6WayCoolMin": driver['properties'].get("valve6WayCoolMin", 0),
-        "valve6WayCoolMax": driver['properties'].get("Valve6WayCoolMax", 0),
-        "valve6WayHeatMin": driver['properties'].get("Valve6WayHeatMin", 0),
-        "valve6WayHeatMax": driver['properties'].get("Valve6WayHeatMax", 0),
-        "valve6WayRefPoint": driver['properties'].get("Valve6WayRefPoint", 0)
+        "co2Max": driver['properties'].get("CO2Max", 5000)
     })
 
 def buildSensor(driver):
@@ -126,7 +121,9 @@ def buildSensor(driver):
     if deviceType != "sensor":
         return res
     return collections.OrderedDict({
-        "thresoldPresence": driver['properties'].get("ThresoldPresence", 10)
+        "thresoldPresence": driver['properties'].get("ThresoldPresence", 10),
+        "brightnessCorrectionFactor": driver['properties'].get("CorrectionFactor", 1.0),
+        "brightnessCorrectionOffset": driver['properties'].get("CorrectionOffset", 0.0)
     })
 
 def buildSwitch(driver):
