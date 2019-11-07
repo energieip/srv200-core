@@ -284,13 +284,11 @@ func (s *CoreService) registerSwitchStatus(switchStatus sd.SwitchStatus) {
 	}
 
 	oldNanos := database.GetNanoSwitchStatus(s.db, switchStatus.Cluster)
-	for label, driver := range switchStatus.Nanos {
+	for _, driver := range switchStatus.Nanos {
 		database.SaveNanoStatus(s.db, driver)
 		var oldCfg *dnanosense.NanosenseSetup
-		// byLabel := false
 		if driver.Label != "" {
 			oldCfg, _ = database.GetNanoLabelConfig(s.db, driver.Label)
-			// byLabel = true
 		}
 		if oldCfg == nil {
 			oldCfg, _ = database.GetNanoConfig(s.db, driver.Mac)
@@ -316,9 +314,9 @@ func (s *CoreService) registerSwitchStatus(switchStatus sd.SwitchStatus) {
 				}
 			}
 		}
-		_, ok := oldNanos[label]
+		_, ok := oldNanos[driver.Label]
 		if ok {
-			delete(oldNanos, label)
+			delete(oldNanos, driver.Label)
 		}
 	}
 	for _, driver := range oldNanos {
