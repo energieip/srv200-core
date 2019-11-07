@@ -60,5 +60,4 @@ To compile it:
 
 For development:
 * recommanded logger: *rlog*
-* For network connection: use *common-network-go* library
-* For database management: use *common-database-go* library
+* For dependency: use common-components-go library
