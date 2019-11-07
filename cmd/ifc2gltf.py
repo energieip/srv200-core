@@ -23,7 +23,10 @@ class ExtractStorey(threading.Thread):
     def run(self):
         cmd = "IfcConvert \""+ self.filepath + "\" \""+ self.dae +"\" -y --center-model --use-element-names --include+=arg Name \""+ self.name +"\""
         print(cmd)
-        os.system(cmd)
+        res = os.system(cmd)
+        if res != 0:
+            print("Finished with error " + str(res))
+            sys.exit(1)
 
         cmd = "COLLADA2GLTF-bin -i " + self.dae + " -o " + self.gltf
         print(cmd)
