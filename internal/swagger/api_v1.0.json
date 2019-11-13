@@ -3631,25 +3631,44 @@
         }
       },
       "/install/qrcode": {
-        "post": {
+        "get": {
           "tags": [
             "commissioning"
           ],
           "summary": "installQrcodeDriver",
           "description": "Generate a qrcode driver",
           "operationId": "installQrcodeDriver",
-          "parameters": [],
-          "requestBody": {
-            "description": "driver detail description",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DriverDesc"
-                }
+          "parameters": [
+            {
+              "name": "mac",
+              "in": "query",
+              "description": "Driver MAC address",
+              "style": "form",
+              "explode": true,
+              "schema": {
+                "type": "string"
               }
             },
-            "required": true
-          },
+            {
+              "name": "device",
+              "in": "query",
+              "description": "Device type",
+              "style": "form",
+              "explode": true,
+              "schema": {
+                "type": "string",
+                "enum": [
+                  "LED",
+                  "SENSOR",
+                  "BLIND",
+                  "HVAC",
+                  "SWITCH",
+                  "WAGO"
+                ],
+                "example": "LED"
+                }
+            }
+          ],
           "responses": {
             "200": {
               "description": "sucessful operation",

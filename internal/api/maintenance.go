@@ -510,31 +510,21 @@ func (api *API) driverQrcodeGeneration(w http.ResponseWriter, req *http.Request)
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
 	}
-	body, err := ioutil.ReadAll(req.Body)
-	if err != nil {
-		api.sendError(w, APIErrorBodyParsing, "Error reading request body", http.StatusInternalServerError)
-		return
-	}
+	mac := req.FormValue("mac")
+	device := req.FormValue("device")
 
-	driver := core.DriverDesc{}
-	err = json.Unmarshal(body, &driver)
-	if err != nil {
-		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	if driver.Mac == "" {
+	if mac == "" {
 		api.sendError(w, APIErrorBodyParsing, "Driver Mac must to be set", http.StatusInternalServerError)
 		return
 	}
 
-	if driver.Device == "" {
+	if device == "" {
 		api.sendError(w, APIErrorBodyParsing, "Driver device must to be set", http.StatusInternalServerError)
 		return
 	}
 
-	cmd := exec.Command("driver_sticker.py", driver.Device, driver.Mac)
-	err = cmd.Run()
+	cmd := exec.Command("driver_sticker.py", device, mac)
+	err := cmd.Run()
 	if err != nil {
 		api.sendError(w, APIErrorDeviceNotFound, "Unable to open file", http.StatusInternalServerError)
 		return
@@ -542,7 +532,7 @@ func (api *API) driverQrcodeGeneration(w http.ResponseWriter, req *http.Request)
 
 	dt := time.Now()
 	path := "/tmp/sticker.pdf"
-	filename := dt.Format("01-02-2006") + "_" + driver.Device + "_qrcode.pdf"
+	filename := dt.Format("01-02-2006") + "_" + device + "_qrcode.pdf"
 
 	fi, err := os.Stat(path)
 	if err != nil {

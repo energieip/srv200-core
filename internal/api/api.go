@@ -948,7 +948,7 @@ func (api *API) swagger() {
 	router.HandleFunc(apiV1+"/install/status", api.verification(api.installStatus)).Methods("GET")
 	router.HandleFunc(apiV1+"/install/modbusTable", api.verification(api.modbusTableAPI)).Methods("GET")
 	router.HandleFunc(apiV1+"/install/stickers", api.verification(api.qrcodeGeneration)).Methods("GET")
-	router.HandleFunc(apiV1+"/install/qrcode", api.verification(api.driverQrcodeGeneration)).Methods("POST")
+	router.HandleFunc(apiV1+"/install/qrcode", api.verification(api.driverQrcodeGeneration)).Methods("GET")
 
 	//dump API
 	router.HandleFunc(apiV1+"/dump", api.verification(api.getDump)).Methods("GET")
