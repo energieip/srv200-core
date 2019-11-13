@@ -43,6 +43,8 @@ deb:
 	cp bin/$(COMPONENT)-$(ARCH) $(BUILD_PATH)/usr/local/bin/$(COMPONENT)
 	cp cmd/*.py $(BUILD_PATH)/usr/local/bin/
 	cp cmd/*.ttf $(BUILD_PATH)/usr/local/share/fonts/
+	mkdir -p $(BUILD_PATH)/usr/local/share/images/
+	cp cmd/*.png $(BUILD_PATH)/usr/local/share/images/
 	chmod +x $(BUILD_PATH)/usr/local/bin/*.py
 	cp -r internal/swaggerui $(BUILD_PATH)/data/www/
 	cp -r internal/swagger/*.json $(BUILD_PATH)/data/www/swaggerui/
