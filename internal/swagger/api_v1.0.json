@@ -3630,6 +3630,74 @@
           ]
         }
       },
+      "/install/qrcode": {
+        "post": {
+          "tags": [
+            "commissioning"
+          ],
+          "summary": "installQrcodeDriver",
+          "description": "Generate a qrcode driver",
+          "operationId": "installQrcodeDriver",
+          "parameters": [],
+          "requestBody": {
+            "description": "driver detail description",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DriverDesc"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "sucessful operation",
+              "headers": {},
+              "content": {
+                "application/octet-stream": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "file": {
+                        "type": "string",
+                        "format": "binary",
+                        "description": "file to download"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Unauthorized Access",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "default": {
+              "description": "unexpected error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "deprecated": false,
+          "security": [
+            {
+              "Authorization": []
+            }
+          ]
+        }
+      },
       "/install/status": {
         "get": {
           "tags": [
@@ -4967,6 +5035,33 @@
             "url": {
               "type": "string",
               "description": "weblink to the technical description"
+            }
+          }
+        },
+        "DriverDesc": {
+          "title": "DriverDesc",
+          "required": [
+            "device",
+            "fullMac"
+          ],
+          "type": "object",
+          "properties": {
+            "device": {
+              "type": "string",
+              "enum": [
+                "LED",
+                "SENSOR",
+                "BLIND",
+                "HVAC",
+                "SWITCH",
+                "WAGO"
+              ],
+              "example": "LED",
+              "description": "Device Type"
+            },
+            "fullMac": {
+              "type": "string",
+              "description": "device mac address"
             }
           }
         },

@@ -505,6 +505,62 @@ func (api *API) qrcodeGeneration(w http.ResponseWriter, req *http.Request) {
 	http.ServeFile(w, req, path)
 }
 
+func (api *API) driverQrcodeGeneration(w http.ResponseWriter, req *http.Request) {
+	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin, duser.PriviledgeMaintainer}) != nil {
+		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
+		return
+	}
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		api.sendError(w, APIErrorBodyParsing, "Error reading request body", http.StatusInternalServerError)
+		return
+	}
+
+	driver := core.DriverDesc{}
+	err = json.Unmarshal(body, &driver)
+	if err != nil {
+		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if driver.Mac == "" {
+		api.sendError(w, APIErrorBodyParsing, "Driver Mac must to be set", http.StatusInternalServerError)
+		return
+	}
+
+	if driver.Device == "" {
+		api.sendError(w, APIErrorBodyParsing, "Driver device must to be set", http.StatusInternalServerError)
+		return
+	}
+
+	cmd := exec.Command("driver_sticker.py", driver.Device, driver.Mac)
+	err = cmd.Run()
+	if err != nil {
+		api.sendError(w, APIErrorDeviceNotFound, "Unable to open file", http.StatusInternalServerError)
+		return
+	}
+
+	dt := time.Now()
+	path := "/tmp/sticker.pdf"
+	filename := dt.Format("01-02-2006") + "_" + driver.Device + "_qrcode.pdf"
+
+	fi, err := os.Stat(path)
+	if err != nil {
+		api.sendError(w, APIErrorDeviceNotFound, "Unable to open file", http.StatusInternalServerError)
+		return
+	}
+
+	// Generate the server headers
+	w.Header().Set("Content-Type", "application/octet-stream")
+	w.Header().Set("Content-Disposition", "attachment; filename="+filename+"")
+	w.Header().Set("Expires", "0")
+	w.Header().Set("Content-Transfer-Encoding", "binary")
+	w.Header().Set("Content-Length", strconv.FormatInt(fi.Size(), 10))
+	w.Header().Set("Content-Control", "private, no-transform, no-store, must-revalidate")
+
+	http.ServeFile(w, req, path)
+}
+
 func (api *API) exportDBStart(w http.ResponseWriter, req *http.Request) {
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin, duser.PriviledgeMaintainer}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)

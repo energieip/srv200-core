@@ -939,15 +939,16 @@ func (api *API) swagger() {
 
 	//Maintenance API
 	router.HandleFunc(apiV1+"/maintenance/driver", api.verification(api.replaceDriver)).Methods("POST")
-	router.HandleFunc(apiV1+"/install/status", api.verification(api.installStatus)).Methods("GET")
-	router.HandleFunc(apiV1+"/install/modbusTable", api.verification(api.modbusTableAPI)).Methods("GET")
-	router.HandleFunc(apiV1+"/install/stickers", api.verification(api.qrcodeGeneration)).Methods("GET")
 	router.HandleFunc(apiV1+"/maintenance/exportDB", api.verification(api.exportDBStart)).Methods("GET")
 	router.HandleFunc(apiV1+"/maintenance/importDB", api.verification(api.importDBStart)).Methods("POST")
 	router.HandleFunc(apiV1+"/maintenance/importDB/status", api.verification(api.uploadDBStatus)).Methods("GET")
 
 	//Install API
 	router.HandleFunc(apiV1+"/commissioning/install", api.verification(api.installDriver)).Methods("POST")
+	router.HandleFunc(apiV1+"/install/status", api.verification(api.installStatus)).Methods("GET")
+	router.HandleFunc(apiV1+"/install/modbusTable", api.verification(api.modbusTableAPI)).Methods("GET")
+	router.HandleFunc(apiV1+"/install/stickers", api.verification(api.qrcodeGeneration)).Methods("GET")
+	router.HandleFunc(apiV1+"/install/qrcode", api.verification(api.driverQrcodeGeneration)).Methods("POST")
 
 	//dump API
 	router.HandleFunc(apiV1+"/dump", api.verification(api.getDump)).Methods("GET")
