@@ -98,7 +98,10 @@ func (api *API) installStatus(w http.ResponseWriter, req *http.Request) {
 	cellLabel.Value = "Label"
 	cellLabel.SetStyle(boldStyle)
 	cellStatus := row.AddCell()
-	cellStatus.Value = "Status"
+	cellStatus.Value = "Mac"
+	cellStatus.SetStyle(boldStyle)
+	cellStatus = row.AddCell()
+	cellStatus.Value = "Commissioned"
 	cellStatus.SetStyle(boldStyle)
 
 	projects := database.GetProjects(api.db)
@@ -108,6 +111,12 @@ func (api *API) installStatus(w http.ResponseWriter, req *http.Request) {
 		cellcable := row.AddCell()
 		cellcable.Value = strings.Replace(project.Label, "_", "-", -1)
 		cellCableStatus := row.AddCell()
+		mac := ""
+		if project.Mac != nil {
+			mac = *project.Mac
+		}
+		cellCableStatus.Value = mac
+		cellCableStatus = row.AddCell()
 		if project.Mac != nil {
 			cellCableStatus.Value = "OK"
 			cellCableStatus.SetStyle(greenStyle)
