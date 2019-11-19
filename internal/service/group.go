@@ -196,6 +196,29 @@ func (s *CoreService) isGroupRequiredUpdate(old gm.GroupStatus, new gm.GroupConf
 		}
 	}
 
+	if new.HvacsForcing6waysValve != nil {
+		if old.HvacsForcing6waysValve != *new.HvacsForcing6waysValve {
+			return true
+		}
+	}
+
+	if new.HvacsForcingAutoBack != nil {
+		if old.HvacsForcingAutoBack != *new.HvacsForcingAutoBack {
+			return true
+		}
+	}
+
+	if new.HvacsForcingDamper != nil {
+		if old.HvacsForcingDamper != *new.HvacsForcingDamper {
+			return true
+		}
+	}
+
+	if new.HvacsTargetMode != nil {
+		if old.HvacsTargetMode != *new.HvacsTargetMode {
+			return true
+		}
+	}
 	return false
 }
 
