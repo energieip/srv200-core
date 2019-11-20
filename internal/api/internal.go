@@ -569,6 +569,25 @@ func (api *InternalAPI) setHvacConfig(w http.ResponseWriter, req *http.Request) 
 	w.Write([]byte("{}"))
 }
 
+func (api *InternalAPI) setGroupConfig(w http.ResponseWriter, req *http.Request) {
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		api.sendError(w, APIErrorBodyParsing, "Error reading request body", http.StatusInternalServerError)
+		return
+	}
+
+	gr := gm.GroupConfig{}
+	err = json.Unmarshal(body, &gr)
+	if err != nil {
+		api.sendError(w, APIErrorBodyParsing, "Could not parse input format "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	event := make(map[string]interface{})
+	event["group"] = gr
+	api.EventsToBackend <- event
+	w.Write([]byte("{}"))
+}
+
 func (api *InternalAPI) swagger() {
 	router := mux.NewRouter()
 	sh := http.StripPrefix("/swaggerui/", http.FileServer(http.Dir("/data/www/swaggerui/")))
@@ -586,6 +605,7 @@ func (api *InternalAPI) swagger() {
 	router.HandleFunc(apiV1+"/config/sensor", api.setSensorConfig).Methods("POST")
 	router.HandleFunc(apiV1+"/config/blind", api.setBlindConfig).Methods("POST")
 	router.HandleFunc(apiV1+"/config/hvac", api.setHvacConfig).Methods("POST")
+	router.HandleFunc(apiV1+"/config/group", api.setGroupConfig).Methods("POST")
 
 	//command API
 	router.HandleFunc(apiV1+"/command/led", api.sendLedCommand).Methods("POST")
