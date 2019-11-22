@@ -2,6 +2,7 @@ package service
 
 import (
 	"strconv"
+	"strings"
 	"time"
 
 	gm "github.com/energieip/common-components-go/pkg/dgroup"
@@ -17,12 +18,33 @@ import (
 	"github.com/romana/rlog"
 )
 
+func (s *CoreService) fixMac(driver *core.InstallDriver) *core.InstallDriver {
+	if driver.Device != pconst.SENSOR {
+		return driver
+	}
+	if driver.Mac == "" {
+		return driver
+	}
+	macSplit := strings.Split(driver.Mac, ":")
+	if len(macSplit) != 6 {
+		return driver
+	}
+	if macSplit[3] != "06" {
+		return driver
+	}
+	macSplit[3] = "16"
+	newMac := strings.Join(macSplit, ":")
+	driver.Mac = newMac
+	return driver
+}
+
 func (s *CoreService) installDriver(dr interface{}) {
 	driver, _ := core.ToInstallDriver(dr)
 	if driver == nil {
 		rlog.Error("Cannot parse replace driver")
 		return
 	}
+	driver = s.fixMac(driver)
 
 	proj, _ := database.GetProject(s.db, driver.Label)
 	if proj == nil {
