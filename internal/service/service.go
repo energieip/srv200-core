@@ -144,45 +144,45 @@ func (s *CoreService) readAPIEvents() {
 				rlog.Info("get API event", eventType, event)
 				switch eventType {
 				case "led":
-					s.updateLedCfg(event)
+					go s.updateLedCfg(event)
 				case "ledSetup":
-					s.updateLedSetup(event)
+					go s.updateLedSetup(event)
 				case "blind":
-					s.updateBlindCfg(event)
+					go s.updateBlindCfg(event)
 				case "blindSetup":
-					s.updateBlindSetup(event)
+					go s.updateBlindSetup(event)
 				case "hvac":
-					s.updateHvacCfg(event)
+					go s.updateHvacCfg(event)
 				case "hvacSetup":
-					s.updateHvacSetup(event)
+					go s.updateHvacSetup(event)
 				case "sensor":
-					s.updateSensorCfg(event)
+					go s.updateSensorCfg(event)
 				case "sensorSetup":
-					s.updateSensorSetup(event)
+					go s.updateSensorSetup(event)
 				case "wago":
-					s.updateWagoCfg(event)
+					go s.updateWagoCfg(event)
 				case "nano":
-					s.updateNanoCfg(event)
+					go s.updateNanoCfg(event)
 				case "wagoSetup":
-					s.updateWagoSetup(event)
+					go s.updateWagoSetup(event)
 				case "group":
-					s.updateGroupCfg(event)
+					go s.updateGroupCfg(event)
 				case "switch":
-					s.updateSwitchCfg(event)
+					go s.updateSwitchCfg(event)
 				case "groupCmd":
-					s.sendGroupCmd(event)
+					go s.sendGroupCmd(event)
 				case "ledCmd":
-					s.sendLedCmd(event)
+					go s.sendLedCmd(event)
 				case "blindCmd":
-					s.sendBlindCmd(event)
+					go s.sendBlindCmd(event)
 				case "hvacCmd":
-					s.sendHvacCmd(event)
+					go s.sendHvacCmd(event)
 				case "replaceDriver":
-					s.replaceDriver(event)
+					go s.replaceDriver(event)
 				case "installDriver":
-					s.installDriver(event)
+					go s.installDriver(event)
 				case "map":
-					s.updateMapInfo(event)
+					go s.updateMapInfo(event)
 				}
 			}
 			apiEvents = nil
@@ -192,45 +192,45 @@ func (s *CoreService) readAPIEvents() {
 				rlog.Info("get internal API event", eventType, event)
 				switch eventType {
 				case "led":
-					s.updateLedCfg(event)
+					go s.updateLedCfg(event)
 				case "ledSetup":
-					s.updateLedSetup(event)
+					go s.updateLedSetup(event)
 				case "blind":
-					s.updateBlindCfg(event)
+					go s.updateBlindCfg(event)
 				case "blindSetup":
-					s.updateBlindSetup(event)
+					go s.updateBlindSetup(event)
 				case "hvac":
-					s.updateHvacCfg(event)
+					go s.updateHvacCfg(event)
 				case "hvacSetup":
-					s.updateHvacSetup(event)
+					go s.updateHvacSetup(event)
 				case "sensor":
-					s.updateSensorCfg(event)
+					go s.updateSensorCfg(event)
 				case "sensorSetup":
-					s.updateSensorSetup(event)
+					go s.updateSensorSetup(event)
 				case "wago":
-					s.updateWagoCfg(event)
+					go s.updateWagoCfg(event)
 				case "nano":
-					s.updateNanoCfg(event)
+					go s.updateNanoCfg(event)
 				case "wagoSetup":
-					s.updateWagoSetup(event)
+					go s.updateWagoSetup(event)
 				case "group":
-					s.updateGroupCfg(event)
+					go s.updateGroupCfg(event)
 				case "switch":
-					s.updateSwitchCfg(event)
+					go s.updateSwitchCfg(event)
 				case "groupCmd":
-					s.sendGroupCmd(event)
+					go s.sendGroupCmd(event)
 				case "ledCmd":
-					s.sendLedCmd(event)
+					go s.sendLedCmd(event)
 				case "blindCmd":
-					s.sendBlindCmd(event)
+					go s.sendBlindCmd(event)
 				case "hvacCmd":
-					s.sendHvacCmd(event)
+					go s.sendHvacCmd(event)
 				case "replaceDriver":
-					s.replaceDriver(event)
+					go s.replaceDriver(event)
 				case "installDriver":
-					s.installDriver(event)
+					go s.installDriver(event)
 				case "map":
-					s.updateMapInfo(event)
+					go s.updateMapInfo(event)
 				}
 			}
 		}
