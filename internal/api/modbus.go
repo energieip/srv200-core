@@ -23,20 +23,23 @@ func (api *API) modbusTableAPI(w http.ResponseWriter, req *http.Request) {
 
 	reqTmp, _ := http.NewRequest("POST", url, nil)
 	transCfg := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // ignore expired SSL certificates
+		TLSClientConfig:   &tls.Config{InsecureSkipVerify: true}, // ignore expired SSL certificates
+		DisableKeepAlives: true,
 	}
 	reqTmp.Close = true
 	client := &http.Client{Transport: transCfg}
 	resp, err := client.Do(reqTmp)
 
+	if resp != nil {
+		defer resp.Body.Close()
+	}
 	if err != nil {
 		rlog.Error(err.Error())
 		api.sendError(w, APIErrorDeviceNotFound, "Unable to open new files", http.StatusInternalServerError)
 		return
 	}
-	defer resp.Body.Close()
-	path := "/tmp/tmp_modbus_table.xlsx"
 
+	path := "/tmp/tmp_modbus_table.xlsx"
 	out, err := os.Create(path)
 	if err != nil {
 		rlog.Error(err.Error())
