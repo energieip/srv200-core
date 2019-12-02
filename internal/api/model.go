@@ -23,6 +23,8 @@ func (api *API) readModelInfo(w http.ResponseWriter, modelName string) {
 }
 
 func (api *API) getModelInfo(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -34,6 +36,8 @@ func (api *API) getModelInfo(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) removeModelInfo(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -50,6 +54,8 @@ func (api *API) removeModelInfo(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) setModelInfo(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return

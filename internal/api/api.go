@@ -167,6 +167,8 @@ func (api *API) sendError(w http.ResponseWriter, errorCode int, message string, 
 }
 
 func (api *API) getStatus(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	decoded := context.Get(req, "decoded")
 	var auth duser.UserAccess
 	mapstructure.Decode(decoded.(duser.UserAccess), &auth)
@@ -304,6 +306,8 @@ func (api *API) getStatus(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	decoded := context.Get(req, "decoded")
 	var auth duser.UserAccess
 	mapstructure.Decode(decoded.(duser.UserAccess), &auth)
@@ -561,6 +565,8 @@ func (api *API) getDump(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) getHistory(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin, duser.PriviledgeMaintainer}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -596,6 +602,8 @@ func (api *API) getHistory(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) setConfig(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin, duser.PriviledgeMaintainer}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -779,6 +787,8 @@ func (api *API) websocketConsumptions() {
 }
 
 func (api *API) getAPIs(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	api.setDefaultHeader(w, req)
 	versions := []string{"v1.0"}
 	apiInfo := APIInfo{
@@ -790,6 +800,8 @@ func (api *API) getAPIs(w http.ResponseWriter, req *http.Request) {
 
 func (api *API) getV1Functions(w http.ResponseWriter, req *http.Request) {
 	api.setDefaultHeader(w, req)
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	apiV1 := "/v1.0"
 	functions := []string{apiV1 + "/setup/sensor", apiV1 + "/setup/led",
 		apiV1 + "/setup/group", apiV1 + "/setup/switch",
@@ -814,6 +826,8 @@ func (api *API) getV1Functions(w http.ResponseWriter, req *http.Request) {
 
 func (api *API) getFunctions(w http.ResponseWriter, req *http.Request) {
 	api.setDefaultHeader(w, req)
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	functions := []string{"/versions"}
 	apiInfo := APIFunctions{
 		Functions: functions,

@@ -27,6 +27,8 @@ func (api *API) readHvacConfig(w http.ResponseWriter, mac string) {
 }
 
 func (api *API) getHvacSetup(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -37,6 +39,8 @@ func (api *API) getHvacSetup(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) setHvacSetup(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -60,6 +64,8 @@ func (api *API) setHvacSetup(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) setHvacConfig(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin, duser.PriviledgeMaintainer}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -106,6 +112,8 @@ func (api *API) setHvacConfig(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) sendHvacCommand(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Error reading request body", http.StatusInternalServerError)
@@ -141,6 +149,8 @@ func (api *API) sendHvacCommand(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) getHvacStatus(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	params := mux.Vars(req)
 	mac := params["mac"]
 	mac = strings.ToUpper(mac)
@@ -158,6 +168,8 @@ func (api *API) getHvacStatus(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) removeHvacSetup(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return

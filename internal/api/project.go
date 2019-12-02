@@ -25,6 +25,8 @@ func (api *API) readBim(w http.ResponseWriter, label string) {
 }
 
 func (api *API) getBim(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -35,6 +37,8 @@ func (api *API) getBim(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) removeBim(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -51,6 +55,8 @@ func (api *API) removeBim(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) setBim(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -110,6 +116,8 @@ func (api *API) readIfcInfo(w http.ResponseWriter, label string) {
 }
 
 func (api *API) getIfcInfo(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -121,6 +129,8 @@ func (api *API) getIfcInfo(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) removeIfcInfo(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -137,6 +147,8 @@ func (api *API) removeIfcInfo(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) setIfcInfo(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -184,6 +196,8 @@ func (api *API) setIfcInfo(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) getIfc(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return

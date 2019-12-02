@@ -14,6 +14,8 @@ import (
 )
 
 func (api *API) modbusTableAPI(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin, duser.PriviledgeMaintainer}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return

@@ -17,6 +17,8 @@ import (
 )
 
 func (api *API) uploadHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer r.Body.Close()
 	if api.hasAccessMode(w, r, []string{duser.PriviledgeAdmin, duser.PriviledgeMaintainer}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -152,6 +154,8 @@ func (api *API) uploadHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *API) uploadStatus(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer r.Body.Close()
 	if api.hasAccessMode(w, r, []string{duser.PriviledgeAdmin, duser.PriviledgeMaintainer}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return

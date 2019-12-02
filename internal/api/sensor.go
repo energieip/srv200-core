@@ -30,6 +30,8 @@ func (api *API) readSensorConfig(w http.ResponseWriter, req *http.Request, mac s
 }
 
 func (api *API) getSensorSetup(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -40,6 +42,8 @@ func (api *API) getSensorSetup(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) setSensorSetup(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -65,6 +69,8 @@ func (api *API) setSensorSetup(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) setSensorConfig(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin, duser.PriviledgeMaintainer}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -110,6 +116,8 @@ func (api *API) setSensorConfig(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) getSensorStatus(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	params := mux.Vars(req)
 	mac := params["mac"]
 	mac = strings.ToUpper(mac)
@@ -127,6 +135,8 @@ func (api *API) getSensorStatus(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) removeSensorSetup(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return

@@ -22,6 +22,8 @@ func (api *API) readWagoConfig(w http.ResponseWriter, req *http.Request, mac str
 }
 
 func (api *API) getWagoSetup(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -32,6 +34,8 @@ func (api *API) getWagoSetup(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) setWagoSetup(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -56,6 +60,8 @@ func (api *API) setWagoSetup(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) setWagoConfig(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin, duser.PriviledgeMaintainer}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -80,6 +86,8 @@ func (api *API) setWagoConfig(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) getWagoStatus(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	params := mux.Vars(req)
 	mac := strings.ToUpper(params["mac"])
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin, duser.PriviledgeMaintainer}) != nil {
@@ -96,6 +104,8 @@ func (api *API) getWagoStatus(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) removeWagoSetup(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return

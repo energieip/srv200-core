@@ -22,6 +22,8 @@ func (api *API) readServiceConfig(w http.ResponseWriter, name string) {
 }
 
 func (api *API) getServiceSetup(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -31,6 +33,8 @@ func (api *API) getServiceSetup(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) setServiceSetup(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -58,6 +62,8 @@ func (api *API) setServiceSetup(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) removeServiceSetup(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return

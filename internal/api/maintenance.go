@@ -24,6 +24,8 @@ import (
 )
 
 func (api *API) replaceDriver(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin, duser.PriviledgeMaintainer}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -56,6 +58,8 @@ func (api *API) replaceDriver(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) installStatus(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin, duser.PriviledgeMaintainer}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -488,6 +492,8 @@ func (api *API) installStatus(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) qrcodeGeneration(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin, duser.PriviledgeMaintainer}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -515,6 +521,8 @@ func (api *API) qrcodeGeneration(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) driverQrcodeGeneration(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin, duser.PriviledgeMaintainer}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -561,6 +569,8 @@ func (api *API) driverQrcodeGeneration(w http.ResponseWriter, req *http.Request)
 }
 
 func (api *API) exportDBStart(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin, duser.PriviledgeMaintainer}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -630,6 +640,8 @@ func (api *API) exportDBStart(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) importDBStart(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer r.Body.Close()
 	if api.hasAccessMode(w, r, []string{duser.PriviledgeAdmin, duser.PriviledgeMaintainer}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -721,6 +733,8 @@ func (api *API) importDBStart(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *API) uploadDBStatus(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer r.Body.Close()
 	if api.hasAccessMode(w, r, []string{duser.PriviledgeAdmin, duser.PriviledgeMaintainer}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return

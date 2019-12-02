@@ -26,6 +26,8 @@ func (api *API) readGroupConfig(w http.ResponseWriter, grID int) {
 }
 
 func (api *API) getGroupSetup(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -40,6 +42,8 @@ func (api *API) getGroupSetup(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) setGroupSetup(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -48,6 +52,8 @@ func (api *API) setGroupSetup(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) setGroupConfig(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin, duser.PriviledgeMaintainer}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -71,6 +77,8 @@ func (api *API) setGroupConfig(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) sendGroupCommand(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Error reading request body", http.StatusInternalServerError)
@@ -94,6 +102,8 @@ func (api *API) sendGroupCommand(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) removeGroupSetup(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -114,6 +124,8 @@ func (api *API) removeGroupSetup(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) getGroupStatus(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	params := mux.Vars(req)
 	grID := params["groupID"]
 	i, err := strconv.Atoi(grID)
@@ -134,6 +146,8 @@ func (api *API) getGroupStatus(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) getGroupsStatus(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	decoded := context.Get(req, "decoded")
 	var auth duser.UserAccess
 	mapstructure.Decode(decoded.(duser.UserAccess), &auth)

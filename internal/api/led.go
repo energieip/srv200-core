@@ -26,6 +26,8 @@ func (api *API) readLedConfig(w http.ResponseWriter, req *http.Request, mac stri
 }
 
 func (api *API) getLedSetup(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -37,6 +39,8 @@ func (api *API) getLedSetup(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) setLedSetup(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -62,6 +66,8 @@ func (api *API) setLedSetup(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) setLedConfig(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin, duser.PriviledgeMaintainer}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -143,6 +149,8 @@ func (api *API) sendLedCommand(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) getLedStatus(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	params := mux.Vars(req)
 	mac := params["mac"]
 	mac = strings.ToUpper(mac)
@@ -159,6 +167,8 @@ func (api *API) getLedStatus(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) removeLedSetup(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return

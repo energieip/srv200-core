@@ -55,6 +55,7 @@ func InitInternalAPI(db database.Database,
 func (api *InternalAPI) setDefaultHeader(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Connection", "close")
 }
 
 func (api *InternalAPI) sendError(w http.ResponseWriter, errorCode int, message string, httpStatus int) {
@@ -70,6 +71,7 @@ func (api *InternalAPI) sendError(w http.ResponseWriter, errorCode int, message 
 
 func (api *InternalAPI) getFunctions(w http.ResponseWriter, req *http.Request) {
 	api.setDefaultHeader(w, req)
+	defer req.Body.Close()
 	functions := []string{"/versions"}
 	apiInfo := APIFunctions{
 		Functions: functions,
@@ -80,6 +82,7 @@ func (api *InternalAPI) getFunctions(w http.ResponseWriter, req *http.Request) {
 
 func (api *InternalAPI) getAPIs(w http.ResponseWriter, req *http.Request) {
 	api.setDefaultHeader(w, req)
+	defer req.Body.Close()
 	versions := []string{"v1.0"}
 	apiInfo := APIInfo{
 		Versions: versions,
@@ -90,6 +93,7 @@ func (api *InternalAPI) getAPIs(w http.ResponseWriter, req *http.Request) {
 
 func (api *InternalAPI) getV1Functions(w http.ResponseWriter, req *http.Request) {
 	api.setDefaultHeader(w, req)
+	defer req.Body.Close()
 	apiV1 := "/v1.0"
 	functions := []string{
 		apiV1 + "/command/led", apiV1 + "/command/blind", apiV1 + "/command/hvac",
@@ -104,6 +108,8 @@ func (api *InternalAPI) getV1Functions(w http.ResponseWriter, req *http.Request)
 }
 
 func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
+	api.setDefaultHeader(w, req)
+	defer req.Body.Close()
 	var leds []dserver.DumpLed
 	var sensors []dserver.DumpSensor
 	var switchs []dserver.DumpSwitch
@@ -302,6 +308,8 @@ func (api *InternalAPI) getDump(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *InternalAPI) sendLedCommand(w http.ResponseWriter, req *http.Request) {
+	api.setDefaultHeader(w, req)
+	defer req.Body.Close()
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Error reading request body", http.StatusInternalServerError)
@@ -329,6 +337,8 @@ func (api *InternalAPI) sendLedCommand(w http.ResponseWriter, req *http.Request)
 }
 
 func (api *InternalAPI) sendBlindCommand(w http.ResponseWriter, req *http.Request) {
+	api.setDefaultHeader(w, req)
+	defer req.Body.Close()
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Error reading request body", http.StatusInternalServerError)
@@ -356,6 +366,8 @@ func (api *InternalAPI) sendBlindCommand(w http.ResponseWriter, req *http.Reques
 }
 
 func (api *InternalAPI) sendHvacCommand(w http.ResponseWriter, req *http.Request) {
+	api.setDefaultHeader(w, req)
+	defer req.Body.Close()
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Error reading request body", http.StatusInternalServerError)
@@ -383,6 +395,8 @@ func (api *InternalAPI) sendHvacCommand(w http.ResponseWriter, req *http.Request
 }
 
 func (api *InternalAPI) sendGroupCommand(w http.ResponseWriter, req *http.Request) {
+	api.setDefaultHeader(w, req)
+	defer req.Body.Close()
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Error reading request body", http.StatusInternalServerError)
@@ -403,6 +417,8 @@ func (api *InternalAPI) sendGroupCommand(w http.ResponseWriter, req *http.Reques
 }
 
 func (api *InternalAPI) setLedConfig(w http.ResponseWriter, req *http.Request) {
+	api.setDefaultHeader(w, req)
+	defer req.Body.Close()
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Error reading request body", http.StatusInternalServerError)
@@ -445,6 +461,8 @@ func (api *InternalAPI) setLedConfig(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *InternalAPI) setSensorConfig(w http.ResponseWriter, req *http.Request) {
+	api.setDefaultHeader(w, req)
+	defer req.Body.Close()
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Error reading request body", http.StatusInternalServerError)
@@ -486,6 +504,8 @@ func (api *InternalAPI) setSensorConfig(w http.ResponseWriter, req *http.Request
 }
 
 func (api *InternalAPI) setBlindConfig(w http.ResponseWriter, req *http.Request) {
+	api.setDefaultHeader(w, req)
+	defer req.Body.Close()
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Error reading request body", http.StatusInternalServerError)
@@ -528,6 +548,8 @@ func (api *InternalAPI) setBlindConfig(w http.ResponseWriter, req *http.Request)
 }
 
 func (api *InternalAPI) setHvacConfig(w http.ResponseWriter, req *http.Request) {
+	api.setDefaultHeader(w, req)
+	defer req.Body.Close()
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Error reading request body", http.StatusInternalServerError)
@@ -570,6 +592,8 @@ func (api *InternalAPI) setHvacConfig(w http.ResponseWriter, req *http.Request) 
 }
 
 func (api *InternalAPI) setGroupConfig(w http.ResponseWriter, req *http.Request) {
+	api.setDefaultHeader(w, req)
+	defer req.Body.Close()
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Error reading request body", http.StatusInternalServerError)

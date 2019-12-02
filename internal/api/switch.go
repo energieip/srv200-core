@@ -22,6 +22,8 @@ func (api *API) readSwitchConfig(w http.ResponseWriter, mac string) {
 }
 
 func (api *API) getSwitchSetup(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -31,6 +33,8 @@ func (api *API) getSwitchSetup(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) setSwitchSetup(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -39,6 +43,8 @@ func (api *API) setSwitchSetup(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) setSwitchConfig(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin, duser.PriviledgeMaintainer}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -66,6 +72,8 @@ func (api *API) setSwitchConfig(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) removeSwitchSetup(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return

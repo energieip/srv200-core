@@ -14,6 +14,8 @@ import (
 
 func (api *API) createToken(w http.ResponseWriter, req *http.Request) {
 	api.setDefaultHeader(w, req)
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	var creds Credentials
 	err := json.NewDecoder(req.Body).Decode(&creds)
 	if err != nil {
@@ -62,6 +64,8 @@ func (api *API) createToken(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) getUserInfo(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	decoded := context.Get(req, "decoded")
 	var auth duser.UserAccess
 	mapstructure.Decode(decoded.(duser.UserAccess), &auth)
@@ -70,6 +74,8 @@ func (api *API) getUserInfo(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) logout(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	decoded := context.Get(req, "token")
 	var tokenString string
 	mapstructure.Decode(decoded.(string), &tokenString)

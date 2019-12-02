@@ -27,6 +27,8 @@ func (api *API) readBlindConfig(w http.ResponseWriter, mac string) {
 }
 
 func (api *API) getBlindSetup(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -37,6 +39,8 @@ func (api *API) getBlindSetup(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) setBlindSetup(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -60,6 +64,8 @@ func (api *API) setBlindSetup(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) setBlindConfig(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin, duser.PriviledgeMaintainer}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
@@ -106,6 +112,8 @@ func (api *API) setBlindConfig(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) sendBlindCommand(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		api.sendError(w, APIErrorBodyParsing, "Error reading request body", http.StatusInternalServerError)
@@ -141,6 +149,8 @@ func (api *API) sendBlindCommand(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) getBlindStatus(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	params := mux.Vars(req)
 	mac := params["mac"]
 	mac = strings.ToUpper(mac)
@@ -157,6 +167,8 @@ func (api *API) getBlindStatus(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *API) removeBlindSetup(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Connection", "close")
+	defer req.Body.Close()
 	if api.hasAccessMode(w, req, []string{duser.PriviledgeAdmin}) != nil {
 		api.sendError(w, APIErrorUnauthorized, "Unauthorized Access", http.StatusUnauthorized)
 		return
