@@ -1,6 +1,8 @@
 package service
 
 import (
+	"os/exec"
+
 	sd "github.com/energieip/common-components-go/pkg/dswitch"
 	"github.com/energieip/srv200-coreservice-go/internal/core"
 	"github.com/energieip/srv200-coreservice-go/internal/database"
@@ -12,6 +14,10 @@ func (s *CoreService) updateMapInfo(config interface{}) {
 		s.uploadValue = "failure"
 		return
 	}
+
+	// Stop cron job to be sure that task is not suspended
+	cmd := exec.Command("systemctl", "stop", "cron.service")
+	cmd.Run()
 
 	//association[label] = mac
 	association := make(map[string]string)
@@ -190,4 +196,8 @@ func (s *CoreService) updateMapInfo(config interface{}) {
 	}
 
 	s.uploadValue = "success"
+
+	// Restart cron job to be sure that task is not suspended
+	cmd = exec.Command("systemctl", "restart", "cron.service")
+	cmd.Run()
 }

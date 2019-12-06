@@ -671,7 +671,7 @@ func (s *CoreService) createGroup(cfg *gm.GroupConfig) {
 	if cfg.SlopeStopAuto == nil {
 		cfg.SlopeStopAuto = &slope
 	}
-	slopeManual := 2000
+	slopeManual := 10000
 	if cfg.SlopeStartManual == nil {
 		cfg.SlopeStartManual = &slopeManual
 	}
