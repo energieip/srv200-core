@@ -238,13 +238,15 @@ func (s *CoreService) readAPIEvents() {
 }
 
 func (s *CoreService) manageMQTTEvent(eventType string, event sd.SwitchStatus) {
-	switch eventType {
-	case network.EventHello:
-		s.sendSwitchSetup(event)
-		s.registerSwitchStatus(event)
-	case network.EventDump:
-		s.sendSwitchUpdateConfig(event)
-		s.registerSwitchStatus(event)
+	if s.uploadValue != "running" {
+		switch eventType {
+		case network.EventHello:
+			s.sendSwitchSetup(event)
+			s.registerSwitchStatus(event)
+		case network.EventDump:
+			s.sendSwitchUpdateConfig(event)
+			s.registerSwitchStatus(event)
+		}
 	}
 }
 

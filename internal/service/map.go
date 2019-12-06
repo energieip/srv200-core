@@ -12,12 +12,12 @@ func (s *CoreService) updateMapInfo(config interface{}) {
 	cfg, _ := core.ToMapInfo(config)
 	if cfg == nil {
 		s.uploadValue = "failure"
+
+		// Restart cron job to be sure that task is not suspended
+		cmd := exec.Command("systemctl", "restart", "cron.service")
+		cmd.Run()
 		return
 	}
-
-	// Stop cron job to be sure that task is not suspended
-	cmd := exec.Command("systemctl", "stop", "cron.service")
-	cmd.Run()
 
 	//association[label] = mac
 	association := make(map[string]string)
@@ -198,6 +198,6 @@ func (s *CoreService) updateMapInfo(config interface{}) {
 	s.uploadValue = "success"
 
 	// Restart cron job to be sure that task is not suspended
-	cmd = exec.Command("systemctl", "restart", "cron.service")
+	cmd := exec.Command("systemctl", "restart", "cron.service")
 	cmd.Run()
 }

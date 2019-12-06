@@ -54,6 +54,10 @@ func (api *API) uploadHandler(w http.ResponseWriter, r *http.Request) {
 	// return an End of File when all parts have been read.
 	for {
 		*api.uploadValue = "running"
+
+		// Stop cron job to be sure that task is not suspended
+		cmd := exec.Command("systemctl", "stop", "cron.service")
+		cmd.Run()
 		p, err = mr.NextPart()
 		if err == io.EOF {
 			// err is io.EOF, files upload completes.
@@ -82,6 +86,10 @@ func (api *API) uploadHandler(w http.ResponseWriter, r *http.Request) {
 					}
 
 					rlog.Error("Cannot parse command ", err.Error())
+
+					// Stop cron job to be sure that task is not suspended
+					cmd = exec.Command("systemctl", "restart", "cron.service")
+					cmd.Run()
 					os.Remove(tempFile.Name())
 					*api.uploadValue = "failure"
 					return
@@ -89,6 +97,10 @@ func (api *API) uploadHandler(w http.ResponseWriter, r *http.Request) {
 
 				if err := cmd.Wait(); err != nil {
 					rlog.Error("cmd.Run() failed with status " + err.Error())
+
+					// Stop cron job to be sure that task is not suspended
+					cmd = exec.Command("systemctl", "restart", "cron.service")
+					cmd.Run()
 					os.Remove(tempFile.Name())
 					*api.uploadValue = "failure"
 					return
@@ -98,12 +110,20 @@ func (api *API) uploadHandler(w http.ResponseWriter, r *http.Request) {
 				if err != nil {
 					rlog.Error("Cannot parse command ", err.Error())
 					os.Remove(tempFile.Name())
+
+					// Stop cron job to be sure that task is not suspended
+					cmd = exec.Command("systemctl", "restart", "cron.service")
+					cmd.Run()
 					*api.uploadValue = "failure"
 					return
 				}
 				cmd = exec.Command("ifc2gltf.py", "-i", newFilename)
 				out, err := cmd.CombinedOutput()
 				if err != nil {
+
+					// Stop cron job to be sure that task is not suspended
+					cmd = exec.Command("systemctl", "restart", "cron.service")
+					cmd.Run()
 					rlog.Error("ifc2gltf.py failed with status " + err.Error() + " : " + string(out))
 					*api.uploadValue = "failure"
 					return
@@ -119,6 +139,10 @@ func (api *API) uploadHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		if err != nil {
 			// A normal error occurred
+
+			// Stop cron job to be sure that task is not suspended
+			cmd = exec.Command("systemctl", "restart", "cron.service")
+			cmd.Run()
 			*api.uploadValue = "failure"
 			tempFile.Close()
 			os.Remove(tempFile.Name())
@@ -136,6 +160,8 @@ func (api *API) uploadHandler(w http.ResponseWriter, r *http.Request) {
 			n, err := p.Read(chunk)
 			if err != nil {
 				if err != io.EOF {
+					cmd = exec.Command("systemctl", "restart", "cron.service")
+					cmd.Run()
 					*api.uploadValue = "failure"
 					rlog.Error("Hit error while writing chunk: ", err.Error())
 					api.sendError(w, APIErrorBodyParsing, "Error while fetching file", http.StatusInternalServerError)
@@ -144,6 +170,8 @@ func (api *API) uploadHandler(w http.ResponseWriter, r *http.Request) {
 				uploaded = true
 			}
 			if _, err = tempFile.Write(chunk[:n]); err != nil {
+				cmd = exec.Command("systemctl", "restart", "cron.service")
+				cmd.Run()
 				*api.uploadValue = "failure"
 				rlog.Error("Hit error while writing chunk: ", err.Error())
 				api.sendError(w, APIErrorBodyParsing, "Error while fetching file", http.StatusInternalServerError)
